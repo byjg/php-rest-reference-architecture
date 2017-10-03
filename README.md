@@ -6,6 +6,7 @@ This project install the follow components:
 - PSR11 Container dependency
 - A JWT Authentication
 - Pre-configured for different environments (DEV, HOMOLOG, LIVE, etc)
+- Database
 - Docker for build your project 
 
 ## Install
@@ -31,5 +32,11 @@ Start editing from "config/config-dev"
 
 ```bash
 APPLICATION_ENV=dev php build.php
+```
+
+### Migrate database
+
+```bash
+APPLICATION_ENV=dev php migrate.php
 ```
 

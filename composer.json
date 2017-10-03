@@ -15,6 +15,7 @@
     }
   },
   "require-dev": {
-    "byjg/swagger-test": "1.0.*"
+    "byjg/swagger-test": "1.0.*",
+    "byjg/migration": "2.0.*"
   }
 }

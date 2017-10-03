@@ -25,6 +25,20 @@ return [
     'JWT_SECRET' => '/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=',
 
 
+    'DBDRIVER_CONNECTION' => 'sqlite:///tmp/sample.db',
+
+    'TEST_TABLE' => function () {
+        $dbDriver = \ByJG\AnyDataset\Factory::getDbRelationalInstance(\RestTemplate\Psr11::container()->get('DBDRIVER_CONNECTION'));
+
+        $mapper = new \ByJG\MicroOrm\Mapper(
+            \RestTemplate\Model\Test::class,
+            'test',
+            'id'
+        );
+
+        return  new \ByJG\MicroOrm\Repository($dbDriver, $mapper);
+    },
+
 
 
 

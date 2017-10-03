@@ -12,6 +12,7 @@ return [
     'JWT_SECRET' => 'zteNpbuArRnv9+cGrZ2K2qn2b4tqgACg6NpxuVH1MHQ=',
 
 
+    'DBDRIVER_CONNECTION' => 'sqlite:///tmp/homolog.db',
 
 
     'DOCKERFILE' => [
