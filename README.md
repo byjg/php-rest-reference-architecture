@@ -19,7 +19,7 @@ composer create-project byjg/resttemplate YOURPATH 1.0.*
 
 ### Start
 
-Replace 'RestTemplate' to your default namespace
+After the command create-project is executed some questions will be asked for setup your new project. 
 
 ### Containers
 

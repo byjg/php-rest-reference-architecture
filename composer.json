@@ -17,7 +17,8 @@
   },
   "scripts": {
     "migrate": "Framework\\Migrate::run",
-    "build": "Framework\\Build::build"
+    "build": "Framework\\Build::build",
+    "post-create-project-cmd": "Framework\\PostCreateScript::run"
   },
   "require-dev": {
     "byjg/swagger-test": "1.0.*",
