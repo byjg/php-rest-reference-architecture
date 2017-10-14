@@ -45,10 +45,13 @@ return [
     'DOCKERFILE' => [
         // Specific for this Environment
     ],
-    'DOCKER_CMD_ARGS' => [
-        '-v $PWD:/srv/web'
-    ],
-    'DOCKER_BEFORE_RUN' => [
+    'DOCKER_IMAGE' => function () {
+        return 'resttemplate-%env%';
+    },
+    'DOCKER_BEFORE_BUILD' => [
 
+    ],
+    'DOCKER_DEPLOY_COMMAND' => [
+        'docker run -d --rm --name %container% -v %workdir%:/srv/web -p "80:80" %image%',
     ],
 ];

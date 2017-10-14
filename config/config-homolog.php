@@ -21,10 +21,10 @@ return [
         'COPY vendor /srv/web/vendor',
         'COPY web /srv/web/web'
     ],
-    'DOCKER_CMD_ARGS' => [
+    'DOCKER_BEFORE_BUILD' => [
 
     ],
-    'DOCKER_BEFORE_RUN' => [
+    'DOCKER_DEPLOY_COMMAND' => [
 
     ],
 ];

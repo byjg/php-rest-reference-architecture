@@ -4,34 +4,54 @@
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/_lib.php';
 
-$dockerExtra = \RestTemplate\Psr11::container()->get('DOCKERFILE');
-$dockerExtra = array_merge(
-    [
-        '## START',
-        'ENV APPLICATION_ENV=' . \RestTemplate\Psr11::environment()->getCurrentEnv()
-    ],
-    $dockerExtra,
-    [
-        '## END'
-    ]
-);
+class Build extends _Lib
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
-$dockerFile = file_get_contents(__DIR__ . '/docker/Dockerfile');
+    public function build()
+    {
+        $dockerExtra = \RestTemplate\Psr11::container()->get('DOCKERFILE');
+        $dockerExtra = array_merge(
+            [
+                '## START',
+                'ENV APPLICATION_ENV=' . \RestTemplate\Psr11::environment()->getCurrentEnv()
+            ],
+            $dockerExtra,
+            [
+                '## END'
+            ]
+        );
 
-file_put_contents(
-    __DIR__ . '/Dockerfile',
-    str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
-);
+        $dockerFile = file_get_contents(__DIR__ . '/docker/Dockerfile');
 
-$image = 'resttemplate-' . \RestTemplate\Psr11::environment()->getCurrentEnv();
-$container = "$image-instance";
-$before = implode(" ", \RestTemplate\Psr11::container()->get('DOCKER_BEFORE_RUN'));
-$cmdArgs = implode(" ", \RestTemplate\Psr11::container()->get('DOCKER_CMD_ARGS'));
+        file_put_contents(
+            __DIR__ . '/Dockerfile',
+            str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
+        );
 
-liveExecuteCommand("docker stop $container");
-liveExecuteCommand("docker rmi $image");
-liveExecuteCommand("docker build -t $image . ");
-if (!empty($before)) {
-    liveExecuteCommand($before);
+        $beforeBuild = implode(" ", \RestTemplate\Psr11::container()->get('DOCKER_BEFORE_BUILD'));
+        $deployCommand = \RestTemplate\Psr11::container()->get('DOCKER_DEPLOY_COMMAND');
+
+        $this->liveExecuteCommand([
+            "docker stop " . $this->container,
+            "docker rmi " . $this->image
+        ]);
+
+        // Before Build
+        if (!empty($beforeBuild)) {
+            $this->liveExecuteCommand($beforeBuild);
+        }
+
+        // Build
+        $this->liveExecuteCommand("docker build -t " . $this->image . " . ");
+
+        // Deploy
+        $this->liveExecuteCommand($deployCommand);
+    }
 }
-liveExecuteCommand("docker run -d --rm --name $container -p \"80:80\" $cmdArgs $image");
+
+$build = new Build();
+$build->build();
