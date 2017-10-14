@@ -35,7 +35,7 @@ The build process will create a docker container with the PHP+NGINX and the code
 The ready to use command is:
 
 ```bash
-APPLICATION_ENV=dev php build.php
+APPLICATION_ENV=dev composer build
 ```
 
 #### Build TL;DR
@@ -69,7 +69,7 @@ Variables
 ### Migrate database
 
 ```bash
-APPLICATION_ENV=dev php migrate.php update
+APPLICATION_ENV=dev composer migrate -- update
 ```
 
 #### Database TL;DR

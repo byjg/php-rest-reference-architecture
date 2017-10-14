@@ -1,17 +1,18 @@
 <?php
 
-
-use Framework\Psr11;
+namespace Framework;
 
 class _Lib
 {
     protected $container;
     protected $image;
+    protected $workdir;
 
     public function __construct()
     {
         $this->image = $this->replaceVariables(Psr11::container()->getClosure('DOCKER_IMAGE'));
         $this->container = $this->image . "-instance";
+        $this->workdir = realpath(__DIR__ . '/../..');
     }
 
     /**
@@ -49,9 +50,14 @@ class _Lib
         // get exit status
         preg_match('/[0-9]+$/', $completeOutput, $matches);
 
+        $exitStatus = intval($matches[0]);
+        // if ($exitStatus !== 0) {
+        //     exit($exitStatus);
+        // }
+
         // return exit status and intended output
         return array (
-            'exit_status'  => intval($matches[0]),
+            'exit_status'  => $exitStatus,
             'output'       => str_replace("Exit status : " . $matches[0], '', $completeOutput)
         );
     }
@@ -61,7 +67,7 @@ class _Lib
         // Deploy
         $args = [
             '%env%' => Psr11::environment()->getCurrentEnv(),
-            '%workdir%' => getcwd(),
+            '%workdir%' => $this->workdir,
             '%container%' => $this->container,
             '%image%' => $this->image
         ];

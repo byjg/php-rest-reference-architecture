@@ -1,10 +1,6 @@
-#!/usr/bin/env php
 <?php
 
-use Framework\Psr11;
-
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/_lib.php';
+namespace Framework;
 
 class Build extends _Lib
 {
@@ -13,7 +9,13 @@ class Build extends _Lib
         parent::__construct();
     }
 
-    public function build()
+    public static function build()
+    {
+        $build = new Build();
+        $build->execute();
+    }
+
+    public function execute()
     {
         $dockerExtra = Psr11::container()->get('DOCKERFILE');
         $dockerExtra = array_merge(
@@ -27,10 +29,10 @@ class Build extends _Lib
             ]
         );
 
-        $dockerFile = file_get_contents(__DIR__ . '/docker/Dockerfile');
+        $dockerFile = file_get_contents($this->workdir . '/docker/Dockerfile');
 
         file_put_contents(
-            __DIR__ . '/Dockerfile',
+            $this->workdir . '/Dockerfile',
             str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
         );
 
@@ -54,6 +56,3 @@ class Build extends _Lib
         $this->liveExecuteCommand($deployCommand);
     }
 }
-
-$build = new Build();
-$build->build();

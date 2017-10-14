@@ -1,10 +1,8 @@
-#!/usr/bin/env php
 <?php
 
-use Framework\Psr11;
+namespace Framework;
 
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/_lib.php';
+use Composer\Script\Event;
 
 class Migrate extends _Lib
 {
@@ -16,20 +14,24 @@ class Migrate extends _Lib
         parent::__construct();
     }
 
-    public function run()
+    public static function run(Event $event)
+    {
+        $migrate = new Migrate($event->getArguments());
+        $migrate->execute();
+    }
+
+    public function execute()
     {
         $db = Psr11::container()->get('DBDRIVER_CONNECTION');
 
-        $params = implode(' ', array_slice($this->arguments, 1));
+        $params = implode(' ', $this->arguments);
         if (!empty($params)) {
             $params .= " $db";
         }
 
-        $cmdLine = __DIR__ . "/vendor/bin/migrate -vvv --path=\"%workdir%/db\" $params";
+        $cmdLine = $this->workdir . "/vendor/bin/migrate -vvv --path=\"%workdir%/db\" $params";
 
         $this->liveExecuteCommand($cmdLine);
     }
 }
 
-$migrate = new Migrate($argv);
-$migrate->run();
