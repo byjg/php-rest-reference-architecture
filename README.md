@@ -11,9 +11,18 @@ This project install the follow components:
 
 ## Install
 
+Stable Release:
+
 ```bash
 composer create-project byjg/resttemplate YOURPATH 1.0.*
 ```
+
+Dev Release
+
+```bash
+composer -sdev create-project byjg/resttemplate YOURPATH master
+```
+
 
 ## How to use
 
