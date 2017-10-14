@@ -6,10 +6,8 @@ use Composer\Script\Event;
 
 class PostCreateScript
 {
-    public function execute($namespace, $composerName)
+    public function execute($workdir, $namespace, $composerName)
     {
-        $workdir = realpath(__DIR__ . '/../..');
-        
         $directory = new \RecursiveDirectoryIterator($workdir);
         $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
             // Skip hidden files and directories.
@@ -50,18 +48,20 @@ class PostCreateScript
 
     public static function run(Event $event)
     {
+        $workdir = realpath(__DIR__ . '/../..');
         $io = $event->getIO();
 
         $io->write("========================================================");
         $io->write("  Setup RestTemplate");
         $io->write("========================================================");
         $io->write("");
+        $io->write("Project Directory: " . $workdir);
         $namespace = $io->ask('Project namespace [MyRest]: ', 'MyRest');
         $composerName = $io->ask('Composer name [me/myrest]: ', 'me/myrest');
         $io->ask('Press <ENTER> to continue');
 
         $script = new PostCreateScript();
-        $script->execute($namespace, $composerName);
+        $script->execute($workdir, $namespace, $composerName);
     }
 }
 
