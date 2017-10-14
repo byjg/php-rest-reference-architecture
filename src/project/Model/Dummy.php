@@ -2,9 +2,23 @@
 
 namespace RestTemplate\Model;
 
+/**
+ * Model that represents the Dummy table
+ *
+ * @SWG\Definition(required={"field"}, type="object", @SWG\Xml(name="Dummy"))
+ */
 class Dummy
 {
+    /**
+     * @SWG\Property()
+     * @var int
+     */
     protected $id;
+
+    /**
+     * @SWG\Property()
+     * @var string
+     */
     protected $field;
 
     /**

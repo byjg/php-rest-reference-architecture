@@ -1,0 +1,276 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Title",
+        "description": "Description",
+        "termsOfService": "http://localhost/terms/",
+        "contact": {
+            "email": "email@example.com"
+        },
+        "license": {
+            "name": "Proprietary",
+            "url": "http://localhost/LICENSE"
+        },
+        "version": "1.0.0"
+    },
+    "host": "localhost",
+    "basePath": "/",
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/login": {
+            "post": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Do login",
+                "operationId": "post",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "The login data",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "username",
+                                "password"
+                            ],
+                            "properties": {
+                                "username": {
+                                    "description": "The username",
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "description": "The password",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "required": [
+                                "token",
+                                "properties"
+                            ],
+                            "properties": {
+                                "token": {
+                                    "description": "Do login",
+                                    "type": "string"
+                                },
+                                "properties": {
+                                    "description": "Do login",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "N\u00e3o autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            }
+        },
+        "/sample/ping": {
+            "get": {
+                "tags": [
+                    "sample"
+                ],
+                "summary": "Simple ping",
+                "operationId": "get",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "required": [
+                                "result"
+                            ],
+                            "properties": {
+                                "result": {
+                                    "description": "Simple ping",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sample/dummy/{field}": {
+            "get": {
+                "tags": [
+                    "sample"
+                ],
+                "summary": "Get the rows from the Dummy table (used in the example)",
+                "operationId": "get",
+                "parameters": [
+                    {
+                        "name": "field",
+                        "in": "path",
+                        "description": "The field content to be returned",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Dummy"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            }
+        },
+        "/sample/dummy": {
+            "post": {
+                "tags": [
+                    "sample"
+                ],
+                "summary": "Save data content in the table Dummy",
+                "operationId": "post",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "The dummy data",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Dummy"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object"
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            }
+        },
+        "/sampleprotected/ping": {
+            "get": {
+                "tags": [
+                    "sampleprotected"
+                ],
+                "summary": "Gets an blog by Id.",
+                "operationId": "get",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "required": [
+                                "result"
+                            ],
+                            "properties": {
+                                "result": {
+                                    "description": "Gets an blog by Id.",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "N\u00e3o autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "Dummy": {
+            "required": [
+                "field"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "field": {
+                    "type": "string"
+                }
+            },
+            "type": "object",
+            "xml": {
+                "name": "Dummy"
+            }
+        },
+        "error": {
+            "properties": {
+                "error": {
+                    "properties": {
+                        "type": {
+                            "description": "A class de Exce\u00e7\u00e3o",
+                            "type": "string"
+                        },
+                        "message": {
+                            "description": "A mensagem de erro",
+                            "type": "string"
+                        },
+                        "file": {
+                            "description": "O arquivo que gerou o erro",
+                            "type": "string"
+                        },
+                        "line": {
+                            "description": "A linha do erro",
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "jwt-token": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "externalDocs": {
+        "description": "Bitbucket Docs",
+        "url": "https://example.com"
+    }
+}

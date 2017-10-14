@@ -16,11 +16,13 @@
     }
   },
   "scripts": {
-    "migrate": "Framework\\Migrate::run",
-    "build": "Framework\\Build::build",
+    "migrate": "Framework\\Scripts::migrate",
+    "build": "Framework\\Scripts::build",
+    "restdocs": "Framework\\Scripts::genRestDocs",
     "post-create-project-cmd": "Framework\\PostCreateScript::run"
   },
   "require-dev": {
+    "zircote/swagger-php": "2.0.*",
     "byjg/swagger-test": "1.0.*",
     "byjg/migration": "2.0.*"
   }

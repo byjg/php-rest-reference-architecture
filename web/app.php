@@ -8,21 +8,21 @@ use \Framework\Psr11;
 /**
  * @SWG\Swagger(
  *     schemes={"http"},
- *     basePath="/rest",
- *     host="HOSTNAME",
+ *     basePath="/",
+ *     host="__HOSTNAME__",
  *     consumes={"application/json"},
  *     produces={"application/json"},
  *     @SWG\Info(
  *         version="1.0.0",
  *         title="Title",
  *         description="Description",
- *         termsOfService="http://localhost/terms/",
+ *         termsOfService="http://__HOSTNAME__/terms/",
  *         @SWG\Contact(
  *             email="email@example.com"
  *         ),
  *         @SWG\License(
  *             name="Proprietary",
- *             url="http://host/"
+ *             url="http://__HOSTNAME__/LICENSE"
  *         )
  *     ),
  *     @SWG\ExternalDocumentation(
@@ -37,15 +37,13 @@ use \Framework\Psr11;
  *   name="Authorization"
  * )
  * @SWG\Definition(
- *   definition="errorProperties",
- *   @SWG\Property(property="type", type="string", description="A class de Exceção"),
- *   @SWG\Property(property="message", type="string", description="A mensagem de erro"),
- *   @SWG\Property(property="file", type="string", description="O arquivo que gerou o erro"),
- *   @SWG\Property(property="line", type="integer", description="A linha do erro")
- * )
- * @SWG\Definition(
  *   definition="error",
- *   @SWG\Property(property="error", ref="#/definitions/errorProperties")
+ *   @SWG\Property(property="error",
+ *      @SWG\Property(property="type", type="string", description="A class de Exceção"),
+ *      @SWG\Property(property="message", type="string", description="A mensagem de erro"),
+ *      @SWG\Property(property="file", type="string", description="O arquivo que gerou o erro"),
+ *      @SWG\Property(property="line", type="integer", description="A linha do erro")
+ *   )
  * )
  */
 

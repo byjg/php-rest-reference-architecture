@@ -2,7 +2,9 @@
 
 namespace Framework;
 
-class Build extends _Lib
+use Composer\Script\Event;
+
+class Scripts extends _Lib
 {
     public function __construct()
     {
@@ -11,11 +13,26 @@ class Build extends _Lib
 
     public static function build()
     {
-        $build = new Build();
-        $build->execute();
+        $build = new Scripts();
+        $build->runBuild();
     }
 
-    public function execute()
+    public static function migrate(Event $event)
+    {
+        $migrate = new Scripts();
+        $migrate->runMigrate($event->getArguments());
+    }
+
+    public static function genRestDocs()
+    {
+        $build = new Scripts();
+        $build->runGenRestDocs();
+    }
+
+
+
+
+    public function runBuild()
     {
         $dockerExtra = Psr11::container()->get('DOCKERFILE');
         $dockerExtra = array_merge(
@@ -55,4 +72,30 @@ class Build extends _Lib
         // Deploy
         $this->liveExecuteCommand($deployCommand);
     }
+
+
+    public function runMigrate($arguments)
+    {
+        $db = Psr11::container()->get('DBDRIVER_CONNECTION');
+
+        $params = implode(' ', $arguments);
+        if (!empty($params)) {
+            $params .= " $db";
+        }
+
+        $cmdLine = $this->workdir . "/vendor/bin/migrate -vvv --path=\"%workdir%/db\" $params";
+
+        $this->liveExecuteCommand($cmdLine);
+    }
+
+    public function runGenRestDocs()
+    {
+        $docPath = $this->workdir . '/web/docs/';
+        $this->liveExecuteCommand("vendor/bin/swagger --output \"$docPath\" --exclude vendor,docker");
+
+        $docs = file_get_contents("$docPath/swagger.json");
+        $docs = str_replace('__HOSTNAME__', Psr11::container()->get('HOST'), $docs);
+        file_put_contents("$docPath/swagger.json", $docs);
+    }
+
 }

@@ -56,7 +56,7 @@ class Login extends ServiceAbstractBase
         $metadata = [
             'role' => 'admin',
             'userid' => '1234567890ABCDEF0123456789',
-            'name' => 'João Gilberto'
+            'name' => 'Administrator'
         ];
 
         $token = $this->createToken($metadata);
