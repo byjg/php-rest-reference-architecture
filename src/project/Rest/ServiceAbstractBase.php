@@ -10,7 +10,7 @@ namespace RestTemplate\Rest;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\ServiceAbstract;
 use ByJG\Util\JwtWrapper;
-use RestTemplate\Psr11;
+use Framework\Psr11;
 
 class ServiceAbstractBase extends ServiceAbstract
 {

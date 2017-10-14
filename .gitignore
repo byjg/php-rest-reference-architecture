@@ -2,3 +2,4 @@
 /Dockerfile
 composer.lock
 vendor
+/src/*.db

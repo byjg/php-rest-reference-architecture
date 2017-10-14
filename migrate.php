@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+use Framework\Psr11;
+
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/_lib.php';
 
@@ -16,7 +18,7 @@ class Migrate extends _Lib
 
     public function run()
     {
-        $db = \RestTemplate\Psr11::container()->get('DBDRIVER_CONNECTION');
+        $db = Psr11::container()->get('DBDRIVER_CONNECTION');
 
         $params = implode(' ', array_slice($this->arguments, 1));
         if (!empty($params)) {

@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+use Framework\Psr11;
+
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/_lib.php';
 
@@ -13,11 +15,11 @@ class Build extends _Lib
 
     public function build()
     {
-        $dockerExtra = \RestTemplate\Psr11::container()->get('DOCKERFILE');
+        $dockerExtra = Psr11::container()->get('DOCKERFILE');
         $dockerExtra = array_merge(
             [
                 '## START',
-                'ENV APPLICATION_ENV=' . \RestTemplate\Psr11::environment()->getCurrentEnv()
+                'ENV APPLICATION_ENV=' . Psr11::environment()->getCurrentEnv()
             ],
             $dockerExtra,
             [
@@ -32,8 +34,8 @@ class Build extends _Lib
             str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
         );
 
-        $beforeBuild = implode(" ", \RestTemplate\Psr11::container()->get('DOCKER_BEFORE_BUILD'));
-        $deployCommand = \RestTemplate\Psr11::container()->get('DOCKER_DEPLOY_COMMAND');
+        $beforeBuild = implode(" ", Psr11::container()->get('DOCKER_BEFORE_BUILD'));
+        $deployCommand = Psr11::container()->get('DOCKER_DEPLOY_COMMAND');
 
         $this->liveExecuteCommand([
             "docker stop " . $this->container,

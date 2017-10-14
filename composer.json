@@ -11,7 +11,8 @@
   },
   "autoload": {
     "psr-4": {
-      "RestTemplate\\": "src/"
+      "RestTemplate\\": "src/project/",
+      "Framework\\": "src/fw/"
     }
   },
   "require-dev": {

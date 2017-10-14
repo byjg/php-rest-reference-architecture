@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use \ByJG\RestServer\ServerRequestHandler;
-use \RestTemplate\Psr11;
+use \Framework\Psr11;
 
 /**
  * @SWG\Swagger(

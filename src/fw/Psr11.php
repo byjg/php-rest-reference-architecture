@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate;
+namespace Framework;
 
 use ByJG\Config\Definition;
 

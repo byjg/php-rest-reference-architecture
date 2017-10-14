@@ -69,6 +69,30 @@ Variables
 ### Migrate database
 
 ```bash
-APPLICATION_ENV=dev php migrate.php
+APPLICATION_ENV=dev php migrate.php update
 ```
+
+#### Database TL;DR
+
+##### Migration
+
+The migration process uses the [byjg/migration](https://github.com/byjg/migration)
+
+Basically there are migration scripts located at "%workdir%/db".
+
+The initial file is "base.sql" and the migration are "%workdir%/db/up/1.sql", "%workdir%/db/up/2.sql" and so on. 
+
+The basic migrations command are:
+- reset: Will reset the database starting from "base.sql" and apply an migrations starting from 1.sql.
+- update: Will update the database until the most recent version existing in the migration;
+- update --up-to=n: Will update the database until the version 'n' existing in the migration;
+
+The connection is in the Psr11 container variable 'DBDRIVER_CONNECTION';
+
+##### ORM
+
+The ORM uses the [byjg/micro-orm](https://github.com/byjg/micro-orm)
+
+There are a basic example in "%workdir%/src/project/Repository/DummyRepository". 
+The defintion in the Psr11 container variable 'DUMMY_TABLE'
 

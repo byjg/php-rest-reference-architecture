@@ -1,6 +1,8 @@
 <?php
 
 
+use Framework\Psr11;
+
 class _Lib
 {
     protected $container;
@@ -8,7 +10,7 @@ class _Lib
 
     public function __construct()
     {
-        $this->image = $this->replaceVariables(\RestTemplate\Psr11::container()->getClosure('DOCKER_IMAGE'));
+        $this->image = $this->replaceVariables(Psr11::container()->getClosure('DOCKER_IMAGE'));
         $this->container = $this->image . "-instance";
     }
 
@@ -58,7 +60,7 @@ class _Lib
     {
         // Deploy
         $args = [
-            '%env%' => \RestTemplate\Psr11::environment()->getCurrentEnv(),
+            '%env%' => Psr11::environment()->getCurrentEnv(),
             '%workdir%' => getcwd(),
             '%container%' => $this->container,
             '%image%' => $this->image

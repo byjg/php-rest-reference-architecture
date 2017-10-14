@@ -18,6 +18,8 @@ return [
     'ROUTE_PATH_EXTRA' => [
         // Specific for this Environment
         new RoutePattern('GET', '/{module:sample}/{action:ping}', JsonHandler::class),
+        new RoutePattern('GET', '/{module:sample}/{action:dummy}/{field}', JsonHandler::class),
+        new RoutePattern('POST', '/{module:sample}/{action:dummy}', JsonHandler::class),
         new RoutePattern('GET', '/{module:sampleprotected}/{action:ping}', JsonHandler::class),
     ],
 
@@ -25,14 +27,14 @@ return [
     'JWT_SECRET' => '/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=',
 
 
-    'DBDRIVER_CONNECTION' => 'sqlite:///tmp/sample.db',
+    'DBDRIVER_CONNECTION' => 'sqlite://' . __DIR__ . '/../src/sample.db',
 
-    'TEST_TABLE' => function () {
-        $dbDriver = \ByJG\AnyDataset\Factory::getDbRelationalInstance(\RestTemplate\Psr11::container()->get('DBDRIVER_CONNECTION'));
+    'DUMMY_TABLE' => function () {
+        $dbDriver = \ByJG\AnyDataset\Factory::getDbRelationalInstance(\Framework\Psr11::container()->get('DBDRIVER_CONNECTION'));
 
         $mapper = new \ByJG\MicroOrm\Mapper(
-            \RestTemplate\Model\Test::class,
-            'test',
+            \RestTemplate\Model\Dummy::class,
+            'dummy',
             'id'
         );
 
