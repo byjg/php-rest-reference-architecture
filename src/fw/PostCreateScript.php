@@ -38,9 +38,21 @@ class PostCreateScript
             $contents = file_get_contents($name);
             if (strpos($contents, 'RestTemplate') !== false) {
                 echo "$name\n";
+
+                // Replace inside Quotes
+                $contents = preg_replace(
+                    "/([\'\"])RestTemplate(.*?[\'\"])/",
+                    '$1' . str_replace('\\', '\\\\\\\\', $namespace) . '$2',
+                    $contents
+                );
+
+                // Replace reserved name
+                $contents = str_replace('RestTemplate', $namespace, $contents);
+
+                // Save it
                 file_put_contents(
                     $name,
-                    str_replace('RestTemplate', $namespace, $contents)
+                    $contents
                 );
             }
         }
