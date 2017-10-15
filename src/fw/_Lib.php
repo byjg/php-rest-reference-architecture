@@ -72,7 +72,7 @@ class _Lib
             '%image%' => $this->image
         ];
 
-        foreach ($args as $arg=>$value) {
+        foreach ($args as $arg => $value) {
             $string = str_replace($arg, $value, $string);
         }
 

@@ -30,11 +30,11 @@ class Dummy
     }
 
     /**
-     * @param mixed $id
+     * @param mixed $value
      */
-    public function setId($id)
+    public function setId($value)
     {
-        $this->id = $id;
+        $this->id = $value;
     }
 
 

@@ -76,11 +76,11 @@ class Scripts extends _Lib
 
     public function runMigrate($arguments)
     {
-        $db = Psr11::container()->get('DBDRIVER_CONNECTION');
+        $dbConnection = Psr11::container()->get('DBDRIVER_CONNECTION');
 
         $params = implode(' ', $arguments);
         if (!empty($params)) {
-            $params .= " $db";
+            $params .= " $dbConnection";
         }
 
         $cmdLine = $this->workdir . "/vendor/bin/migrate -vvv --path=\"%workdir%/db\" $params";
@@ -97,5 +97,4 @@ class Scripts extends _Lib
         $docs = str_replace('__HOSTNAME__', Psr11::container()->get('HOST'), $docs);
         file_put_contents("$docPath/swagger.json", $docs);
     }
-
 }
