@@ -49,6 +49,13 @@ class PostCreateScript
                 // Replace reserved name
                 $contents = str_replace('RestTemplate', $namespace, $contents);
 
+                // Replace reserved name
+                $contents = str_replace(
+                    'resttemplate',
+                    str_replace('/', '', $composerName),
+                    $contents
+                );
+
                 // Save it
                 file_put_contents(
                     $name,
