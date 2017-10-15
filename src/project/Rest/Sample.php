@@ -2,6 +2,7 @@
 
 namespace RestTemplate\Rest;
 
+use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\Serializer\BinderObject;
 use RestTemplate\Model\Dummy;
 use RestTemplate\Repository\DummyRepository;
@@ -52,6 +53,11 @@ class Sample extends ServiceAbstractBase
      *         @SWG\Schema(type="array", @SWG\Items(ref="#/definitions/Dummy"))
      *     ),
      *     @SWG\Response(
+     *         response=404,
+     *         description="Not found",
+     *         @SWG\Schema(ref="#/definitions/error")
+     *     ),
+     *     @SWG\Response(
      *         response=500,
      *         description="Erro Geral",
      *         @SWG\Schema(ref="#/definitions/error")
@@ -63,8 +69,12 @@ class Sample extends ServiceAbstractBase
         $dummyRepo = new DummyRepository();
         $field = $this->getRequest()->get('field');
 
+        $result = $dummyRepo->getByField($field);
+        if (empty($result)) {
+            throw new Error404Exception('Pattern not found');
+        }
         $this->getResponse()->write(
-            $dummyRepo->getByField($field)
+            $result
         );
     }
 

@@ -8,7 +8,7 @@ use \Framework\Psr11;
 /**
  * @SWG\Swagger(
  *     schemes={"http"},
- *     basePath="/",
+ *     basePath="",
  *     host="__HOSTNAME__",
  *     consumes={"application/json"},
  *     produces={"application/json"},

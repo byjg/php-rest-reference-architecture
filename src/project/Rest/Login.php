@@ -28,9 +28,11 @@ class Login extends ServiceAbstractBase
      *         response=200,
      *         description="The object",
      *         @SWG\Schema(
-     *            required={"token","properties"},
+     *            required={"token"},
      *            @SWG\Property(property="token", type="string"),
-     *            @SWG\Property(property="properties", type="array")
+     *            @SWG\Property(property="role", type="string"),
+     *            @SWG\Property(property="userid", type="string"),
+     *            @SWG\Property(property="name", type="string")
      *         )
      *     ),
      *     @SWG\Response(
@@ -61,6 +63,8 @@ class Login extends ServiceAbstractBase
 
         $token = $this->createToken($metadata);
 
-        $this->getResponse()->write(['token' => $token]);
+        $metadata['token'] = $token;
+
+        $this->getResponse()->write($metadata);
     }
 }

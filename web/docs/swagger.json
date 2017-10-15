@@ -14,7 +14,7 @@
         "version": "1.0.0"
     },
     "host": "localhost",
-    "basePath": "/",
+    "basePath": "",
     "schemes": [
         "http"
     ],
@@ -61,17 +61,24 @@
                         "description": "The object",
                         "schema": {
                             "required": [
-                                "token",
-                                "properties"
+                                "token"
                             ],
                             "properties": {
                                 "token": {
                                     "description": "Do login",
                                     "type": "string"
                                 },
-                                "properties": {
+                                "role": {
                                     "description": "Do login",
-                                    "type": "array"
+                                    "type": "string"
+                                },
+                                "userid": {
+                                    "description": "Do login",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "description": "Do login",
+                                    "type": "string"
                                 }
                             }
                         }
@@ -140,6 +147,12 @@
                             "items": {
                                 "$ref": "#/definitions/Dummy"
                             }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/error"
                         }
                     },
                     "500": {
