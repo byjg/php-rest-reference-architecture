@@ -13,15 +13,12 @@ abstract class BaseRepository
     protected $repository;
 
     /**
-     * @param $objectId
+     * @param $itemId
      * @return mixed
      */
-    public function get($objectId)
+    public function get($itemId)
     {
-        if (!($objectId instanceof Literal)) {
-            $objectId = new Literal("X'$objectId'");
-        }
-        return $this->repository->get($objectId);
+        return $this->repository->get($itemId);
     }
 
     /**
