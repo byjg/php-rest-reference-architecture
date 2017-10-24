@@ -53,12 +53,12 @@ class Scripts extends _Lib
             str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
         );
 
-        $beforeBuild = implode(" ", Psr11::container()->get('DOCKER_BEFORE_BUILD'));
+        $beforeBuild = Psr11::container()->get('DOCKER_BEFORE_BUILD');
         $deployCommand = Psr11::container()->get('DOCKER_DEPLOY_COMMAND');
 
         $this->liveExecuteCommand([
             "docker stop " . $this->container,
-            "docker rmi " . $this->image
+            "docker rm " . $this->container,
         ]);
 
         // Before Build
@@ -91,7 +91,9 @@ class Scripts extends _Lib
     public function runGenRestDocs()
     {
         $docPath = $this->workdir . '/web/docs/';
-        $this->liveExecuteCommand("vendor/bin/swagger --output \"$docPath\" --exclude vendor,docker");
+        $this->liveExecuteCommand(
+            $this->workdir . "vendor/bin/swagger --output \"$docPath\" --exclude vendor,docker,fw"
+        );
 
         $docs = file_get_contents("$docPath/swagger.json");
         $docs = str_replace('__HOSTNAME__', Psr11::container()->get('HOST'), $docs);

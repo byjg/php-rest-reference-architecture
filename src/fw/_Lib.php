@@ -62,6 +62,19 @@ class _Lib
         );
     }
 
+    protected $dockerVariables = null;
+    protected function getDockerVariables()
+    {
+        if ($this->dockerVariables === null) {
+            $this->dockerVariables = Psr11::container()->get('DOCKER_VARIABLES');
+            if ($this->dockerVariables === null) {
+                $this->dockerVariables = [];
+            }
+        }
+
+        return $this->dockerVariables;
+    }
+
     protected function replaceVariables($string)
     {
         // Deploy
@@ -71,6 +84,11 @@ class _Lib
             '%container%' => $this->container,
             '%image%' => $this->image
         ];
+
+        $variables = $this->getDockerVariables();
+        foreach ((array)$variables as $variable => $value) {
+            $args["%$variable%"] = $value;
+        }
 
         foreach ($args as $arg => $value) {
             $string = str_replace($arg, $value, $string);

@@ -1,7 +1,9 @@
 <?php
 
+use \ByJG\AnyDataset\Factory;
 use \ByJG\RestServer\RoutePattern;
 use \ByJG\RestServer\HandleOutput\JsonHandler;
+use \Framework\Psr11;
 
 return [
 
@@ -30,7 +32,7 @@ return [
     'DBDRIVER_CONNECTION' => 'sqlite://' . __DIR__ . '/../src/sample.db',
 
     'DUMMY_TABLE' => function () {
-        $dbDriver = \ByJG\AnyDataset\Factory::getDbRelationalInstance(\Framework\Psr11::container()->get('DBDRIVER_CONNECTION'));
+        $dbDriver = Factory::getDbRelationalInstance(Psr11::container()->get('DBDRIVER_CONNECTION'));
 
         $mapper = new \ByJG\MicroOrm\Mapper(
             \RestTemplate\Model\Dummy::class,
@@ -43,7 +45,9 @@ return [
 
 
 
-
+    'DOCKER_VARIABLES' => [
+        'buildnum' => "release" . date('YmdHis')
+    ],
     'DOCKERFILE' => [
         // Specific for this Environment
     ],
