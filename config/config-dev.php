@@ -57,8 +57,10 @@ return [
     'BUILDER_BEFORE_BUILD' => [
         "docker stop %container%"
     ],
-    'BUILDER_DEPLOY_COMMAND' => [
+    'BUILDER_BUILD' => [
         'docker build -t %image% . ',
+    ],
+    'BUILDER_DEPLOY_COMMAND' => [
         'docker run -d --rm --name %container% -v %workdir%:/srv/web -p "80:80" %image%',
     ],
 ];

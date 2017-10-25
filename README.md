@@ -39,7 +39,8 @@ Start editing from "config/config-dev"
 
 ### Build
 
-The build process will create a docker container with the PHP+NGINX and the code necessary to run your project.
+The build process will enable you create an artifact of your project. 
+The "Builder" can easily turn your project inside a docker container.
 
 The ready to use command is:
 
@@ -49,27 +50,29 @@ APPLICATION_ENV=dev composer build
 
 #### Build TL;DR
 
-The build process uses the configuration environment defined in the Container to create a docker instance. 
+The build process uses the configuration environment defined in the PSR11 Container 
 
 The process for build is:
 - Read the PSR11 Container with the specific environment;
-- Copy the Dockerfile template from 'docker/Dockerfile' to the workdir
-- Customize the Dockerfile at the Workdir with PSR11 "BUILDER_DOCKERFILE" variable;
-- Run the PSR11 "BUILDER_BEFORE_BUILD" variable
-- Run the PSR11 "BUILDER_DEPLOY_COMMAND" variable
+- If exists PSR11 "BUILDER_DOCKERFILE" variable it will copy the Dockerfile template from 'docker/Dockerfile' 
+to the workdir and apply the customizations;
+- Run the commands inside the PSR11 "BUILDER_BEFORE_BUILD" variable
+- Run the commands inside the PSR11 "BUILDER_BUILD" variable
+- Run the commands inside the PSR11 "BUILDER_DEPLOY_COMMAND" variable
 
 Your PSR11 Container must have the follow variables:
 
+- BUILDER_VARIABLES => an array with custom variables. By default there are:
+    - %env% - Your current environment
+    - %workdir% - The root workdir
 - BUILDER_DOCKERFILE: an array with specific commands for the current environment. Basically
 the build process will copy the docker template file from 'docker/Dockerfile' and replace the 
 string comment `##---ENV-SPECIFICS-HERE` with the commands defined here; **IMPORTANT NOTE**: if the array is empty
 or null, the Builder will ignore the custom Dockerfile
-- BUILDER_DEPLOY_COMMAND: The commands used to deploy your docker image. Maybe a docker run command or 
-a docker push or everything else.;
 - BUILDER_BEFORE_BUILD' => The commands before start the build image. For example the grunt command or a minifier; 
-- BUILDER_VARIABLES => an array with custom variables. By default there are:
-    - %env% - Your current environment
-    - %workdir% - The root workdir
+- BUILDER_BUILD =>The commands used to build your artifact. 
+- BUILDER_DEPLOY_COMMAND: The commands used to deploy your artifact. Maybe a docker run command or 
+a docker push or everything else.;
 
 
 ### Migrate database
