@@ -45,19 +45,20 @@ return [
 
 
 
-    'DOCKER_VARIABLES' => [
-        'buildnum' => "release" . date('YmdHis')
+    'BUILDER_VARIABLES' => [
+        'buildnum' => "release" . date('YmdHis'),
+        'image' => 'resttemplate-%env%',
+        'container' => '%image%-instance'
     ],
-    'DOCKERFILE' => [
-        // Specific for this Environment
+    'BUILDER_DOCKERFILE' => [
+        '# If there any command here, a Dockerfile will be generated with this commands',
+        '# If you do not have a custom command, put a single comment like this'
     ],
-    'DOCKER_IMAGE' => function () {
-        return 'resttemplate-%env%';
-    },
-    'DOCKER_BEFORE_BUILD' => [
-
+    'BUILDER_BEFORE_BUILD' => [
+        "docker stop %container%"
     ],
-    'DOCKER_DEPLOY_COMMAND' => [
+    'BUILDER_DEPLOY_COMMAND' => [
+        'docker build -t %image% . ',
         'docker run -d --rm --name %container% -v %workdir%:/srv/web -p "80:80" %image%',
     ],
 ];

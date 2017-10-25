@@ -34,43 +34,42 @@ class Scripts extends _Lib
 
     public function runBuild()
     {
-        $dockerExtra = Psr11::container()->get('DOCKERFILE');
-        $dockerExtra = array_merge(
-            [
-                '## START',
-                'ENV APPLICATION_ENV=' . Psr11::environment()->getCurrentEnv()
-            ],
-            $dockerExtra,
-            [
-                '## END'
-            ]
-        );
+        $dockerExtra = Psr11::container()->get('BUILDER_DOCKERFILE');
+        var_dump($dockerExtra);
+        if (!empty($dockerExtra)) {
+            $dockerExtra = array_merge(
+                [
+                    '############################################################',
+                    '##-- START CUSTOM',
+                    'ENV APPLICATION_ENV=' . Psr11::environment()->getCurrentEnv()
+                ],
+                (array)$dockerExtra,
+                [
+                    '##-- END CUSTOM',
+                    '############################################################',
+                ]
+            );
 
-        $dockerFile = file_get_contents($this->workdir . '/docker/Dockerfile');
+            $dockerFile = file_get_contents($this->workdir . '/docker/Dockerfile');
 
-        file_put_contents(
-            $this->workdir . '/Dockerfile',
-            str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
-        );
+            file_put_contents(
+                $this->workdir . '/Dockerfile',
+                str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
+            );
+        }
 
-        $beforeBuild = Psr11::container()->get('DOCKER_BEFORE_BUILD');
-        $deployCommand = Psr11::container()->get('DOCKER_DEPLOY_COMMAND');
-
-        $this->liveExecuteCommand([
-            "docker stop " . $this->container,
-            "docker rm " . $this->container,
-        ]);
+        $beforeBuild = Psr11::container()->get('BUILDER_BEFORE_BUILD');
+        $deployCommand = Psr11::container()->get('BUILDER_DEPLOY_COMMAND');
 
         // Before Build
         if (!empty($beforeBuild)) {
             $this->liveExecuteCommand($beforeBuild);
         }
 
-        // Build
-        $this->liveExecuteCommand("docker build -t " . $this->image . " . ");
-
         // Deploy
-        $this->liveExecuteCommand($deployCommand);
+        if (!empty($deployCommand)) {
+            $this->liveExecuteCommand($deployCommand);
+        }
     }
 
 

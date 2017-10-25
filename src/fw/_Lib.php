@@ -10,8 +10,6 @@ class _Lib
 
     public function __construct()
     {
-        $this->image = $this->replaceVariables(Psr11::container()->getClosure('DOCKER_IMAGE'));
-        $this->container = $this->image . "-instance";
         $this->workdir = realpath(__DIR__ . '/../..');
     }
 
@@ -65,10 +63,17 @@ class _Lib
     protected $dockerVariables = null;
     protected function getDockerVariables()
     {
+        // Builder Variables
         if ($this->dockerVariables === null) {
-            $this->dockerVariables = Psr11::container()->get('DOCKER_VARIABLES');
-            if ($this->dockerVariables === null) {
-                $this->dockerVariables = [];
+            $this->dockerVariables = [
+                '%env%'     => Psr11::environment()->getCurrentEnv(),
+                '%workdir%' => $this->workdir
+            ];
+
+            // Get User Variables
+            $variables = Psr11::container()->get('BUILDER_VARIABLES');
+            foreach ((array)$variables as $variable => $value) {
+                $this->dockerVariables["%$variable%"] = $this->replaceVariables($value);
             }
         }
 
@@ -77,19 +82,10 @@ class _Lib
 
     protected function replaceVariables($string)
     {
-        // Deploy
-        $args = [
-            '%env%' => Psr11::environment()->getCurrentEnv(),
-            '%workdir%' => $this->workdir,
-            '%container%' => $this->container,
-            '%image%' => $this->image
-        ];
+        // Builder Variables
+        $args = $this->getDockerVariables();
 
-        $variables = $this->getDockerVariables();
-        foreach ((array)$variables as $variable => $value) {
-            $args["%$variable%"] = $value;
-        }
-
+        // Replace variables into string
         foreach ($args as $arg => $value) {
             $string = str_replace($arg, $value, $string);
         }

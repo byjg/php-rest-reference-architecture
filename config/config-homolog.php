@@ -15,16 +15,16 @@ return [
     'DBDRIVER_CONNECTION' => 'sqlite://' . __DIR__ . '/../src/homolog.db',
 
 
-    'DOCKERFILE' => [
+    'BUILDER_DOCKERFILE' => [
         'COPY config /srv/web/config',
         'COPY src /srv/web/src',
         'COPY vendor /srv/web/vendor',
         'COPY web /srv/web/web'
     ],
-    'DOCKER_BEFORE_BUILD' => [
+    'BUILDER_BEFORE_BUILD' => [
 
     ],
-    'DOCKER_DEPLOY_COMMAND' => [
+    'BUILDER_DEPLOY_COMMAND' => [
 
     ],
 ];

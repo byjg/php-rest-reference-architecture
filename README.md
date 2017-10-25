@@ -54,25 +54,22 @@ The build process uses the configuration environment defined in the Container to
 The process for build is:
 - Read the PSR11 Container with the specific environment;
 - Copy the Dockerfile template from 'docker/Dockerfile' to the workdir
-- Customize the Dockerfile at the Workdir with PSR11 "DOCKERFILE" variable;
-- Run the PSR11 "DOCKER_BEFORE_BUILD" variable
-- Run the PSR11 "DOCKER_DEPLOY_COMMAND" variable
+- Customize the Dockerfile at the Workdir with PSR11 "BUILDER_DOCKERFILE" variable;
+- Run the PSR11 "BUILDER_BEFORE_BUILD" variable
+- Run the PSR11 "BUILDER_DEPLOY_COMMAND" variable
 
 Your PSR11 Container must have the follow variables:
 
-- DOCKER_IMAGE: The docker image name;
-- DOCKERFILE: an array with specific commands for the current environment. Basically
+- BUILDER_DOCKERFILE: an array with specific commands for the current environment. Basically
 the build process will copy the docker template file from 'docker/Dockerfile' and replace the 
-string comment `##---ENV-SPECIFICS-HERE` with the commands defined here;
-- DOCKER_DEPLOY_COMMAND: The commands used to deploy your docker image. Maybe a docker run command or 
+string comment `##---ENV-SPECIFICS-HERE` with the commands defined here; **IMPORTANT NOTE**: if the array is empty
+or null, the Builder will ignore the custom Dockerfile
+- BUILDER_DEPLOY_COMMAND: The commands used to deploy your docker image. Maybe a docker run command or 
 a docker push or everything else.;
-- DOCKER_BEFORE_BUILD' => The commands before start the build image. For example the grunt command or a minifier; 
-
-Variables
-- %env% - Your current environment
-- %workdir% - The root workdir
-- %image% - The image name
-- %container% - The docker container image name 
+- BUILDER_BEFORE_BUILD' => The commands before start the build image. For example the grunt command or a minifier; 
+- BUILDER_VARIABLES => an array with custom variables. By default there are:
+    - %env% - Your current environment
+    - %workdir% - The root workdir
 
 
 ### Migrate database
