@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework;
+namespace Builder;
 
 use Composer\Script\Event;
 
@@ -35,7 +35,6 @@ class Scripts extends _Lib
     public function runBuild()
     {
         $dockerExtra = Psr11::container()->get('BUILDER_DOCKERFILE');
-        var_dump($dockerExtra);
         if (!empty($dockerExtra)) {
             $dockerExtra = array_merge(
                 [

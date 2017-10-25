@@ -12,18 +12,20 @@
   "autoload": {
     "psr-4": {
       "RestTemplate\\": "src/project/",
-      "Framework\\": "src/fw/"
+      "Builder\\": "src/builder/"
     }
   },
   "scripts": {
-    "migrate": "Framework\\Scripts::migrate",
-    "build": "Framework\\Scripts::build",
-    "restdocs": "Framework\\Scripts::genRestDocs",
-    "post-create-project-cmd": "Framework\\PostCreateScript::run"
+    "test": "./vendor/bin/phpunit",
+    "migrate": "Builder\\Scripts::migrate",
+    "build": "Builder\\Scripts::build",
+    "restdocs": "Builder\\Scripts::genRestDocs",
+    "post-create-project-cmd": "Builder\\PostCreateScript::run"
   },
   "require-dev": {
     "zircote/swagger-php": "2.0.*",
     "byjg/swagger-test": "1.0.*",
-    "byjg/migration": "2.0.*"
+    "byjg/migration": "2.0.*",
+    "phpunit/phpunit": "6.2.*"
   }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework;
+namespace Builder;
 
 use Composer\Script\Event;
 
