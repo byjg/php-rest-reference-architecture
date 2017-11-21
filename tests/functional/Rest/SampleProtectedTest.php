@@ -26,7 +26,6 @@ class SampleProtectedTest extends \ByJG\Swagger\SwaggerTestCase
                 'password' => 'pwd'
             ]  // The request body
         );
-        print_r($result);
         $this->makeRequest('GET', "/sampleprotected/ping", 401);
     }
 }
