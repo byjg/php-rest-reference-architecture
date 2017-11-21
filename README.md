@@ -77,9 +77,20 @@ a docker push or everything else.;
 
 ### Migrate database
 
+**Update to the most recent database version**
+
 ```bash
 APPLICATION_ENV=dev composer migrate -- update
 ```
+
+**Reset the database**
+
+```bash
+APPLICATION_ENV=dev composer migrate -- reset
+```
+
+Note: be careful with this command, because all of your database will erased 
+and recreated with the migrations scripts.
 
 #### Database TL;DR
 
