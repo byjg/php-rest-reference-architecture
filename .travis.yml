@@ -18,8 +18,8 @@ install:
   - composer migrate -- reset --yes
   - composer build
   - docker ps -a
-  - docker inspect resttemplate-dev-instance
-  - docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' resttemplate-dev-instance
+  - docker inspect resttemplate-test-instance
+  - docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' resttemplate-test-instance
   - sudo chown 82:82 src/sample.db
   - sudo chown 82:82 src/
 
