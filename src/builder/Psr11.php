@@ -30,6 +30,8 @@ class Psr11
         if (is_null(self::$definition)) {
             self::$definition = (new Definition())
                 ->addEnvironment('dev')
+                ->addEnvironment('test')
+                    ->inheritFrom('dev')
                 ->addEnvironment('homolog')
                     ->inheritFrom('dev')
                 ->addEnvironment('live')
