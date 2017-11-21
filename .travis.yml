@@ -1,0 +1,24 @@
+sudo: required
+
+language: php
+php:
+  - "7.1"
+  - "7.0"
+  - "5.6"
+
+env:
+  - APPLICATION_ENV=dev
+
+services:
+  - docker
+
+install:
+  - composer install
+  - composer restdocs
+  - composer migrate -- reset --yes
+  - composer build
+  - sudo chown 82:82 src/sample.db
+  - sudo chown 82:82 src/
+
+script:
+  - phpunit
