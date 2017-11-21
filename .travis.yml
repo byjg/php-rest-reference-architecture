@@ -7,7 +7,7 @@ php:
   - "5.6"
 
 env:
-  - APPLICATION_ENV=dev
+  - APPLICATION_ENV=test
 
 services:
   - docker
