@@ -24,4 +24,5 @@ install:
   - sudo chown 82:82 src/
 
 script:
+  - curl -X GET "http://127.0.0.1/sample/ping" -H  "accept: application/json"
   - phpunit
