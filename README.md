@@ -1,5 +1,8 @@
 # Rest Template
 
+[![Build Status](https://travis-ci.org/byjg/php-rest-template.svg?branch=master)](https://travis-ci.org/byjg/php-rest-template)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/php-rest-template/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/php-rest-template/?branch=master)
+
 This project creates a starter project for REST Api
 
 This project install the follow components:
