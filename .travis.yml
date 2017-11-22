@@ -18,6 +18,7 @@ install:
   - composer migrate -- reset --yes
   - composer build
   - docker ps -a
+  - "curl -X GET \"http://127.0.0.1/sample/ping\" -H  \"accept: application/json\""
   - docker inspect resttemplate-test-instance
   - docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' resttemplate-test-instance
   - sudo chown 82:82 src/sample.db
