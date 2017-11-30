@@ -61,6 +61,6 @@ return [
         'docker build -t %image% . ',
     ],
     'BUILDER_DEPLOY_COMMAND' => [
-        'docker run -d --rm --name %container% -v %workdir%:/srv/web -p "80:80" %image%',
+        'docker run -d --rm --name %container% -v "%workdir%:/srv/web" -p "80:80" %image%',
     ],
 ];

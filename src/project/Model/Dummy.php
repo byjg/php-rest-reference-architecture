@@ -10,12 +10,14 @@ namespace RestTemplate\Model;
 class Dummy
 {
     /**
+     * The "fake" key
      * @SWG\Property()
      * @var int
      */
     protected $id;
 
     /**
+     * Some field property
      * @SWG\Property()
      * @var string
      */

@@ -239,9 +239,11 @@
             ],
             "properties": {
                 "id": {
+                    "description": "",
                     "type": "integer"
                 },
                 "field": {
+                    "description": "",
                     "type": "string"
                 }
             },
