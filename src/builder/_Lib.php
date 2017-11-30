@@ -7,10 +7,23 @@ class _Lib
     protected $container;
     protected $image;
     protected $workdir;
+    protected $os;
 
     public function __construct()
     {
         $this->workdir = realpath(__DIR__ . '/../..');
+    }
+
+    public function getOs()
+    {
+        if (!$this->os) {
+            $this->os = php_uname('s');
+            if (preg_match('/[Ww]in/', $this->os)) {
+                $this->os = 'Windows';
+            }
+        }
+
+        return $this->os;
     }
 
     /**
@@ -32,7 +45,14 @@ class _Lib
 
         $cmd = $this->replaceVariables($cmd);
         echo "\n>> $cmd\n";
-        $proc = popen("$cmd 2>&1 ; echo Exit status : $?", 'r');
+
+        $prefix = "";
+        $complement = " 2>&1 ; echo Exit status : $?";
+        if ($this->getOs() === "Windows") {
+            $prefix = 'start /B ';
+            $complement = ' & echo Exit status : %errorlevel%';
+        }
+        $proc = popen("$prefix $cmd $complement", 'r');
 
         $completeOutput = "";
 
