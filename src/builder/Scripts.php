@@ -83,10 +83,11 @@ class Scripts extends _Lib
 
         $params = implode(' ', $arguments);
         if (!empty($params)) {
-            $params .= " $dbConnection";
+            $params .= " \"$dbConnection\"";
         }
 
-        $cmdLine = $this->workdir . "/vendor/bin/migrate -vvv --path=\"%workdir%/db\" $params";
+        chdir($this->workdir);
+        $cmdLine = $this->fixDir("vendor/bin/migrate") . " -vvv --path=db $params";
 
         $this->liveExecuteCommand($cmdLine);
     }
@@ -94,8 +95,9 @@ class Scripts extends _Lib
     public function runGenRestDocs()
     {
         $docPath = $this->workdir . '/web/docs/';
+        chdir($this->workdir);
         $this->liveExecuteCommand(
-            $this->workdir . "/vendor/bin/swagger --output \"$docPath\" --exclude vendor,docker,fw"
+            $this->fixDir("vendor/bin/swagger") . " --output \"$docPath\" --exclude vendor,docker,fw"
         );
 
         $docs = file_get_contents("$docPath/swagger.json");

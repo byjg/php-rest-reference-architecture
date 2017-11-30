@@ -26,6 +26,14 @@ class _Lib
         return $this->os;
     }
 
+    public function fixDir($command)
+    {
+        if ($this->getOs() === "Windows") {
+            return str_replace('/', '\\', $command);
+        }
+        return $command;
+    }
+
     /**
      * Execute the given command by displaying console output live to the user.
      *  @param  string|array  $cmd          :  command to be executed
@@ -46,13 +54,11 @@ class _Lib
         $cmd = $this->replaceVariables($cmd);
         echo "\n>> $cmd\n";
 
-        $prefix = "";
         $complement = " 2>&1 ; echo Exit status : $?";
         if ($this->getOs() === "Windows") {
-            $prefix = 'start /B ';
             $complement = ' & echo Exit status : %errorlevel%';
         }
-        $proc = popen("$prefix $cmd $complement", 'r');
+        $proc = popen("$cmd $complement", 'r');
 
         $completeOutput = "";
 
