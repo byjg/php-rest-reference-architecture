@@ -14,18 +14,44 @@ This project install the follow components:
 
 ## Install
 
-Stable Release:
+### Requirements
+
+This project requires in order to run:
+ - PHP
+ - composer
+ - Docker. 
+
+**Installing Docker**
+
+Follow the instructions for your environment at dockers web site.
+
+
+**Installing PHP**
+
+On `Debian` systems just do:
+
+```bash
+sudo apt install composer php php-sqlite php-mysql
+```
+
+On Windows system the easiest way is installing from [Chocolatey](https://chocolatey.org/install). 
+Once chocolatey is installed you can just do:
+
+```bash
+choco install -y php composer
+```
+
+### Stable Release
 
 ```bash
 composer create-project byjg/resttemplate YOURPATH 1.0.*
 ```
 
-Dev Release
+### Dev Release
 
 ```bash
 composer -sdev create-project byjg/resttemplate YOURPATH master
 ```
-
 
 ## How to use
 
