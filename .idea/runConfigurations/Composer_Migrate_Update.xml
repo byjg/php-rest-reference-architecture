@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Composer Migrate Update" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="/usr/local/bin/composer" scriptParameters="migrate -- update">
+  <configuration default="false" name="Composer Migrate Update" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="/usr/bin/composer" scriptParameters="migrate -- update">
     <CommandLine workingDirectory="$PROJECT_DIR$">
       <envs>
         <env name="APPLICATION_ENV" value="dev" />
