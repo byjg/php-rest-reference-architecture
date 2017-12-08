@@ -9,8 +9,14 @@ php:
 env:
   - APPLICATION_ENV=test
 
+host:
+  - mysql-container
+
 services:
   - docker
+
+before_install:
+  - sudo service mysql stop || echo "mysql not stopped"
 
 install:
   - npm i
