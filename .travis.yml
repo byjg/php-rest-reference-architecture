@@ -20,7 +20,7 @@ before_install:
 
 install:
   - npm i
-  - node_modules/.bin/usdocker --refresh . -v mysql up
+  - node_modules/.bin/usdocker --refresh . -v mysql up --home /tmp --no-link
   - composer install
   - composer restdocs
   - composer migrate -- reset --yes
