@@ -13,14 +13,14 @@ services:
   - docker
 
 install:
+  - npm i
+  - node_modules/.bin/usdocker --refresh . -v mysql up
   - composer install
   - composer restdocs
   - composer migrate -- reset --yes
   - composer build
   - docker ps -a
   - sleep 15
-  - sudo chown 82:82 src/sample.db
-  - sudo chown 82:82 src/
 
 script:
   - phpunit

@@ -57,7 +57,15 @@ composer -sdev create-project byjg/resttemplate YOURPATH master
 
 ### Start
 
-After the command create-project is executed some questions will be asked for setup your new project. 
+After the command create-project is executed some questions will be asked for setup your new project.
+
+You can create the project by your own hand:
+
+```bash
+composer install
+npm i
+node_modules/.bin/usdocker --refresh -v
+``` 
 
 ### Containers
 
@@ -74,6 +82,13 @@ The "Builder" can easily turn your project inside a docker container.
 The ready to use command is:
 
 ```bash
+# If you do not have a test database you can do:
+node_modules/.bin/usdocker mysql up
+
+# Update the database
+APPLICATION_ENV=dev composer migrate -- update    # or reset if you want to recreate
+
+# Build
 APPLICATION_ENV=dev composer build
 ```
 
@@ -105,6 +120,19 @@ a docker push or everything else.;
 
 
 ### Migrate database
+
+The sample database requires you have a MySQL running. 
+
+You can install the MySQL or running a Docker file. We use the "USDocker"
+project that make easy create and up Database/Services instances. 
+
+The default user/password is "root/password".
+
+If you're using the USDocker just do the line below before run :
+
+```bash
+node_modules/.bin/usdocker mysql up
+```
 
 **Update to the most recent database version**
 

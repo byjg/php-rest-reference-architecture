@@ -7,10 +7,10 @@
 
 namespace RestTemplate\Rest;
 
+use Builder\Psr11;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\ServiceAbstract;
 use ByJG\Util\JwtWrapper;
-use Builder\Psr11;
 
 class ServiceAbstractBase extends ServiceAbstract
 {
@@ -18,6 +18,8 @@ class ServiceAbstractBase extends ServiceAbstract
     /**
      * @param array $properties
      * @return mixed
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function createToken($properties = [])
     {

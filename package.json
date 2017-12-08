@@ -1,0 +1,13 @@
+{
+  "name": "resttemplate",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "node_modules/.bin/usdocker --refresh -v ",
+    "start-database": "node_modules/.bin/usdocker mysql up",
+    "stop-database": "node_modules/.bin/usdocker mysql down"
+  },
+  "devDependencies": {
+    "@usdocker/mysql": "^1.0.8",
+    "@usdocker/usdocker": "^1.0.15"
+  }
+}
