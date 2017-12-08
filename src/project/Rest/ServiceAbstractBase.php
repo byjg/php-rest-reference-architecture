@@ -18,6 +18,8 @@ class ServiceAbstractBase extends ServiceAbstract
     /**
      * @param array $properties
      * @return mixed
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function createToken($properties = [])
     {

@@ -29,7 +29,7 @@ return [
     'JWT_SECRET' => '/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=',
 
 
-    'DBDRIVER_CONNECTION' => 'sqlite://' . __DIR__ . '/../src/sample.db',
+    'DBDRIVER_CONNECTION' => 'mysql://root:password@mysql-container/database',
 
     'DUMMY_TABLE' => function () {
         $dbDriver = Factory::getDbRelationalInstance(Psr11::container()->get('DBDRIVER_CONNECTION'));
@@ -41,6 +41,14 @@ return [
         );
 
         return  new \ByJG\MicroOrm\Repository($dbDriver, $mapper);
+    },
+
+    'LOGIN' => function () {
+        return new ByJG\Authenticate\UsersDBDataset(
+            Psr11::container()->get('DBDRIVER_CONNECTION'),
+            new \RestTemplate\Model\UserDefinition(),
+            new \ByJG\Authenticate\Definition\UserPropertiesDefinition()
+        );
     },
 
 
@@ -61,6 +69,10 @@ return [
         'docker build -t %image% . ',
     ],
     'BUILDER_DEPLOY_COMMAND' => [
-        'docker run -d --rm --name %container% -v %workdir%:/srv/web -p "80:80" %image%',
+        'docker run -d --rm --name %container% '
+        . '-v %workdir%:/srv/web '
+        . '-w /srv/web '
+        . '--link mysql-container '
+        . '-p "80:80" %image%',
     ],
 ];

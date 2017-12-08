@@ -68,17 +68,22 @@
                                     "description": "Do login",
                                     "type": "string"
                                 },
-                                "role": {
+                                "data": {
                                     "description": "Do login",
-                                    "type": "string"
-                                },
-                                "userid": {
-                                    "description": "Do login",
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "description": "Do login",
-                                    "type": "string"
+                                    "properties": {
+                                        "role": {
+                                            "description": "Do login",
+                                            "type": "string"
+                                        },
+                                        "userid": {
+                                            "description": "Do login",
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "description": "Do login",
+                                            "type": "string"
+                                        }
+                                    }
                                 }
                             }
                         }
