@@ -7,7 +7,7 @@ php:
   - "5.6"
 
 env:
-  - APPLICATION_ENV=test
+  - APPLICATION_ENV=dev
 
 addons:
   hosts:
@@ -30,4 +30,4 @@ install:
   - sleep 15
 
 script:
-  - phpunit
+  - vendor/bin/phpunit
