@@ -31,11 +31,44 @@ class SampleProtected extends ServiceAbstractBase
      */
     public function getPing()
     {
-        $data = $this->decodePreviousToken();
+        $this->requireAuthenticated();
 
         $this->getResponse()->write([
-            'result' => 'pong',
-            'metadata' => $data
+            'result' => 'pong'
+        ]);
+    }
+
+    /**
+     * Gets an blog by Id.
+     *
+     * @SWG\Get(
+     *     path="/sampleprotected/pingadm",
+     *     operationId="get",
+     *     tags={"sampleprotected"},
+     *     security={{
+     *         "jwt-token":{}
+     *     }},
+     *     @SWG\Response(
+     *         response=200,
+     *         description="The object",
+     *         @SWG\Schema(
+     *            required={"result"},
+     *            @SWG\Property(property="result", type="string")
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @SWG\Schema(ref="#/definitions/error")
+     *     )
+     * )
+     */
+    public function getPingAdm()
+    {
+        $this->requireRole('admin');
+
+        $this->getResponse()->write([
+            'result' => 'pongadm'
         ]);
     }
 }
