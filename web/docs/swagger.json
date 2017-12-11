@@ -235,6 +235,42 @@
                     }
                 ]
             }
+        },
+        "/sampleprotected/pingadm": {
+            "get": {
+                "tags": [
+                    "sampleprotected"
+                ],
+                "summary": "Gets an blog by Id.",
+                "operationId": "get",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "required": [
+                                "result"
+                            ],
+                            "properties": {
+                                "result": {
+                                    "description": "Gets an blog by Id.",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "N\u00e3o autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
         }
     },
     "definitions": {

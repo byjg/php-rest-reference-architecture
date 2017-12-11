@@ -22,6 +22,7 @@ return [
         new RoutePattern('GET', '/{module:sample}/{action:ping}', JsonHandler::class),
         new RoutePattern('GET', '/{module:sample}/{action:dummy}/{field}', JsonHandler::class),
         new RoutePattern('POST', '/{module:sample}/{action:dummy}', JsonHandler::class),
+        new RoutePattern('GET', '/{module:sampleprotected}/{action:pingadm}', JsonHandler::class),
         new RoutePattern('GET', '/{module:sampleprotected}/{action:ping}', JsonHandler::class),
     ],
 
