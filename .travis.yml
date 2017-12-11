@@ -9,8 +9,9 @@ php:
 env:
   - APPLICATION_ENV=test
 
-host:
-  - mysql-container
+addons:
+  hosts:
+    - mysql-container
 
 services:
   - docker
