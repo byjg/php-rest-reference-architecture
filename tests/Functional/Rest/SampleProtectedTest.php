@@ -1,6 +1,6 @@
 <?php
 
-namespace Test;
+namespace Test\Functional\Rest;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase
@@ -33,10 +33,7 @@ class SampleProtectedTest extends \ByJG\Swagger\SwaggerTestCase
             "/login",             // The path defined in the swagger.json
             200,           // The expected status code
             null,                 // The parameters 'in path'
-            [
-                'username' => 'admin',
-                'password' => 'pwd'
-            ]  // The request body
+            Credentials::getAdminUser()
         );
 
         $this->makeRequest(
@@ -64,10 +61,7 @@ class SampleProtectedTest extends \ByJG\Swagger\SwaggerTestCase
             "/login",             // The path defined in the swagger.json
             200,           // The expected status code
             null,                 // The parameters 'in path'
-            [
-                'username' => 'admin',
-                'password' => 'pwd'
-            ]  // The request body
+            Credentials::getAdminUser()
         );
         $this->makeRequest(
             'GET',
@@ -94,10 +88,7 @@ class SampleProtectedTest extends \ByJG\Swagger\SwaggerTestCase
             "/login",             // The path defined in the swagger.json
             200,           // The expected status code
             null,                 // The parameters 'in path'
-            [
-                'username' => 'user',
-                'password' => 'pwd'
-            ]  // The request body
+            Credentials::getRegularUser()
         );
         $this->makeRequest(
             'GET',

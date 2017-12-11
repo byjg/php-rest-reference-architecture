@@ -23,9 +23,14 @@
     "restdocs": "Builder\\Scripts::genRestDocs",
     "post-create-project-cmd": "Builder\\PostCreateScript::run"
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\": "tests/"
+    }
+  },
   "require-dev": {
     "zircote/swagger-php": "2.0.*",
-    "byjg/swagger-test": "1.2.1.x-dev",
+    "byjg/swagger-test": "1.2.*",
     "byjg/migration": "2.0.*",
     "phpunit/phpunit": "6.4.*|5.7.*"
   }

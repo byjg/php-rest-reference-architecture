@@ -147,3 +147,17 @@ The ORM uses the [byjg/micro-orm](https://github.com/byjg/micro-orm)
 There are a basic example in "%workdir%/src/project/Repository/DummyRepository". 
 The defintion in the Psr11 container variable 'DUMMY_TABLE'
 
+### Test
+
+To run the tests you need to start the database and build the project. 
+
+After all, you have to setup the environment and the username for test
+
+```php
+export APPLICATION_ENV=dev
+export TEST_ADMIN_USER=admin
+export TEST_ADMIN_PASSWORD=pwd
+export TEST_REGULAR_USER=user
+export TEST_REGULAR_PASSWORD=pwd
+vendor/bin/phpunit
+```
