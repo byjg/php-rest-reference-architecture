@@ -49,6 +49,7 @@ class ServiceAbstractBase extends ServiceAbstract
     /**
      * @param $role
      * @param null $token
+     * @return mixed
      * @throws \ByJG\RestServer\Exception\Error401Exception
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
@@ -59,5 +60,6 @@ class ServiceAbstractBase extends ServiceAbstract
         if ($data['role'] !== $role) {
             throw new Error401Exception('Insufficient privileges - ' . print_r($data, true));
         }
+        return $data;
     }
 }

@@ -65,8 +65,8 @@ class Login extends ServiceAbstractBase
 
 
         $metadata = [
-            'role' => ($user->getAdmin() === 'Y' ? 'admin' : 'user'),
-            'userid' => $user->getUuid(),
+            'role' => ($user->getAdmin() === 'yes' ? 'admin' : 'user'),
+            'userid' => $user->getUserid(),
             'name' => $user->getName()
         ];
         $token = $this->createToken($metadata);

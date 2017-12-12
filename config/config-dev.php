@@ -24,6 +24,7 @@ return [
         new RoutePattern('POST', '/{module:sample}/{action:dummy}', JsonHandler::class),
         new RoutePattern('GET', '/{module:sampleprotected}/{action:pingadm}', JsonHandler::class),
         new RoutePattern('GET', '/{module:sampleprotected}/{action:ping}', JsonHandler::class),
+        new RoutePattern('POST', '/{module:sampleprotected}/{action:adduser}', JsonHandler::class),
     ],
 
     'JWT_SERVER' => "localhost",
@@ -45,9 +46,27 @@ return [
     },
 
     'LOGIN' => function () {
+        $userDefinition = new \RestTemplate\Model\UserDefinition(
+            'users',
+            \RestTemplate\Model\UserDefinition::LOGIN_IS_EMAIL
+        );
+        $userDefinition->markPropertyAsReadOnly('uuid');
+        $userDefinition->defineClosureForSelect('userid', function ($value, $instance) {
+            if (!empty($instance->getUuid())) {
+                return $instance->getUuid();
+            }
+            return $value;
+        });
+        $userDefinition->defineClosureForUpdate('userid', function ($value) {
+            if (empty($value)) {
+                return new \ByJG\MicroOrm\Literal("unhex(replace(uuid(),'-',''))");
+            }
+            return new \ByJG\MicroOrm\Literal('0x' . str_replace('-', '', $value));
+        });
+
         return new ByJG\Authenticate\UsersDBDataset(
             Psr11::container()->get('DBDRIVER_CONNECTION'),
-            new \RestTemplate\Model\UserDefinition(),
+            $userDefinition,
             new \ByJG\Authenticate\Definition\UserPropertiesDefinition()
         );
     },
