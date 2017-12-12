@@ -205,7 +205,7 @@
                 "tags": [
                     "sampleprotected"
                 ],
-                "summary": "Gets an blog by Id.",
+                "summary": "Sample Ping Only Authenticated",
                 "operationId": "get",
                 "responses": {
                     "200": {
@@ -216,7 +216,7 @@
                             ],
                             "properties": {
                                 "result": {
-                                    "description": "Gets an blog by Id.",
+                                    "description": "Sample Ping Only Authenticated",
                                     "type": "string"
                                 }
                             }
@@ -241,7 +241,7 @@
                 "tags": [
                     "sampleprotected"
                 ],
-                "summary": "Gets an blog by Id.",
+                "summary": "Sample Ping Only Admin",
                 "operationId": "get",
                 "responses": {
                     "200": {
@@ -252,7 +252,75 @@
                             ],
                             "properties": {
                                 "result": {
-                                    "description": "Gets an blog by Id.",
+                                    "description": "Sample Ping Only Admin",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "N\u00e3o autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/sampleprotected/adduser": {
+            "post": {
+                "tags": [
+                    "sampleprotected"
+                ],
+                "summary": "Sample how to add an user;",
+                "operationId": "post",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "The login data",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "username",
+                                "password"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "description": "The Name",
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "description": "The Email",
+                                    "type": "string"
+                                },
+                                "username": {
+                                    "description": "The username",
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "description": "The password",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "required": [
+                                "result"
+                            ],
+                            "properties": {
+                                "result": {
+                                    "description": "Sample how to add an user;",
                                     "type": "string"
                                 }
                             }

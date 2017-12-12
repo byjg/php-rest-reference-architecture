@@ -7,7 +7,7 @@ create table users
     username varchar(15) not null,
     password char(40) not null,
     created datetime,
-    admin enum('Y','N'),
+    admin enum('yes','no'),
 
     constraint pk_users primary key (userid)
 ) ENGINE=InnoDB;
@@ -15,8 +15,8 @@ create table users
 -- Default Password is "pwd"
 -- Please change it!
 insert into users (name, email, username, password, admin) VALUES
-  ('Administrator', 'admin@example.com', 'admin', '37fa265330ad83eaa879efb1e2db6380896cf639', 'Y'),
-  ('Regular User', 'user@example.com', 'user', '37fa265330ad83eaa879efb1e2db6380896cf639', 'N')
+  ('Administrator', 'admin@example.com', 'admin', '37fa265330ad83eaa879efb1e2db6380896cf639', 'yes'),
+  ('Regular User', 'user@example.com', 'user', '37fa265330ad83eaa879efb1e2db6380896cf639', 'no')
 ;
 
 -- This table are using by the component byjg/authuser

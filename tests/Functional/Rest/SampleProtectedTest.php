@@ -101,4 +101,36 @@ class SampleProtectedTest extends \ByJG\Swagger\SwaggerTestCase
             ]
         );
     }
+
+    /**
+     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function testAddUser()
+    {
+        $result = $this->makeRequest(
+            'POST',             // The method
+            "/login",             // The path defined in the swagger.json
+            200,           // The expected status code
+            null,                 // The parameters 'in path'
+            Credentials::getAdminUser()
+        );
+        $this->makeRequest(
+            'POST',
+            "/sampleprotected/adduser",
+            200,
+            null,
+            [
+                "name" => 'Test',
+                "username" => 'test',
+                'email' => 'test@example.com',
+                'password' => 'somepass'
+            ],
+            [
+                "Authorization" => "Bearer " . $result['token']
+            ]
+        );
+    }
 }
