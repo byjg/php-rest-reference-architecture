@@ -74,16 +74,19 @@ return [
 
 
     'BUILDER_VARIABLES' => [
+        'project' => 'resttemplate',
         'buildnum' => "release" . date('YmdHis'),
-        'image' => 'resttemplate-%env%',
-        'container' => '%image%-instance'
+        'image' => function ($variables) {
+            return '%project%-%env%' . ($variables['%env%'] !== "dev" ? ':%buildnum%' : '');
+        },
+        'container' => '%project%-%env%-instance'
     ],
     'BUILDER_DOCKERFILE' => [
         '# If there any command here, a Dockerfile will be generated with this commands',
         '# If you do not have a custom command, put a single comment like this'
     ],
     'BUILDER_BEFORE_BUILD' => [
-        "docker stop %container%"
+        "docker stop %container%",
     ],
     'BUILDER_BUILD' => [
         'docker build -t %image% . ',
@@ -94,5 +97,9 @@ return [
         . '-w /srv/web '
         . '--link mysql-container '
         . '-p "80:80" %image%',
+    ],
+
+    'BUILDER_AFTER_DEPLOY' => [
+
     ],
 ];

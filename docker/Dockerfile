@@ -1,4 +1,4 @@
-FROM byjg/php7-fpm-nginx:alpine
+FROM byjg/php:7-fpm-nginx
 
 VOLUME /srv/web
 WORKDIR /srv/web

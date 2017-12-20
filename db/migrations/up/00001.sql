@@ -12,3 +12,8 @@ ALTER TABLE users_property
   ADD CONSTRAINT fk_custom_user
   FOREIGN KEY (userid)
   REFERENCES users(userid);
+
+-- Index
+ALTER TABLE `users`
+  ADD INDEX `ix_users_email` (`email` ASC, `password` ASC),
+  ADD INDEX `ix_users_username` (`username` ASC, `password` ASC);
