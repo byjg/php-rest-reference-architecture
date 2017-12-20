@@ -46,9 +46,10 @@ return [
     },
 
     'LOGIN' => function () {
-        $userDefinition = new \RestTemplate\Model\UserDefinition(
+        $userDefinition = new \ByJG\Authenticate\Definition\UserDefinition(
             'users',
-            \RestTemplate\Model\UserDefinition::LOGIN_IS_EMAIL
+            \RestTemplate\Model\User::class,
+            \ByJG\Authenticate\Definition\UserDefinition::LOGIN_IS_EMAIL
         );
         $userDefinition->markPropertyAsReadOnly('uuid');
         $userDefinition->defineClosureForSelect('userid', function ($value, $instance) {
