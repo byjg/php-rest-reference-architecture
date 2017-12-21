@@ -1,6 +1,5 @@
 FROM byjg/php:7-fpm-nginx
 
-VOLUME /srv/web
 WORKDIR /srv/web
 
 # Setup Docker/Fpm
