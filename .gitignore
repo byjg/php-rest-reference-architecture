@@ -4,3 +4,4 @@
 composer.lock
 vendor
 /src/*.db
+node_modules
