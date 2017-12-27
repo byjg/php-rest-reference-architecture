@@ -106,10 +106,20 @@ class _Lib
         return $this->dockerVariables;
     }
 
-    protected function replaceVariables($string)
+    /**
+     * @param string|\Closure $variableValue
+     * @return mixed
+     */
+    protected function replaceVariables($variableValue)
     {
         // Builder Variables
         $args = $this->getDockerVariables();
+
+        if ($variableValue instanceof \Closure) {
+            $string = $variableValue($args);
+        } else {
+            $string = $variableValue;
+        }
 
         // Replace variables into string
         foreach ($args as $arg => $value) {

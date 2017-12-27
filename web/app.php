@@ -36,6 +36,16 @@ use \Builder\Psr11;
  *   in="header",
  *   name="Authorization"
  * )
+ * @SWG\SecurityScheme(
+ *   securityDefinition="query-token",
+ *   type="apiKey",
+ *   in="query",
+ *   name="token"
+ * )
+ * @SWG\SecurityScheme(
+ *   securityDefinition="basic-http",
+ *   type="basic"
+ * )
  * @SWG\Definition(
  *   definition="error",
  *   @SWG\Property(property="error",
@@ -47,8 +57,8 @@ use \Builder\Psr11;
  * )
  */
 
-ServerRequestHandler::handle(
-    Psr11::container()->get('ROUTE_CLASSMAP'),
+$server = new ServerRequestHandler();
+$server->handle(
     array_merge(
         Psr11::container()->get('ROUTE_PATH'),
         Psr11::container()->get('ROUTE_PATH_EXTRA')

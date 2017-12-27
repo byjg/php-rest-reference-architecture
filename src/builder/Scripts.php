@@ -60,6 +60,7 @@ class Scripts extends _Lib
         $beforeBuild = Psr11::container()->get('BUILDER_BEFORE_BUILD');
         $build = Psr11::container()->get('BUILDER_BUILD');
         $deployCommand = Psr11::container()->get('BUILDER_DEPLOY_COMMAND');
+        $afterDeploy = Psr11::container()->get('BUILDER_AFTER_DEPLOY');
 
         // Before Build
         if (!empty($beforeBuild)) {
@@ -73,6 +74,10 @@ class Scripts extends _Lib
         // Deploy
         if (!empty($deployCommand)) {
             $this->liveExecuteCommand($deployCommand);
+        }
+        // After Deploy
+        if (!empty($afterDeploy)) {
+            $this->liveExecuteCommand($afterDeploy);
         }
     }
 

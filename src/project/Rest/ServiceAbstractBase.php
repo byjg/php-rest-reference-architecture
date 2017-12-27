@@ -12,12 +12,14 @@ use ByJG\RestServer\ServiceAbstract;
 use ByJG\Util\JwtWrapper;
 use Builder\Psr11;
 
-class ServiceAbstractBase extends ServiceAbstract
+class ServiceAbstractBase
 {
 
     /**
      * @param array $properties
      * @return mixed
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function createToken($properties = [])
     {
@@ -26,7 +28,14 @@ class ServiceAbstractBase extends ServiceAbstract
         return $jwt->generateToken($jwtData);
     }
 
-    public function decodePreviousToken($token = null)
+    /**
+     * @param null $token
+     * @return mixed
+     * @throws \ByJG\RestServer\Exception\Error401Exception
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function requireAuthenticated($token = null)
     {
         try {
             $jwt = new JwtWrapper(Psr11::container()->get('JWT_SERVER'), Psr11::container()->get('JWT_SECRET'));
@@ -35,5 +44,22 @@ class ServiceAbstractBase extends ServiceAbstract
         } catch (\Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
+    }
+
+    /**
+     * @param $role
+     * @param null $token
+     * @return mixed
+     * @throws \ByJG\RestServer\Exception\Error401Exception
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function requireRole($role, $token = null)
+    {
+        $data = $this->requireAuthenticated($token);
+        if ($data['role'] !== $role) {
+            throw new Error401Exception('Insufficient privileges - ' . print_r($data, true));
+        }
+        return $data;
     }
 }
