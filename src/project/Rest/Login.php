@@ -49,13 +49,15 @@ class Login extends ServiceAbstractBase
      *     )
      * )
      *
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
      * @throws \ByJG\RestServer\Exception\Error401Exception
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function post()
+    public function post($response, $request)
     {
-        $json = json_decode($this->getRequest()->payload());
+        $json = json_decode($request->payload());
 
         $users = Psr11::container()->getClosure('LOGIN');
         $user = $users->isValidUser($json->username, $json->password);
@@ -71,8 +73,8 @@ class Login extends ServiceAbstractBase
         ];
         $token = $this->createToken($metadata);
 
-        $this->getResponse()->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
-        $this->getResponse()->write(['token' => $token]);
-        $this->getResponse()->write(['data' => $metadata]);
+        $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
+        $response->write(['token' => $token]);
+        $response->write(['data' => $metadata]);
     }
 }

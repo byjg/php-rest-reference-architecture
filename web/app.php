@@ -57,8 +57,8 @@ use \Builder\Psr11;
  * )
  */
 
-ServerRequestHandler::handle(
-    Psr11::container()->get('ROUTE_CLASSMAP'),
+$server = new ServerRequestHandler();
+$server->handle(
     array_merge(
         Psr11::container()->get('ROUTE_PATH'),
         Psr11::container()->get('ROUTE_PATH_EXTRA')

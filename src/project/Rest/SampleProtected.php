@@ -32,15 +32,17 @@ class SampleProtected extends ServiceAbstractBase
      *     )
      * )
      *
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
      * @throws \ByJG\RestServer\Exception\Error401Exception
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function getPing()
+    public function getPing($response, $request)
     {
         $this->requireAuthenticated();
 
-        $this->getResponse()->write([
+        $response->write([
             'result' => 'pong'
         ]);
     }
@@ -70,15 +72,17 @@ class SampleProtected extends ServiceAbstractBase
      *     )
      * )
      *
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
      * @throws \ByJG\RestServer\Exception\Error401Exception
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function getPingAdm()
+    public function getPingAdm($response, $request)
     {
         $this->requireRole('admin');
 
-        $this->getResponse()->write([
+        $response->write([
             'result' => 'pongadm'
         ]);
     }
@@ -121,15 +125,17 @@ class SampleProtected extends ServiceAbstractBase
      *     )
      * )
      *
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
      * @throws \ByJG\RestServer\Exception\Error401Exception
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function postAddUser()
+    public function postAddUser($response, $request)
     {
         $this->requireRole('admin');
 
-        $data = json_decode($this->getRequest()->payload());
+        $data = json_decode($request->payload());
         $user = new User($data->name, $data->email, $data->username, $data->password);
         $users = Psr11::container()->getClosure('LOGIN');
         $users->save($user);
@@ -139,7 +145,7 @@ class SampleProtected extends ServiceAbstractBase
         $updateField = $users->getUserDefinition()->getClosureForUpdate('userid');
         $users->removeUserById($updateField($savedUser->getUserid()));
 
-        $this->getResponse()->write([
+        $response->write([
             'result' => 'pong'
         ]);
     }

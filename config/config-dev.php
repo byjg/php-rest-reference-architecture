@@ -15,16 +15,58 @@ return [
         'sampleprotected' => 'RestTemplate.Rest.SampleProtected',
     ],
     'ROUTE_PATH' => [
-        new RoutePattern('POST', '/{module:login}', JsonHandler::class),
+        new RoutePattern(
+            'POST',
+            '/login',
+            JsonHandler::class,
+            'post',
+            \RestTemplate\Rest\Login::class
+        ),
     ],
     'ROUTE_PATH_EXTRA' => [
         // Specific for this Environment
-        new RoutePattern('GET', '/{module:sample}/{action:ping}', JsonHandler::class),
-        new RoutePattern('GET', '/{module:sample}/{action:dummy}/{field}', JsonHandler::class),
-        new RoutePattern('POST', '/{module:sample}/{action:dummy}', JsonHandler::class),
-        new RoutePattern('GET', '/{module:sampleprotected}/{action:pingadm}', JsonHandler::class),
-        new RoutePattern('GET', '/{module:sampleprotected}/{action:ping}', JsonHandler::class),
-        new RoutePattern('POST', '/{module:sampleprotected}/{action:adduser}', JsonHandler::class),
+        new RoutePattern(
+            'GET',
+            '/{module:sample}/{action:ping}',
+            JsonHandler::class,
+            'getPing',
+            \RestTemplate\Rest\Sample::class
+        ),
+        new RoutePattern(
+            'GET',
+            '/{module:sample}/{action:dummy}/{field}',
+            JsonHandler::class,
+            'getDummy',
+            \RestTemplate\Rest\Sample::class
+        ),
+        new RoutePattern(
+            'POST',
+            '/{module:sample}/{action:dummy}',
+            JsonHandler::class,
+            'postDummy',
+            \RestTemplate\Rest\Sample::class
+        ),
+        new RoutePattern(
+            'GET',
+            '/{module:sampleprotected}/{action:pingadm}',
+            JsonHandler::class,
+            'getPingadm',
+            \RestTemplate\Rest\SampleProtected::class
+        ),
+        new RoutePattern(
+            'GET',
+            '/{module:sampleprotected}/{action:ping}',
+            JsonHandler::class,
+            'getPing',
+            \RestTemplate\Rest\SampleProtected::class
+        ),
+        new RoutePattern(
+            'POST',
+            '/{module:sampleprotected}/{action:adduser}',
+            JsonHandler::class,
+            'postAdduser',
+            \RestTemplate\Rest\SampleProtected::class
+        ),
     ],
 
     'JWT_SERVER' => "localhost",

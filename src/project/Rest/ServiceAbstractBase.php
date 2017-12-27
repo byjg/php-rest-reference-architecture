@@ -12,7 +12,7 @@ use ByJG\RestServer\ServiceAbstract;
 use ByJG\Util\JwtWrapper;
 use Builder\Psr11;
 
-class ServiceAbstractBase extends ServiceAbstract
+class ServiceAbstractBase
 {
 
     /**

@@ -7,7 +7,7 @@
     "byjg/config": "2.0.*",
     "byjg/micro-orm": "dev-master as 2.1.1",
     "byjg/authuser": "2.0.x-dev",
-    "byjg/restserver": "2.1.*",
+    "byjg/restserver": "3.0.*",
     "byjg/jwt-wrapper": "1.0.*"
   },
   "autoload": {
