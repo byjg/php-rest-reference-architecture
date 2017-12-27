@@ -36,6 +36,16 @@ use \Builder\Psr11;
  *   in="header",
  *   name="Authorization"
  * )
+ * @SWG\SecurityScheme(
+ *   securityDefinition="query-token",
+ *   type="apiKey",
+ *   in="query",
+ *   name="token"
+ * )
+ * @SWG\SecurityScheme(
+ *   securityDefinition="basic-http",
+ *   type="basic"
+ * )
  * @SWG\Definition(
  *   definition="error",
  *   @SWG\Property(property="error",
