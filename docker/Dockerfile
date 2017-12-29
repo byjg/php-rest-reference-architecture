@@ -1,4 +1,4 @@
-FROM byjg/php:7-fpm-nginx
+FROM byjg/php:7.2-fpm-nginx
 
 WORKDIR /srv/web
 
