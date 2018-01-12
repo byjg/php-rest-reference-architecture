@@ -9,61 +9,42 @@ return [
 
     'HOST' => 'localhost',
 
-    'ROUTE_CLASSMAP' => [
-        'login' => 'RestTemplate.Rest.Login',
-        'sample' => 'RestTemplate.Rest.Sample',
-        'sampleprotected' => 'RestTemplate.Rest.SampleProtected',
-    ],
     'ROUTE_PATH' => [
-        new RoutePattern(
-            'POST',
+        RoutePattern::post(
             '/login',
-            JsonHandler::class,
             'post',
             \RestTemplate\Rest\Login::class
         ),
     ],
     'ROUTE_PATH_EXTRA' => [
         // Specific for this Environment
-        new RoutePattern(
-            'GET',
-            '/{module:sample}/{action:ping}',
-            JsonHandler::class,
+        RoutePattern::get(
+            '/sample/ping',
             'getPing',
             \RestTemplate\Rest\Sample::class
         ),
-        new RoutePattern(
-            'GET',
-            '/{module:sample}/{action:dummy}/{field}',
-            JsonHandler::class,
+        RoutePattern::get(
+            '/sample/dummy/{field}',
             'getDummy',
             \RestTemplate\Rest\Sample::class
         ),
-        new RoutePattern(
-            'POST',
-            '/{module:sample}/{action:dummy}',
-            JsonHandler::class,
+        RoutePattern::post(
+            '/sample/dummy',
             'postDummy',
             \RestTemplate\Rest\Sample::class
         ),
-        new RoutePattern(
-            'GET',
-            '/{module:sampleprotected}/{action:pingadm}',
-            JsonHandler::class,
+        RoutePattern::get(
+            '/sampleprotected/pingadm',
             'getPingadm',
             \RestTemplate\Rest\SampleProtected::class
         ),
-        new RoutePattern(
-            'GET',
-            '/{module:sampleprotected}/{action:ping}',
-            JsonHandler::class,
+        RoutePattern::get(
+            '/sampleprotected/ping',
             'getPing',
             \RestTemplate\Rest\SampleProtected::class
         ),
-        new RoutePattern(
-            'POST',
-            '/{module:sampleprotected}/{action:adduser}',
-            JsonHandler::class,
+        RoutePattern::post(
+            '/sampleprotected/adduser',
             'postAdduser',
             \RestTemplate\Rest\SampleProtected::class
         ),

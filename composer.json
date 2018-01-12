@@ -32,6 +32,6 @@
     "zircote/swagger-php": "2.0.*",
     "byjg/swagger-test": "1.2.*",
     "byjg/migration": "2.0.*",
-    "phpunit/phpunit": "6.4.*|5.7.*"
+    "phpunit/phpunit": "6.5.*|5.7.*"
   }
 }
