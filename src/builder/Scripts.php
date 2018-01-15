@@ -102,7 +102,7 @@ class Scripts extends _Lib
         $docPath = $this->workdir . '/web/docs/';
         chdir($this->workdir);
         $this->liveExecuteCommand(
-            $this->fixDir("vendor/bin/swagger") . " --output \"$docPath\" --exclude vendor,docker,fw"
+            $this->fixDir("vendor/bin/swagger") . " --output \"$docPath\" --exclude vendor,docker,fw --operationid"
         );
 
         $docs = file_get_contents("$docPath/swagger.json");

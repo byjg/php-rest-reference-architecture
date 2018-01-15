@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use \ByJG\RestServer\ServerRequestHandler;
-use \Builder\Psr11;
+use Builder\Psr11;
+use ByJG\RestServer\ServerRequestHandler;
 
 /**
  * @SWG\Swagger(
@@ -57,10 +57,13 @@ use \Builder\Psr11;
  * )
  */
 
-ServerRequestHandler::handle(
-    Psr11::container()->get('ROUTE_CLASSMAP'),
-    array_merge(
-        Psr11::container()->get('ROUTE_PATH'),
-        Psr11::container()->get('ROUTE_PATH_EXTRA')
-    )
+$server = new ServerRequestHandler();
+
+// $server->setPathHandler("get", "/user", \ByJG\RestServer\HandleOutput\JsonCleanHandler::class);
+// $server->setMimeTypeHandler("image/png", \ByJG\RestServer\HandleOutput\HtmlHandler::class);
+
+$server->setRoutesSwagger(
+    __DIR__ . '/docs/swagger.json',
+    Psr11::container()->getClosure('CACHE_ROUTES')
 );
+$server->handle();
