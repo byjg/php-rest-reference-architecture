@@ -4,9 +4,9 @@ return [
 
     'HOST' => 'homolog',
 
-    'ROUTE_PATH_EXTRA' => [
-        // Specific for the current environment.
-    ],
+    'CACHE_ROUTES' => function () {
+        return new \ByJG\Cache\Psr16\FileSystemCacheEngine();
+    },
 
     'JWT_SERVER' => "homolog",
     'JWT_SECRET' => 'zteNpbuArRnv9+cGrZ2K2qn2b4tqgACg6NpxuVH1MHQ=',

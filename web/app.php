@@ -58,9 +58,12 @@ use \Builder\Psr11;
  */
 
 $server = new ServerRequestHandler();
-$server->handle(
-    array_merge(
-        Psr11::container()->get('ROUTE_PATH'),
-        Psr11::container()->get('ROUTE_PATH_EXTRA')
-    )
+
+// $server->setPathHandler("get", "/user", \ByJG\RestServer\HandleOutput\JsonCleanHandler::class);
+// $server->setMimeTypeHandler("image/png", \ByJG\RestServer\HandleOutput\HtmlHandler::class);
+
+$server->setRoutesSwagger(
+    __DIR__ . '/docs/swagger.json',
+    Psr11::container()->getClosure('CACHE_ROUTES')
 );
+$server->handle();

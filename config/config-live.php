@@ -4,10 +4,6 @@ return [
 
     'HOST' => 'live',
 
-    'ROUTE_PATH_EXTRA' => [
-        // Specific for the current environment.
-    ],
-
     'DBDRIVER_CONNECTION' => 'sqlite://' . __DIR__ . '/../src/live.db',
 
     'JWT_SERVER' => "live",

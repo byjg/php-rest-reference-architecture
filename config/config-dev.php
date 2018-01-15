@@ -9,46 +9,9 @@ return [
 
     'HOST' => 'localhost',
 
-    'ROUTE_PATH' => [
-        RoutePattern::post(
-            '/login',
-            'post',
-            \RestTemplate\Rest\Login::class
-        ),
-    ],
-    'ROUTE_PATH_EXTRA' => [
-        // Specific for this Environment
-        RoutePattern::get(
-            '/sample/ping',
-            'getPing',
-            \RestTemplate\Rest\Sample::class
-        ),
-        RoutePattern::get(
-            '/sample/dummy/{field}',
-            'getDummy',
-            \RestTemplate\Rest\Sample::class
-        ),
-        RoutePattern::post(
-            '/sample/dummy',
-            'postDummy',
-            \RestTemplate\Rest\Sample::class
-        ),
-        RoutePattern::get(
-            '/sampleprotected/pingadm',
-            'getPingadm',
-            \RestTemplate\Rest\SampleProtected::class
-        ),
-        RoutePattern::get(
-            '/sampleprotected/ping',
-            'getPing',
-            \RestTemplate\Rest\SampleProtected::class
-        ),
-        RoutePattern::post(
-            '/sampleprotected/adduser',
-            'postAdduser',
-            \RestTemplate\Rest\SampleProtected::class
-        ),
-    ],
+    'CACHE_ROUTES' => function () {
+        return new \ByJG\Cache\Psr16\NoCacheEngine();
+    },
 
     'JWT_SERVER' => "localhost",
     'JWT_SECRET' => '/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=',
