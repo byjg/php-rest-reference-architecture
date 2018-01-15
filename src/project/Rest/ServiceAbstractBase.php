@@ -23,7 +23,7 @@ class ServiceAbstractBase extends ServiceAbstract
      */
     public function createToken($properties = [])
     {
-        $jwt = new JwtWrapper(Psr11::container()->get('JWT_SERVER'), Psr11::container()->get('JWT_SECRET'));
+        $jwt = new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
         $jwtData = $jwt->createJwtData($properties, 1800);
         return $jwt->generateToken($jwtData);
     }
@@ -38,7 +38,7 @@ class ServiceAbstractBase extends ServiceAbstract
     public function requireAuthenticated($token = null)
     {
         try {
-            $jwt = new JwtWrapper(Psr11::container()->get('JWT_SERVER'), Psr11::container()->get('JWT_SECRET'));
+            $jwt = new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
             $tokenInfo = json_decode(json_encode($jwt->extractData($token)), true);
             return $tokenInfo['data'];
         } catch (\Exception $ex) {

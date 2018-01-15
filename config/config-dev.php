@@ -7,13 +7,12 @@ use ByJG\RestServer\RoutePattern;
 
 return [
 
-    'HOST' => 'localhost',
-
     'CACHE_ROUTES' => function () {
         return new \ByJG\Cache\Psr16\NoCacheEngine();
     },
 
-    'JWT_SERVER' => "localhost",
+    'WEB_SERVER' => 'localhost',
+    'API_SERVER' => "localhost",
     'JWT_SECRET' => '/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=',
 
 
