@@ -104,7 +104,7 @@ class Scripts extends _Lib
         );
 
         $docs = file_get_contents("$docPath/swagger.json");
-        $docs = str_replace('__HOSTNAME__', Psr11::container()->get('HOST'), $docs);
+        $docs = str_replace('__HOSTNAME__', Psr11::container()->get('API_SERVER'), $docs);
         file_put_contents("$docPath/swagger.json", $docs);
     }
 }
