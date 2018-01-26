@@ -14,7 +14,6 @@ class Sample extends ServiceAbstractBase
      *
      * @SWG\Get(
      *     path="/sample/ping",
-     *     operationId="get",
      *     tags={"sample"},
      *     @SWG\Response(
      *         response=200,
@@ -38,7 +37,6 @@ class Sample extends ServiceAbstractBase
      *
      * @SWG\Get(
      *     path="/sample/dummy/{field}",
-     *     operationId="get",
      *     tags={"sample"},
      *     @SWG\Parameter(
      *         name="field",
@@ -83,7 +81,6 @@ class Sample extends ServiceAbstractBase
      *
      * @SWG\Post(
      *     path="/sample/dummy",
-     *     operationId="post",
      *     tags={"sample"},
      *     @SWG\Parameter(
      *         name="body",

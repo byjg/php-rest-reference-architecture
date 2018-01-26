@@ -88,11 +88,10 @@ class Scripts extends _Lib
 
         $params = implode(' ', $arguments);
         if (!empty($params)) {
-            $params .= " \"$dbConnection\"";
+            $params .= " $dbConnection";
         }
 
-        chdir($this->workdir);
-        $cmdLine = $this->fixDir("vendor/bin/migrate") . " -vvv --path=db $params";
+        $cmdLine = $this->workdir . "/vendor/bin/migrate -vvv --path=\"%workdir%/db\" $params";
 
         $this->liveExecuteCommand($cmdLine);
     }
@@ -102,7 +101,12 @@ class Scripts extends _Lib
         $docPath = $this->workdir . '/web/docs/';
         chdir($this->workdir);
         $this->liveExecuteCommand(
-            $this->fixDir("vendor/bin/swagger") . " --output \"$docPath\" --exclude vendor,docker,fw --operationid"
+            $this->workdir . "/vendor/bin/swagger "
+            . "--output \"$docPath\" "
+            . "--exclude vendor "
+            . "--exclude docker "
+            . "--exclude fw "
+            . "--processor OperationId"
         );
 
         $docs = file_get_contents("$docPath/swagger.json");
