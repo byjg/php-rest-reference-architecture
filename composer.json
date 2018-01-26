@@ -29,15 +29,9 @@
     }
   },
   "require-dev": {
-    "zircote/swagger-php": "dev-master#06cc245f82982b68ff82d6259b49c67b3aef9a71 as 2.0.13",
+    "zircote/swagger-php": "dev-master#941f0b62b7a2f2d784d5de13b146682e65449f53 as 2.0.13",
     "byjg/swagger-test": "1.2.*",
     "byjg/migration": "2.0.*",
     "phpunit/phpunit": "6.5.*|5.7.*"
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/byjg/swagger-php"
-    }
-  ]
+  }
 }

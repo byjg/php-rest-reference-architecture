@@ -12,7 +12,6 @@ class Login extends ServiceAbstractBase
      * Do login
      * @SWG\Post(
      *     path="/login",
-     *     operationId="post",
      *     tags={"login"},
      *     @SWG\Parameter(
      *         name="body",

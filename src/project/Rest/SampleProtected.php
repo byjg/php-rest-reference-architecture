@@ -12,7 +12,6 @@ class SampleProtected extends ServiceAbstractBase
      *
      * @SWG\Get(
      *     path="/sampleprotected/ping",
-     *     operationId="get",
      *     tags={"sampleprotected"},
      *     security={{
      *         "jwt-token":{}
@@ -52,7 +51,6 @@ class SampleProtected extends ServiceAbstractBase
      *
      * @SWG\Get(
      *     path="/sampleprotected/pingadm",
-     *     operationId="get",
      *     tags={"sampleprotected"},
      *     security={{
      *         "jwt-token":{}
@@ -92,7 +90,6 @@ class SampleProtected extends ServiceAbstractBase
      *
      * @SWG\Post(
      *     path="/sampleprotected/adduser",
-     *     operationId="post",
      *     tags={"sampleprotected"},
      *     security={{
      *         "jwt-token":{}

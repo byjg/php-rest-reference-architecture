@@ -31,7 +31,7 @@
                     "login"
                 ],
                 "summary": "Do login",
-                "operationId": "post",
+                "operationId": "RestTemplate\\Rest\\Login::post",
                 "parameters": [
                     {
                         "name": "body",
@@ -109,7 +109,7 @@
                     "sample"
                 ],
                 "summary": "Simple ping",
-                "operationId": "get",
+                "operationId": "RestTemplate\\Rest\\Sample::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -134,7 +134,7 @@
                     "sample"
                 ],
                 "summary": "Get the rows from the Dummy table (used in the example)",
-                "operationId": "get",
+                "operationId": "RestTemplate\\Rest\\Sample::getDummy",
                 "parameters": [
                     {
                         "name": "field",
@@ -175,7 +175,7 @@
                     "sample"
                 ],
                 "summary": "Save data content in the table Dummy",
-                "operationId": "post",
+                "operationId": "RestTemplate\\Rest\\Sample::postDummy",
                 "parameters": [
                     {
                         "name": "body",
@@ -206,7 +206,7 @@
                     "sampleprotected"
                 ],
                 "summary": "Sample Ping Only Authenticated",
-                "operationId": "get",
+                "operationId": "RestTemplate\\Rest\\SampleProtected::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -242,7 +242,7 @@
                     "sampleprotected"
                 ],
                 "summary": "Sample Ping Only Admin",
-                "operationId": "get",
+                "operationId": "RestTemplate\\Rest\\SampleProtected::getPingAdm",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -278,7 +278,7 @@
                     "sampleprotected"
                 ],
                 "summary": "Sample how to add an user;",
-                "operationId": "post",
+                "operationId": "RestTemplate\\Rest\\SampleProtected::postAddUser",
                 "parameters": [
                     {
                         "name": "body",
@@ -389,6 +389,14 @@
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
+        },
+        "query-token": {
+            "type": "apiKey",
+            "name": "token",
+            "in": "query"
+        },
+        "basic-http": {
+            "type": "basic"
         }
     },
     "externalDocs": {
