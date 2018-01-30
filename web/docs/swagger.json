@@ -31,7 +31,7 @@
                     "login"
                 ],
                 "summary": "Do login",
-                "operationId": "post",
+                "operationId": "RestTemplate\\Rest\\Login::post",
                 "parameters": [
                     {
                         "name": "body",
@@ -68,17 +68,22 @@
                                     "description": "Do login",
                                     "type": "string"
                                 },
-                                "role": {
+                                "data": {
                                     "description": "Do login",
-                                    "type": "string"
-                                },
-                                "userid": {
-                                    "description": "Do login",
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "description": "Do login",
-                                    "type": "string"
+                                    "properties": {
+                                        "role": {
+                                            "description": "Do login",
+                                            "type": "string"
+                                        },
+                                        "userid": {
+                                            "description": "Do login",
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "description": "Do login",
+                                            "type": "string"
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -104,7 +109,7 @@
                     "sample"
                 ],
                 "summary": "Simple ping",
-                "operationId": "get",
+                "operationId": "RestTemplate\\Rest\\Sample::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -129,7 +134,7 @@
                     "sample"
                 ],
                 "summary": "Get the rows from the Dummy table (used in the example)",
-                "operationId": "get",
+                "operationId": "RestTemplate\\Rest\\Sample::getDummy",
                 "parameters": [
                     {
                         "name": "field",
@@ -170,7 +175,7 @@
                     "sample"
                 ],
                 "summary": "Save data content in the table Dummy",
-                "operationId": "post",
+                "operationId": "RestTemplate\\Rest\\Sample::postDummy",
                 "parameters": [
                     {
                         "name": "body",
@@ -200,8 +205,8 @@
                 "tags": [
                     "sampleprotected"
                 ],
-                "summary": "Gets an blog by Id.",
-                "operationId": "get",
+                "summary": "Sample Ping Only Authenticated",
+                "operationId": "RestTemplate\\Rest\\SampleProtected::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -211,7 +216,111 @@
                             ],
                             "properties": {
                                 "result": {
-                                    "description": "Gets an blog by Id.",
+                                    "description": "Sample Ping Only Authenticated",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "N\u00e3o autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/sampleprotected/pingadm": {
+            "get": {
+                "tags": [
+                    "sampleprotected"
+                ],
+                "summary": "Sample Ping Only Admin",
+                "operationId": "RestTemplate\\Rest\\SampleProtected::getPingAdm",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "required": [
+                                "result"
+                            ],
+                            "properties": {
+                                "result": {
+                                    "description": "Sample Ping Only Admin",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "N\u00e3o autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/sampleprotected/adduser": {
+            "post": {
+                "tags": [
+                    "sampleprotected"
+                ],
+                "summary": "Sample how to add an user;",
+                "operationId": "RestTemplate\\Rest\\SampleProtected::postAddUser",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "The login data",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "username",
+                                "password"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "description": "The Name",
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "description": "The Email",
+                                    "type": "string"
+                                },
+                                "username": {
+                                    "description": "The username",
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "description": "The password",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "schema": {
+                            "required": [
+                                "result"
+                            ],
+                            "properties": {
+                                "result": {
+                                    "description": "Sample how to add an user;",
                                     "type": "string"
                                 }
                             }
@@ -280,6 +389,14 @@
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
+        },
+        "query-token": {
+            "type": "apiKey",
+            "name": "token",
+            "in": "query"
+        },
+        "basic-http": {
+            "type": "basic"
         }
     },
     "externalDocs": {
