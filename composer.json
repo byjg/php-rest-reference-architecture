@@ -5,8 +5,8 @@
   "license": "MIT",
   "require": {
     "byjg/config": "2.0.*",
-    "byjg/micro-orm": "2.2.0.x-dev",
-    "byjg/authuser": "2.0.x-dev",
+    "byjg/micro-orm": "2.2.*",
+    "byjg/authuser": "2.0.*",
     "byjg/restserver": "3.0.*",
     "byjg/jwt-wrapper": "1.0.*"
   },

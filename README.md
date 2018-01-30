@@ -17,7 +17,7 @@ This project install the follow components:
 Stable Release:
 
 ```bash
-composer create-project byjg/resttemplate YOURPATH 1.0.*
+composer create-project byjg/resttemplate YOURPATH 2.0.*
 ```
 
 Dev Release
