@@ -2,15 +2,13 @@
 
 return [
 
-    'HOST' => 'homolog',
+    'CACHE_ROUTES' => function () {
+        return new \ByJG\Cache\Psr16\FileSystemCacheEngine();
+    },
 
-    'ROUTE_PATH_EXTRA' => [
-        // Specific for the current environment.
-    ],
-
-    'JWT_SERVER' => "homolog",
+    'WEB_SERVER' => 'homolog',
+    'API_SERVER' => "homolog",
     'JWT_SECRET' => 'zteNpbuArRnv9+cGrZ2K2qn2b4tqgACg6NpxuVH1MHQ=',
-
 
     'DBDRIVER_CONNECTION' => 'sqlite://' . __DIR__ . '/../src/homolog.db',
 
