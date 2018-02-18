@@ -101,8 +101,8 @@ class Scripts extends _Lib
         $docPath = $this->workdir . '/web/docs/';
         chdir($this->workdir);
         $this->liveExecuteCommand(
-            $this->workdir . "/vendor/bin/swagger "
-            . "--output \"$docPath\" "
+            $this->fixDir("vendor/bin/swagger")
+            . " --output \"$docPath\" "
             . "--exclude vendor "
             . "--exclude docker "
             . "--exclude fw "
