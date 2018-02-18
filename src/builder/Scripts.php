@@ -60,6 +60,7 @@ class Scripts extends _Lib
         $beforeBuild = Psr11::container()->get('BUILDER_BEFORE_BUILD');
         $build = Psr11::container()->get('BUILDER_BUILD');
         $deployCommand = Psr11::container()->get('BUILDER_DEPLOY_COMMAND');
+        $afterDeploy = Psr11::container()->get('BUILDER_AFTER_DEPLOY');
 
         // Before Build
         if (!empty($beforeBuild)) {
@@ -73,6 +74,10 @@ class Scripts extends _Lib
         // Deploy
         if (!empty($deployCommand)) {
             $this->liveExecuteCommand($deployCommand);
+        }
+        // After Deploy
+        if (!empty($afterDeploy)) {
+            $this->liveExecuteCommand($afterDeploy);
         }
     }
 
@@ -97,11 +102,16 @@ class Scripts extends _Lib
         $docPath = $this->workdir . '/web/docs/';
         chdir($this->workdir);
         $this->liveExecuteCommand(
-            $this->fixDir("vendor/bin/swagger") . " --output \"$docPath\" --exclude vendor,docker,fw"
+            $this->workdir . "/vendor/bin/swagger "
+            . "--output \"$docPath\" "
+            . "--exclude vendor "
+            . "--exclude docker "
+            . "--exclude fw "
+            . "--processor OperationId"
         );
 
         $docs = file_get_contents("$docPath/swagger.json");
-        $docs = str_replace('__HOSTNAME__', Psr11::container()->get('HOST'), $docs);
+        $docs = str_replace('__HOSTNAME__', Psr11::container()->get('API_SERVER'), $docs);
         file_put_contents("$docPath/swagger.json", $docs);
     }
 }

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Composer Build Dev" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="/usr/local/bin/composer" scriptParameters="build">
+  <configuration default="false" name="Composer Build Dev" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="/usr/bin/composer" scriptParameters="build">
     <CommandLine workingDirectory="$PROJECT_DIR$">
       <envs>
         <env name="APPLICATION_ENV" value="dev" />

@@ -14,7 +14,6 @@ class Sample extends ServiceAbstractBase
      *
      * @SWG\Get(
      *     path="/sample/ping",
-     *     operationId="get",
      *     tags={"sample"},
      *     @SWG\Response(
      *         response=200,
@@ -25,20 +24,20 @@ class Sample extends ServiceAbstractBase
      *         )
      *     )
      * )
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
      */
-    public function getPing()
+    public function getPing($response, $request)
     {
-        $this->getResponse()->write([
+        $response->write([
             'result' => 'pong'
         ]);
     }
 
     /**
      * Get the rows from the Dummy table (used in the example)
-     *
      * @SWG\Get(
      *     path="/sample/dummy/{field}",
-     *     operationId="get",
      *     tags={"sample"},
      *     @SWG\Parameter(
      *         name="field",
@@ -63,17 +62,21 @@ class Sample extends ServiceAbstractBase
      *         @SWG\Schema(ref="#/definitions/error")
      *     )
      * )
+     *
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
+     * @throws \ByJG\RestServer\Exception\Error404Exception
      */
-    public function getDummy()
+    public function getDummy($response, $request)
     {
         $dummyRepo = new DummyRepository();
-        $field = $this->getRequest()->get('field');
+        $field = $request->get('field');
 
         $result = $dummyRepo->getByField($field);
         if (empty($result)) {
             throw new Error404Exception('Pattern not found');
         }
-        $this->getResponse()->write(
+        $response->write(
             $result
         );
     }
@@ -83,7 +86,6 @@ class Sample extends ServiceAbstractBase
      *
      * @SWG\Post(
      *     path="/sample/dummy",
-     *     operationId="post",
      *     tags={"sample"},
      *     @SWG\Parameter(
      *         name="body",
@@ -102,11 +104,13 @@ class Sample extends ServiceAbstractBase
      *         @SWG\Schema(ref="#/definitions/error")
      *     )
      * )
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
      */
-    public function postDummy()
+    public function postDummy($response, $request)
     {
         $model = new Dummy();
-        $payload = json_decode($this->getRequest()->payload());
+        $payload = json_decode($request->payload());
         BinderObject::bindObject($payload, $model);
 
         $dummyRepo = new DummyRepository();
