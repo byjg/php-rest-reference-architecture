@@ -187,3 +187,44 @@ export TEST_REGULAR_USER=user
 export TEST_REGULAR_PASSWORD=pwd
 vendor/bin/phpunit
 ```
+
+### Fix problems
+
+##### Error: Script "mysql" does not exists.
+
+```
+node_modules\.bin\usdocker --refresh --home ..\db
+```
+
+##### Error: connect ENOENT /var/run/docker.sock
+
+If you are running under Windows or Mac or even a Virtual Machine outside your local host
+try to setup the docker to:
+ 
+```
+node_modules\.bin\usdocker --global docker-host=http://localhost:2375 --home ..\db
+```
+
+##### SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: No such host is known.
+
+Try to add to your hosts file the follow line:
+
+```
+127.0.0.1	mysql-container
+``` 
+
+##### SQLSTATE[HY000] [1049] Unknown database 'database'
+
+```
+export APPLICATION_ENV=dev
+composer migrate -- reset 
+```
+
+##### How to setup the environment APPLICATION at Windows command prompt?
+
+Use the `set` command.
+
+```
+set APPLICATION_ENV=dev
+```
+
