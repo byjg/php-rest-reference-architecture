@@ -79,7 +79,7 @@ return [
     ],
     'BUILDER_DEPLOY_COMMAND' => [
         'docker run -d --rm --name %container% '
-        . '-v %workdir%:/srv/web '
+        . '-v "%workdir%:/srv/web" '
         . '-w /srv/web '
         . '--link mysql-container '
         . '-p "80:80" %image%',
