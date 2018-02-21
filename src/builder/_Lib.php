@@ -18,7 +18,9 @@ class _Lib
     {
         if (!$this->os) {
             $this->os = php_uname('s');
-            if (preg_match('/[Ww]in/', $this->os)) {
+            if (preg_match('/[Dd]arwin/', $this->os)) {
+                $this->os = 'Darwin';
+            } else if (preg_match('/[Ww]in/', $this->os)) {
                 $this->os = 'Windows';
             }
         }
