@@ -56,7 +56,7 @@ class Login extends ServiceAbstractBase
     {
         $json = json_decode($this->getRequest()->payload());
 
-        $users = Psr11::container()->getClosure('LOGIN');
+        $users = Psr11::container()->get('LOGIN');
         $user = $users->isValidUser($json->username, $json->password);
         if (is_null($user)) {
             throw new Error401Exception('Username or password is invalid');

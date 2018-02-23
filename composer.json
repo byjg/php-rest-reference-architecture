@@ -4,7 +4,7 @@
   "prefer-stable": true,
   "license": "MIT",
   "require": {
-    "byjg/config": "2.0.*",
+    "byjg/config": "3.0.*",
     "byjg/micro-orm": "2.2.*",
     "byjg/authuser": "2.0.*",
     "byjg/restserver": "2.1.*",

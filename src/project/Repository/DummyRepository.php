@@ -9,7 +9,7 @@ class DummyRepository extends BaseRepository
 {
     public function __construct()
     {
-        $this->repository = Psr11::container()->getClosure('DUMMY_TABLE', null);
+        $this->repository = Psr11::container()->get('DUMMY_TABLE');
     }
 
     /**

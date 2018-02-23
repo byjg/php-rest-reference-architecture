@@ -64,6 +64,6 @@ $server = new ServerRequestHandler();
 
 $server->setRoutesSwagger(
     __DIR__ . '/docs/swagger.json',
-    Psr11::container()->getClosure('CACHE_ROUTES')
+    Psr11::container()->get('CACHE_ROUTES')
 );
 $server->handle();

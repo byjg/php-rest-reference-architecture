@@ -128,7 +128,7 @@ class SampleProtected extends ServiceAbstractBase
 
         $data = json_decode($this->getRequest()->payload());
         $user = new User($data->name, $data->email, $data->username, $data->password);
-        $users = Psr11::container()->getClosure('LOGIN');
+        $users = Psr11::container()->get('LOGIN');
         $users->save($user);
 
         $savedUser = $users->getByEmail($data->email);
