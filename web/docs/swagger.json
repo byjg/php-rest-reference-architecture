@@ -348,11 +348,11 @@
             ],
             "properties": {
                 "id": {
-                    "description": "",
+                    "description": "The \"fake\" key",
                     "type": "integer"
                 },
                 "field": {
-                    "description": "",
+                    "description": "Some field property",
                     "type": "string"
                 }
             },
