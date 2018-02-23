@@ -1,6 +1,6 @@
 {
   "name": "byjg/resttemplate",
-  "description": "Boilerplate project template for create RESTFul services with docker and database integrated"
+  "description": "Boilerplate project template for create RESTFul services with docker and database integrated",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "license": "MIT",
