@@ -61,6 +61,14 @@ class Sample extends ServiceAbstractBase
      *         @SWG\Schema(ref="#/definitions/error")
      *     )
      * )
+     *
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \ByJG\RestServer\Exception\Error404Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getDummy()
     {
@@ -78,7 +86,6 @@ class Sample extends ServiceAbstractBase
 
     /**
      * Save data content in the table Dummy
-     *
      * @SWG\Post(
      *     path="/sample/dummy",
      *     tags={"sample"},
@@ -99,6 +106,17 @@ class Sample extends ServiceAbstractBase
      *         @SWG\Schema(ref="#/definitions/error")
      *     )
      * )
+     *
+     * @param \ByJG\RestServer\HttpResponse $response
+     * @param \ByJG\RestServer\HttpRequest $request
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \ByJG\MicroOrm\Exception\OrmBeforeInvalidException
+     * @throws \ByJG\MicroOrm\Exception\OrmInvalidFieldsException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function postDummy()
     {

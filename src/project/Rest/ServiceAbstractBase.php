@@ -1,15 +1,9 @@
 <?php
-/**
- * User: jg
- * Date: 30/09/17
- * Time: 18:10
- */
 
 namespace RestTemplate\Rest;
 
 use Builder\Psr11;
 use ByJG\RestServer\Exception\Error401Exception;
-use ByJG\RestServer\ServiceAbstract;
 use ByJG\Util\JwtWrapper;
 
 class ServiceAbstractBase extends ServiceAbstract
@@ -18,8 +12,10 @@ class ServiceAbstractBase extends ServiceAbstract
     /**
      * @param array $properties
      * @return mixed
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function createToken($properties = [])
     {
@@ -32,8 +28,7 @@ class ServiceAbstractBase extends ServiceAbstract
      * @param null $token
      * @return mixed
      * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function requireAuthenticated($token = null)
     {
@@ -51,8 +46,7 @@ class ServiceAbstractBase extends ServiceAbstract
      * @param null $token
      * @return mixed
      * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function requireRole($role, $token = null)
     {
