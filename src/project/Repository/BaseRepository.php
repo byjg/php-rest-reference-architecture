@@ -2,7 +2,6 @@
 
 namespace RestTemplate\Repository;
 
-use ByJG\MicroOrm\Literal;
 use ByJG\MicroOrm\Query;
 
 abstract class BaseRepository
@@ -15,6 +14,8 @@ abstract class BaseRepository
     /**
      * @param $itemId
      * @return mixed
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
     public function get($itemId)
     {
@@ -27,6 +28,8 @@ abstract class BaseRepository
      * @param null $orderBy
      * @param null $filter
      * @return array
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
     public function getAll($page = 0, $size = 20, $orderBy = null, $filter = null)
     {
@@ -64,6 +67,13 @@ abstract class BaseRepository
         return new $class();
     }
 
+    /**
+     * @param $model
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \ByJG\MicroOrm\Exception\OrmBeforeInvalidException
+     * @throws \ByJG\MicroOrm\Exception\OrmInvalidFieldsException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     */
     public function save($model)
     {
         $this->repository->save($model);

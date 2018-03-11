@@ -11,6 +11,9 @@ class Psr11
 
     /**
      * @return \ByJG\Config\Container
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function container()
     {
@@ -24,6 +27,7 @@ class Psr11
 
     /**
      * @return Definition
+     * @throws \ByJG\Config\Exception\EnvironmentException
      */
     public static function environment()
     {

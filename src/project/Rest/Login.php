@@ -50,9 +50,11 @@ class Login extends ServiceAbstractBase
      *
      * @param \ByJG\RestServer\HttpResponse $response
      * @param \ByJG\RestServer\HttpRequest $request
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
      * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function post($response, $request)
     {

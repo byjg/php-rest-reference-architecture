@@ -9,7 +9,10 @@
     "byjg/micro-orm": "2.2.*",
     "byjg/authuser": "2.0.*",
     "byjg/restserver": "3.0.*",
-    "byjg/jwt-wrapper": "1.0.*"
+    "byjg/jwt-wrapper": "1.0.*",
+    "zircote/swagger-php": "dev-master#941f0b62b7a2f2d784d5de13b146682e65449f53 as 2.0.13",
+    "byjg/swagger-test": "1.2.*",
+    "byjg/migration": "2.0.*"
   },
   "autoload": {
     "psr-4": {
@@ -30,9 +33,6 @@
     }
   },
   "require-dev": {
-    "zircote/swagger-php": "dev-master#941f0b62b7a2f2d784d5de13b146682e65449f53 as 2.0.13",
-    "byjg/swagger-test": "1.2.*",
-    "byjg/migration": "2.0.*",
-    "phpunit/phpunit": "6.5.*|5.7.*"
+    "phpunit/phpunit": ">5.7"
   }
 }

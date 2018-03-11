@@ -9,7 +9,6 @@ class SampleProtected extends ServiceAbstractBase
 {
     /**
      * Sample Ping Only Authenticated
-     *
      * @SWG\Get(
      *     path="/sampleprotected/ping",
      *     tags={"sampleprotected"},
@@ -34,8 +33,7 @@ class SampleProtected extends ServiceAbstractBase
      * @param \ByJG\RestServer\HttpResponse $response
      * @param \ByJG\RestServer\HttpRequest $request
      * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getPing($response, $request)
     {
@@ -48,7 +46,6 @@ class SampleProtected extends ServiceAbstractBase
 
     /**
      * Sample Ping Only Admin
-     *
      * @SWG\Get(
      *     path="/sampleprotected/pingadm",
      *     tags={"sampleprotected"},
@@ -73,8 +70,7 @@ class SampleProtected extends ServiceAbstractBase
      * @param \ByJG\RestServer\HttpResponse $response
      * @param \ByJG\RestServer\HttpRequest $request
      * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getPingAdm($response, $request)
     {
@@ -87,7 +83,6 @@ class SampleProtected extends ServiceAbstractBase
 
     /**
      * Sample how to add an user;
-     *
      * @SWG\Post(
      *     path="/sampleprotected/adduser",
      *     tags={"sampleprotected"},
@@ -124,9 +119,11 @@ class SampleProtected extends ServiceAbstractBase
      *
      * @param \ByJG\RestServer\HttpResponse $response
      * @param \ByJG\RestServer\HttpRequest $request
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
      * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function postAddUser($response, $request)
     {
