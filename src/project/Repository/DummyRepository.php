@@ -7,6 +7,14 @@ use Builder\Psr11;
 
 class DummyRepository extends BaseRepository
 {
+    /**
+     * DummyRepository constructor.
+     *
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function __construct()
     {
         $this->repository = Psr11::container()->get('DUMMY_TABLE');

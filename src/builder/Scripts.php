@@ -11,18 +11,37 @@ class Scripts extends _Lib
         parent::__construct();
     }
 
+    /**
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public static function build()
     {
         $build = new Scripts();
         $build->runBuild();
     }
 
+    /**
+     * @param \Composer\Script\Event $event
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public static function migrate(Event $event)
     {
         $migrate = new Scripts();
         $migrate->runMigrate($event->getArguments());
     }
 
+    /**
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public static function genRestDocs()
     {
         $build = new Scripts();
@@ -30,8 +49,12 @@ class Scripts extends _Lib
     }
 
 
-
-
+    /**
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function runBuild()
     {
         $dockerExtra = Psr11::container()->get('BUILDER_DOCKERFILE');
@@ -82,6 +105,13 @@ class Scripts extends _Lib
     }
 
 
+    /**
+     * @param $arguments
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function runMigrate($arguments)
     {
         $dbConnection = Psr11::container()->get('DBDRIVER_CONNECTION');
@@ -97,6 +127,12 @@ class Scripts extends _Lib
         $this->liveExecuteCommand($cmdLine);
     }
 
+    /**
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function runGenRestDocs()
     {
         $docPath = $this->workdir . '/web/docs/';

@@ -7,30 +7,30 @@ class _Lib
     protected $container;
     protected $image;
     protected $workdir;
-    protected $os;
+    protected $systemOs;
 
     public function __construct()
     {
         $this->workdir = realpath(__DIR__ . '/../..');
     }
 
-    public function getOs()
+    public function getSystemOs()
     {
-        if (!$this->os) {
-            $this->os = php_uname('s');
-            if (preg_match('/[Dd]arwin/', $this->os)) {
-                $this->os = 'Darwin';
-            } else if (preg_match('/[Ww]in/', $this->os)) {
-                $this->os = 'Windows';
+        if (!$this->systemOs) {
+            $this->systemOs = php_uname('s');
+            if (preg_match('/[Dd]arwin/', $this->systemOs)) {
+                $this->systemOs = 'Darwin';
+            } elseif (preg_match('/[Ww]in/', $this->systemOs)) {
+                $this->systemOs = 'Windows';
             }
         }
 
-        return $this->os;
+        return $this->systemOs;
     }
 
     public function fixDir($command)
     {
-        if ($this->getOs() === "Windows") {
+        if ($this->getSystemOs() === "Windows") {
             return str_replace('/', '\\', $command);
         }
         return $command;
@@ -38,9 +38,14 @@ class _Lib
 
     /**
      * Execute the given command by displaying console output live to the user.
-     *  @param  string|array  $cmd          :  command to be executed
-     *  @return array   exit_status  :  exit status of the executed command
+     *
+     * @param  string|array $cmd :  command to be executed
+     * @return array   exit_status  :  exit status of the executed command
      *                  output       :  console output of the executed command
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function liveExecuteCommand($cmd)
     {
@@ -57,7 +62,7 @@ class _Lib
         echo "\n>> $cmd\n";
 
         $complement = " 2>&1 ; echo Exit status : $?";
-        if ($this->getOs() === "Windows") {
+        if ($this->getSystemOs() === "Windows") {
             $complement = ' & echo Exit status : %errorlevel%';
         }
         $proc = popen("$cmd $complement", 'r');
@@ -89,6 +94,14 @@ class _Lib
     }
 
     protected $dockerVariables = null;
+
+    /**
+     * @return array|null
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     protected function getDockerVariables()
     {
         // Builder Variables
@@ -111,6 +124,10 @@ class _Lib
     /**
      * @param string|\Closure $variableValue
      * @return mixed
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function replaceVariables($variableValue)
     {
