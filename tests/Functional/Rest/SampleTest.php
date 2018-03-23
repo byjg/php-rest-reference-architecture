@@ -2,6 +2,7 @@
 
 namespace Test\Functional\Rest;
 
+use ByJG\Swagger\SwaggerRequester;
 use ByJG\Swagger\SwaggerTestCase;
 
 /**
@@ -14,71 +15,103 @@ class SampleTest extends SwaggerTestCase
     /**
      * Just test ping
      *
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testPing()
     {
-        $this->makeRequest('GET', "/sample/ping");
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sample/ping")
+        ;
+        $this->assertRequest($request);
     }
 
     /**
      * Test Dummy
      *
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testDummyOk()
     {
-        $this->makeRequest('GET', "/sample/dummy/e");
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sample/dummy/e")
+        ;
+        $this->assertRequest($request);
     }
 
     /**
      * Test Dummy
      *
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testDummyOk2()
     {
-        $this->makeRequest('GET', "/sample/dummy/1");
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sample/dummy/1")
+        ;
+        $this->assertRequest($request);
     }
 
     /**
      * Just test ping
      *
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testDummyNotFound()
     {
-        $this->makeRequest('GET', "/sample/dummy/not", 404);
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sample/dummy/not")
+            ->assertResponseCode(404)
+        ;
+        $this->assertRequest($request);
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testDummySaveOk()
     {
-        $this->makeRequest(
-            'POST',             // The method
-            "/sample/dummy",             // The path defined in the swagger.json
-            200,           // The expected status code
-            null,                 // The parameters 'in path'
-            [
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/sample/dummy")
+            ->assertResponseCode(200)
+            ->withRequestBody([
                 'field' => 'new field'
-            ]  // The request body
-        );
+            ])
+        ;
+        $this->assertRequest($request);
     }
 }
