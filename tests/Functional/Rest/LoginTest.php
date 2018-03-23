@@ -2,64 +2,76 @@
 
 namespace Test\Functional\Rest;
 
+use ByJG\Swagger\SwaggerRequester;
+use ByJG\Swagger\SwaggerTestCase;
+
 /**
  * Create a TestCase inherited from SwaggerTestCase
  */
-class LoginTest extends \ByJG\Swagger\SwaggerTestCase
+class LoginTest extends SwaggerTestCase
 {
     protected $filePath = __DIR__ . '/../../../web/docs/swagger.json';
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testLoginOk()
     {
-        $this->makeRequest(
-            'POST',             // The method
-            "/login",             // The path defined in the swagger.json
-            200,           // The expected status code
-            null,                 // The parameters 'in path'
-            Credentials::getAdminUser()
-        );
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/login")
+            ->assertResponseCode(200)
+            ->withRequestBody(Credentials::getAdminUser())
+        ;
+        $this->assertRequest($request);
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testLoginOk2()
     {
-        $this->makeRequest(
-            'POST',             // The method
-            "/login",             // The path defined in the swagger.json
-            200,           // The expected status code
-            null,                 // The parameters 'in path'
-            Credentials::getRegularUser()
-        );
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/login")
+            ->assertResponseCode(200)
+            ->withRequestBody(Credentials::getRegularUser())
+        ;
+        $this->assertRequest($request);
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testLoginFail()
     {
-        $this->makeRequest(
-            'POST',             // The method
-            "/login",             // The path defined in the swagger.json
-            401,           // The expected status code
-            null,                 // The parameters 'in path'
-            [
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/login")
+            ->assertResponseCode(401)
+            ->withRequestBody([
                 'username' => 'invalid',
                 'password' => 'invalid'
-            ]  // The request body
-        );
+            ])
+        ;
+        $this->assertRequest($request);
     }
 }
