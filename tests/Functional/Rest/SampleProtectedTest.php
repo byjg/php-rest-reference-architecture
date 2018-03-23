@@ -2,135 +2,162 @@
 
 namespace Test\Functional\Rest;
 
+use ByJG\Swagger\SwaggerRequester;
+use ByJG\Swagger\SwaggerTestCase;
+
 /**
  * Create a TestCase inherited from SwaggerTestCase
  */
-class SampleProtectedTest extends \ByJG\Swagger\SwaggerTestCase
+class SampleProtectedTest extends SwaggerTestCase
 {
     protected $filePath = __DIR__ . '/../../../web/docs/swagger.json';
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testGetUnauthorized()
     {
-        $this->makeRequest('GET', "/sampleprotected/ping", 401);
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sampleprotected/ping")
+            ->assertResponseCode(401)
+        ;
+        $this->assertRequest($request);
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testGetAuthorized()
     {
-        $result = $this->makeRequest(
-            'POST',             // The method
-            "/login",             // The path defined in the swagger.json
-            200,           // The expected status code
-            null,                 // The parameters 'in path'
-            Credentials::getAdminUser()
-        );
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/login")
+            ->assertResponseCode(200)
+            ->withRequestBody(Credentials::getAdminUser())
+        ;
+        $result = $this->assertRequest($request);
 
-        $this->makeRequest(
-            'GET',
-            "/sampleprotected/ping",
-            200,
-            null,
-            null,
-            [
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sampleprotected/ping")
+            ->assertResponseCode(200)
+            ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ]
-        );
+            ])
+        ;
+        $this->assertRequest($request);
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testGetAuthorizedRole1()
     {
-        $result = $this->makeRequest(
-            'POST',             // The method
-            "/login",             // The path defined in the swagger.json
-            200,           // The expected status code
-            null,                 // The parameters 'in path'
-            Credentials::getAdminUser()
-        );
-        $this->makeRequest(
-            'GET',
-            "/sampleprotected/pingadm",
-            200,
-            null,
-            null,
-            [
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/login")
+            ->assertResponseCode(200)
+            ->withRequestBody(Credentials::getAdminUser())
+        ;
+        $result = $this->assertRequest($request);
+
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sampleprotected/pingadm")
+            ->assertResponseCode(200)
+            ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ]
-        );
+            ])
+        ;
+        $this->assertRequest($request);
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testGetAuthorizedRole2()
     {
-        $result = $this->makeRequest(
-            'POST',             // The method
-            "/login",             // The path defined in the swagger.json
-            200,           // The expected status code
-            null,                 // The parameters 'in path'
-            Credentials::getRegularUser()
-        );
-        $this->makeRequest(
-            'GET',
-            "/sampleprotected/pingadm",
-            401,
-            null,
-            null,
-            [
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/login")
+            ->assertResponseCode(200)
+            ->withRequestBody(Credentials::getRegularUser())
+        ;
+        $result = $this->assertRequest($request);
+
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sampleprotected/pingadm")
+            ->assertResponseCode(401)
+            ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ]
-        );
+            ])
+        ;
+        $this->assertRequest($request);
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function testAddUser()
     {
-        $result = $this->makeRequest(
-            'POST',             // The method
-            "/login",             // The path defined in the swagger.json
-            200,           // The expected status code
-            null,                 // The parameters 'in path'
-            Credentials::getAdminUser()
-        );
-        $this->makeRequest(
-            'POST',
-            "/sampleprotected/adduser",
-            200,
-            null,
-            [
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/login")
+            ->assertResponseCode(200)
+            ->withRequestBody(Credentials::getAdminUser())
+        ;
+        $result = $this->assertRequest($request);
+
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/sampleprotected/adduser")
+            ->assertResponseCode(200)
+            ->withRequestBody([
                 "name" => 'Test',
                 "username" => 'test',
                 'email' => 'test@example.com',
                 'password' => 'somepass'
-            ],
-            [
+            ])
+            ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ]
-        );
+            ])
+        ;
+        $this->assertRequest($request);
     }
 }
