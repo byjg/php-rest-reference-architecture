@@ -71,7 +71,8 @@ class PostCreateScript
         $stdIo = $event->getIO();
 
         $stdIo->write("========================================================");
-        $stdIo->write("  Setup RestTemplate");
+        $stdIo->write(" Setup Project");
+        $stdIo->write(" Answer the questions below");
         $stdIo->write("========================================================");
         $stdIo->write("");
         $stdIo->write("Project Directory: " . $workdir);
