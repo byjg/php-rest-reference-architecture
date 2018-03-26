@@ -67,7 +67,7 @@ class PostCreateScript
 
     public static function run(Event $event)
     {
-        $workdir = realpath(__DIR__ . '/../php-rest-template');
+        $workdir = realpath(__DIR__ . '/..');
         $stdIo = $event->getIO();
 
         $stdIo->write("========================================================");
