@@ -16,8 +16,8 @@
   },
   "autoload": {
     "psr-4": {
-      "RestTemplate\\": "src/project/",
-      "Builder\\": "src/builder/"
+      "RestTemplate\\": "src/",
+      "Builder\\": "builder/"
     }
   },
   "scripts": {

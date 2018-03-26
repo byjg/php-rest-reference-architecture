@@ -3,8 +3,9 @@
 namespace Builder;
 
 use Composer\Script\Event;
+use RestTemplate\Psr11;
 
-class Scripts extends _Lib
+class Scripts extends BaseScripts
 {
     public function __construct()
     {
@@ -59,6 +60,7 @@ class Scripts extends _Lib
     {
         $dockerExtra = Psr11::container()->get('BUILDER_DOCKERFILE');
         if (!empty($dockerExtra)) {
+            // @todo Analyse if hardcode the APPLIACATION_ENV
             $dockerExtra = array_merge(
                 [
                     '############################################################',

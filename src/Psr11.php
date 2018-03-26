@@ -1,6 +1,6 @@
 <?php
 
-namespace Builder;
+namespace RestTemplate;
 
 use ByJG\Config\Definition;
 

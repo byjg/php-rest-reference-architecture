@@ -1,9 +1,7 @@
 <?php
 
 use \ByJG\AnyDataset\Factory;
-use \ByJG\RestServer\RoutePattern;
-use \ByJG\RestServer\HandleOutput\JsonHandler;
-use \Builder\Psr11;
+use \RestTemplate\Psr11;
 
 return [
 
