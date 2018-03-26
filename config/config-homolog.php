@@ -14,14 +14,13 @@ return [
 
 
     'BUILDER_DOCKERFILE' => [
-        'COPY config /srv/web/config',
-        'COPY src /srv/web/src',
-        'COPY vendor /srv/web/vendor',
-        'COPY web /srv/web/web'
+
     ],
+
     'BUILDER_BEFORE_BUILD' => [
 
     ],
+
     'BUILDER_DEPLOY_COMMAND' => [
 
     ],

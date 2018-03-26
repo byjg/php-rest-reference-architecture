@@ -16,6 +16,13 @@ ENV TZ=America/Sao_Paulo
 # SETUP NGINX
 COPY docker/nginx/conf.d/default.conf /etc/nginx/conf.d/
 
+# Copy project files
+COPY config /srv/web/config
+COPY src /srv/web/src
+COPY vendor /srv/web/vendor
+COPY web /srv/web/web
+COPY builder /srv/web/builder
+
 
 ##---ENV-SPECIFICS-HERE
 

@@ -2,8 +2,8 @@
 
 namespace RestTemplate\Rest;
 
-use Builder\Psr11;
 use RestTemplate\Model\User;
+use RestTemplate\Psr11;
 
 class SampleProtected extends ServiceAbstractBase
 {

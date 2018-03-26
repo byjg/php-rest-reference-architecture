@@ -2,8 +2,8 @@
 
 namespace RestTemplate\Repository;
 
-use Builder\Psr11;
 use ByJG\MicroOrm\Query;
+use RestTemplate\Psr11;
 
 class DummyRepository extends BaseRepository
 {
