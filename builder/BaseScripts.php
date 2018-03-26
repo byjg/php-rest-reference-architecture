@@ -2,7 +2,9 @@
 
 namespace Builder;
 
-class _Lib
+use RestTemplate\Psr11;
+
+class BaseScripts
 {
     protected $container;
     protected $image;
@@ -11,7 +13,7 @@ class _Lib
 
     public function __construct()
     {
-        $this->workdir = realpath(__DIR__ . '/../..');
+        $this->workdir = realpath(__DIR__ . '/..');
     }
 
     public function getSystemOs()
