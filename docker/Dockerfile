@@ -3,7 +3,7 @@ FROM byjg/php:7.2-fpm-nginx
 WORKDIR /srv/web
 
 # Setup Docker/Fpm
-COPY ./docker/fpm/php /usr/local/etc/php/conf.d
+COPY ./docker/fpm/php/custom.ini /etc/php7/conf.d/custom.ini
 
 # SETUP CRONTAB
 # COPY ./docker/fpm/cron/crontab /etc/crontabs/root
