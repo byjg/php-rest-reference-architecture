@@ -16,8 +16,13 @@ return [
 
     'DBDRIVER_CONNECTION' => 'mysql://root:password@mysql-container/database',
 
+    'DBDRIVER' => function () {
+        $connectionManager = new \ByJG\MicroOrm\ConnectionManager();
+        return $connectionManager->addConnection(Psr11::container()->get('DBDRIVER_CONNECTION'));
+    },
+
     'DUMMY_TABLE' => function () {
-        $dbDriver = Factory::getDbRelationalInstance(Psr11::container()->get('DBDRIVER_CONNECTION'));
+        $dbDriver = Psr11::container()->get('DBDRIVER');
 
         $mapper = new \ByJG\MicroOrm\Mapper(
             \RestTemplate\Model\Dummy::class,
