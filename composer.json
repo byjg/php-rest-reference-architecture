@@ -10,10 +10,16 @@
     "byjg/authuser": "3.0.*",
     "byjg/restserver": "3.0.*",
     "byjg/jwt-wrapper": "1.0.*",
-    "zircote/swagger-php": "dev-master#941f0b62b7a2f2d784d5de13b146682e65449f53 as 2.0.13",
+    "zircote/swagger-php": "2.0.13.1",
     "byjg/swagger-test": "1.2.*",
     "byjg/migration": "2.0.*"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/byjg/swagger-php"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "RestTemplate\\": "src/project/",
