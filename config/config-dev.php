@@ -1,8 +1,6 @@
 <?php
 
-use \ByJG\AnyDataset\Factory;
-use \ByJG\RestServer\RoutePattern;
-use \ByJG\RestServer\HandleOutput\JsonHandler;
+use \ByJG\AnyDataset\Db\Factory;
 use \Builder\Psr11;
 
 return [
