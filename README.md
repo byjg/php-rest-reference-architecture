@@ -44,7 +44,7 @@ choco install -y php composer
 ### Stable Release
 
 ```bash
-composer create-project byjg/resttemplate YOURPATH 2.0.*
+composer create-project byjg/resttemplate YOURPATH 4.0.*
 ```
 
 ### Dev Release
