@@ -2,6 +2,9 @@
 
 namespace Builder;
 
+use ByJG\DbMigration\Database\MySqlDatabase;
+use ByJG\DbMigration\Migration;
+use ByJG\Util\Uri;
 use Composer\Script\Event;
 
 class Scripts extends _Lib
@@ -28,6 +31,7 @@ class Scripts extends _Lib
      * @throws \ByJG\Config\Exception\ConfigNotFoundException
      * @throws \ByJG\Config\Exception\EnvironmentException
      * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \ByJG\DbMigration\Exception\InvalidMigrationFile
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function migrate(Event $event)
@@ -110,21 +114,57 @@ class Scripts extends _Lib
      * @throws \ByJG\Config\Exception\ConfigNotFoundException
      * @throws \ByJG\Config\Exception\EnvironmentException
      * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \ByJG\DbMigration\Exception\InvalidMigrationFile
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function runMigrate($arguments)
     {
         $dbConnection = Psr11::container()->get('DBDRIVER_CONNECTION');
 
-        $params = implode(' ', $arguments);
-        if (!empty($params)) {
-            $params .= " \"$dbConnection\"";
+        $migration = new Migration(new Uri($dbConnection), $this->workdir . "/db");
+        $migration->registerDatabase("mysql", MySqlDatabase::class);
+        $migration->addCallbackProgress(function ($cmd, $version) {
+            echo "Doing $cmd, $version\n";
+        });
+
+        $argumentList = $this->extractArguments($arguments);
+
+        $exec['reset'] = function () use ($migration, $argumentList) {
+            if (!$argumentList["--yes"]) {
+                throw new \Exception("Reset require the argument --yes");
+            }
+            $migration->reset();
+        };
+
+
+        $exec["update"] = function () use ($migration, $argumentList) {
+            $migration->update($argumentList["--up-to"], $argumentList["--force"]);
+        };
+
+        if (isset($exec[$argumentList['command']])) {
+            $exec[$argumentList['command']]();
+        }
+    }
+
+    /**
+     * @param $arguments
+     * @return array
+     */
+    protected function extractArguments($arguments) {
+        $ret = [
+            '--up-to' => null,
+            '--yes' => null,
+            '--force' => false,
+        ];
+
+        $ret['command'] = isset($arguments[0]) ? $arguments[0] : null;
+
+        for ($i=1; $i < count($arguments); $i++) {
+            $args = explode("=", $arguments[$i]);
+            $ret[$args[0]] = isset($args[1]) ? $args[1] : true;
         }
 
-        chdir($this->workdir);
-        $cmdLine = $this->fixDir("vendor/bin/migrate") . " -vvv --path=db $params";
-
-        $this->liveExecuteCommand($cmdLine);
+        return $ret;
     }
 
     /**
