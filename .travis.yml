@@ -24,8 +24,7 @@ before_install:
 
 install:
   - sed -ie "s/7\.2/${TRAVIS_PHP_VERSION:0:3}/" docker/Dockerfile
-  - npm i
-  - node_modules/.bin/usdocker --refresh . -v mysql up --home /tmp --no-link
+  - docker run -d -p 3306:3306 --env MYSQL_ROOT_PASSWORD=password --name mysql-container mysql:5.7
   - composer install
   - composer restdocs
   - composer migrate -- reset --yes
