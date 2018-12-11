@@ -135,6 +135,7 @@ class Scripts extends BaseScripts
             if (!$argumentList["--yes"]) {
                 throw new \Exception("Reset require the argument --yes");
             }
+            $migration->prepareEnvironment();
             $migration->reset();
         };
 
