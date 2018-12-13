@@ -23,12 +23,13 @@ before_install:
   - sudo service mysql stop || echo "mysql not stopped"
 
 install:
-  - sed -ie "s/7\.2/${TRAVIS_PHP_VERSION:0:3}/" docker/Dockerfile
+  - sed -i "s~\(FROM byjg/php:\)[5-7]\.[0-9]~\1${TRAVIS_PHP_VERSION:0:3}~" docker/Dockerfile-dev
   - docker run -d -p 3306:3306 --env MYSQL_ROOT_PASSWORD=password --name mysql-container mysql:5.7
   - composer install
   - composer restdocs
   - composer migrate -- reset --yes
-  - composer build
+  - composer docker-build
+  - composer docker-run
   - docker ps -a
   - sleep 15
 

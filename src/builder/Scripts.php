@@ -20,10 +20,22 @@ class Scripts extends _Lib
      * @throws \ByJG\Config\Exception\KeyNotFoundException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public static function build()
+    public static function dockerBuild()
     {
         $build = new Scripts();
-        $build->runBuild();
+        $build->execDockerBuild();
+    }
+
+    /**
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public static function dockerRun()
+    {
+        $build = new Scripts();
+        $build->execDockerRun();
     }
 
     /**
@@ -59,52 +71,31 @@ class Scripts extends _Lib
      * @throws \ByJG\Config\Exception\KeyNotFoundException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function runBuild()
+    public function execDockerBuild()
     {
-        $dockerExtra = Psr11::container()->get('BUILDER_DOCKERFILE');
-        if (!empty($dockerExtra)) {
-            $dockerExtra = array_merge(
-                [
-                    '############################################################',
-                    '##-- START CUSTOM',
-                    'ENV APPLICATION_ENV=' . Psr11::environment()->getCurrentEnv()
-                ],
-                (array)$dockerExtra,
-                [
-                    '##-- END CUSTOM',
-                    '############################################################',
-                ]
-            );
+        $dockerFile = Psr11::container()->get('BUILDER_DOCKERFILE');
 
-            $dockerFile = file_get_contents($this->workdir . '/docker/Dockerfile');
-
-            file_put_contents(
-                $this->workdir . '/Dockerfile',
-                str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
-            );
-        }
-
-        $beforeBuild = Psr11::container()->get('BUILDER_BEFORE_BUILD');
-        $build = Psr11::container()->get('BUILDER_BUILD');
-        $deployCommand = Psr11::container()->get('BUILDER_DEPLOY_COMMAND');
-        $afterDeploy = Psr11::container()->get('BUILDER_AFTER_DEPLOY');
-
-        // Before Build
-        if (!empty($beforeBuild)) {
-            $this->liveExecuteCommand($beforeBuild);
-        }
+        $build = Psr11::container()->get('BUILDER_DOCKER_BUILD');
 
         // Build
         if (!empty($build)) {
             $this->liveExecuteCommand($build);
         }
+    }
+
+    /**
+     * @throws \ByJG\Config\Exception\ConfigNotFoundException
+     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function execDockerRun()
+    {
+        $deployCommand = Psr11::container()->get('BUILDER_DOCKER_RUN');
+
         // Deploy
         if (!empty($deployCommand)) {
             $this->liveExecuteCommand($deployCommand);
-        }
-        // After Deploy
-        if (!empty($afterDeploy)) {
-            $this->liveExecuteCommand($afterDeploy);
         }
     }
 
