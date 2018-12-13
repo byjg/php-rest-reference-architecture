@@ -24,7 +24,7 @@ before_install:
 
 install:
   - sed -i "s~\(FROM byjg/php:\)[5-7]\.[0-9]~\1${TRAVIS_PHP_VERSION:0:3}~" docker/Dockerfile-dev
-  - docker run -d -p 3306:3306 --env MYSQL_ROOT_PASSWORD=password --name mysql-container mysql:5.7
+  - docker run -d -p 3306:3306 --env MYSQL_ROOT_PASSWORD=password --rm --name mysql-container mysql:5.7
   - composer install
   - composer restdocs
   - composer migrate -- reset --yes
