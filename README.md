@@ -101,9 +101,8 @@ The process for build is:
 - Read the PSR11 Container with the specific environment;
 - If exists PSR11 "BUILDER_DOCKERFILE" variable it will copy the Dockerfile template from 'docker/Dockerfile' 
 to the workdir and apply the customizations;
-- Run the commands inside the PSR11 "BUILDER_BEFORE_BUILD" variable
-- Run the commands inside the PSR11 "BUILDER_BUILD" variable
-- Run the commands inside the PSR11 "BUILDER_DEPLOY_COMMAND" variable
+- Run the commands inside the PSR11 "BUILDER_DOCKER_BUILD" variable
+- Run the commands inside the PSR11 "BUILDER_DOCKER_RUN" variable
 
 Your PSR11 Container must have the follow variables:
 
@@ -114,9 +113,8 @@ Your PSR11 Container must have the follow variables:
 the build process will copy the docker template file from 'docker/Dockerfile' and replace the 
 string comment `##---ENV-SPECIFICS-HERE` with the commands defined here; **IMPORTANT NOTE**: if the array is empty
 or null, the Builder will ignore the custom Dockerfile
-- BUILDER_BEFORE_BUILD' => The commands before start the build image. For example the grunt command or a minifier; 
-- BUILDER_BUILD =>The commands used to build your artifact. 
-- BUILDER_DEPLOY_COMMAND: The commands used to deploy your artifact. Maybe a docker run command or 
+- BUILDER_DOCKER_BUILD =>The commands used to build your artifact. 
+- BUILDER_DOCKER_RUN: The commands used to deploy your artifact. Maybe a docker run command or 
 a docker push or everything else.;
 
 
