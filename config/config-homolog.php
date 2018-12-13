@@ -19,6 +19,9 @@ return [
     ],
 
     'BUILDER_DOCKER_RUN' => [
-
+        'docker run -d --rm --name %container% '
+        . '-e APPLICATION_ENV=%env% '
+        . '--link mysql-container '
+        . '-p "80:80" %image%',
     ],
 ];

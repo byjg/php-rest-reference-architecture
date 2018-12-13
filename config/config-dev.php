@@ -76,6 +76,7 @@ return [
         'docker run -d --rm --name %container% '
         . '-v "%workdir%:/srv/web" '
         . '-w /srv/web '
+        . '-e APPLICATION_ENV=%env% '
         . '--link mysql-container '
         . '-p "80:80" %image%',
     ],
