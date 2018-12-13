@@ -65,25 +65,18 @@ return [
         },
         'container' => '%project%-%env%-instance'
     ],
-    'BUILDER_DOCKERFILE' => [
-        '# If there any command here, a Dockerfile will be generated with this commands',
-        '# If you do not have a custom command, put a single comment like this'
+
+    'BUILDER_DOCKERFILE' => 'docker/Dockerfile-dev',
+
+    'BUILDER_DOCKER_BUILD' => [
+        'docker build -t %image% . -f docker/Dockerfile-dev',
     ],
-    'BUILDER_BEFORE_BUILD' => [
-        "docker stop %container%",
-    ],
-    'BUILDER_BUILD' => [
-        'docker build -t %image% . ',
-    ],
-    'BUILDER_DEPLOY_COMMAND' => [
+
+    'BUILDER_DOCKER_RUN' => [
         'docker run -d --rm --name %container% '
         . '-v "%workdir%:/srv/web" '
         . '-w /srv/web '
         . '--link mysql-container '
         . '-p "80:80" %image%',
-    ],
-
-    'BUILDER_AFTER_DEPLOY' => [
-
     ],
 ];

@@ -10,19 +10,15 @@ return [
     'API_SERVER' => "homolog",
     'JWT_SECRET' => 'zteNpbuArRnv9+cGrZ2K2qn2b4tqgACg6NpxuVH1MHQ=',
 
-    'DBDRIVER_CONNECTION' => 'sqlite://' . __DIR__ . '/../src/homolog.db',
+    'DBDRIVER_CONNECTION' => 'mysql://root:password@mysql-container/database',
 
+    'BUILDER_DOCKERFILE' => 'docker/Dockerfile',
 
-    'BUILDER_DOCKERFILE' => [
-        'COPY config /srv/web/config',
-        'COPY src /srv/web/src',
-        'COPY vendor /srv/web/vendor',
-        'COPY web /srv/web/web'
+    'BUILDER_DOCKER_BUILD' => [
+        'docker build -t %image% . -f docker/Dockerfile',
     ],
-    'BUILDER_BEFORE_BUILD' => [
 
-    ],
-    'BUILDER_DEPLOY_COMMAND' => [
+    'BUILDER_DOCKER_RUN' => [
 
     ],
 ];
