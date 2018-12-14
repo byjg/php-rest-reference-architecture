@@ -13,9 +13,9 @@ This project install the follow components:
 - Database
 - Docker for build your project 
 
-## Install
+# Install
 
-### Requirements
+## Requirements
 
 This project requires in order to run:
  - PHP
@@ -42,40 +42,44 @@ Once chocolatey is installed you can just do:
 choco install -y php composer
 ```
 
-### Stable Release
+## Stable Release
 
 ```bash
 composer create-project byjg/resttemplate YOURPATH 4.0.*
 ```
 
-### Dev Release
+## Dev Release
 
 ```bash
 composer -sdev create-project byjg/resttemplate YOURPATH master
 ```
 
-## How to use
+# How to use
 
-### Start
+## Start
 
 After the command create-project is executed some questions will be asked for setup your new project.
 
-You can create the project by your own hand:
+![Post Install](post-install.jpg)
+
+You need also a MySQL installation. You can use docker if you want:
 
 ```bash
-composer install
-npm i
-node_modules/.bin/usdocker --refresh -v
+docker run -d --rm \
+    --name mysql-container  \
+    -e MYSQL_ROOT_PASSWORD=password \
+    -v $PWD/mysql:/var/lib/mysql \
+    mysql:5.7
 ``` 
 
-### Containers
+## PSR-11
 
 This project uses a PSR11 implementation for container. 
 The implementation is from [byjg/config](https://github.com/byjg/config). 
 
 Start editing from "config/config-dev"
 
-### Build
+## Build
 
 The build process will enable you create an artifact of your project. 
 The "Builder" can easily turn your project inside a docker container.
@@ -83,17 +87,20 @@ The "Builder" can easily turn your project inside a docker container.
 The ready to use command is:
 
 ```bash
-# If you do not have a test database you can do:
-node_modules/.bin/usdocker mysql up
+# Set the correct environment
+export APPLICATION_ENV=dev
 
 # Update the database
-APPLICATION_ENV=dev composer migrate -- update    # or reset if you want to recreate
+composer migrate -- update    # or reset if you want to recreate
 
 # Build
-APPLICATION_ENV=dev composer build
+composer docker-build
+
+# Run
+composer docker-run
 ```
 
-#### Build TL;DR
+## Build TL;DR
 
 The build process uses the configuration environment defined in the PSR11 Container 
 
@@ -118,20 +125,10 @@ or null, the Builder will ignore the custom Dockerfile
 a docker push or everything else.;
 
 
-### Migrate database
+# Migrate database
 
 The sample database requires you have a MySQL running. 
 
-You can install the MySQL or running a Docker file. We use the "USDocker"
-project that make easy create and up Database/Services instances. 
-
-The default user/password is "root/password".
-
-If you're using the USDocker just do the line below before run :
-
-```bash
-node_modules/.bin/usdocker mysql up
-```
 
 **Update to the most recent database version**
 
@@ -142,15 +139,15 @@ APPLICATION_ENV=dev composer migrate -- update
 **Reset the database**
 
 ```bash
-APPLICATION_ENV=dev composer migrate -- reset
+APPLICATION_ENV=dev composer migrate -- reset --yes
 ```
 
 Note: be careful with this command, because all of your database will erased 
 and recreated with the migrations scripts.
 
-#### Database TL;DR
+# Database TL;DR
 
-##### Migration
+## Migration
 
 The migration process uses the [byjg/migration](https://github.com/byjg/migration)
 
@@ -165,14 +162,14 @@ The basic migrations command are:
 
 The connection is in the Psr11 container variable 'DBDRIVER_CONNECTION';
 
-##### ORM
+## ORM
 
 The ORM uses the [byjg/micro-orm](https://github.com/byjg/micro-orm)
 
 There are a basic example in "%workdir%/src/project/Repository/DummyRepository". 
 The defintion in the Psr11 container variable 'DUMMY_TABLE'
 
-### Test
+# Test
 
 To run the tests you need to start the database and build the project. 
 
@@ -187,43 +184,20 @@ export TEST_REGULAR_PASSWORD=pwd
 vendor/bin/phpunit
 ```
 
-### Fix problems
+# Fix problems
 
-##### Error: Script "mysql" does not exists.
+## SQLSTATE[HY000] [1049] Unknown database 'database'
 
-```
-node_modules\.bin\usdocker --refresh --home ..\db
-```
-
-##### Error: connect ENOENT /var/run/docker.sock
-
-If you are running under Windows or Mac or even a Virtual Machine outside your local host
-try to setup the docker to:
- 
-```
-node_modules\.bin\usdocker --global docker-host=http://localhost:2375 --home ..\db
-```
-
-##### SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: No such host is known.
-
-Try to add to your hosts file the follow line:
-
-```
-127.0.0.1	mysql-container
-``` 
-
-##### SQLSTATE[HY000] [1049] Unknown database 'database'
-
-```
+```bash
 export APPLICATION_ENV=dev
-composer migrate -- reset 
+composer migrate -- reset --yes
 ```
 
-##### How to setup the environment APPLICATION at Windows command prompt?
+## How to setup the environment APPLICATION at Windows command prompt?
 
 Use the `set` command.
 
-```
+```cmd
 set APPLICATION_ENV=dev
 ```
 

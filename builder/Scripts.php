@@ -74,14 +74,13 @@ class Scripts extends BaseScripts
      */
     public function execDockerBuild()
     {
-        $dockerFile = Psr11::container()->get('BUILDER_DOCKERFILE');
-
         $build = Psr11::container()->get('BUILDER_DOCKER_BUILD');
 
-        // Build
-        if (!empty($build)) {
-            $this->liveExecuteCommand($build);
+        if (empty($build)) {
+            return;
         }
+
+        $this->liveExecuteCommand($build);
     }
 
     /**
@@ -94,10 +93,11 @@ class Scripts extends BaseScripts
     {
         $deployCommand = Psr11::container()->get('BUILDER_DOCKER_RUN');
 
-        // Deploy
-        if (!empty($deployCommand)) {
-            $this->liveExecuteCommand($deployCommand);
+        if (empty($deployCommand)) {
+            return;
         }
+
+        $this->liveExecuteCommand($deployCommand);
     }
 
 
@@ -141,18 +141,23 @@ class Scripts extends BaseScripts
 
     /**
      * @param $arguments
+     * @param bool $hasCmd
      * @return array
      */
-    protected function extractArguments($arguments) {
+    protected function extractArguments($arguments, $hasCmd = true) {
         $ret = [
             '--up-to' => null,
             '--yes' => null,
             '--force' => false,
         ];
 
-        $ret['command'] = isset($arguments[0]) ? $arguments[0] : null;
+        $start = 0;
+        if ($hasCmd) {
+            $ret['command'] = isset($arguments[0]) ? $arguments[0] : null;
+            $start = 1;
+        }
 
-        for ($i=1; $i < count($arguments); $i++) {
+        for ($i=$start; $i < count($arguments); $i++) {
             $args = explode("=", $arguments[$i]);
             $ret[$args[0]] = isset($args[1]) ? $args[1] : true;
         }
