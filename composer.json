@@ -9,9 +9,9 @@
     "ext-json": "*",
     "byjg/config": "3.0.*",
     "byjg/micro-orm": "4.0.*",
-    "byjg/authuser": "4.0.*",
+    "byjg/authuser": "4.1.*",
     "byjg/restserver": "2.1.*",
-    "byjg/jwt-wrapper": "1.0.*",
+    "byjg/jwt-wrapper": "2.0.*",
     "zircote/swagger-php": "2.0.13.1",
     "byjg/swagger-test": "1.2.*",
     "byjg/migration": "4.0.*"
