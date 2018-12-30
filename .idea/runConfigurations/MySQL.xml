@@ -22,7 +22,7 @@
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="commandLineOptions" value="" />
+        <option name="commandLineOptions" value="--rm" />
         <option name="volumeBindings">
           <list>
             <DockerVolumeBindingImpl>
