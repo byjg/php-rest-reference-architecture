@@ -59,6 +59,10 @@ return [
         );
     },
 
+    'JWT_WRAPPER' => function () {
+        return new \ByJG\Util\JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
+    },
+
 
 
     'BUILDER_VARIABLES' => [
