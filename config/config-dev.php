@@ -11,7 +11,9 @@ return [
 
     'WEB_SERVER' => 'localhost',
     'API_SERVER' => "localhost",
-    'JWT_SECRET' => '/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=',
+    'JWT_SECRET' => function () {
+        return new \ByJG\Util\JwtKeySecret('/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=');
+    },
 
 
     'DBDRIVER_CONNECTION' => 'mysql://root:password@mysql-container/database',
