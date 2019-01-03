@@ -1,5 +1,6 @@
 # Boilerplate Project Template for RESTFul API
 
+[![Opensource ByJG](https://img.shields.io/badge/opensource-byjg.com-brightgreen.svg)](http://opensource.byjg.com)
 [![Build Status](https://travis-ci.org/byjg/php-rest-template.svg?branch=master)](https://travis-ci.org/byjg/php-rest-template)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/php-rest-template/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/php-rest-template/?branch=master)
 
@@ -200,3 +201,6 @@ Use the `set` command.
 set APPLICATION_ENV=dev
 ```
 
+
+----
+[Open source ByJG](http://opensource.byjg.com)
