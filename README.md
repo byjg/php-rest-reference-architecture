@@ -201,3 +201,6 @@ Use the `set` command.
 set APPLICATION_ENV=dev
 ```
 
+
+----
+[Open source ByJG](http://opensource.byjg.com)
