@@ -3,6 +3,13 @@
 namespace RestTemplate\Rest;
 
 use Builder\Psr11;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use Psr\SimpleCache\InvalidArgumentException;
 use RestTemplate\Model\User;
 
 class SampleProtected extends ServiceAbstractBase
@@ -30,10 +37,10 @@ class SampleProtected extends ServiceAbstractBase
      *     )
      * )
      *
-     * @param \ByJG\RestServer\HttpResponse $response
-     * @param \ByJG\RestServer\HttpRequest $request
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
     public function getPing($response, $request)
     {
@@ -67,10 +74,10 @@ class SampleProtected extends ServiceAbstractBase
      *     )
      * )
      *
-     * @param \ByJG\RestServer\HttpResponse $response
-     * @param \ByJG\RestServer\HttpRequest $request
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
     public function getPingAdm($response, $request)
     {
@@ -117,13 +124,13 @@ class SampleProtected extends ServiceAbstractBase
      *     )
      * )
      *
-     * @param \ByJG\RestServer\HttpResponse $response
-     * @param \ByJG\RestServer\HttpRequest $request
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
     public function postAddUser($response, $request)
     {

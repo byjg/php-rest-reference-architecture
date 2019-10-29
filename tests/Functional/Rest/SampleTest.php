@@ -15,12 +15,16 @@ class SampleTest extends SwaggerTestCase
     /**
      * Just test ping
      *
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
      * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
      * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \Exception
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testPing()
     {
@@ -35,12 +39,16 @@ class SampleTest extends SwaggerTestCase
     /**
      * Test Dummy
      *
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
      * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
      * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \Exception
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyOk()
     {
@@ -55,12 +63,16 @@ class SampleTest extends SwaggerTestCase
     /**
      * Test Dummy
      *
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
      * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
      * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \Exception
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyOk2()
     {
@@ -75,12 +87,16 @@ class SampleTest extends SwaggerTestCase
     /**
      * Just test ping
      *
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
      * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
      * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \Exception
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyNotFound()
     {
@@ -94,12 +110,16 @@ class SampleTest extends SwaggerTestCase
     }
 
     /**
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
      * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
      * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
      * @throws \ByJG\Swagger\Exception\NotMatchedException
      * @throws \ByJG\Swagger\Exception\PathNotFoundException
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \Exception
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummySaveOk()
     {
