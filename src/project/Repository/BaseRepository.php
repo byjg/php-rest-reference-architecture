@@ -2,12 +2,16 @@
 
 namespace RestTemplate\Repository;
 
+use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
+use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\MicroOrm\Query;
+use ByJG\MicroOrm\Repository;
+use ByJG\Serializer\Exception\InvalidArgumentException;
 
 abstract class BaseRepository
 {
     /**
-     * @var \ByJG\MicroOrm\Repository
+     * @var Repository
      */
     protected $repository;
 
@@ -15,7 +19,7 @@ abstract class BaseRepository
      * @param $itemId
      * @return mixed
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get($itemId)
     {
@@ -29,7 +33,7 @@ abstract class BaseRepository
      * @param null $filter
      * @return array
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getAll($page = 0, $size = 20, $orderBy = null, $filter = null)
     {
@@ -70,9 +74,9 @@ abstract class BaseRepository
     /**
      * @param $model
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws \ByJG\MicroOrm\Exception\OrmBeforeInvalidException
-     * @throws \ByJG\MicroOrm\Exception\OrmInvalidFieldsException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws InvalidArgumentException
      */
     public function save($model)
     {
