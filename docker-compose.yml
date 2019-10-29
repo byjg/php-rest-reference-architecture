@@ -1,14 +1,19 @@
 version: '3.2'
 services:
   site:
-    image: resttest:latest
+    image: resttest:dev
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile-dev
     ports:
       - 80:80
+    volumes:
+      - ./config:/srv/web/config
+      - ./src:/srv/web/src
+      - ./vendor /srv/web/vendor
+      - ./web /srv/web/web
     environment:
-      - APPLICATION_ENV=homolog
+      - APPLICATION_ENV=dev
 #    deploy:
 #      replicas: 1
 #      resources:
@@ -21,11 +26,13 @@ services:
     networks:
       - net
 
-  server:
+  database:
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: password
       TZ: America/Sao_Paulo
+    volumes:
+      - mysql:/var/lib/mysql
     ports:
       - 3306:3306
 #    deploy:

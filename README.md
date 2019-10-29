@@ -66,9 +66,9 @@ You need also a MySQL installation. You can use docker if you want:
 
 ```bash
 docker run -d --rm \
-    --name mysql-container  \
+    --name database  \
     -e MYSQL_ROOT_PASSWORD=password \
-    -v $PWD/mysql:/var/lib/mysql \
+    -v $PWD/.mysql:/var/lib/mysql \
     mysql:5.7
 ``` 
 
