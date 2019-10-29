@@ -66,9 +66,10 @@ You need also a MySQL installation. You can use docker if you want:
 
 ```bash
 docker run -d --rm \
-    --name database  \
+    --name mysql-container  \
     -e MYSQL_ROOT_PASSWORD=password \
-    -v $PWD/.mysql:/var/lib/mysql \
+    -v mysql:/var/lib/mysql \
+    -p 3306:3306 \
     mysql:5.7
 ``` 
 
@@ -89,6 +90,9 @@ The ready to use command is:
 ```bash
 # Set the correct environment
 export APPLICATION_ENV=dev
+
+# Create the database
+composer migrate -- reset --yes
 
 # Update the database
 composer migrate -- update    # or reset if you want to recreate
