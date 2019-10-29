@@ -2,7 +2,12 @@
 
 namespace RestTemplate\Repository;
 
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Query;
+use Psr\SimpleCache\InvalidArgumentException;
+use RestTemplate\Model\Dummy;
 use RestTemplate\Psr11;
 
 class DummyRepository extends BaseRepository
@@ -10,10 +15,10 @@ class DummyRepository extends BaseRepository
     /**
      * DummyRepository constructor.
      *
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public function __construct()
     {
@@ -22,7 +27,7 @@ class DummyRepository extends BaseRepository
 
     /**
      * @param $field string
-     * @return null|\RestTemplate\Model\Dummy[]
+     * @return null|Dummy[]
      */
     public function getByField($field)
     {

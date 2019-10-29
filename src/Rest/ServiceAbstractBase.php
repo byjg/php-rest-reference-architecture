@@ -3,8 +3,12 @@
 namespace RestTemplate\Rest;
 
 use Builder\Psr11;
-use Builder\Psr11;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\Error401Exception;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class ServiceAbstractBase extends ServiceAbstract
 {
@@ -12,10 +16,10 @@ class ServiceAbstractBase extends ServiceAbstract
     /**
      * @param array $properties
      * @return mixed
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public function createToken($properties = [])
     {
@@ -27,8 +31,8 @@ class ServiceAbstractBase extends ServiceAbstract
     /**
      * @param null $token
      * @return mixed
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
     public function requireAuthenticated($token = null)
     {
@@ -36,7 +40,7 @@ class ServiceAbstractBase extends ServiceAbstract
             $jwt = Psr11::container()->get('JWT_WRAPPER');
             $tokenInfo = json_decode(json_encode($jwt->extractData($token)), true);
             return $tokenInfo['data'];
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
     }
@@ -45,8 +49,8 @@ class ServiceAbstractBase extends ServiceAbstract
      * @param $role
      * @param null $token
      * @return mixed
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
     public function requireRole($role, $token = null)
     {

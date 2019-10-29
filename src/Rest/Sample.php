@@ -2,8 +2,16 @@
 
 namespace RestTemplate\Rest;
 
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
+use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
+use Psr\SimpleCache\InvalidArgumentException;
 use RestTemplate\Model\Dummy;
 use RestTemplate\Repository\DummyRepository;
 
@@ -24,6 +32,8 @@ class Sample extends ServiceAbstractBase
      *         )
      *     )
      * )
+     * @param HttpResponse $response
+     * @param HttpRequest $request
      */
     public function getPing()
     {
@@ -62,13 +72,13 @@ class Sample extends ServiceAbstractBase
      *     )
      * )
      *
-     * @param \ByJG\RestServer\HttpResponse $response
-     * @param \ByJG\RestServer\HttpRequest $request
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws Error404Exception
+     * @throws InvalidArgumentException
      */
     public function getDummy()
     {
@@ -107,16 +117,16 @@ class Sample extends ServiceAbstractBase
      *     )
      * )
      *
-     * @param \ByJG\RestServer\HttpResponse $response
-     * @param \ByJG\RestServer\HttpRequest $request
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws \ByJG\MicroOrm\Exception\OrmBeforeInvalidException
-     * @throws \ByJG\MicroOrm\Exception\OrmInvalidFieldsException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function postDummy()
     {
