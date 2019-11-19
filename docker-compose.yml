@@ -10,8 +10,8 @@ services:
     volumes:
       - ./config:/srv/web/config
       - ./src:/srv/web/src
-      - ./vendor /srv/web/vendor
-      - ./web /srv/web/web
+      - ./vendor:/srv/web/vendor
+      - ./web:/srv/web/web
     environment:
       - APPLICATION_ENV=dev
 #    deploy:
@@ -26,7 +26,7 @@ services:
     networks:
       - net
 
-  database:
+  mysql-container:
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: password
@@ -46,6 +46,9 @@ services:
 #          memory: 64M
     networks:
       - net
+
+volumes:
+  mysql:
 
 networks:
   net:
