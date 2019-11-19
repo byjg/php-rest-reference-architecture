@@ -2,6 +2,7 @@
 
 namespace Builder;
 
+use ByJG\Util\JwtWrapper;
 use Composer\Script\Event;
 use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
@@ -51,9 +52,11 @@ class PostCreateScript
         $files = [ 'config/config-dev.php', 'config/config-homolog.php' , 'config/config-live.php', 'config/config-test.php'];
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
+            $contents = str_replace( 'super_secret_key', JwtWrapper::generateSecret(64), $contents);
+            $contents = str_replace('mysql://root:password@mysql-container/database', "$mysqlConnection", $contents);
             file_put_contents(
                 "$workdir/$file",
-                str_replace('mysql://root:password@mysql-container/database', "$mysqlConnection", $contents)
+                $contents
             );
         }
 
