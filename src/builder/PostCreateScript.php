@@ -3,13 +3,16 @@
 namespace Builder;
 
 use Composer\Script\Event;
+use RecursiveCallbackFilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class PostCreateScript
 {
     public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone)
     {
-        $directory = new \RecursiveDirectoryIterator($workdir);
-        $filter = new \RecursiveCallbackFilterIterator($directory, function ($current/*, $key, $iterator*/) {
+        $directory = new RecursiveDirectoryIterator($workdir);
+        $filter = new RecursiveCallbackFilterIterator($directory, function ($current/*, $key, $iterator*/) {
             // Skip hidden files and directories.
             if ($current->getFilename()[0] === '.') {
                 return false;
@@ -55,7 +58,7 @@ class PostCreateScript
         }
 
         // Replace Namespace
-        $objects = new \RecursiveIteratorIterator($filter);
+        $objects = new RecursiveIteratorIterator($filter);
         foreach ($objects as $name => $object) {
             $contents = file_get_contents($name);
             if (strpos($contents, 'RestTemplate') !== false) {

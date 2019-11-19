@@ -2,10 +2,16 @@
 
 namespace Builder;
 
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
+use ByJG\DbMigration\Exception\InvalidMigrationFile;
 use ByJG\DbMigration\Migration;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class Scripts extends _Lib
 {
@@ -15,10 +21,10 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public static function dockerBuild()
     {
@@ -27,10 +33,10 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public static function dockerRun()
     {
@@ -39,12 +45,12 @@ class Scripts extends _Lib
     }
 
     /**
-     * @param \Composer\Script\Event $event
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \ByJG\DbMigration\Exception\InvalidMigrationFile
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param Event $event
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidMigrationFile
+     * @throws InvalidArgumentException
      */
     public static function migrate(Event $event)
     {
@@ -53,10 +59,10 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public static function genRestDocs()
     {
@@ -66,10 +72,10 @@ class Scripts extends _Lib
 
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public function execDockerBuild()
     {
@@ -83,10 +89,10 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public function execDockerRun()
     {
@@ -102,11 +108,11 @@ class Scripts extends _Lib
 
     /**
      * @param $arguments
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \ByJG\DbMigration\Exception\InvalidMigrationFile
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidMigrationFile
+     * @throws InvalidArgumentException
      */
     public function runMigrate($arguments)
     {
@@ -122,7 +128,7 @@ class Scripts extends _Lib
 
         $exec['reset'] = function () use ($migration, $argumentList) {
             if (!$argumentList["--yes"]) {
-                throw new \Exception("Reset require the argument --yes");
+                throw new Exception("Reset require the argument --yes");
             }
             $migration->prepareEnvironment();
             $migration->reset();
@@ -165,10 +171,10 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     public function runGenRestDocs()
     {
