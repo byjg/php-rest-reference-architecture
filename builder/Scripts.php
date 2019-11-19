@@ -21,30 +21,6 @@ class Scripts extends BaseScripts
     }
 
     /**
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidArgumentException
-     */
-    public static function dockerBuild()
-    {
-        $build = new Scripts();
-        $build->execDockerBuild();
-    }
-
-    /**
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidArgumentException
-     */
-    public static function dockerRun()
-    {
-        $build = new Scripts();
-        $build->execDockerRun();
-    }
-
-    /**
      * @param Event $event
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
@@ -69,42 +45,6 @@ class Scripts extends BaseScripts
         $build = new Scripts();
         $build->runGenRestDocs();
     }
-
-
-    /**
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidArgumentException
-     */
-    public function execDockerBuild()
-    {
-        $build = Psr11::container()->get('BUILDER_DOCKER_BUILD');
-
-        if (empty($build)) {
-            return;
-        }
-
-        $this->liveExecuteCommand($build);
-    }
-
-    /**
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidArgumentException
-     */
-    public function execDockerRun()
-    {
-        $deployCommand = Psr11::container()->get('BUILDER_DOCKER_RUN');
-
-        if (empty($deployCommand)) {
-            return;
-        }
-
-        $this->liveExecuteCommand($deployCommand);
-    }
-
 
     /**
      * @param $arguments

@@ -31,8 +31,6 @@
   "scripts": {
     "test": "./vendor/bin/phpunit",
     "migrate": "Builder\\Scripts::migrate",
-    "docker-build": "Builder\\Scripts::dockerBuild",
-    "docker-run": "Builder\\Scripts::dockerRun",
     "restdocs": "Builder\\Scripts::genRestDocs",
     "post-create-project-cmd": "Builder\\PostCreateScript::run"
   },

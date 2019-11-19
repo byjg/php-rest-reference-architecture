@@ -21,7 +21,7 @@ return [
     'WEB_SERVER' => 'localhost',
     'API_SERVER' => "localhost",
     'JWT_SECRET' => function () {
-        return new JwtKeySecret('/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=');
+        return new JwtKeySecret('super_secret_key');
     },
 
 
@@ -75,29 +75,4 @@ return [
         return new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
     },
 
-
-
-    'BUILDER_VARIABLES' => [
-        'project' => 'resttemplate',
-        'buildnum' => "release" . date('YmdHis'),
-        'image' => function ($variables) {
-            return '%project%-%env%' . ($variables['%env%'] !== "dev" ? ':%buildnum%' : '');
-        },
-        'container' => '%project%-%env%-instance'
-    ],
-
-    'BUILDER_DOCKERFILE' => 'docker/Dockerfile-dev',
-
-    'BUILDER_DOCKER_BUILD' => [
-        'docker build -t %image% . -f docker/Dockerfile-dev',
-    ],
-
-    'BUILDER_DOCKER_RUN' => [
-        'docker run -d --rm --name %container% '
-        . '-v "%workdir%:/srv/web" '
-        . '-w /srv/web '
-        . '-e APPLICATION_ENV=%env% '
-        . '--link mysql-container '
-        . '-p "80:80" %image%',
-    ],
 ];

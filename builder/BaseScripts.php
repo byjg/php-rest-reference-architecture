@@ -99,34 +99,6 @@ class _Lib
         );
     }
 
-    protected $dockerVariables = null;
-
-    /**
-     * @return array|null
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidArgumentException
-     */
-    protected function getDockerVariables()
-    {
-        // Builder Variables
-        if ($this->dockerVariables === null) {
-            $this->dockerVariables = [
-                '%env%'     => Psr11::environment()->getCurrentEnv(),
-                '%workdir%' => $this->workdir
-            ];
-
-            // Get User Variables
-            $variables = Psr11::container()->get('BUILDER_VARIABLES');
-            foreach ((array)$variables as $variable => $value) {
-                $this->dockerVariables["%$variable%"] = $this->replaceVariables($value);
-            }
-        }
-
-        return $this->dockerVariables;
-    }
-
     /**
      * @param string|Closure $variableValue
      * @return mixed
@@ -137,20 +109,17 @@ class _Lib
      */
     protected function replaceVariables($variableValue)
     {
-        // Builder Variables
-        $args = $this->getDockerVariables();
+        $args = [];
+        if (preg_match_all("/%[\\w\\d]+%/", $variableValue, $args)) {
+            foreach ($args[0] as $arg) {
+                $variableValue = str_replace(
+                    $arg,
+                    Psr11::container()->get(substr($arg,1, -1)),
+                    $variableValue
+                );
+            }
+        };
 
-        if ($variableValue instanceof Closure) {
-            $string = $variableValue($args);
-        } else {
-            $string = $variableValue;
-        }
-
-        // Replace variables into string
-        foreach ($args as $arg => $value) {
-            $string = str_replace($arg, $value, $string);
-        }
-
-        return $string;
+        return $variableValue;
     }
 }
