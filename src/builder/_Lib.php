@@ -2,6 +2,12 @@
 
 namespace Builder;
 
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use Closure;
+use Psr\SimpleCache\InvalidArgumentException;
+
 class _Lib
 {
     protected $container;
@@ -42,10 +48,10 @@ class _Lib
      * @param  string|array $cmd :  command to be executed
      * @return array   exit_status  :  exit status of the executed command
      *                  output       :  console output of the executed command
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     protected function liveExecuteCommand($cmd)
     {
@@ -97,10 +103,10 @@ class _Lib
 
     /**
      * @return array|null
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     protected function getDockerVariables()
     {
@@ -122,19 +128,19 @@ class _Lib
     }
 
     /**
-     * @param string|\Closure $variableValue
+     * @param string|Closure $variableValue
      * @return mixed
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
      */
     protected function replaceVariables($variableValue)
     {
         // Builder Variables
         $args = $this->getDockerVariables();
 
-        if ($variableValue instanceof \Closure) {
+        if ($variableValue instanceof Closure) {
             $string = $variableValue($args);
         } else {
             $string = $variableValue;
