@@ -1,17 +1,27 @@
 <?php
 
 use Builder\Psr11;
+use ByJG\Authenticate\Definition\UserDefinition;
+use ByJG\Authenticate\Definition\UserPropertiesDefinition;
+use ByJG\Cache\Psr16\NoCacheEngine;
+use ByJG\MicroOrm\Literal;
+use ByJG\MicroOrm\Mapper;
+use ByJG\MicroOrm\Repository;
+use ByJG\Util\JwtKeySecret;
+use ByJG\Util\JwtWrapper;
+use RestTemplate\Model\Dummy;
+use RestTemplate\Model\User;
 
 return [
 
     'CACHE_ROUTES' => function () {
-        return new \ByJG\Cache\Psr16\NoCacheEngine();
+        return new NoCacheEngine();
     },
 
     'WEB_SERVER' => 'localhost',
     'API_SERVER' => "localhost",
     'JWT_SECRET' => function () {
-        return new \ByJG\Util\JwtKeySecret('/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=');
+        return new JwtKeySecret('/R2/isXLfFD+xqxP9rfD/UDVwA5rVZzEe9tQhBYLJrU=');
     },
 
 
@@ -25,20 +35,20 @@ return [
     'DUMMY_TABLE' => function () {
         $dbDriver = Psr11::container()->get('DBDRIVER');
 
-        $mapper = new \ByJG\MicroOrm\Mapper(
-            \RestTemplate\Model\Dummy::class,
+        $mapper = new Mapper(
+            Dummy::class,
             'dummy',
             'id'
         );
 
-        return  new \ByJG\MicroOrm\Repository($dbDriver, $mapper);
+        return  new Repository($dbDriver, $mapper);
     },
 
     'LOGIN' => function () {
-        $userDefinition = new \ByJG\Authenticate\Definition\UserDefinition(
+        $userDefinition = new UserDefinition(
             'users',
-            \RestTemplate\Model\User::class,
-            \ByJG\Authenticate\Definition\UserDefinition::LOGIN_IS_EMAIL
+            User::class,
+            UserDefinition::LOGIN_IS_EMAIL
         );
         $userDefinition->markPropertyAsReadOnly('uuid');
         $userDefinition->defineClosureForSelect('userid', function ($value, $instance) {
@@ -49,20 +59,20 @@ return [
         });
         $userDefinition->defineClosureForUpdate('userid', function ($value) {
             if (empty($value)) {
-                return new \ByJG\MicroOrm\Literal("unhex(replace(uuid(),'-',''))");
+                return new Literal("unhex(replace(uuid(),'-',''))");
             }
-            return new \ByJG\MicroOrm\Literal('0x' . str_replace('-', '', $value));
+            return new Literal('0x' . str_replace('-', '', $value));
         });
 
         return new ByJG\Authenticate\UsersDBDataset(
             Psr11::container()->get('DBDRIVER_CONNECTION'),
             $userDefinition,
-            new \ByJG\Authenticate\Definition\UserPropertiesDefinition()
+            new UserPropertiesDefinition()
         );
     },
 
     'JWT_WRAPPER' => function () {
-        return new \ByJG\Util\JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
+        return new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
     },
 
 

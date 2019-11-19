@@ -2,9 +2,15 @@
 
 namespace RestTemplate\Rest;
 
+use Builder\Psr11;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
-use RestTemplate\Psr11;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class Login extends ServiceAbstractBase
 {
@@ -48,13 +54,13 @@ class Login extends ServiceAbstractBase
      *     )
      * )
      *
-     * @param \ByJG\RestServer\HttpResponse $response
-     * @param \ByJG\RestServer\HttpRequest $request
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws KeyNotFoundException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
     public function post()
     {

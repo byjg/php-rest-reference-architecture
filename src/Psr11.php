@@ -2,7 +2,11 @@
 
 namespace RestTemplate;
 
+use ByJG\Config\Container;
 use ByJG\Config\Definition;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class Psr11
 {
@@ -10,10 +14,10 @@ class Psr11
     private static $container = null;
 
     /**
-     * @return \ByJG\Config\Container
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @return Container
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
      */
     public static function container()
     {
@@ -27,7 +31,7 @@ class Psr11
 
     /**
      * @return Definition
-     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws EnvironmentException
      */
     public static function environment()
     {
