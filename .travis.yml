@@ -16,11 +16,9 @@ addons:
   hosts:
     - mysql-container
 
-env:
-  - APPLICATION_ENV=dev
-  - DOCKER_COMPOSE_VERSION=1.23.2
-
 before_install:
+  - export APPLICATION_ENV=dev
+  - export DOCKER_COMPOSE_VERSION=1.23.2
   - composer config --global github-oauth.github.com ${GITHUB_TOKEN}
   - sudo service mysql stop || echo "mysql not stopped"
   - sudo rm -f /usr/local/bin/docker-compose
