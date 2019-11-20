@@ -134,4 +134,105 @@ class SampleTest extends SwaggerTestCase
         ;
         $this->assertRequest($request);
     }
+
+    /**
+     * Assert that the DummyHex Fail
+     *
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
+     * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
+     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function testDummyHexFail()
+    {
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sample/dummyhex/not")
+            ->assertResponseCode(404)
+        ;
+        $this->assertRequest($request);
+    }
+
+    /**
+     * Assert that the DummyHex not found
+     *
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
+     * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
+     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function testDummyHexOK()
+    {
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sample/dummyhex/11111111-2222-3333-4444-555555555555")
+            ->assertResponseCode(200)
+        ;
+        $this->assertRequest($request);
+    }
+
+    /**
+     * Assert that the DummyHex not found
+     *
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
+     * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
+     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function testDummyHexNotFound()
+    {
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath("/sample/dummyhex/00000000-0000-0000-0000-000000000000")
+            ->assertResponseCode(404)
+        ;
+        $this->assertRequest($request);
+    }
+
+    /**
+     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
+     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
+     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
+     * @throws \ByJG\Swagger\Exception\InvalidRequestException
+     * @throws \ByJG\Swagger\Exception\NotMatchedException
+     * @throws \ByJG\Swagger\Exception\PathNotFoundException
+     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
+     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function testDummyHexSaveOk()
+    {
+        $request = new SwaggerRequester();
+        $request
+            ->withMethod('POST')
+            ->withPath("/sample/dummyhex")
+            ->assertResponseCode(200)
+            ->withRequestBody([
+                'field' => 'new field'
+            ])
+        ;
+        $this->assertRequest($request);
+    }
 }

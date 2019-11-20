@@ -30,16 +30,21 @@ class ServiceAbstractBase
 
     /**
      * @param null $token
+     * @param bool $fullToken
      * @return mixed
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function requireAuthenticated($token = null)
+    public function requireAuthenticated($token = null, $fullToken = false)
     {
         try {
             $jwt = Psr11::container()->get('JWT_WRAPPER');
             $tokenInfo = json_decode(json_encode($jwt->extractData($token)), true);
-            return $tokenInfo['data'];
+            if ($fullToken) {
+                return $tokenInfo;
+            } else {
+                return $tokenInfo['data'];
+            }
         } catch (Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
