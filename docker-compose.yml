@@ -52,6 +52,4 @@ volumes:
 
 networks:
   net:
-    driver: overlay
-    attachable: true
 
