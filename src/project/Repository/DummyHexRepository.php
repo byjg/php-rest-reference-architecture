@@ -2,10 +2,10 @@
 
 namespace RestTemplate\Repository;
 
+use Builder\Psr11;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
-use Builder\Psr11;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class DummyHexRepository extends BaseRepository
