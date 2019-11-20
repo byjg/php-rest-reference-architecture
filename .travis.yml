@@ -9,30 +9,34 @@ php:
   - "7.0"
   - "5.6"
 
-env:
-  - APPLICATION_ENV=dev
+services:
+  - docker
 
 addons:
   hosts:
     - mysql-container
 
-services:
-  - docker
+env:
+  - APPLICATION_ENV=dev
+  - DOCKER_COMPOSE_VERSION=1.23.2
 
 before_install:
   - composer config --global github-oauth.github.com ${GITHUB_TOKEN}
   - sudo service mysql stop || echo "mysql not stopped"
+  - sudo rm -f /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
-install:
+before_script:
   - sed -i "s~\(FROM byjg/php:\)[5-7]\.[0-9]~\1${TRAVIS_PHP_VERSION:0:3}~" docker/Dockerfile-dev
-  - docker run -d -p 3306:3306 --env MYSQL_ROOT_PASSWORD=password --rm --name mysql-container mysql:5.7
+  - docker-compose up -d
   - composer install
   - composer restdocs
   - composer migrate -- reset --yes
-  - composer docker-build
-  - composer docker-run
-  - docker ps -a
-  - sleep 15
 
 script:
   - vendor/bin/phpunit
+
+after_script:
+  - docker-compose down
