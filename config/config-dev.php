@@ -10,6 +10,7 @@ use ByJG\MicroOrm\Repository;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
 use RestTemplate\Model\Dummy;
+use RestTemplate\Model\DummyHex;
 use RestTemplate\Model\User;
 
 return [
@@ -41,6 +42,22 @@ return [
             'id'
         );
 
+        return new Repository($dbDriver, $mapper);
+    },
+
+    'DUMMYHEX_TABLE' => function () {
+        $dbDriver = Factory::getDbRelationalInstance(Psr11::container()->get('DBDRIVER_CONNECTION'));
+
+        $mapper = new Mapper(
+            DummyHex::class,
+            'dummyhex',
+            'id',
+            Psr11::container()->raw("_CLOSURE_NEWKEY")
+        );
+
+        Psr11::container()->get('_CLOSURE_FIELDMAP_ID', $mapper);
+        $mapper->addFieldMap('uuid', 'uuid', Mapper::doNotUpdateClosure());
+
         return  new Repository($dbDriver, $mapper);
     },
 
@@ -61,7 +78,7 @@ return [
             if (empty($value)) {
                 return new Literal("unhex(replace(uuid(),'-',''))");
             }
-            return new Literal('0x' . str_replace('-', '', $value));
+            return new Literal("X'" . str_replace('-', '', $value) . "'");
         });
 
         return new ByJG\Authenticate\UsersDBDataset(
@@ -73,6 +90,51 @@ return [
 
     'JWT_WRAPPER' => function () {
         return new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
+    },
+
+    // -------------------------------------------------------------------------------
+    // Use the closure below to add UUID to the MySQL keys instead of auto increment
+    // -------------------------------------------------------------------------------
+
+    '_CLOSURE_NEWKEY' => function () {
+        return new Literal("X'" . bin2hex(openssl_random_pseudo_bytes(16)) . "'");
+    },
+    '_CLOSURE_FIELDMAP_ID' => function ($mapper) {
+        $mapper->addFieldMap(
+            'id',
+            'id',
+            function ($value, $instance) {
+                if (empty($value)) {
+                    return null;
+                }
+                if (!($value instanceof Literal)) {
+                    $value = new Literal("X'$value'");
+                }
+                return $value;
+            },
+            function ($value, $instance) {
+                return str_replace('-', '', $instance->getUuid());
+            }
+        );
+    },
+
+    '_CLOSURE_FIELDMAP_FKID' => function ($mapper, $fk) {
+        $mapper->addFieldMap(
+            $fk,
+            $fk,
+            function ($value, $instance) {
+                if (empty($value)) {
+                    return null;
+                }
+                if (!($value instanceof Literal)) {
+                    $value = new Literal("X'$value'");
+                }
+                return $value;
+            },
+            function ($value, $instance) use ($fk) {
+                return str_replace('-', '', $instance->{'get' . $fk . 'uuid'}());
+            }
+        );
     },
 
 ];
