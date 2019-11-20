@@ -28,9 +28,9 @@ before_install:
 
 before_script:
   - sed -i "s~\(FROM byjg/php:\)[5-7]\.[0-9]~\1${TRAVIS_PHP_VERSION:0:3}~" docker/Dockerfile-dev
-  - docker-compose up -d
   - composer install
   - composer restdocs
+  - docker-compose up -d
   - composer migrate -- reset --yes
 
 script:
