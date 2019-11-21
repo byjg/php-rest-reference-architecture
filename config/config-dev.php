@@ -27,7 +27,7 @@ return [
     },
 
 
-    'DBDRIVER_CONNECTION' => 'mysql://root:password@mysql-container/database',
+    'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/mydb',
 
     'DUMMY_TABLE' => function () {
         $dbDriver = Factory::getDbRelationalInstance(Psr11::container()->get('DBDRIVER_CONNECTION'));
