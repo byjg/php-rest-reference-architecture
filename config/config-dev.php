@@ -27,7 +27,7 @@ return [
     },
 
 
-    'DBDRIVER_CONNECTION' => 'mysql://root:password@mysql-container/database',
+    'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/mydb',
 
     'DBDRIVER' => function () {
         $connectionManager = new \ByJG\MicroOrm\ConnectionManager();

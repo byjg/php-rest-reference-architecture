@@ -1,8 +1,4 @@
 # This is a sample build configuration for Docker.
-# Check our guides at https://confluence.atlassian.com/x/O1toN for more examples.
-# Only use spaces to indent your .yml configuration.
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
 image: byjg/php:7.2-cli
 
 # enable Docker for your repository
@@ -10,29 +6,29 @@ options:
   docker: true
 
 pipelines:
-  tags:
-    v*:
+  branches:
+    master:
       - step:
-          caches:
-            - node
-            - composer
+          deployment: Test
           script:
-            # Build the Dev environment and run the tests
-            - docker run --name mysql-container --rm -e MYSQL_ROOT_PASSWORD=password -e TZ=America/Sao_Paulo -p 3306:3306 -d mysql:5.7
+            - docker login $DOCKER_REGISTRY --username $DOCKER_LOGIN --password $DOCKER_PASSWORD
+            - docker run --name mysql-container --rm -e MYSQL_ROOT_PASSWORD=mysqlp455w0rd -e TZ=America/Sao_Paulo -p 3306:3306 -d mysql:5.7
             - composer install
-            - APPLICATION_ENV=dev composer build
-            - docker exec resttemplate-dev-instance composer restdocs
-            - docker exec resttemplate-dev-instance composer migrate -- reset --yes
-            - docker exec resttemplate-dev-instance vendor/bin/phpunit
-            - docker stop resttemplate-dev-instance mysql-container
-
-            # Deploy to live
-            - APPLICATION_ENV=live composer build
-    rc*:
+            - composer restdocs
+            - composer migrate -- reset --yes
+            - docker build -t ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER} -f devops/Dockerfile .
+            - docker run -e APPLICATION_ENV=dev -d --name app ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}
+            - sleep 10
+            - vendor/bin/phpunit
+            - docker push ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}
+            - docker stop mysql-container app
       - step:
-          caches:
-            - composer
+          deployment: Develop
+          trigger: manual
           script:
-            # Just build an image.
-            - composer install
-            - APPLICATION_ENV=homolog composer build
+            - echo "Image - ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}"
+      - step:
+          deployment: Production
+          trigger: manual
+          script:
+            - echo "Image - ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}"

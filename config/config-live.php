@@ -9,5 +9,5 @@ return [
         return new JwtKeySecret('super_secret_key');
     },
 
-    'DBDRIVER_CONNECTION' => 'mysql://root:password@mysql-container/database',
+    'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/mydb',
 ];
