@@ -3,6 +3,7 @@
 namespace Builder;
 
 use ByJG\Util\JwtWrapper;
+use ByJG\Util\Uri;
 use Composer\Script\Event;
 use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
@@ -29,6 +30,7 @@ class PostCreateScript
             return true;
         });
 
+        $composerParts = explode("/", $composerName);
 
         //Replace composer name:
         $contents = file_get_contents($workdir . '/composer.json');
@@ -49,11 +51,15 @@ class PostCreateScript
         }
 
         // Replace MySQL Connection
-        $files = [ 'config/config-dev.php', 'config/config-homolog.php' , 'config/config-live.php', 'config/config-test.php'];
+        $files = [ 'config/config-dev.php', 'config/config-homolog.php' , 'config/config-live.php', 'config/config-test.php', 'docker-compose.yml', 'bitbucket-pipelines.yml'];
+        $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
             $contents = str_replace( 'super_secret_key', JwtWrapper::generateSecret(64), $contents);
-            $contents = str_replace('mysql://root:password@mysql-container/database', "$mysqlConnection", $contents);
+            $contents = str_replace('mysql://root:mysqlp455w0rd@mysql-container/mydb', "$mysqlConnection", $contents);
+            $contents = str_replace('mysql-container', $uri->getHost(), $contents);
+            $contents = str_replace('mysqlp455w0rd', $uri->getPassword(), $contents);
+            $contents = str_replace('repository-name', $composerParts[1], $contents);
             file_put_contents(
                 "$workdir/$file",
                 $contents
@@ -106,7 +112,7 @@ class PostCreateScript
         $phpVersion = $stdIo->ask('PHP Version [7.2]: ', '7.2');
         $namespace = $stdIo->ask('Project namespace [MyRest]: ', 'MyRest');
         $composerName = $stdIo->ask('Composer name [me/myrest]: ', 'me/myrest');
-        $mysqlConnection = $stdIo->ask('MySQL connection DEV [mysql://root:password@mysql-container/database]: ', 'mysql://root:password@mysql-container/database');
+        $mysqlConnection = $stdIo->ask('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
         $timezone = $stdIo->ask('Timezone [America/Sao_Paulo]: ', 'America/Sao_Paulo');
         $stdIo->ask('Press <ENTER> to continue');
 
