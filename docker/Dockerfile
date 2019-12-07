@@ -21,6 +21,10 @@ COPY src /srv/web/src
 COPY vendor /srv/web/vendor
 COPY web /srv/web/web
 
+# This is necessary for the migration script
+COPY composer.* /srv/web/
+COPY db /srv/web/db
+
 STOPSIGNAL SIGQUIT
 
 CMD ["/usr/bin/supervisord",  "-n",  "-c", "/etc/supervisord.conf" ]

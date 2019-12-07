@@ -12,23 +12,28 @@ pipelines:
           deployment: Test
           script:
             - docker login $DOCKER_REGISTRY --username $DOCKER_LOGIN --password $DOCKER_PASSWORD
-            - docker run --name mysql-container --rm -e MYSQL_ROOT_PASSWORD=mysqlp455w0rd -e TZ=America/Sao_Paulo -p 3306:3306 -d mysql:5.7
+            - docker network create testapp
+            - docker run --name mysql-container --rm --network=testapp -e MYSQL_ROOT_PASSWORD=mysqlp455w0rd -e TZ=America/Sao_Paulo -p 3306:3306 -d mysql:5.7
             - composer install
+            - export APPLICATION_ENV=dev
             - composer restdocs
             - composer migrate -- reset --yes
-            - docker build -t ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER} -f devops/Dockerfile .
-            - docker run -e APPLICATION_ENV=dev -d --name app ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}
+            - docker build -t ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository:${BITBUCKET_BUILD_NUMBER} -f docker/Dockerfile .
+            - docker run -e APPLICATION_ENV=${APPLICATION_ENV} -d --name app --rm -p 80:80 --network=testapp ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository:${BITBUCKET_BUILD_NUMBER}
             - sleep 10
             - vendor/bin/phpunit
-            - docker push ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}
             - docker stop mysql-container app
+            - docker network rm testapp
+            - docker push ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository:${BITBUCKET_BUILD_NUMBER}
       - step:
           deployment: Develop
           trigger: manual
           script:
-            - echo "Image - ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}"
+            - echo "Image - ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository:${BITBUCKET_BUILD_NUMBER}"
+            - echo "Deploy your image"
       - step:
           deployment: Production
           trigger: manual
           script:
-            - echo "Image - ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository-name:${BITBUCKET_BUILD_NUMBER}"
+            - echo "Image - ${DOCKER_REGISTRY}/${DOCKER_LOGIN}/repository:${BITBUCKET_BUILD_NUMBER}"
+            - echo "Deploy your image"
