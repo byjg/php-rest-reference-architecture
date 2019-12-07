@@ -9,7 +9,7 @@ This project enables you to create a full functional project for RESTFul server 
 This project install the follow components:
 - PSR11 Container dependency
 - A JWT Authentication
-- Pre-configured for different environments (DEV, HOMOLOG, LIVE, etc)
+- Pre-configured for different environments (DEV, HOMOLOG, PROD, etc)
 - Database
 - Docker for build your project 
 
