@@ -42,7 +42,7 @@ class Psr11
                     ->inheritFrom('dev')
                 ->addEnvironment('homolog')
                     ->inheritFrom('dev')
-                ->addEnvironment('live')
+                ->addEnvironment('prod')
                     ->inheritFrom('homolog')
                     ->inheritFrom('dev');
             // ->setCache($somePsr16Implementation); // This will cache the result;

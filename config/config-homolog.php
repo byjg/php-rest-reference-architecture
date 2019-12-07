@@ -15,6 +15,6 @@ return [
         return new JwtKeySecret('super_secret_key');
     },
 
-    'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/mydb',
+    'DBDRIVER_CONNECTION' => 'mysql://root:' . getenv('MYSQL_ROOT_PASSWORD') . '@mysql-dev/mydb',
 
 ];

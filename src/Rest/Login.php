@@ -70,7 +70,7 @@ class Login extends ServiceAbstractBase
 
         $users = Psr11::container()->get('LOGIN');
         $user = $users->isValidUser($json->username, $json->password);
-        $metadata = $this->createcreateUserMetadata($user);
+        $metadata = $this->createUserMetadata($user);
 
         $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
         $response->write(['token' => $this->createToken($metadata)]);
@@ -125,7 +125,7 @@ class Login extends ServiceAbstractBase
         $users = Psr11::container()->get('LOGIN');
         $user = $users->getById(new Literal("X'" . str_replace("-", "", $result["data"]["userid"]) . "'"));
 
-        $response->write([ "token" => $this->createToken($this->createcreateUserMetadata($user))]);
+        $response->write([ "token" => $this->createToken($this->createUserMetadata($user))]);
     }
 
     /**
@@ -133,7 +133,7 @@ class Login extends ServiceAbstractBase
      * @return mixed
      * @throws Error401Exception
      */
-    private function createcreateUserMetadata($user)
+    private function createUserMetadata($user)
     {
         if (is_null($user)) {
             throw new Error401Exception('Username or password is invalid');
