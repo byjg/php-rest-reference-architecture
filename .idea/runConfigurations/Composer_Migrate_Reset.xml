@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Composer Migrate Reset" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="/usr/bin/composer" scriptParameters="migrate -- reset --yes">
+    <CommandLine workingDirectory="$PROJECT_DIR$">
+      <envs>
+        <env name="APPLICATION_ENV" value="dev" />
+      </envs>
+    </CommandLine>
+    <method v="2" />
+  </configuration>
+</component>
