@@ -2,31 +2,28 @@
 
 namespace Test\Functional\Rest;
 
-use ByJG\Swagger\SwaggerRequester;
-use ByJG\Swagger\SwaggerTestCase;
+use ByJG\ApiTools\ApiRequester;
+use ByJG\ApiTools\ApiTestCase;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase
  */
-class SampleProtectedTest extends SwaggerTestCase
+class SampleProtectedTest extends ApiTestCase
 {
     protected $filePath = __DIR__ . '/../../../web/docs/swagger.json';
 
     /**
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testGetUnauthorized()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sampleprotected/ping")
@@ -36,20 +33,17 @@ class SampleProtectedTest extends SwaggerTestCase
     }
 
     /**
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testGetAuthorized()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/login")
@@ -58,7 +52,7 @@ class SampleProtectedTest extends SwaggerTestCase
         ;
         $result = $this->assertRequest($request);
 
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sampleprotected/ping")
@@ -71,20 +65,17 @@ class SampleProtectedTest extends SwaggerTestCase
     }
 
     /**
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testGetAuthorizedRole1()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/login")
@@ -93,7 +84,7 @@ class SampleProtectedTest extends SwaggerTestCase
         ;
         $result = $this->assertRequest($request);
 
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sampleprotected/pingadm")
@@ -106,20 +97,17 @@ class SampleProtectedTest extends SwaggerTestCase
     }
 
     /**
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testGetAuthorizedRole2()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/login")
@@ -128,7 +116,7 @@ class SampleProtectedTest extends SwaggerTestCase
         ;
         $result = $this->assertRequest($request);
 
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sampleprotected/pingadm")
@@ -141,20 +129,17 @@ class SampleProtectedTest extends SwaggerTestCase
     }
 
     /**
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testAddUser()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/login")
@@ -163,7 +148,7 @@ class SampleProtectedTest extends SwaggerTestCase
         ;
         $result = $this->assertRequest($request);
 
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/sampleprotected/adduser")

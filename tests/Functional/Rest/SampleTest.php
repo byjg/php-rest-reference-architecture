@@ -2,33 +2,30 @@
 
 namespace Test\Functional\Rest;
 
-use ByJG\Swagger\SwaggerRequester;
-use ByJG\Swagger\SwaggerTestCase;
+use ByJG\ApiTools\ApiRequester;
+use ByJG\ApiTools\ApiTestCase;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase
  */
-class SampleTest extends SwaggerTestCase
+class SampleTest extends ApiTestCase
 {
     protected $filePath = __DIR__ . '/../../../web/docs/swagger.json';
 
     /**
      * Just test ping
      *
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testPing()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sample/ping")
@@ -39,20 +36,17 @@ class SampleTest extends SwaggerTestCase
     /**
      * Test Dummy
      *
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyOk()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sample/dummy/e")
@@ -63,20 +57,17 @@ class SampleTest extends SwaggerTestCase
     /**
      * Test Dummy
      *
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyOk2()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sample/dummy/1")
@@ -87,20 +78,17 @@ class SampleTest extends SwaggerTestCase
     /**
      * Just test ping
      *
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyNotFound()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sample/dummy/not")
@@ -110,20 +98,17 @@ class SampleTest extends SwaggerTestCase
     }
 
     /**
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummySaveOk()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/sample/dummy")
@@ -138,20 +123,17 @@ class SampleTest extends SwaggerTestCase
     /**
      * Assert that the DummyHex Fail
      *
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyHexFail()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sample/dummyhex/not")
@@ -163,20 +145,17 @@ class SampleTest extends SwaggerTestCase
     /**
      * Assert that the DummyHex not found
      *
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyHexOK()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sample/dummyhex/11111111-2222-3333-4444-555555555555")
@@ -188,20 +167,17 @@ class SampleTest extends SwaggerTestCase
     /**
      * Assert that the DummyHex not found
      *
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyHexNotFound()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/sample/dummyhex/00000000-0000-0000-0000-000000000000")
@@ -211,20 +187,17 @@ class SampleTest extends SwaggerTestCase
     }
 
     /**
-     * @throws \ByJG\Swagger\Exception\DefinitionNotFoundException
-     * @throws \ByJG\Swagger\Exception\GenericSwaggerException
-     * @throws \ByJG\Swagger\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\Swagger\Exception\InvalidDefinitionException
-     * @throws \ByJG\Swagger\Exception\InvalidRequestException
-     * @throws \ByJG\Swagger\Exception\NotMatchedException
-     * @throws \ByJG\Swagger\Exception\PathNotFoundException
-     * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
-     * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function testDummyHexSaveOk()
     {
-        $request = new SwaggerRequester();
+        $request = new ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/sample/dummyhex")
