@@ -13,7 +13,7 @@
     "byjg/restserver": "3.0.*",
     "byjg/jwt-wrapper": "2.0.*",
     "zircote/swagger-php": "2.0.13.1",
-    "byjg/swagger-test": "2.0.*",
+    "byjg/swagger-test": "dev-version3",
     "byjg/migration": "4.0.*"
   },
   "repositories": [
