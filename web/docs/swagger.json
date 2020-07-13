@@ -3,17 +3,14 @@
     "info": {
         "title": "Title",
         "description": "Description",
-        "termsOfService": "http://localhost/terms/",
         "contact": {
             "email": "email@example.com"
         },
         "license": {
-            "name": "Proprietary",
-            "url": "http://localhost/LICENSE"
+            "name": "Proprietary"
         },
         "version": "1.0.0"
     },
-    "host": "localhost",
     "basePath": "",
     "schemes": [
         "http"
@@ -159,7 +156,7 @@
         "/sample/ping": {
             "get": {
                 "tags": [
-                    "sample"
+                    "zz_sample"
                 ],
                 "summary": "Simple ping",
                 "operationId": "RestTemplate\\Rest\\Sample::getPing",
@@ -184,7 +181,7 @@
         "/sample/dummy/{field}": {
             "get": {
                 "tags": [
-                    "sample"
+                    "zz_sample"
                 ],
                 "summary": "Get the rows from the Dummy table (used in the example)",
                 "operationId": "RestTemplate\\Rest\\Sample::getDummy",
@@ -225,7 +222,7 @@
         "/sample/dummy": {
             "post": {
                 "tags": [
-                    "sample"
+                    "zz_sample"
                 ],
                 "summary": "Save data content in the table Dummy",
                 "operationId": "RestTemplate\\Rest\\Sample::postDummy",
@@ -256,7 +253,7 @@
         "/sample/dummyhex/{id}": {
             "get": {
                 "tags": [
-                    "sample"
+                    "zz_sample"
                 ],
                 "summary": "Get the rows from the DummyHex table by ID",
                 "operationId": "RestTemplate\\Rest\\Sample::getDummyHex",
@@ -294,7 +291,7 @@
         "/sample/dummyhex": {
             "post": {
                 "tags": [
-                    "sample"
+                    "zz_sample"
                 ],
                 "summary": "Save data content in the table Dummy Hex",
                 "operationId": "RestTemplate\\Rest\\Sample::postDummyHex",
@@ -328,7 +325,7 @@
         "/sampleprotected/ping": {
             "get": {
                 "tags": [
-                    "sampleprotected"
+                    "zz_sampleprotected"
                 ],
                 "summary": "Sample Ping Only Authenticated",
                 "operationId": "RestTemplate\\Rest\\SampleProtected::getPing",
@@ -364,7 +361,7 @@
         "/sampleprotected/pingadm": {
             "get": {
                 "tags": [
-                    "sampleprotected"
+                    "zz_sampleprotected"
                 ],
                 "summary": "Sample Ping Only Admin",
                 "operationId": "RestTemplate\\Rest\\SampleProtected::getPingAdm",
@@ -378,74 +375,6 @@
                             "properties": {
                                 "result": {
                                     "description": "Sample Ping Only Admin",
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "N\u00e3o autorizado",
-                        "schema": {
-                            "$ref": "#/definitions/error"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "jwt-token": []
-                    }
-                ]
-            }
-        },
-        "/sampleprotected/adduser": {
-            "post": {
-                "tags": [
-                    "sampleprotected"
-                ],
-                "summary": "Sample how to add an user;",
-                "operationId": "RestTemplate\\Rest\\SampleProtected::postAddUser",
-                "parameters": [
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "The login data",
-                        "required": true,
-                        "schema": {
-                            "required": [
-                                "username",
-                                "password"
-                            ],
-                            "properties": {
-                                "name": {
-                                    "description": "The Name",
-                                    "type": "string"
-                                },
-                                "email": {
-                                    "description": "The Email",
-                                    "type": "string"
-                                },
-                                "username": {
-                                    "description": "The username",
-                                    "type": "string"
-                                },
-                                "password": {
-                                    "description": "The password",
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The object",
-                        "schema": {
-                            "required": [
-                                "result"
-                            ],
-                            "properties": {
-                                "result": {
-                                    "description": "Sample how to add an user;",
                                     "type": "string"
                                 }
                             }
@@ -507,6 +436,44 @@
             "type": "object",
             "xml": {
                 "name": "DummyHex"
+            }
+        },
+        "User": {
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "userid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "created": {
+                    "type": "string"
+                },
+                "updated": {
+                    "type": "string"
+                },
+                "admin": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            },
+            "type": "object",
+            "xml": {
+                "name": "User"
             }
         },
         "error": {

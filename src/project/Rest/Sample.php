@@ -2,6 +2,7 @@
 
 namespace RestTemplate\Rest;
 
+use Builder\Psr11;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
@@ -12,10 +13,12 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use RestTemplate\Model\Dummy;
 use RestTemplate\Model\DummyHex;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
+use Swagger\Annotations as SWG;
 
 class Sample extends ServiceAbstractBase
 {
@@ -24,7 +27,7 @@ class Sample extends ServiceAbstractBase
      *
      * @SWG\Get(
      *     path="/sample/ping",
-     *     tags={"sample"},
+     *     tags={"zz_sample"},
      *     @SWG\Response(
      *         response=200,
      *         description="The object",
@@ -48,7 +51,7 @@ class Sample extends ServiceAbstractBase
      * Get the rows from the Dummy table (used in the example)
      * @SWG\Get(
      *     path="/sample/dummy/{field}",
-     *     tags={"sample"},
+     *     tags={"zz_sample"},
      *     @SWG\Parameter(
      *         name="field",
      *         in="path",
@@ -77,18 +80,21 @@ class Sample extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws Error404Exception
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
     public function getDummy($response, $request)
     {
-        $dummyRepo = new DummyRepository();
-        $field = $request->get('field');
+        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $field = $request->param('field');
 
         $result = $dummyRepo->getByField($field);
         if (empty($result)) {
-            throw new Error404Exception('Pattern not found');
+            throw new Error404Exception('Id not found');
         }
         $response->write(
             $result
@@ -99,7 +105,7 @@ class Sample extends ServiceAbstractBase
      * Save data content in the table Dummy
      * @SWG\Post(
      *     path="/sample/dummy",
-     *     tags={"sample"},
+     *     tags={"zz_sample"},
      *     @SWG\Parameter(
      *         name="body",
      *         in="body",
@@ -122,12 +128,13 @@ class Sample extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
+     * @throws InvalidArgumentException
      * @throws KeyNotFoundException
-     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
-     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function postDummy($response, $request)
     {
@@ -135,7 +142,7 @@ class Sample extends ServiceAbstractBase
         $payload = json_decode($request->payload());
         BinderObject::bindObject($payload, $model);
 
-        $dummyRepo = new DummyRepository();
+        $dummyRepo = Psr11::container()->get(DummyRepository::class);
         $dummyRepo->save($model);
     }
 
@@ -143,7 +150,7 @@ class Sample extends ServiceAbstractBase
      * Get the rows from the DummyHex table by ID
      * @SWG\Get(
      *     path="/sample/dummyhex/{id}",
-     *     tags={"sample"},
+     *     tags={"zz_sample"},
      *     @SWG\Parameter(
      *         name="id",
      *         in="path",
@@ -177,11 +184,12 @@ class Sample extends ServiceAbstractBase
      * @throws KeyNotFoundException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getDummyHex($response, $request)
     {
-        $dummyRepo = new DummyHexRepository();
-        $id = $request->get('id');
+        $dummyRepo = Psr11::container()->get(DummyHexRepository::class);
+        $id = $request->param('id');
 
         $result = $dummyRepo->get($id);
         if (empty($result)) {
@@ -196,7 +204,7 @@ class Sample extends ServiceAbstractBase
      * Save data content in the table Dummy Hex
      * @SWG\Post(
      *     path="/sample/dummyhex",
-     *     tags={"sample"},
+     *     tags={"zz_sample"},
      *     @SWG\Parameter(
      *         name="body",
      *         in="body",
@@ -220,12 +228,13 @@ class Sample extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
+     * @throws InvalidArgumentException
      * @throws KeyNotFoundException
-     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
-     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function postDummyHex($response, $request)
     {
@@ -233,7 +242,7 @@ class Sample extends ServiceAbstractBase
         $payload = json_decode($request->payload());
         BinderObject::bindObject($payload, $model);
 
-        $dummyRepo = new DummyHexRepository();
+        $dummyRepo = Psr11::container()->get(DummyHexRepository::class);
         $dummyRepo->save($model);
 
         $model = $dummyRepo->get($model->getId());

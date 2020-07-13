@@ -2,6 +2,8 @@
 
 namespace RestTemplate\Model;
 
+use Swagger\Annotations as SWG;
+
 /**
  * Model that represents the DummyHex table
  *

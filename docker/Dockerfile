@@ -3,7 +3,7 @@ FROM byjg/php:7.2-fpm-nginx
 WORKDIR /srv/web
 
 # Setup Docker/Fpm
-COPY ./docker/fpm/php /usr/local/etc/php/conf.d
+COPY ./docker/fpm/php /etc/php7/conf.d
 
 # SETUP CRONTAB
 # COPY ./docker/fpm/cron/crontab /etc/crontabs/root
@@ -20,6 +20,7 @@ COPY config /srv/web/config
 COPY src /srv/web/src
 COPY vendor /srv/web/vendor
 COPY web /srv/web/web
+COPY template /srv/web/template
 
 # This is necessary for the migration script
 COPY composer.* /srv/web/

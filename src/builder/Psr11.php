@@ -14,15 +14,16 @@ class Psr11
     private static $container = null;
 
     /**
+     * @param string $env
      * @return Container
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
      * @throws InvalidArgumentException
      */
-    public static function container()
+    public static function container($env = null)
     {
         if (is_null(self::$container)) {
-            self::$container = self::environment()->build();
+            self::$container = self::environment()->build($env);
         }
 
         return self::$container;
@@ -40,10 +41,10 @@ class Psr11
                 ->addEnvironment('dev')
                 ->addEnvironment('test')
                     ->inheritFrom('dev')
-                ->addEnvironment('homolog')
+                ->addEnvironment('staging')
                     ->inheritFrom('dev')
                 ->addEnvironment('prod')
-                    ->inheritFrom('homolog')
+                    ->inheritFrom('staging')
                     ->inheritFrom('dev');
             // ->setCache($somePsr16Implementation); // This will cache the result;
         }
