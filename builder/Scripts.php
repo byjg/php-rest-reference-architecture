@@ -12,6 +12,7 @@ use ByJG\Util\Uri;
 use Composer\Script\Event;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class Scripts extends BaseScripts
 {
@@ -24,9 +25,10 @@ class Scripts extends BaseScripts
      * @param Event $event
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidMigrationFile
      * @throws InvalidArgumentException
+     * @throws InvalidMigrationFile
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     public static function migrate(Event $event)
     {
@@ -35,36 +37,42 @@ class Scripts extends BaseScripts
     }
 
     /**
+     * @param Event $event
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
-    public static function genRestDocs()
+    public static function genRestDocs(Event $event)
     {
         $build = new Scripts();
-        $build->runGenRestDocs();
+        $build->runGenRestDocs($event->getArguments());
     }
 
     /**
      * @param $arguments
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidMigrationFile
      * @throws InvalidArgumentException
+     * @throws InvalidMigrationFile
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     public function runMigrate($arguments)
     {
-        $dbConnection = Psr11::container()->get('DBDRIVER_CONNECTION');
+        $argumentList = $this->extractArguments($arguments);
+        if (isset($argumentList["command"])) {
+            echo "> Command: ${argumentList["command"]} \n";
+        }
+
+        $dbConnection = Psr11::container($argumentList["--env"])->get('DBDRIVER_CONNECTION');
 
         $migration = new Migration(new Uri($dbConnection), $this->workdir . "/db");
         $migration->registerDatabase("mysql", MySqlDatabase::class);
         $migration->addCallbackProgress(function ($cmd, $version) {
             echo "Doing $cmd, $version\n";
         });
-
-        $argumentList = $this->extractArguments($arguments);
 
         $exec['reset'] = function () use ($migration, $argumentList) {
             if (!$argumentList["--yes"]) {
@@ -79,9 +87,13 @@ class Scripts extends BaseScripts
             $migration->update($argumentList["--up-to"], $argumentList["--force"]);
         };
 
-        if (isset($exec[$argumentList['command']])) {
-            $exec[$argumentList['command']]();
-        }
+        $exec["version"] = function () use ($migration, $argumentList) {
+            foreach ($migration->getCurrentVersion() as $key => $value) {
+                echo "$key: $value\n";
+            }
+        };
+
+        $exec[$argumentList['command']]();
     }
 
     /**
@@ -94,6 +106,7 @@ class Scripts extends BaseScripts
             '--up-to' => null,
             '--yes' => null,
             '--force' => false,
+            '--env' => null
         ];
 
         $start = 0;
@@ -111,12 +124,14 @@ class Scripts extends BaseScripts
     }
 
     /**
+     * @param $arguments
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
-    public function runGenRestDocs()
+    public function runGenRestDocs($arguments)
     {
         $docPath = $this->workdir . '/web/docs/';
         chdir($this->workdir);
@@ -129,8 +144,10 @@ class Scripts extends BaseScripts
             . "--processor OperationId"
         );
 
+        $argumentList = $this->extractArguments($arguments, false);
+
         $docs = file_get_contents("$docPath/swagger.json");
-        $docs = str_replace('__HOSTNAME__', Psr11::container()->get('API_SERVER'), $docs);
+        $docs = str_replace('__HOSTNAME__', Psr11::container($argumentList["--env"])->get('API_SERVER'), $docs);
         file_put_contents("$docPath/swagger.json", $docs);
     }
 }

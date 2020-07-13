@@ -2,79 +2,67 @@
 
 namespace Test\Functional\Rest;
 
-use ByJG\ApiTools\ApiRequester;
-use ByJG\ApiTools\ApiTestCase;
+use ByJG\ApiTools\Base\Schema;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase
  */
-class LoginTest extends ApiTestCase
+class LoginTest extends BaseApiTestCase
 {
     protected $filePath = __DIR__ . '/../../../web/docs/swagger.json';
 
+    public function setUp()
+    {
+        $schema = Schema::getInstance(file_get_contents($this->filePath));
+        $this->setSchema($schema);
+    }
     /**
      * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testLoginOk()
     {
-        $request = new ApiRequester();
-        $request
-            ->withMethod('POST')
-            ->withPath("/login")
-            ->assertResponseCode(200)
-            ->withRequestBody(Credentials::getAdminUser())
-        ;
-        $this->assertRequest($request);
+        $this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()));
     }
 
     /**
      * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testLoginOk2()
     {
-        $request = new ApiRequester();
-        $request
-            ->withMethod('POST')
-            ->withPath("/login")
-            ->assertResponseCode(200)
-            ->withRequestBody(Credentials::getRegularUser())
-        ;
-        $this->assertRequest($request);
+        $this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()));
     }
 
     /**
      * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ByJG\Util\Psr7\MessageException
+     * @expectedException \ByJG\RestServer\Exception\Error401Exception
+     * @expectedExceptionMessage Username or password is invalid
      */
     public function testLoginFail()
     {
-        $request = new ApiRequester();
-        $request
-            ->withMethod('POST')
-            ->withPath("/login")
-            ->assertResponseCode(401)
-            ->withRequestBody([
-                'username' => 'invalid',
-                'password' => 'invalid'
-            ])
-        ;
-        $this->assertRequest($request);
+        $this->assertRequest(Credentials::requestLogin([
+            'username' => 'invalid',
+            'password' => 'invalid'
+        ]));
     }
 }

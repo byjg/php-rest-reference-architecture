@@ -51,11 +51,11 @@ class PostCreateScript
         }
 
         // Replace MySQL Connection
-        $files = [ 'config/config-dev.php', 'config/config-homolog.php' , 'config/config-live.php', 'config/config-test.php', 'docker-compose.yml', 'bitbucket-pipelines.yml'];
+        $files = [ 'config/config-dev.php', 'config/config-staging.php' , 'config/config-prod.php', 'config/config-test.php', 'docker-compose.yml', 'bitbucket-pipelines.yml'];
         $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
-            $contents = str_replace( 'super_secret_key', JwtWrapper::generateSecret(64), $contents);
+            $contents = str_replace( 'jwt_super_secret_key', JwtWrapper::generateSecret(64), $contents);
             $contents = str_replace('mysql://root:mysqlp455w0rd@mysql-container/mydb', "$mysqlConnection", $contents);
             $contents = str_replace('mysql-container', $uri->getHost(), $contents);
             $contents = str_replace('mysqlp455w0rd', $uri->getPassword(), $contents);

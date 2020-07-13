@@ -7,11 +7,10 @@ use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use Closure;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class _Lib
 {
-    protected $container;
-    protected $image;
     protected $workdir;
     protected $systemOs;
 
@@ -45,13 +44,14 @@ class _Lib
     /**
      * Execute the given command by displaying console output live to the user.
      *
-     * @param  string|array $cmd :  command to be executed
+     * @param string|array $cmd :  command to be executed
      * @return array   exit_status  :  exit status of the executed command
      *                  output       :  console output of the executed command
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     protected function liveExecuteCommand($cmd)
     {
@@ -104,8 +104,9 @@ class _Lib
      * @return mixed
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     protected function replaceVariables($variableValue)
     {
@@ -118,7 +119,7 @@ class _Lib
                     $variableValue
                 );
             }
-        };
+        }
 
         return $variableValue;
     }

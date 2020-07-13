@@ -15,6 +15,7 @@ pipelines:
             - docker login $DOCKER_REGISTRY --username $DOCKER_LOGIN --password $DOCKER_PASSWORD
             - docker network create testapp
             - docker run --name mysql-container --rm --network=testapp -e MYSQL_ROOT_PASSWORD=mysqlp455w0rd -e TZ=America/Sao_Paulo -p 3306:3306 -d mysql:5.7
+            - composer config --global github-oauth.github.com ${GITHUB_TOKEN}
             - composer install
             - export APPLICATION_ENV=test
             - composer restdocs
