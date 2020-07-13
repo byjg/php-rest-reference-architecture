@@ -2,12 +2,16 @@
 
 namespace RestTemplate\Repository;
 
-use Builder\Psr11;
+use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\MicroOrm\Exception\OrmModelInvalidException;
+use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
+use ByJG\MicroOrm\Repository;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use RestTemplate\Model\Dummy;
 
 class DummyRepository extends BaseRepository
@@ -15,19 +19,25 @@ class DummyRepository extends BaseRepository
     /**
      * DummyRepository constructor.
      *
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws KeyNotFoundException
-     * @throws InvalidArgumentException
+     * @param DbDriverInterface $dbDriver
+     *
      */
-    public function __construct()
+    public function __construct(DbDriverInterface $dbDriver)
     {
-        $this->repository = Psr11::container()->get('DUMMY_TABLE');
+        $mapper = new Mapper(
+            Dummy::class,
+            'dummy',
+            'id'
+        );
+
+        $this->repository = new Repository($dbDriver, $mapper);
     }
 
     /**
      * @param $field string
      * @return null|Dummy[]
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
     public function getByField($field)
     {

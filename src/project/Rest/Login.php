@@ -3,6 +3,8 @@
 namespace RestTemplate\Rest;
 
 use Builder\Psr11;
+use ByJG\Authenticate\Model\UserModel;
+use ByJG\Authenticate\UsersDBDataset;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
@@ -12,7 +14,9 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use RestTemplate\Model\User;
+use Swagger\Annotations as SWG;
 
 class Login extends ServiceAbstractBase
 {
@@ -60,15 +64,17 @@ class Login extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws Error401Exception
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
     public function post($response, $request)
     {
         $json = json_decode($request->payload());
 
-        $users = Psr11::container()->get('LOGIN');
+        $users = Psr11::container()->get(UsersDBDataset::class);
         $user = $users->isValidUser($json->username, $json->password);
         $metadata = $this->createUserMetadata($user);
 
@@ -111,6 +117,8 @@ class Login extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
     public function refreshToken($response, $request)
     {
@@ -122,14 +130,19 @@ class Login extends ServiceAbstractBase
             throw new Error401Exception("You only can refresh the token 5 minutes before expire");
         }
 
-        $users = Psr11::container()->get('LOGIN');
+        $users = Psr11::container()->get(UsersDBDataset::class);
         $user = $users->getById(new Literal("X'" . str_replace("-", "", $result["data"]["userid"]) . "'"));
 
-        $response->write([ "token" => $this->createToken($this->createUserMetadata($user))]);
+        $metadata = $this->createUserMetadata($user);
+        
+        $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
+        $response->write(['token' => $this->createToken($metadata)]);
+        $response->write(['data' => $metadata]);
+       
     }
 
     /**
-     * @param User $user
+     * @param UserModel $user
      * @return mixed
      * @throws Error401Exception
      */
@@ -139,12 +152,10 @@ class Login extends ServiceAbstractBase
             throw new Error401Exception('Username or password is invalid');
         }
 
-        $metadata = [
+        return [
             'role' => ($user->getAdmin() === 'yes' ? 'admin' : 'user'),
             'userid' => $user->getUserid(),
             'name' => $user->getName()
         ];
-
-        return $metadata;
     }
 }

@@ -12,8 +12,12 @@ services:
       - ./src:/srv/web/src
       - ./vendor:/srv/web/vendor
       - ./web:/srv/web/web
+      - ./template:/srv/web/template
     environment:
       - APPLICATION_ENV=dev
+      - NGINX_ROOT=/srv/web/web
+      - VERBOSE=true
+      - PHP_CONTROLLER=/app.php
 #    deploy:
 #      replicas: 1
 #      resources:

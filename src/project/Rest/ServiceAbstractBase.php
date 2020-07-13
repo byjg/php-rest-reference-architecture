@@ -7,8 +7,10 @@ use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\Util\JwtWrapper;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class ServiceAbstractBase
 {
@@ -18,12 +20,13 @@ class ServiceAbstractBase
      * @return mixed
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     public function createToken($properties = [])
     {
-        $jwt = Psr11::container()->get('JWT_WRAPPER');
+        $jwt = Psr11::container()->get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 1800);
         return $jwt->generateToken($jwtData);
     }
@@ -38,7 +41,7 @@ class ServiceAbstractBase
     public function requireAuthenticated($token = null, $fullToken = false)
     {
         try {
-            $jwt = Psr11::container()->get('JWT_WRAPPER');
+            $jwt = Psr11::container()->get(JwtWrapper::class);
             $tokenInfo = json_decode(json_encode($jwt->extractData($token)), true);
             if ($fullToken) {
                 return $tokenInfo;

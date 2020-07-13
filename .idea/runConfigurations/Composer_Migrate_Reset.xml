@@ -1,10 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Composer Migrate Reset" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="/usr/bin/composer" scriptParameters="migrate -- reset --yes">
-    <CommandLine workingDirectory="$PROJECT_DIR$">
-      <envs>
-        <env name="APPLICATION_ENV" value="dev" />
-      </envs>
-    </CommandLine>
+  <configuration default="false" name="Composer Migrate Reset" type="ComposerRunConfigurationType" factoryName="Composer Script">
+    <option name="commandLineParameters" value="-- reset --yes --env=dev" />
+    <option name="pathToComposerJson" value="$PROJECT_DIR$/composer.json" />
+    <option name="script" value="migrate" />
     <method v="2" />
   </configuration>
 </component>

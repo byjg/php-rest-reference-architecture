@@ -1,92 +1,131 @@
 <?php
 
 use Builder\Psr11;
+use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
 use ByJG\Authenticate\Definition\UserDefinition;
 use ByJG\Authenticate\Definition\UserPropertiesDefinition;
+use ByJG\Authenticate\UsersDBDataset;
+use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
+use ByJG\Config\DependencyInjection as DI;
+use ByJG\Config\Param;
+use ByJG\Mail\Envelope;
+use ByJG\Mail\MailerFactory;
+use ByJG\Mail\Wrapper\MailgunApiWrapper;
+use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal;
-use ByJG\MicroOrm\Mapper;
-use ByJG\MicroOrm\Repository;
+use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
+use ByJG\RestServer\Route\OpenApiRouteDefinition;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
-use RestTemplate\Model\Dummy;
-use RestTemplate\Model\DummyHex;
 use RestTemplate\Model\User;
+use RestTemplate\Repository\DummyHexRepository;
+use RestTemplate\Repository\DummyRepository;
+use RestTemplate\Repository\UserRepository;
 
 return [
 
-    'CACHE_ROUTES' => function () {
-        return new NoCacheEngine();
-    },
-
     'WEB_SERVER' => 'localhost',
+    'DASH_SERVER' => 'localhost',
+    'WEB_SCHEMA' => "http",
     'API_SERVER' => "localhost",
-    'JWT_SECRET' => function () {
-        return new JwtKeySecret('super_secret_key');
-    },
-
-
+    'API_SCHEMA' => "http",
     'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/mydb',
 
-    'DUMMY_TABLE' => function () {
-        $dbDriver = Factory::getDbRelationalInstance(Psr11::container()->get('DBDRIVER_CONNECTION'));
+    BaseCacheEngine::class => DI::bind(NoCacheEngine::class)
+        ->toSingleton(),
 
-        $mapper = new Mapper(
-            Dummy::class,
-            'dummy',
-            'id'
-        );
+    OpenApiRouteDefinition::class => DI::bind(OpenApiRouteDefinition::class)
+        ->withConstructorArgs([
+            __DIR__ . '/../web/docs/swagger.json',
+            Param::get(BaseCacheEngine::class)
+        ])
+        ->withMethodCall("withDefaultProcessor", [JsonCleanOutputProcessor::class])
+        ->toSingleton(),
 
-        return new Repository($dbDriver, $mapper);
+    JwtKeySecret::class => DI::bind(JwtKeySecret::class)
+        ->withConstructorArgs(['jwt_super_secret_key'])
+        ->toSingleton(),
+
+    JwtWrapper::class => DI::bind(JwtWrapper::class)
+        ->withConstructorArgs([Param::get('API_SERVER'), Param::get(JwtKeySecret::class)])
+        ->toSingleton(),
+
+    MailWrapperInterface::class => function () {
+        $apiKey = "mailgun://uri";
+        MailerFactory::registerMailer('mailgun', MailgunApiWrapper::class);
+
+        return MailerFactory::create($apiKey);
     },
 
-    'DUMMYHEX_TABLE' => function () {
-        $dbDriver = Factory::getDbRelationalInstance(Psr11::container()->get('DBDRIVER_CONNECTION'));
+    DbDriverInterface::class => DI::bind(Factory::class)
+        ->withFactoryMethod("getDbRelationalInstance", [Param::get('DBDRIVER_CONNECTION')])
+        ->toSingleton(),
 
-        $mapper = new Mapper(
-            DummyHex::class,
-            'dummyhex',
-            'id',
-            Psr11::container()->raw("_CLOSURE_NEWKEY")
-        );
+    DummyRepository::class => DI::bind(DummyRepository::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
 
-        Psr11::container()->get('_CLOSURE_FIELDMAP_ID', $mapper);
-        $mapper->addFieldMap('uuid', 'uuid', Mapper::doNotUpdateClosure());
+    DummyHexRepository::class => DI::bind(DummyHexRepository::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
 
-        return  new Repository($dbDriver, $mapper);
-    },
+    UserRepository::class => DI::bind(UserRepository::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
 
-    'LOGIN' => function () {
-        $userDefinition = new UserDefinition(
-            'users',
-            User::class,
-            UserDefinition::LOGIN_IS_EMAIL
-        );
-        $userDefinition->markPropertyAsReadOnly('uuid');
-        $userDefinition->defineClosureForSelect('userid', function ($value, $instance) {
-            if (!empty($instance->getUuid())) {
-                return $instance->getUuid();
+    UserDefinition::class => DI::bind(UserDefinition::class)
+        ->withConstructorArgs(['users', User::class, UserDefinition::LOGIN_IS_EMAIL])
+        ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
+        ->withMethodCall("defineClosureForSelect", [
+            "userid",
+            function ($value, $instance) {
+                if (!empty($instance->getUuid())) {
+                    return $instance->getUuid();
+                }
+                return $value;
             }
-            return $value;
-        });
-        $userDefinition->defineClosureForUpdate('userid', function ($value) {
-            if (empty($value)) {
-                return new Literal("unhex(replace(uuid(),'-',''))");
+        ])
+        ->withMethodCall("defineClosureForUpdate", [
+            'userid',
+            function ($value, $instance) {
+                if (empty($value)) {
+                    return new Literal("unhex(replace(uuid(),'-',''))");
+                }
+                return new Literal("X'" . str_replace('-', '', $value) . "'");
             }
-            return new Literal("X'" . str_replace('-', '', $value) . "'");
-        });
+        ])
+        ->toSingleton(),
 
-        return new ByJG\Authenticate\UsersDBDataset(
-            Psr11::container()->get('DBDRIVER_CONNECTION'),
-            $userDefinition,
-            new UserPropertiesDefinition()
-        );
+    UserPropertiesDefinition::class => DI::bind(UserPropertiesDefinition::class)
+        ->toSingleton(),
+
+
+    UsersDBDataset::class => DI::bind(UsersDBDataset::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
+
+    // ----------------------------------------------------------------------------
+
+    'MAIL_ENVELOPE' => function ($to, $subject, $template, $mapVariables = []) {
+        $body = "";
+
+        if (!empty($template)) {
+            $body = file_get_contents(__DIR__ . "/../template/$template");
+            if (!empty($mapVariables)) {
+                foreach ($mapVariables as $key => $value) {
+                    $body = str_replace("{{ $key }}", $value, $body);
+                }
+            }
+        }
+        $prefix = "";
+        if (Psr11::environment()->getCurrentEnv() != "prod") {
+            $prefix = "[" . Psr11::environment()->getCurrentEnv() . "] ";
+        }
+        return new Envelope("info@example.org", $to, $prefix . $subject, $body, true);
     },
 
-    'JWT_WRAPPER' => function () {
-        return new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
-    },
 
     // -------------------------------------------------------------------------------
     // Use the closure below to add UUID to the MySQL keys instead of auto increment
