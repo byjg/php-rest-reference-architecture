@@ -13,6 +13,8 @@ class PostCreateScript
 {
     public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone)
     {
+        // ------------------------------------------------
+        // Defining function to interatively walking through the directories
         $directory = new RecursiveDirectoryIterator($workdir);
         $filter = new RecursiveCallbackFilterIterator($directory, function ($current/*, $key, $iterator*/) {
             // Skip hidden files and directories.
@@ -32,6 +34,7 @@ class PostCreateScript
 
         $composerParts = explode("/", $composerName);
 
+        // ------------------------------------------------
         //Replace composer name:
         $contents = file_get_contents($workdir . '/composer.json');
         file_put_contents(
@@ -39,6 +42,7 @@ class PostCreateScript
             str_replace('byjg/resttemplate', $composerName, $contents)
         );
 
+        // ------------------------------------------------
         // Replace Docker PHP Version
         $files = [ 'docker/Dockerfile', 'docker/Dockerfile-dev' ];
         foreach ($files as $file) {
@@ -50,8 +54,16 @@ class PostCreateScript
             );
         }
 
-        // Replace MySQL Connection
-        $files = [ 'config/config-dev.php', 'config/config-staging.php' , 'config/config-prod.php', 'config/config-test.php', 'docker-compose.yml', 'bitbucket-pipelines.yml'];
+        // ------------------------------------------------
+        // Adjusting config files
+        $files = [
+            'config/config-dev.php',
+            'config/config-staging.php' ,
+            'config/config-prod.php', '
+            config/config-test.php',
+            'docker-compose.yml',
+            'bitbucket-pipelines.yml'
+        ];
         $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
@@ -66,7 +78,8 @@ class PostCreateScript
             );
         }
 
-        // Replace Namespace
+        // ------------------------------------------------
+        // Adjusting namespace
         $objects = new RecursiveIteratorIterator($filter);
         foreach ($objects as $name => $object) {
             $contents = file_get_contents($name);
