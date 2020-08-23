@@ -59,8 +59,8 @@ class PostCreateScript
         $files = [
             'config/config-dev.php',
             'config/config-staging.php' ,
-            'config/config-prod.php', '
-            config/config-test.php',
+            'config/config-prod.php',
+            'config/config-test.php',
             'docker-compose.yml',
             'bitbucket-pipelines.yml'
         ];
