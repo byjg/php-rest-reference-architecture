@@ -2,10 +2,17 @@
 
 namespace Builder;
 
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
+use ByJG\DbMigration\Exception\InvalidMigrationFile;
 use ByJG\DbMigration\Migration;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class Scripts extends _Lib
 {
@@ -15,24 +22,13 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
-    public static function build()
-    {
-        $build = new Scripts();
-        $build->runBuild();
-    }
-
-    /**
-     * @param \Composer\Script\Event $event
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \ByJG\DbMigration\Exception\InvalidMigrationFile
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param Event $event
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws InvalidMigrationFile
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     public static function migrate(Event $event)
     {
@@ -41,85 +37,36 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param Event $event
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
-    public static function genRestDocs()
+    public static function genRestDocs(Event $event)
     {
         $build = new Scripts();
-        $build->runGenRestDocs();
+        $build->runGenRestDocs($event->getArguments());
     }
-
-
-    /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
-    public function runBuild()
-    {
-        $dockerExtra = Psr11::container()->get('BUILDER_DOCKERFILE');
-        if (!empty($dockerExtra)) {
-            $dockerExtra = array_merge(
-                [
-                    '############################################################',
-                    '##-- START CUSTOM',
-                    'ENV APPLICATION_ENV=' . Psr11::environment()->getCurrentEnv()
-                ],
-                (array)$dockerExtra,
-                [
-                    '##-- END CUSTOM',
-                    '############################################################',
-                ]
-            );
-
-            $dockerFile = file_get_contents($this->workdir . '/docker/Dockerfile');
-
-            file_put_contents(
-                $this->workdir . '/Dockerfile',
-                str_replace('##---ENV-SPECIFICS-HERE', implode("\n", $dockerExtra), $dockerFile)
-            );
-        }
-
-        $beforeBuild = Psr11::container()->get('BUILDER_BEFORE_BUILD');
-        $build = Psr11::container()->get('BUILDER_BUILD');
-        $deployCommand = Psr11::container()->get('BUILDER_DEPLOY_COMMAND');
-        $afterDeploy = Psr11::container()->get('BUILDER_AFTER_DEPLOY');
-
-        // Before Build
-        if (!empty($beforeBuild)) {
-            $this->liveExecuteCommand($beforeBuild);
-        }
-
-        // Build
-        if (!empty($build)) {
-            $this->liveExecuteCommand($build);
-        }
-        // Deploy
-        if (!empty($deployCommand)) {
-            $this->liveExecuteCommand($deployCommand);
-        }
-        // After Deploy
-        if (!empty($afterDeploy)) {
-            $this->liveExecuteCommand($afterDeploy);
-        }
-    }
-
 
     /**
      * @param $arguments
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \ByJG\DbMigration\Exception\InvalidMigrationFile
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws InvalidMigrationFile
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     public function runMigrate($arguments)
     {
-        $dbConnection = Psr11::container()->get('DBDRIVER_CONNECTION');
+        $argumentList = $this->extractArguments($arguments);
+        if (isset($argumentList["command"])) {
+            echo "> Command: ${argumentList["command"]} \n";
+        }
+
+        $dbConnection = Psr11::container($argumentList["--env"])->get('DBDRIVER_CONNECTION');
 
         $migration = new Migration(new Uri($dbConnection), $this->workdir . "/db");
         $migration->registerDatabase("mysql", MySqlDatabase::class);
@@ -127,11 +74,9 @@ class Scripts extends _Lib
             echo "Doing $cmd, $version\n";
         });
 
-        $argumentList = $this->extractArguments($arguments);
-
         $exec['reset'] = function () use ($migration, $argumentList) {
             if (!$argumentList["--yes"]) {
-                throw new \Exception("Reset require the argument --yes");
+                throw new Exception("Reset require the argument --yes");
             }
             $migration->prepareEnvironment();
             $migration->reset();
@@ -142,25 +87,35 @@ class Scripts extends _Lib
             $migration->update($argumentList["--up-to"], $argumentList["--force"]);
         };
 
-        if (isset($exec[$argumentList['command']])) {
-            $exec[$argumentList['command']]();
-        }
+        $exec["version"] = function () use ($migration, $argumentList) {
+            foreach ($migration->getCurrentVersion() as $key => $value) {
+                echo "$key: $value\n";
+            }
+        };
+
+        $exec[$argumentList['command']]();
     }
 
     /**
      * @param $arguments
+     * @param bool $hasCmd
      * @return array
      */
-    protected function extractArguments($arguments) {
+    protected function extractArguments($arguments, $hasCmd = true) {
         $ret = [
             '--up-to' => null,
             '--yes' => null,
             '--force' => false,
+            '--env' => null
         ];
 
-        $ret['command'] = isset($arguments[0]) ? $arguments[0] : null;
+        $start = 0;
+        if ($hasCmd) {
+            $ret['command'] = isset($arguments[0]) ? $arguments[0] : null;
+            $start = 1;
+        }
 
-        for ($i=1; $i < count($arguments); $i++) {
+        for ($i=$start; $i < count($arguments); $i++) {
             $args = explode("=", $arguments[$i]);
             $ret[$args[0]] = isset($args[1]) ? $args[1] : true;
         }
@@ -169,12 +124,14 @@ class Scripts extends _Lib
     }
 
     /**
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param $arguments
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
-    public function runGenRestDocs()
+    public function runGenRestDocs($arguments)
     {
         $docPath = $this->workdir . '/web/docs/';
         chdir($this->workdir);
@@ -187,8 +144,10 @@ class Scripts extends _Lib
             . "--processor OperationId"
         );
 
+        $argumentList = $this->extractArguments($arguments, false);
+
         $docs = file_get_contents("$docPath/swagger.json");
-        $docs = str_replace('__HOSTNAME__', Psr11::container()->get('API_SERVER'), $docs);
+        $docs = str_replace('__HOSTNAME__', Psr11::container($argumentList["--env"])->get('API_SERVER'), $docs);
         file_put_contents("$docPath/swagger.json", $docs);
     }
 }
