@@ -25,7 +25,7 @@ This project requires in order to run:
 ## Create a Project from the Stable Release
 
 ```bash
-composer create-project byjg/resttemplate YOURPATH 4.0.*
+composer create-project byjg/resttemplate YOURPATH 4.1.*
 ```
 
 ## Create a Project from Development Release
