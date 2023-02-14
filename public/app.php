@@ -4,7 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use RestTemplate\Psr11;
 use ByJG\RestServer\HttpRequestHandler;
-use ByJG\RestServer\Route\OpenApiRouteDefinition;
+use ByJG\RestServer\Route\OpenApiRouteList;
 
 /**
  * @SWG\Swagger(
@@ -57,7 +57,4 @@ use ByJG\RestServer\Route\OpenApiRouteDefinition;
 
 $server = new HttpRequestHandler();
 
-// $server->setPathHandler("get", "/user", \ByJG\RestServer\HandleOutput\JsonCleanHandler::class);
-// $server->setMimeTypeHandler("image/png", \ByJG\RestServer\HandleOutput\HtmlHandler::class);
-
-$server->handle(Psr11::container()->get(OpenApiRouteDefinition::class));
+$server->handle(Psr11::container()->get(OpenApiRouteList::class));
