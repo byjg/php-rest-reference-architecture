@@ -1,6 +1,5 @@
 <?php
 
-use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
 use ByJG\Authenticate\Definition\UserDefinition;
@@ -16,10 +15,11 @@ use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
-use ByJG\RestServer\Route\OpenApiRouteDefinition;
+use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
 use RestTemplate\Model\User;
+use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
 use RestTemplate\Repository\UserRepository;
@@ -36,12 +36,12 @@ return [
     BaseCacheEngine::class => DI::bind(NoCacheEngine::class)
         ->toSingleton(),
 
-    OpenApiRouteDefinition::class => DI::bind(OpenApiRouteDefinition::class)
+    OpenAPiRouteList::class => DI::bind(OpenAPiRouteList::class)
         ->withConstructorArgs([
-            __DIR__ . '/../public/docs/swagger.json',
-            Param::get(BaseCacheEngine::class)
+            __DIR__ . '/../public/docs/swagger.json'
         ])
         ->withMethodCall("withDefaultProcessor", [JsonCleanOutputProcessor::class])
+        ->withMethodCall("withCache", [Param::get(BaseCacheEngine::class)])
         ->toSingleton(),
 
     JwtKeySecret::class => DI::bind(JwtKeySecret::class)

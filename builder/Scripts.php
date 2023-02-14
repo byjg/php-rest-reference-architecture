@@ -11,10 +11,10 @@ use ByJG\DbMigration\Migration;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
 use Exception;
-use Psr\SimpleCache\InvalidArgumentException;
-use ReflectionException;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use ReflectionException;
 
 class Scripts extends BaseScripts
@@ -66,7 +66,9 @@ class Scripts extends BaseScripts
     {
         $argumentList = $this->extractArguments($arguments);
         if (isset($argumentList["command"])) {
-            echo "> Command: ${argumentList["command"]} \n";
+            echo "> Command: " . $argumentList["command"] . "\n";
+        } else {
+            throw new Exception("Command not found. Use: reset, update, version");
         }
 
         $dbConnection = Psr11::container($argumentList["--env"])->get('DBDRIVER_CONNECTION');
@@ -78,8 +80,8 @@ class Scripts extends BaseScripts
         });
 
         $exec['reset'] = function () use ($migration, $argumentList) {
-            if (!$argumentList["--yes"]) {
-                throw new Exception("Reset require the argument --yes");
+            if (!isset($argumentList["yes"])) {
+                throw new Exception("Reset require the argument 'yes'");
             }
             $migration->prepareEnvironment();
             $migration->reset();

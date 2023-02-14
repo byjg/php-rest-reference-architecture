@@ -25,4 +25,7 @@ and open the template in the editor.
         </testsuite>
     </testsuites>
 
+    <php>
+        <env name="APP_ENV" value="test" force="true" />
+    </php>
 </phpunit>

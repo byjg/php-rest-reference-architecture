@@ -2,7 +2,6 @@
 
 namespace RestTemplate\Rest;
 
-use RestTemplate\Psr11;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
@@ -16,9 +15,9 @@ use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestTemplate\Model\Dummy;
 use RestTemplate\Model\DummyHex;
+use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
-use Swagger\Annotations as SWG;
 
 class Sample extends ServiceAbstractBase
 {
@@ -241,7 +240,7 @@ class Sample extends ServiceAbstractBase
     {
         $model = new DummyHex();
         $payload = json_decode($request->payload());
-        BinderObject::bindObject($payload, $model);
+        BinderObject::bind($payload, $model);
 
         $dummyRepo = Psr11::container()->get(DummyRepository::class);
         $dummyRepo->save($model);
@@ -341,7 +340,7 @@ class Sample extends ServiceAbstractBase
     {
         $model = new DummyHex();
         $payload = json_decode($request->payload());
-        BinderObject::bindObject($payload, $model);
+        BinderObject::bind($payload, $model);
 
         $dummyRepo = Psr11::container()->get(DummyHexRepository::class);
         $dummyRepo->save($model);
