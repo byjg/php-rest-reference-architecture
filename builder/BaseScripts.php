@@ -2,12 +2,16 @@
 
 namespace Builder;
 
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use Closure;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use RestTemplate\Psr11;
 
 class BaseScripts
 {
-    protected $container;
-    protected $image;
     protected $workdir;
     protected $systemOs;
 
@@ -41,13 +45,14 @@ class BaseScripts
     /**
      * Execute the given command by displaying console output live to the user.
      *
-     * @param  string|array $cmd :  command to be executed
+     * @param string|array $cmd :  command to be executed
      * @return array   exit_status  :  exit status of the executed command
      *                  output       :  console output of the executed command
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     protected function liveExecuteCommand($cmd)
     {
@@ -95,58 +100,28 @@ class BaseScripts
         );
     }
 
-    protected $dockerVariables = null;
-
     /**
-     * @return array|null
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
-    protected function getDockerVariables()
-    {
-        // Builder Variables
-        if ($this->dockerVariables === null) {
-            $this->dockerVariables = [
-                '%env%'     => Psr11::environment()->getCurrentEnv(),
-                '%workdir%' => $this->workdir
-            ];
-
-            // Get User Variables
-            $variables = Psr11::container()->get('BUILDER_VARIABLES');
-            foreach ((array)$variables as $variable => $value) {
-                $this->dockerVariables["%$variable%"] = $this->replaceVariables($value);
-            }
-        }
-
-        return $this->dockerVariables;
-    }
-
-    /**
-     * @param string|\Closure $variableValue
+     * @param string|Closure $variableValue
      * @return mixed
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     protected function replaceVariables($variableValue)
     {
-        // Builder Variables
-        $args = $this->getDockerVariables();
-
-        if ($variableValue instanceof \Closure) {
-            $string = $variableValue($args);
-        } else {
-            $string = $variableValue;
+        $args = [];
+        if (preg_match_all("/%[\\w\\d]+%/", $variableValue, $args)) {
+            foreach ($args[0] as $arg) {
+                $variableValue = str_replace(
+                    $arg,
+                    Psr11::container()->get(substr($arg,1, -1)),
+                    $variableValue
+                );
+            }
         }
 
-        // Replace variables into string
-        foreach ($args as $arg => $value) {
-            $string = str_replace($arg, $value, $string);
-        }
-
-        return $string;
+        return $variableValue;
     }
 }

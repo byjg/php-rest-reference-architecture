@@ -1,0 +1,59 @@
+version: '3.2'
+services:
+  rest:
+    image: resttest:dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-dev
+    ports:
+      - 80:80
+    volumes:
+      - ./config:/srv/public/config
+      - ./src:/srv/public/src
+      - ./vendor:/srv/public/vendor
+      - ./web:/srv/public/web
+      - ./template:/srv/public/template
+    environment:
+      - APPLICATION_ENV=dev
+      - NGINX_ROOT=/srv/public/web
+      - VERBOSE=true
+      - PHP_CONTROLLER=/app.php
+#    deploy:
+#      replicas: 1
+#      resources:
+#        limits:
+#          cpus: '0.50'
+#          memory: 384M
+#        reservations:
+#          cpus: '0.20'
+#          memory: 64M
+    networks:
+      - net
+
+  mysql-container:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: mysqlp455w0rd
+      TZ: America/Sao_Paulo
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+#    deploy:
+#      replicas: 1
+#      resources:
+#        limits:
+#          cpus: '0.80'
+#          memory: 640M
+#        reservations:
+#          cpus: '0.10'
+#          memory: 64M
+    networks:
+      - net
+
+volumes:
+  mysql:
+
+networks:
+  net:
+

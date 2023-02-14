@@ -3,34 +3,39 @@ sudo: required
 language: php
 
 php:
+  - "7.3"
   - "7.2"
   - "7.1"
   - "7.0"
-  - "5.6"
 
-env:
-  - APPLICATION_ENV=dev
+services:
+  - docker
 
 addons:
   hosts:
     - mysql-container
 
-services:
-  - docker
-
 before_install:
+  - export APPLICATION_ENV=dev
+  - export DOCKER_COMPOSE_VERSION=1.23.2
+  - composer config --global github-oauth.github.com ${GITHUB_TOKEN}
   - sudo service mysql stop || echo "mysql not stopped"
+  - sudo rm -f /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
-install:
-  - sed -ie "s/7\.2/${TRAVIS_PHP_VERSION:0:3}/" docker/Dockerfile
-  - npm i
-  - node_modules/.bin/usdocker --refresh . -v mysql up --home /tmp --no-link
+before_script:
+  - sed -i "s~\(FROM byjg/php:\)[5-7]\.[0-9]~\1${TRAVIS_PHP_VERSION:0:3}~" docker/Dockerfile-dev
+  - docker-compose up -d mysql-container
   - composer install
   - composer restdocs
+  - docker-compose up -d
   - composer migrate -- reset --yes
-  - composer build
-  - docker ps -a
   - sleep 15
 
 script:
   - vendor/bin/phpunit
+
+after_script:
+  - docker-compose down

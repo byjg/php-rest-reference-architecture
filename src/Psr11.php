@@ -2,7 +2,11 @@
 
 namespace RestTemplate;
 
+use ByJG\Config\Container;
 use ByJG\Config\Definition;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class Psr11
 {
@@ -10,15 +14,16 @@ class Psr11
     private static $container = null;
 
     /**
-     * @return \ByJG\Config\Container
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param string $env
+     * @return Container
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
      */
-    public static function container()
+    public static function container($env = null)
     {
         if (is_null(self::$container)) {
-            self::$container = self::environment()->build();
+            self::$container = self::environment()->build($env);
         }
 
         return self::$container;
@@ -27,7 +32,7 @@ class Psr11
 
     /**
      * @return Definition
-     * @throws \ByJG\Config\Exception\EnvironmentException
+     * @throws EnvironmentException
      */
     public static function environment()
     {
@@ -36,10 +41,10 @@ class Psr11
                 ->addEnvironment('dev')
                 ->addEnvironment('test')
                     ->inheritFrom('dev')
-                ->addEnvironment('homolog')
+                ->addEnvironment('staging')
                     ->inheritFrom('dev')
-                ->addEnvironment('live')
-                    ->inheritFrom('homolog')
+                ->addEnvironment('prod')
+                    ->inheritFrom('staging')
                     ->inheritFrom('dev');
             // ->setCache($somePsr16Implementation); // This will cache the result;
         }
