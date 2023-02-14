@@ -26,13 +26,6 @@ use RestTemplate\Repository\UserRepository;
 
 return [
 
-    'WEB_SERVER' => 'localhost',
-    'DASH_SERVER' => 'localhost',
-    'WEB_SCHEMA' => "http",
-    'API_SERVER' => "localhost",
-    'API_SCHEMA' => "http",
-    'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/mydb',
-
     BaseCacheEngine::class => DI::bind(NoCacheEngine::class)
         ->toSingleton(),
 

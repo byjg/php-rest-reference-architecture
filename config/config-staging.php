@@ -7,10 +7,6 @@ use ByJG\Util\JwtKeySecret;
 
 return [
 
-    'WEB_SERVER' => 'www-hmlg.example.org',
-    'API_SERVER' => "api-hmlg.example.org",
-    'DBDRIVER_CONNECTION' => 'mysql://root:' . getenv('MYSQL_ROOT_PASSWORD') . '@mysql-dev/mydb',
-
     BaseCacheEngine::class => DI::bind(FileSystemCacheEngine::class)->toSingleton(),
 
     JwtKeySecret::class => DI::bind(JwtKeySecret::class)
