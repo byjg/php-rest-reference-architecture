@@ -78,7 +78,7 @@ class Login extends ServiceAbstractBase
         $user = $users->isValidUser($json->username, $json->password);
         $metadata = $this->createUserMetadata($user);
 
-        $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
+        $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
         $response->write(['token' => $this->createToken($metadata)]);
         $response->write(['data' => $metadata]);
     }
@@ -135,7 +135,7 @@ class Login extends ServiceAbstractBase
 
         $metadata = $this->createUserMetadata($user);
         
-        $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
+        $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
         $response->write(['token' => $this->createToken($metadata)]);
         $response->write(['data' => $metadata]);
        

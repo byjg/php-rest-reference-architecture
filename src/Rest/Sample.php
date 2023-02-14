@@ -140,7 +140,7 @@ class Sample extends ServiceAbstractBase
     {
         $model = new Dummy();
         $payload = json_decode($request->payload());
-        BinderObject::bindObject($payload, $model);
+        BinderObject::bind($payload, $model);
 
         $dummyRepo = Psr11::container()->get(DummyRepository::class);
         $dummyRepo->save($model);
@@ -240,7 +240,7 @@ class Sample extends ServiceAbstractBase
     {
         $model = new DummyHex();
         $payload = json_decode($request->payload());
-        BinderObject::bindObject($payload, $model);
+        BinderObject::bind($payload, $model);
 
         $dummyRepo = Psr11::container()->get(DummyHexRepository::class);
         $dummyRepo->save($model);

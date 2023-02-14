@@ -38,12 +38,12 @@ class Psr11
     {
         if (is_null(self::$definition)) {
             self::$definition = (new Definition())
-                ->addEnvironment('dev')
-                ->addEnvironment('test')
+                ->addConfig('dev')
+                ->addConfig('test')
                     ->inheritFrom('dev')
-                ->addEnvironment('staging')
+                ->addConfig('staging')
                     ->inheritFrom('dev')
-                ->addEnvironment('prod')
+                ->addConfig('prod')
                     ->inheritFrom('staging')
                     ->inheritFrom('dev');
             // ->setCache($somePsr16Implementation); // This will cache the result;

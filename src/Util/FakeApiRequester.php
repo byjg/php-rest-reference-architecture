@@ -14,7 +14,8 @@ use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\MockRequestHandler;
-use ByJG\RestServer\Route\OpenApiRouteDefinition;
+use ByJG\RestServer\Route\OpenApiRouteList;
+use ByJG\Util\MockClient;
 use ByJG\Util\Psr7\MessageException;
 use ByJG\Util\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
@@ -45,6 +46,9 @@ class FakeApiRequester extends AbstractRequester
      */
     protected function handleRequest(RequestInterface $request)
     {
-        return MockRequestHandler::mock(Psr11::container()->get(OpenApiRouteDefinition::class), $request);
+        $mock = MockRequestHandler::mock(Psr11::container()->get(OpenApiRouteList::class), $request);
+
+        $httpClient = new MockClient($mock->getPsr7Response());
+        return $httpClient->sendRequest($request);
     }
 }

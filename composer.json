@@ -8,15 +8,15 @@
     "php": ">5.6.0",
     "ext-json": "*",
     "ext-openssl": "*",
-    "byjg/config": "4.0.*",
-    "byjg/micro-orm": "4.1.*",
-    "byjg/authuser": "4.2.*",
-    "byjg/restserver": "4.0.*",
+    "byjg/config": "dev-bump",
+    "byjg/micro-orm": "dev-bump",
+    "byjg/authuser": "dev-bump",
+    "byjg/mailwrapper": "dev-bump",
+    "byjg/restserver": "dev-bump",
     "byjg/jwt-wrapper": "2.0.*",
-    "byjg/mailwrapper": "2.1.*",
     "zircote/swagger-php": "2.0.13.1",
-    "byjg/swagger-test": "3.1.*",
-    "byjg/migration": "4.1.*"
+    "byjg/swagger-test": "dev-bump",
+    "byjg/migration": "dev-bump"
   },
   "require-dev": {
     "phpunit/phpunit": "5.7.*|7.4.*"

@@ -1,0 +1,32 @@
+version: '3.2'
+services:
+  rest:
+    image: resttest:dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - 8080:80
+    environment:
+      - APPLICATION_ENV=dev
+    networks:
+      - net
+
+  mysql-container:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: mysqlp455w0rd
+      TZ: UTC
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - net
+
+volumes:
+  mysql:
+
+networks:
+  net:
+

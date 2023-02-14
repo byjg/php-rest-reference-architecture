@@ -16,11 +16,10 @@ ENV TZ=UTC
 COPY builder /srv/builder
 COPY config /srv/config
 COPY src /srv/src
-COPY vendor /srv/vendor
 COPY public /srv/public
 COPY template /srv/template
 
-
 # This is necessary for the migration script
-COPY composer.* /srv/html/
-COPY db /srv/html/db
+COPY composer.* /srv
+COPY db /srv/db
+RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader
