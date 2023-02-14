@@ -2,7 +2,7 @@
   <configuration default="false" name="PHPUnit" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
     <CommandLine>
       <envs>
-        <env name="APPLICATION_ENV" value="dev" />
+        <env name="APPLICATION_ENV" value="test" />
       </envs>
     </CommandLine>
     <TestRunner configuration_file="$PROJECT_DIR$/phpunit.xml.dist" scope="XML" use_alternative_configuration_file="true" />

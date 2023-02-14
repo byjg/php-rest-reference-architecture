@@ -2,9 +2,15 @@
 
 namespace RestTemplate\Rest;
 
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\Util\JwtWrapper;
 use RestTemplate\Psr11;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class ServiceAbstractBase
 {
@@ -12,31 +18,37 @@ class ServiceAbstractBase
     /**
      * @param array $properties
      * @return mixed
-     * @throws \ByJG\Config\Exception\ConfigNotFoundException
-     * @throws \ByJG\Config\Exception\EnvironmentException
-     * @throws \ByJG\Config\Exception\KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     public function createToken($properties = [])
     {
-        $jwt = new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
+        $jwt = Psr11::container()->get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 1800);
         return $jwt->generateToken($jwtData);
     }
 
     /**
      * @param null $token
+     * @param bool $fullToken
      * @return mixed
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
-    public function requireAuthenticated($token = null)
+    public function requireAuthenticated($token = null, $fullToken = false)
     {
         try {
-            $jwt = new JwtWrapper(Psr11::container()->get('API_SERVER'), Psr11::container()->get('JWT_SECRET'));
+            $jwt = Psr11::container()->get(JwtWrapper::class);
             $tokenInfo = json_decode(json_encode($jwt->extractData($token)), true);
-            return $tokenInfo['data'];
-        } catch (\Exception $ex) {
+            if ($fullToken) {
+                return $tokenInfo;
+            } else {
+                return $tokenInfo['data'];
+            }
+        } catch (Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
     }
@@ -45,8 +57,8 @@ class ServiceAbstractBase
      * @param $role
      * @param null $token
      * @return mixed
-     * @throws \ByJG\RestServer\Exception\Error401Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
      */
     public function requireRole($role, $token = null)
     {

@@ -2,27 +2,25 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use \ByJG\RestServer\ServerRequestHandler;
-use \RestTemplate\Psr11;
+use RestTemplate\Psr11;
+use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Route\OpenApiRouteDefinition;
 
 /**
  * @SWG\Swagger(
  *     schemes={"http"},
  *     basePath="",
- *     host="__HOSTNAME__",
  *     consumes={"application/json"},
  *     produces={"application/json"},
  *     @SWG\Info(
  *         version="1.0.0",
  *         title="Title",
  *         description="Description",
- *         termsOfService="http://__HOSTNAME__/terms/",
  *         @SWG\Contact(
  *             email="email@example.com"
  *         ),
  *         @SWG\License(
  *             name="Proprietary",
- *             url="http://__HOSTNAME__/LICENSE"
  *         )
  *     ),
  *     @SWG\ExternalDocumentation(
@@ -57,13 +55,9 @@ use \RestTemplate\Psr11;
  * )
  */
 
-$server = new ServerRequestHandler();
+$server = new HttpRequestHandler();
 
 // $server->setPathHandler("get", "/user", \ByJG\RestServer\HandleOutput\JsonCleanHandler::class);
 // $server->setMimeTypeHandler("image/png", \ByJG\RestServer\HandleOutput\HtmlHandler::class);
 
-$server->setRoutesSwagger(
-    __DIR__ . '/docs/swagger.json',
-    Psr11::container()->get('CACHE_ROUTES')
-);
-$server->handle();
+$server->handle(Psr11::container()->get(OpenApiRouteDefinition::class));

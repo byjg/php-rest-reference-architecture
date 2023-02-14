@@ -1,32 +1,26 @@
-FROM byjg/php:7.2-fpm-nginx
+FROM byjg/php:7.4-fpm-nginx
 
-WORKDIR /srv/web
+ENV NGINX_ROOT="/srv/public"
+ENV PHP_CONTROLLER="/app.php"
+
+WORKDIR /srv
 
 # Setup Docker/Fpm
-COPY ./docker/fpm/php/custom.ini /etc/php7/conf.d/custom.ini
-
-# SETUP CRONTAB
-# COPY ./docker/fpm/cron/crontab /etc/crontabs/root
-# COPY ./docker/fpm/cron/docker-php-entrypoint-replacement /usr/local/bin/docker-php-entrypoint
+COPY ./docker/fpm/php /etc/php7/conf.d
 
 # Setup DateFile
 RUN apk add --no-cache --update tzdata
-ENV TZ=America/Sao_Paulo
-
-# SETUP NGINX
-COPY docker/nginx/conf.d/default.conf /etc/nginx/conf.d/
+ENV TZ=UTC
 
 # Copy project files
-COPY config /srv/web/config
-COPY src /srv/web/src
-COPY vendor /srv/web/vendor
-COPY web /srv/web/web
-COPY builder /srv/web/builder
+COPY builder /srv/builder
+COPY config /srv/config
+COPY src /srv/src
+COPY vendor /srv/vendor
+COPY public /srv/public
+COPY template /srv/template
 
 
-##---ENV-SPECIFICS-HERE
-
-
-STOPSIGNAL SIGQUIT
-
-CMD ["/usr/bin/supervisord",  "-n",  "-c", "/etc/supervisord.conf" ]
+# This is necessary for the migration script
+COPY composer.* /srv/html/
+COPY db /srv/html/db

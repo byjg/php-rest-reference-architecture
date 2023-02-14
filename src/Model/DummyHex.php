@@ -5,18 +5,25 @@ namespace RestTemplate\Model;
 use Swagger\Annotations as SWG;
 
 /**
- * Model that represents the Dummy table
+ * Model that represents the DummyHex table
  *
- * @SWG\Definition(required={"field"}, type="object", @SWG\Xml(name="Dummy"))
+ * @SWG\Definition(required={"field"}, type="object", @SWG\Xml(name="DummyHex"))
  */
-class Dummy
+class DummyHex
 {
     /**
      * The "fake" key
      * @SWG\Property()
-     * @var int
+     * @var string
      */
     protected $id;
+
+    /**
+     * The UUID
+     * @SWG\Property()
+     * @var string
+     */
+    protected $uuid;
 
     /**
      * Some field property
@@ -41,6 +48,21 @@ class Dummy
         $this->id = $value;
     }
 
+    /**
+     * @return string
+     */
+    public function getUuid()
+    {
+        return $this->uuid;
+    }
+
+    /**
+     * @param string $uuid
+     */
+    public function setUuid($uuid)
+    {
+        $this->uuid = $uuid;
+    }
 
 
     /**

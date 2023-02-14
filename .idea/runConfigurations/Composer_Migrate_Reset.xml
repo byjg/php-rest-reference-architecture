@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Composer Migrate Update" type="ComposerRunConfigurationType" factoryName="Composer Script">
-    <option name="commandLineParameters" value="-- update --env=dev" />
+  <configuration default="false" name="Composer Migrate Reset" type="ComposerRunConfigurationType" factoryName="Composer Script">
+    <option name="commandLineParameters" value="-- reset --yes --env=dev" />
     <option name="pathToComposerJson" value="$PROJECT_DIR$/composer.json" />
     <option name="script" value="migrate" />
     <method v="2" />
