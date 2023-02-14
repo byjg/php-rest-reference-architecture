@@ -44,13 +44,13 @@ class PostCreateScript
 
         // ------------------------------------------------
         // Replace Docker PHP Version
-        $files = [ 'docker/Dockerfile', 'docker/Dockerfile-dev' ];
+        $files = [ 'docker/Dockerfile', 'docker/Dockerfile' ];
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
-            $contents = str_replace('ENV TZ=America/Sao_Paulo', "ENV TZ=${timezone}", $contents);
+            $contents = str_replace('ENV TZ=UTC', "ENV TZ=$timezone", $contents);
             file_put_contents(
                 "$workdir/$file",
-                str_replace('FROM byjg/php:7.2-fpm-nginx', "FROM byjg/php:${phpVersion}-fpm-nginx", $contents)
+                str_replace('FROM byjg/php:7.4-fpm-nginx', "FROM byjg/php:$phpVersion-fpm-nginx", $contents)
             );
         }
 
@@ -61,8 +61,8 @@ class PostCreateScript
             'config/config-staging.php' ,
             'config/config-prod.php',
             'config/config-test.php',
-            'docker-compose.yml',
-            'bitbucket-pipelines.yml'
+            'docker-compose-dev.yml',
+            'docker-compose-image.yml'
         ];
         $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
@@ -71,7 +71,7 @@ class PostCreateScript
             $contents = str_replace('mysql://root:mysqlp455w0rd@mysql-container/mydb', "$mysqlConnection", $contents);
             $contents = str_replace('mysql-container', $uri->getHost(), $contents);
             $contents = str_replace('mysqlp455w0rd', $uri->getPassword(), $contents);
-            $contents = str_replace('repository-name', $composerParts[1], $contents);
+            $contents = str_replace('resttest', $composerParts[1], $contents);
             file_put_contents(
                 "$workdir/$file",
                 $contents
@@ -123,11 +123,11 @@ class PostCreateScript
         $stdIo->write("========================================================");
         $stdIo->write("");
         $stdIo->write("Project Directory: " . $workdir);
-        $phpVersion = $stdIo->ask('PHP Version [7.2]: ', '7.2');
+        $phpVersion = $stdIo->ask('PHP Version [7.4]: ', '7.4');
         $namespace = $stdIo->ask('Project namespace [MyRest]: ', 'MyRest');
         $composerName = $stdIo->ask('Composer name [me/myrest]: ', 'me/myrest');
         $mysqlConnection = $stdIo->ask('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
-        $timezone = $stdIo->ask('Timezone [America/Sao_Paulo]: ', 'America/Sao_Paulo');
+        $timezone = $stdIo->ask('Timezone [UTC]: ', 'UTC');
         $stdIo->ask('Press <ENTER> to continue');
 
         $script = new PostCreateScript();
