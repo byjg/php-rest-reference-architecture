@@ -2,7 +2,6 @@
 
 namespace RestTemplate\Rest;
 
-use Builder\Psr11;
 use ByJG\Authenticate\Model\UserModel;
 use ByJG\Authenticate\UsersDBDataset;
 use ByJG\Config\Exception\ConfigNotFoundException;
@@ -15,6 +14,10 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
+use RestTemplate\Model\User;
+use Swagger\Annotations as SWG;
 
 class Login extends ServiceAbstractBase
 {

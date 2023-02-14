@@ -2,7 +2,7 @@
 
 namespace RestTemplate\Repository;
 
-use Builder\Psr11;
+use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;

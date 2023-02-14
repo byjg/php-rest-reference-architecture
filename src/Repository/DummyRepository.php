@@ -3,7 +3,6 @@
 namespace RestTemplate\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
-use ByJG\Config\Exception\EnvironmentException;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;

@@ -9,7 +9,7 @@ use ByJG\ApiTools\Base\Schema;
  */
 class LoginTest extends BaseApiTestCase
 {
-    protected $filePath = __DIR__ . '/../../../web/docs/swagger.json';
+    protected $filePath = __DIR__ . '/../../../public/docs/swagger.json';
 
     public function setUp()
     {

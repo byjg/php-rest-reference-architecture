@@ -13,6 +13,9 @@ use Composer\Script\Event;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class Scripts extends BaseScripts
 {
@@ -133,7 +136,7 @@ class Scripts extends BaseScripts
      */
     public function runGenRestDocs($arguments)
     {
-        $docPath = $this->workdir . '/web/docs/';
+        $docPath = $this->workdir . '/public/docs/';
         chdir($this->workdir);
         $this->liveExecuteCommand(
             $this->fixDir("vendor/bin/swagger")

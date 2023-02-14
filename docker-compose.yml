@@ -8,14 +8,14 @@ services:
     ports:
       - 80:80
     volumes:
-      - ./config:/srv/web/config
-      - ./src:/srv/web/src
-      - ./vendor:/srv/web/vendor
-      - ./web:/srv/web/web
-      - ./template:/srv/web/template
+      - ./config:/srv/public/config
+      - ./src:/srv/public/src
+      - ./vendor:/srv/public/vendor
+      - ./web:/srv/public/web
+      - ./template:/srv/public/template
     environment:
       - APPLICATION_ENV=dev
-      - NGINX_ROOT=/srv/web/web
+      - NGINX_ROOT=/srv/public/web
       - VERBOSE=true
       - PHP_CONTROLLER=/app.php
 #    deploy:

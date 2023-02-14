@@ -1,6 +1,6 @@
 <?php
 
-use Builder\Psr11;
+use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
 use ByJG\Authenticate\Definition\UserDefinition;
@@ -38,7 +38,7 @@ return [
 
     OpenApiRouteDefinition::class => DI::bind(OpenApiRouteDefinition::class)
         ->withConstructorArgs([
-            __DIR__ . '/../web/docs/swagger.json',
+            __DIR__ . '/../public/docs/swagger.json',
             Param::get(BaseCacheEngine::class)
         ])
         ->withMethodCall("withDefaultProcessor", [JsonCleanOutputProcessor::class])

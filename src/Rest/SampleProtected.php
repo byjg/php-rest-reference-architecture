@@ -6,6 +6,7 @@ use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use Psr\SimpleCache\InvalidArgumentException;
+use Swagger\Annotations as SWG;
 
 class SampleProtected extends ServiceAbstractBase
 {

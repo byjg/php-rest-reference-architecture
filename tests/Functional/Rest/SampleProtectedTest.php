@@ -10,7 +10,15 @@ use RestTemplate\Util\FakeApiRequester;
  */
 class SampleProtectedTest extends BaseApiTestCase
 {
-    protected $filePath = __DIR__ . '/../../../web/docs/swagger.json';
+    protected $filePath = __DIR__ . '/../../../public/docs/swagger.json';
+
+    protected function setUp()
+    {
+        $schema = Schema::getInstance(file_get_contents($this->filePath));
+        $this->setSchema($schema);
+
+        parent::setUp();
+    }
 
     protected function setUp()
     {

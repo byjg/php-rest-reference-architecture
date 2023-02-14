@@ -3,7 +3,7 @@
 
 namespace Test\Functional\Rest;
 
-use Builder\Psr11;
+use RestTemplate\Psr11;
 use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
 

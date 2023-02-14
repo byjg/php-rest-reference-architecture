@@ -4,6 +4,7 @@ namespace RestTemplate\Model;
 
 use ByJG\Authenticate\Model\UserModel;
 use Exception;
+use Swagger\Annotations as SWG;
 
 /**
  * @SWG\Definition(required={"email"}, type="object", @SWG\Xml(name="User"))
