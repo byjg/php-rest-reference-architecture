@@ -14,19 +14,13 @@
     "byjg/mailwrapper": "dev-bump",
     "byjg/restserver": "dev-bump",
     "byjg/jwt-wrapper": "2.0.*",
-    "zircote/swagger-php": "2.0.13.1",
+    "zircote/swagger-php": "^4.6.1",
     "byjg/swagger-test": "dev-bump",
     "byjg/migration": "dev-bump"
   },
   "require-dev": {
     "phpunit/phpunit": "5.7.*|7.4.*"
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/byjg/swagger-php"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "RestTemplate\\": "src/",

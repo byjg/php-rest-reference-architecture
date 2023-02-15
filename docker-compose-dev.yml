@@ -10,7 +10,7 @@ services:
     volumes:
       - .:/srv/
     environment:
-      - APPLICATION_ENV=dev
+      - APP_ENV=dev
     networks:
       - net
 

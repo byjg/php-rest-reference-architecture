@@ -137,20 +137,18 @@ class Scripts extends BaseScripts
     public function runGenRestDocs($arguments)
     {
         $docPath = $this->workdir . '/public/docs/';
-        chdir($this->workdir);
-        $this->liveExecuteCommand(
-            $this->fixDir("vendor/bin/swagger")
-            . " --output \"$docPath\" "
-            . "--exclude vendor "
-            . "--exclude docker "
-            . "--exclude fw "
-            . "--processor OperationId"
+
+        $generator = (new \OpenApi\Generator())
+            ->setConfig([
+                "operationId.hash" => false
+            ]);
+        $openapi = $generator->generate(
+            [
+                $this->workdir . '/src',
+            ],
+            null,
+            true
         );
-
-        $argumentList = $this->extractArguments($arguments, false);
-
-        $docs = file_get_contents("$docPath/swagger.json");
-        $docs = str_replace('__HOSTNAME__', Psr11::container($argumentList["--env"])->get('API_SERVER'), $docs);
-        file_put_contents("$docPath/swagger.json", $docs);
+        file_put_contents("$docPath/openapi.json", $openapi->toJson());
     }
 }
