@@ -2,32 +2,30 @@
 
 namespace RestTemplate\Model;
 
-use Swagger\Annotations as SWG;
-
 /**
  * Model that represents the DummyHex table
  *
- * @SWG\Definition(required={"field"}, type="object", @SWG\Xml(name="DummyHex"))
+ * @OA\Schema(required={"field"}, type="object", @OA\Xml(name="DummyHex"))
  */
 class DummyHex
 {
     /**
      * The "fake" key
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $id;
 
     /**
      * The UUID
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $uuid;
 
     /**
      * Some field property
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $field;

@@ -24,15 +24,18 @@ class Sample extends ServiceAbstractBase
     /**
      * Simple ping
      *
-     * @SWG\Get(
+     * @OA\Get(
      *     path="/sample/ping",
      *     tags={"zz_sample"},
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(
-     *            required={"result"},
-     *            @SWG\Property(property="result", type="string")
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             required={"result"},
+     *             @OA\Property(property="result", type="string")
+     *           )
      *         )
      *     )
      * )
@@ -47,32 +50,40 @@ class Sample extends ServiceAbstractBase
     }
 
     /**
-     * Get the rows from the Dummy table (used in the example)
+     * Get the rows from the Dummy table by ID
      *
-     * @SWG\Get(
+     * @OA\Get(
      *     path="/sample/dummy/{field}",
      *     tags={"zz_sample"},
-     *     @SWG\Parameter(
+     *     @OA\Parameter(
      *         name="field",
      *         in="path",
-     *         description="The field content to be returned",
+     *         description="The field to search",
      *         required=true,
-     *         type="string"
+     *         @OA\Schema(
+     *           type="string"
+     *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(type="array", @SWG\Items(ref="#/definitions/Dummy"))
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             type="array",
+     *             @OA\Items(@OA\Schema(ref="#/components/schemas/Dummy"))
+     *           )
+     *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=404,
      *         description="Not found",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Erro Geral",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *
@@ -83,10 +94,13 @@ class Sample extends ServiceAbstractBase
      * @throws Error404Exception
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
      * @throws ReflectionException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
+
     public function getDummy()
     {
         $dummyRepo = Psr11::container()->get(DummyRepository::class);
@@ -102,25 +116,29 @@ class Sample extends ServiceAbstractBase
     }
 
     /**
-     * Save data content in the table Dummy
-     * @SWG\Post(
+     * Insert a new row in the Dummy table
+     * @OA\Post(
      *     path="/sample/dummy",
      *     tags={"zz_sample"},
-     *     @SWG\Parameter(
-     *         name="body",
-     *         in="body",
-     *         description="The dummy data",
+     *     @OA\RequestBody(
+     *         description="Dummy object that needs to be added to the store",
      *         required=true,
-     *         @SWG\Schema(ref="#/definitions/Dummy")
+     *         @OA\JsonContent(ref="#/components/schemas/Dummy")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
+     *         @OA\JsonContent(ref="#/components/schemas/Dummy")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not found",
+     *         @OA\JsonContent(ref="#/components/schemas/error")
+     *     ),
+     *     @OA\Response(
      *         response=500,
      *         description="Erro Geral",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *
@@ -128,13 +146,14 @@ class Sample extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws ConfigNotFoundException
      * @throws EnvironmentException
+     * @throws Error404Exception
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
+     * @throws ReflectionException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
-     * @throws ReflectionException
      */
     public function postDummy()
     {
@@ -243,35 +262,37 @@ class Sample extends ServiceAbstractBase
         BinderObject::bind($payload, $model);
 
         $dummyRepo = Psr11::container()->get(DummyRepository::class);
-        $dummyRepo->save($model);
+        $response->write($dummyRepo->save($model));
     }
 
     /**
      * Get the rows from the DummyHex table by ID
-     * @SWG\Get(
+     * @OA\Get(
      *     path="/sample/dummyhex/{id}",
      *     tags={"zz_sample"},
-     *     @SWG\Parameter(
+     *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="The field content to be returned",
      *         required=true,
-     *         type="string"
+     *         @OA\Schema(
+     *           type="string"
+     *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(ref="#/definitions/DummyHex")
+     *         @OA\JsonContent(ref="#/components/schemas/DummyHex")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=404,
      *         description="Not found",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Erro Geral",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *
@@ -302,25 +323,23 @@ class Sample extends ServiceAbstractBase
 
     /**
      * Save data content in the table Dummy Hex
-     * @SWG\Post(
+     * @OA\Post(
      *     path="/sample/dummyhex",
      *     tags={"zz_sample"},
-     *     @SWG\Parameter(
-     *         name="body",
-     *         in="body",
+     *     @OA\RequestBody(
      *         description="The dummy data",
      *         required=true,
-     *         @SWG\Schema(ref="#/definitions/DummyHex")
+     *         @OA\JsonContent(ref="#/components/schemas/DummyHex")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(ref="#/definitions/DummyHex")
+     *         @OA\JsonContent(ref="#/components/schemas/DummyHex")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Erro Geral",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *

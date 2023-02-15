@@ -84,6 +84,6 @@ abstract class BaseRepository
      */
     public function save($model)
     {
-        $this->repository->save($model);
+        return $this->repository->save($model);
     }
 }

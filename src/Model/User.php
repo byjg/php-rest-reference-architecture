@@ -4,56 +4,55 @@ namespace RestTemplate\Model;
 
 use ByJG\Authenticate\Model\UserModel;
 use Exception;
-use Swagger\Annotations as SWG;
 
 /**
- * @SWG\Definition(required={"email"}, type="object", @SWG\Xml(name="User"))
+ * @OA\Schema(required={"email"}, type="object", @OA\Xml(name="User"))
  */
 class User extends UserModel
 {
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $userid;
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $name;
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $email;
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $username;
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $password;
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $created;
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $updated;
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $admin = "no";
 
     /**
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $uuid;

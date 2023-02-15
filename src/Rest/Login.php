@@ -15,47 +15,50 @@ use ByJG\RestServer\ResponseBag;
 use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use ReflectionException;
 
 class Login extends ServiceAbstractBase
 {
     /**
      * Do login
-     * @SWG\Post(
+     * @OA\Post(
      *     path="/login",
      *     tags={"login"},
-     *     @SWG\Parameter(
-     *         name="body",
-     *         in="body",
+     *     @OA\RequestBody(
      *         description="The login data",
      *         required=true,
-     *         @SWG\Schema(
+     *         @OA\MediaType(
+     *            mediaType="application/json",
+     *            @OA\Schema(
      *              required={"username","password"},
-     *              @SWG\Property(property="username", type="string", description="The username"),
-     *              @SWG\Property(property="password", type="string", description="The password"),
-     *         )
+     *              @OA\Property(property="username", type="string", description="The username"),
+     *              @OA\Property(property="password", type="string", description="The password"),
+     *           )
+     *        )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(
-     *            required={"token"},
-     *            @SWG\Property(property="token", type="string"),
-     *            @SWG\Property(property="data",
-     *            @SWG\Property(property="role", type="string"),
-     *            @SWG\Property(property="userid", type="string"),
-     *            @SWG\Property(property="name", type="string"))
-     *         )
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             required={"token"},
+     *             @OA\Property(property="token", type="string"),
+     *             @OA\Property(property="data",
+     *             @OA\Property(property="role", type="string"),
+     *             @OA\Property(property="userid", type="string"),
+     *             @OA\Property(property="name",type="string"))
+     *          )
+     *       )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=401,
      *         description="Não autorizado",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Erro Geral",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *
@@ -84,28 +87,31 @@ class Login extends ServiceAbstractBase
 
     /**
      * Refresh Token
-     * @SWG\Post(
+     * @OA\Post(
      *     path="/refreshtoken",
      *     tags={"login"},
      *     security={{
      *         "jwt-token":{}
      *     }},
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(
-     *            required={"token"},
-     *            @SWG\Property(property="token", type="string"),
-     *            @SWG\Property(property="data",
-     *            @SWG\Property(property="role", type="string"),
-     *            @SWG\Property(property="userid", type="string"),
-     *            @SWG\Property(property="name", type="string"))
-     *         )
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *              required={"token"},
+     *              @OA\Property(property="token", type="string"),
+     *              @OA\Property(property="data",
+     *              @OA\Property(property="role", type="string"),
+     *              @OA\Property(property="userid", type="string"),
+     *              @OA\Property(property="name", type="string"))
+     *          )
+     *       )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=401,
      *         description="Não autorizado",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *
