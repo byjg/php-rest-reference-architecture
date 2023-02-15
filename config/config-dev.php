@@ -31,7 +31,7 @@ return [
 
     OpenAPiRouteList::class => DI::bind(OpenAPiRouteList::class)
         ->withConstructorArgs([
-            __DIR__ . '/../public/docs/swagger.json'
+            __DIR__ . '/../public/docs/openapi.json'
         ])
         ->withMethodCall("withDefaultProcessor", [JsonCleanOutputProcessor::class])
         ->withMethodCall("withCache", [Param::get(BaseCacheEngine::class)])

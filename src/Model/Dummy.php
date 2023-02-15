@@ -2,25 +2,26 @@
 
 namespace RestTemplate\Model;
 
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 
+// PHPDOC for Dummy class using OpenAPI Zircote annotations
 /**
- * Model that represents the Dummy table
- *
- * @SWG\Definition(required={"field"}, type="object", @SWG\Xml(name="Dummy"))
+ * Class Dummy
+ * @package RestTemplate\Model
+ * @OA\Schema(required={"field"}, type="object", @OA\Xml(name="Dummy"))
  */
 class Dummy
 {
     /**
      * The "fake" key
-     * @SWG\Property()
+     * @OA\Property()
      * @var int
      */
     protected $id;
 
     /**
      * Some field property
-     * @SWG\Property()
+     * @OA\Property()
      * @var string
      */
     protected $field;

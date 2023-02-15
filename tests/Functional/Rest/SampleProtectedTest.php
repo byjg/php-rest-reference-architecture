@@ -10,7 +10,7 @@ use RestTemplate\Util\FakeApiRequester;
  */
 class SampleProtectedTest extends BaseApiTestCase
 {
-    protected $filePath = __DIR__ . '/../../../public/docs/swagger.json';
+    protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
 
     protected function setUp()
     {

@@ -1,0 +1,616 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Title",
+        "description": "Information about the API",
+        "termsOfService": "http://localhost:8080/terms/",
+        "contact": {
+            "email": "someone@example.com"
+        },
+        "license": {
+            "name": "Proprietary"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "SwaggerHUB API Mocking"
+        }
+    ],
+    "paths": {
+        "/login": {
+            "post": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Do login",
+                "operationId": "POST::/login::RestTemplate\\Rest\\Login::post",
+                "requestBody": {
+                    "description": "The login data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "description": "The username",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "description": "The password",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "token"
+                                    ],
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "userid": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/refreshtoken": {
+            "post": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Refresh Token",
+                "operationId": "POST::/refreshtoken::RestTemplate\\Rest\\Login::refreshToken",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "token"
+                                    ],
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "userid": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/sample/ping": {
+            "get": {
+                "tags": [
+                    "zz_sample"
+                ],
+                "summary": "Simple ping",
+                "operationId": "GET::/sample/ping::RestTemplate\\Rest\\Sample::getPing",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "result"
+                                    ],
+                                    "properties": {
+                                        "result": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sample/dummy/{field}": {
+            "get": {
+                "tags": [
+                    "zz_sample"
+                ],
+                "summary": "Get the rows from the Dummy table by ID",
+                "operationId": "GET::/sample/dummy/{field}::RestTemplate\\Rest\\Sample::getDummy",
+                "parameters": [
+                    {
+                        "name": "field",
+                        "in": "path",
+                        "description": "The field to search",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sample/dummy": {
+            "post": {
+                "tags": [
+                    "zz_sample"
+                ],
+                "summary": "Insert a new row in the Dummy table",
+                "operationId": "POST::/sample/dummy::RestTemplate\\Rest\\Sample::postDummy",
+                "requestBody": {
+                    "description": "Dummy object that needs to be added to the store",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Dummy"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dummy"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sample/dummyhex/{id}": {
+            "get": {
+                "tags": [
+                    "zz_sample"
+                ],
+                "summary": "Get the rows from the DummyHex table by ID",
+                "operationId": "GET::/sample/dummyhex/{id}::RestTemplate\\Rest\\Sample::getDummyHex",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The field content to be returned",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DummyHex"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sample/dummyhex": {
+            "post": {
+                "tags": [
+                    "zz_sample"
+                ],
+                "summary": "Save data content in the table Dummy Hex",
+                "operationId": "POST::/sample/dummyhex::RestTemplate\\Rest\\Sample::postDummyHex",
+                "requestBody": {
+                    "description": "The dummy data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DummyHex"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DummyHex"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro Geral",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sampleprotected/ping": {
+            "get": {
+                "tags": [
+                    "zz_sampleprotected"
+                ],
+                "summary": "Sample Ping Only Authenticated",
+                "operationId": "GET::/sampleprotected/ping::RestTemplate\\Rest\\SampleProtected::getPing",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "result"
+                                    ],
+                                    "properties": {
+                                        "result": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/sampleprotected/pingadm": {
+            "get": {
+                "tags": [
+                    "zz_sampleprotected"
+                ],
+                "summary": "Sample Ping Only Admin",
+                "operationId": "GET::/sampleprotected/pingadm::RestTemplate\\Rest\\SampleProtected::getPingAdm",
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "result"
+                                    ],
+                                    "properties": {
+                                        "result": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Dummy": {
+                "description": "Class Dummy",
+                "required": [
+                    "field"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "The \"fake\" key",
+                        "type": "integer"
+                    },
+                    "field": {
+                        "description": "Some field property",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "Dummy"
+                }
+            },
+            "DummyHex": {
+                "description": "Model that represents the DummyHex table",
+                "required": [
+                    "field"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "The \"fake\" key",
+                        "type": "string"
+                    },
+                    "uuid": {
+                        "description": "The UUID",
+                        "type": "string"
+                    },
+                    "field": {
+                        "description": "Some field property",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "DummyHex"
+                }
+            },
+            "User": {
+                "required": [
+                    "email"
+                ],
+                "properties": {
+                    "userid": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "created": {
+                        "type": "string"
+                    },
+                    "updated": {
+                        "type": "string"
+                    },
+                    "admin": {
+                        "type": "string"
+                    },
+                    "uuid": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "User"
+                }
+            },
+            "error": {
+                "properties": {
+                    "error": {
+                        "properties": {
+                            "type": {
+                                "description": "A class de Exceção",
+                                "type": "string"
+                            },
+                            "message": {
+                                "description": "A mensagem de erro",
+                                "type": "string"
+                            },
+                            "file": {
+                                "description": "O arquivo que gerou o erro",
+                                "type": "string"
+                            },
+                            "line": {
+                                "description": "A linha do erro",
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "jwt-token": {
+                "type": "apiKey",
+                "name": "Authorization",
+                "in": "header"
+            },
+            "query-token": {
+                "type": "apiKey",
+                "name": "token",
+                "in": "query"
+            },
+            "basic-http": {
+                "type": "http"
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Swagger",
+        "url": "http://localhostL:8080/docs"
+    }
+}

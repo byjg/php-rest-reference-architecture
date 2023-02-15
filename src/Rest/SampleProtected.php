@@ -6,30 +6,33 @@ use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use Psr\SimpleCache\InvalidArgumentException;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 
 class SampleProtected extends ServiceAbstractBase
 {
     /**
      * Sample Ping Only Authenticated
-     * @SWG\Get(
+     * @OA\Get(
      *     path="/sampleprotected/ping",
      *     tags={"zz_sampleprotected"},
      *     security={{
      *         "jwt-token":{}
      *     }},
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(
-     *            required={"result"},
-     *            @SWG\Property(property="result", type="string")
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             required={"result"},
+     *             @OA\Property(property="result", type="string")
+     *           )
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=401,
      *         description="Não autorizado",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *
@@ -49,24 +52,27 @@ class SampleProtected extends ServiceAbstractBase
 
     /**
      * Sample Ping Only Admin
-     * @SWG\Get(
+     * @OA\Get(
      *     path="/sampleprotected/pingadm",
      *     tags={"zz_sampleprotected"},
      *     security={{
      *         "jwt-token":{}
      *     }},
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="The object",
-     *         @SWG\Schema(
-     *            required={"result"},
-     *            @SWG\Property(property="result", type="string")
-     *         )
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             required={"result"},
+     *             @OA\Property(property="result", type="string")
+     *           )
+     *        )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=401,
      *         description="Não autorizado",
-     *         @SWG\Schema(ref="#/definitions/error")
+     *         @OA\JsonContent(ref="#/components/schemas/error")
      *     )
      * )
      *
