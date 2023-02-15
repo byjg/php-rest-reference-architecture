@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Composer GenDocs" type="ComposerRunConfigurationType" factoryName="Composer Script">
-    <option name="commandLineParameters" value="-- --env=dev" />
-    <option name="pathToComposerJson" value="$PROJECT_DIR$/composer.json" />
-    <option name="script" value="restdocs" />
-    <method v="2" />
-  </configuration>
-</component>

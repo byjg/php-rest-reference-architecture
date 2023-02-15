@@ -71,7 +71,7 @@ The ready to use command is:
 
 ```bash
 # Set the correct environment
-export APPLICATION_ENV=dev
+export APP_ENV=dev
 
 # Create the database
 composer migrate -- reset --yes
@@ -119,13 +119,13 @@ The sample database requires you have a MySQL running.
 **Update to the most recent database version**
 
 ```bash
-APPLICATION_ENV=dev composer migrate -- update
+APP_ENV=dev composer migrate -- update
 ```
 
 **Reset the database**
 
 ```bash
-APPLICATION_ENV=dev composer migrate -- reset --yes
+APP_ENV=dev composer migrate -- reset --yes
 ```
 
 Note: be careful with this command, because all of your database will erased 
@@ -162,7 +162,7 @@ To run the tests you need to start the database and build the project.
 After all, you have to setup the environment and the username for test
 
 ```php
-export APPLICATION_ENV=dev
+export APP_ENV=dev
 export TEST_ADMIN_USER=admin
 export TEST_ADMIN_PASSWORD=pwd
 export TEST_REGULAR_USER=user
@@ -175,7 +175,7 @@ vendor/bin/phpunit
 ## SQLSTATE[HY000] [1049] Unknown database 'database'
 
 ```bash
-export APPLICATION_ENV=dev
+export APP_ENV=dev
 composer migrate -- reset --yes
 ```
 
@@ -184,7 +184,7 @@ composer migrate -- reset --yes
 Use the `set` command.
 
 ```cmd
-set APPLICATION_ENV=dev
+set APP_ENV=dev
 ```
 
 
