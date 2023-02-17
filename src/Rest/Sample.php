@@ -157,6 +157,8 @@ class Sample extends ServiceAbstractBase
      */
     public function postDummy($response, $request)
     {
+        $this->validateRequest($request);
+
         $model = new Dummy();
         $payload = json_decode($request->payload());
         BinderObject::bind($payload, $model);
@@ -257,6 +259,8 @@ class Sample extends ServiceAbstractBase
      */
     public function postDummyHex($response, $request)
     {
+        $this->validateRequest($request);
+        
         $model = new DummyHex();
         $payload = json_decode($request->payload());
         BinderObject::bind($payload, $model);
