@@ -24,7 +24,7 @@ abstract class BaseRepository
      */
     public function get($itemId)
     {
-        if (!($itemId instanceof Literal) && preg_match("/^\d{8}-?\d{4}-?\d{4}-?\d{4}-?\d{12}$/", $itemId)) {
+        if (!($itemId instanceof Literal) && preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $itemId)) {
             $itemId = new Literal("X'" . str_replace("-", "", $itemId) . "'");
         }
         return $this->repository->get($itemId);

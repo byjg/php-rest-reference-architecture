@@ -2,6 +2,7 @@
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
+use ByJG\ApiTools\Base\Schema;
 use ByJG\Authenticate\Definition\UserDefinition;
 use ByJG\Authenticate\Definition\UserPropertiesDefinition;
 use ByJG\Authenticate\UsersDBDataset;
@@ -14,6 +15,7 @@ use ByJG\Mail\MailerFactory;
 use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal;
+use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\Util\JwtKeySecret;
@@ -37,6 +39,10 @@ return [
         ->withMethodCall("withCache", [Param::get(BaseCacheEngine::class)])
         ->toSingleton(),
 
+    Schema::class => DI::bind(Schema::class)
+        ->withFactoryMethod('getInstance', [file_get_contents(__DIR__ . '/../public/docs/openapi.json')])
+        ->toSingleton(),
+
     JwtKeySecret::class => DI::bind(JwtKeySecret::class)
         ->withConstructorArgs(['jwt_super_secret_key'])
         ->toSingleton(),
@@ -46,7 +52,7 @@ return [
         ->toSingleton(),
 
     MailWrapperInterface::class => function () {
-        $apiKey = "mailgun://uri";
+        $apiKey = Psr11::container()->get('EMAIL_CONNECTION');
         MailerFactory::registerMailer('mailgun', MailgunApiWrapper::class);
 
         return MailerFactory::create($apiKey);
@@ -94,6 +100,16 @@ return [
     UserPropertiesDefinition::class => DI::bind(UserPropertiesDefinition::class)
         ->toSingleton(),
 
+    'CORS_SERVER_LIST' => function () {
+        return preg_split('/,(?![^{}]*})/', Psr11::container()->get('CORS_SERVERS'));
+    },
+
+    CorsMiddleware::class => DI::bind(CorsMiddleware::class)
+        ->withNoConstructor()
+        ->withMethodCall("withCorsOrigins", [Param::get("CORS_SERVER_LIST")])  // Required to enable CORS
+        // ->withMethodCall("withAcceptCorsMethods", [[/* list of methods */]])     // Optional. Default all methods. Don't need to pass 'OPTIONS'
+        // ->withMethodCall("withAcceptCorsHeaders", [[/* list of headers */]])     // Optional. Default all headers
+        ->toSingleton(),
 
     UsersDBDataset::class => DI::bind(UsersDBDataset::class)
         ->withInjectedConstructor()
@@ -113,10 +129,10 @@ return [
             }
         }
         $prefix = "";
-        if (Psr11::environment()->getCurrentEnv() != "prod") {
-            $prefix = "[" . Psr11::environment()->getCurrentEnv() . "] ";
+        if (Psr11::environment()->getCurrentConfig() != "prod") {
+            $prefix = "[" . Psr11::environment()->getCurrentConfig() . "] ";
         }
-        return new Envelope("info@example.org", $to, $prefix . $subject, $body, true);
+        return new Envelope(Psr11::container()->get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
     },
 
 
@@ -125,7 +141,11 @@ return [
     // -------------------------------------------------------------------------------
 
     '_CLOSURE_NEWKEY' => function () {
-        return new Literal("X'" . bin2hex(openssl_random_pseudo_bytes(16)) . "'");
+        $data = openssl_random_pseudo_bytes(16);
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+
+        return new Literal("X'" . bin2hex($data) . "'");
     },
     '_CLOSURE_FIELDMAP_ID' => function ($mapper) {
         $mapper->addFieldMap(

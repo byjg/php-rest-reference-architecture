@@ -5,13 +5,15 @@ namespace RestTemplate\Rest;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\HttpRequest;
 use ByJG\Util\JwtWrapper;
 use Exception;
-use Psr\SimpleCache\InvalidArgumentException;
-use ReflectionException;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use ReflectionException;
 
 class ServiceAbstractBase extends ServiceAbstract
@@ -69,5 +71,24 @@ class ServiceAbstractBase extends ServiceAbstract
             throw new Error401Exception('Insufficient privileges - ' . print_r($data, true));
         }
         return $data;
+    }
+
+    public function validateRequest(HttpRequest $request, $statusExpected = 200)
+    {
+        $schema = Psr11::container()->get(Schema::class);
+
+        $path = $request->getRequestPath();
+        $method = $request->server('REQUEST_METHOD');
+
+        // Returns a SwaggerRequestBody instance
+        $bodyRequestDef = $schema->getRequestParameters($path, $method);
+
+        // Validate the request body (payload)
+        $requestBody = json_decode($request->payload(), true);
+        try {
+            $bodyRequestDef->match($requestBody);
+        } catch (Exception $ex) {
+            throw new Error400Exception(explode("\n", $ex->getMessage())[0]);
+        }
     }
 }
