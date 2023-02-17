@@ -29,7 +29,7 @@ Class UserRepository extends BaseRepository
         $userMapper = new Mapper(
             $userTable->model(),
             $userTable->table(),
-            $userTable->getUserid()
+            $userTable->getEmail()
         );
 
         $propertyDefinition = $userTable->toArray();

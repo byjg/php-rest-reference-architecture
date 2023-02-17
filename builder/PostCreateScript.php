@@ -32,6 +32,7 @@ class PostCreateScript
             return true;
         });
 
+        $composerName = strtolower($composerName);
         $composerParts = explode("/", $composerName);
 
         // ------------------------------------------------

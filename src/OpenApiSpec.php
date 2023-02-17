@@ -16,7 +16,7 @@ namespace RestTemplate;
  *     )
  * )
  * @OA\Server(
- *     description="SwaggerHUB API Mocking",
+ *     description="Local Development server",
  *     url="http://localhost:8080"
  * )
  * @OA\ExternalDocumentation(
