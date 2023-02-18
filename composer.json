@@ -13,7 +13,6 @@
     "byjg/authuser": "dev-bump",
     "byjg/mailwrapper": "dev-bump",
     "byjg/restserver": "dev-bump",
-    "byjg/jwt-wrapper": "2.0.*",
     "zircote/swagger-php": "^4.6.1",
     "byjg/swagger-test": "dev-bump",
     "byjg/migration": "dev-bump"
