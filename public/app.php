@@ -11,9 +11,7 @@ class App
 {
     public static function run()
     {
-        $server = new HttpRequestHandler();
-        $server->withMiddleware(Psr11::container()->get(CorsMiddleware::class));
-
+        $server = Psr11::container()->get(HttpRequestHandler::class); 
         $server->handle(Psr11::container()->get(OpenApiRouteList::class));
     }
 }

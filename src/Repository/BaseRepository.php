@@ -75,6 +75,31 @@ abstract class BaseRepository
         return new $class();
     }
 
+    protected function getClosureNewUUID()
+    {
+        return new Literal("X'" . $this->repository->getDbDriver()->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+    }
+
+    protected function setClosureFieldMapId($mapper, $pkFieldName = 'id', $modelField = 'uuid')
+    {
+        $mapper->addFieldMap(
+            $pkFieldName,
+            $pkFieldName,
+            function ($value, $instance) {
+                if (empty($value)) {
+                    return null;
+                }
+                if (!($value instanceof Literal)) {
+                    $value = new Literal("X'$value'");
+                }
+                return $value;
+            },
+            function ($value, $instance) use ($modelField) {
+                return str_replace('-', '', $instance->{'get' . $modelField}());
+            }
+        );
+    }
+
     /**
      * @param $model
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
