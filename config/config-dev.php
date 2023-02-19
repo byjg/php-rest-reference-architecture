@@ -4,6 +4,7 @@ use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
 use ByJG\ApiTools\Base\Schema;
+use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Definition\UserDefinition;
 use ByJG\Authenticate\Definition\UserPropertiesDefinition;
 use ByJG\Authenticate\UsersDBDataset;
@@ -16,6 +17,7 @@ use ByJG\Mail\MailerFactory;
 use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal;
+use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\Route\OpenApiRouteList;
@@ -74,6 +76,19 @@ return [
         ->withInjectedConstructor()
         ->toSingleton(),
 
+    PasswordDefinition::class => DI::bind(PasswordDefinition::class)
+        ->withConstructorArgs([[
+            PasswordDefinition::MINIMUM_CHARS => 12,
+            PasswordDefinition::REQUIRE_UPPERCASE => 1,  // Number of uppercase characters
+            PasswordDefinition::REQUIRE_LOWERCASE => 1,  // Number of lowercase characters
+            PasswordDefinition::REQUIRE_SYMBOLS => 1,    // Number of symbols
+            PasswordDefinition::REQUIRE_NUMBERS => 1,    // Number of numbers
+            PasswordDefinition::ALLOW_WHITESPACE => 0,   // Allow whitespace
+            PasswordDefinition::ALLOW_SEQUENTIAL => 0,   // Allow sequential characters
+            PasswordDefinition::ALLOW_REPEATED => 0      // Allow repeated characters
+        ]])
+        ->toSingleton(),
+
     UserDefinition::class => DI::bind(UserDefinition::class)
         ->withConstructorArgs(['users', User::class, UserDefinition::LOGIN_IS_EMAIL])
         ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
@@ -111,6 +126,10 @@ return [
         // ->withMethodCall("withAcceptCorsHeaders", [[/* list of headers */]])     // Optional. Default all headers
         ->toSingleton(),
 
+    HttpRequestHandler::class => DI::bind(HttpRequestHandler::class)
+        ->withMethodCall("withMiddleware", [Param::get(CorsMiddleware::class)])
+        ->toSingleton(),
+
     UsersDBDataset::class => DI::bind(UsersDBDataset::class)
         ->withInjectedConstructor()
         ->toSingleton(),
@@ -133,56 +152,6 @@ return [
             $prefix = "[" . Psr11::environment()->getCurrentConfig() . "] ";
         }
         return new Envelope(Psr11::container()->get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
-    },
-
-
-    // -------------------------------------------------------------------------------
-    // Use the closure below to add UUID to the MySQL keys instead of auto increment
-    // -------------------------------------------------------------------------------
-
-    '_CLOSURE_NEWKEY' => function () {
-        $data = openssl_random_pseudo_bytes(16);
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
-
-        return new Literal("X'" . bin2hex($data) . "'");
-    },
-    '_CLOSURE_FIELDMAP_ID' => function ($mapper) {
-        $mapper->addFieldMap(
-            'id',
-            'id',
-            function ($value, $instance) {
-                if (empty($value)) {
-                    return null;
-                }
-                if (!($value instanceof Literal)) {
-                    $value = new Literal("X'$value'");
-                }
-                return $value;
-            },
-            function ($value, $instance) {
-                return str_replace('-', '', $instance->getUuid());
-            }
-        );
-    },
-
-    '_CLOSURE_FIELDMAP_FKID' => function ($mapper, $fk) {
-        $mapper->addFieldMap(
-            $fk,
-            $fk,
-            function ($value, $instance) {
-                if (empty($value)) {
-                    return null;
-                }
-                if (!($value instanceof Literal)) {
-                    $value = new Literal("X'$value'");
-                }
-                return $value;
-            },
-            function ($value, $instance) use ($fk) {
-                return str_replace('-', '', $instance->{'get' . $fk . 'uuid'}());
-            }
-        );
     },
 
 ];

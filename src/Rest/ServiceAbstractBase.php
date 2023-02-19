@@ -2,6 +2,7 @@
 
 namespace RestTemplate\Rest;
 
+use ByJG\ApiTools\Base\Schema;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
@@ -71,7 +72,7 @@ class ServiceAbstractBase
         return $data;
     }
 
-    public function validateRequest(HttpRequest $request, $statusExpected = 200)
+    public function validateRequest(HttpRequest $request)
     {
         $schema = Psr11::container()->get(Schema::class);
 
@@ -88,5 +89,7 @@ class ServiceAbstractBase
         } catch (Exception $ex) {
             throw new Error400Exception(explode("\n", $ex->getMessage())[0]);
         }
+
+        return $requestBody;
     }
 }

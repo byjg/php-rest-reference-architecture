@@ -259,10 +259,9 @@ class Sample extends ServiceAbstractBase
      */
     public function postDummyHex($response, $request)
     {
-        $this->validateRequest($request);
+        $payload = $this->validateRequest($request);
         
         $model = new DummyHex();
-        $payload = json_decode($request->payload());
         BinderObject::bind($payload, $model);
 
         $dummyRepo = Psr11::container()->get(DummyHexRepository::class);
