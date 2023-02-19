@@ -2,8 +2,10 @@
 
 namespace RestTemplate\Model;
 
+use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Model\UserModel;
 use Exception;
+use RestTemplate\Psr11;
 
 /**
  * @OA\Schema(required={"email"}, type="object", @OA\Xml(name="User"))
@@ -69,6 +71,8 @@ class User extends UserModel
     public function __construct(string $name = "", string $email = "", string $username = "", string $password = "", string $admin = "")
     {
         parent::__construct($name, $email, $username, $password, $admin);
+
+        $this->withPasswordDefinition(Psr11::container()->get(PasswordDefinition::class));
     }
 
     /**

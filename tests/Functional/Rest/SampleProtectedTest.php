@@ -12,7 +12,7 @@ class SampleProtectedTest extends BaseApiTestCase
 {
     protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $schema = Schema::getInstance(file_get_contents($this->filePath));
         $this->setSchema($schema);
@@ -37,11 +37,12 @@ class SampleProtectedTest extends BaseApiTestCase
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \ByJG\Util\Psr7\MessageException
-     * @expectedException \ByJG\RestServer\Exception\Error401Exception
-     * @expectedExceptionMessage Absent authorization token
      */
     public function testGetUnauthorized()
     {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
@@ -115,11 +116,12 @@ class SampleProtectedTest extends BaseApiTestCase
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \ByJG\Util\Psr7\MessageException
-     * @expectedException \ByJG\RestServer\Exception\Error401Exception
-     * @expectedExceptionMessage Insufficient privileges
      */
     public function testGetAuthorizedRole2()
     {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();

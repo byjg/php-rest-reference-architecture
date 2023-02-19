@@ -2,9 +2,9 @@
 
 namespace Test\Functional\Rest;
 
-use RestTemplate\Psr11;
 use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
+use RestTemplate\Psr11;
 use RestTemplate\Util\FakeApiRequester;
 
 class Credentials
@@ -13,7 +13,7 @@ class Credentials
     {
         return [
             'username' => (getenv('TEST_ADMIN_USER') ? getenv('TEST_ADMIN_USER') : 'admin@example.com'),
-            'password' => (getenv('TEST_ADMIN_PASSWORD') ? getenv('TEST_ADMIN_PASSWORD') : 'pwd'),
+            'password' => (getenv('TEST_ADMIN_PASSWORD') ? getenv('TEST_ADMIN_PASSWORD') : '!P4ssw0rdstr!'),
         ];
     }
 
@@ -21,7 +21,7 @@ class Credentials
     {
         return [
             'username' => (getenv('TEST_REGULAR_USER') ? getenv('TEST_REGULAR_USER') : 'user@example.com'),
-            'password' => (getenv('TEST_REGULAR_PASSWORD') ? getenv('TEST_REGULAR_PASSWORD') : 'pwd'),
+            'password' => (getenv('TEST_REGULAR_PASSWORD') ? getenv('TEST_REGULAR_PASSWORD') : '!P4ssw0rdstr!'),
         ];
     }
 

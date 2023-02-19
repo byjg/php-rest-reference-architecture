@@ -2,7 +2,6 @@
 
 namespace RestTemplate\Repository;
 
-use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
@@ -35,10 +34,12 @@ class DummyHexRepository extends BaseRepository
             DummyHex::class,
             'dummyhex',
             'id',
-            Psr11::container()->raw("_CLOSURE_NEWKEY")
+            function () {
+                return $this->getClosureNewUUID();
+            }
         );
 
-        Psr11::container()->get('_CLOSURE_FIELDMAP_ID', $mapper);
+        $this->setClosureFieldMapId($mapper);
         $mapper->addFieldMap('uuid', 'uuid', Mapper::doNotUpdateClosure());
 
         $this->repository = new Repository($dbDriver, $mapper);

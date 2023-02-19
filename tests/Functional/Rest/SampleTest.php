@@ -13,7 +13,7 @@ class SampleTest extends BaseApiTestCase
 {
     protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $schema = Schema::getInstance(file_get_contents($this->filePath));
         $this->setSchema($schema);
@@ -117,11 +117,12 @@ class SampleTest extends BaseApiTestCase
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
      * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @expectedException \ByJG\RestServer\Exception\Error404Exception
-     * @expectedExceptionMessage Id not found
      */
     public function testDummyNotFound()
     {
+        $this->expectException(\ByJG\RestServer\Exception\Error404Exception::class);
+        $this->expectExceptionMessage('Id not found');
+
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
@@ -172,11 +173,12 @@ class SampleTest extends BaseApiTestCase
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
      * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @expectedException \ByJG\RestServer\Exception\Error404Exception
-     * @expectedExceptionMessage Id not found
      */
     public function testDummyHexFail()
     {
+        $this->expectException(\ByJG\RestServer\Exception\Error404Exception::class);
+        $this->expectExceptionMessage('Id not found');
+
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
@@ -226,11 +228,12 @@ class SampleTest extends BaseApiTestCase
      * @throws \ByJG\Swagger\Exception\RequiredArgumentNotFound
      * @throws \ByJG\Swagger\Exception\StatusCodeNotMatchedException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @expectedException \ByJG\RestServer\Exception\Error404Exception
-     * @expectedExceptionMessage Id not found
      */
     public function testDummyHexNotFound()
     {
+        $this->expectException(\ByJG\RestServer\Exception\Error404Exception::class);
+        $this->expectExceptionMessage('Id not found');
+
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())

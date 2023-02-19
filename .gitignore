@@ -6,3 +6,4 @@ vendor
 /src/*.db
 node_modules
 .mysql
+.phpunit.result.cache

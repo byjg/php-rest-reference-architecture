@@ -11,7 +11,7 @@ class LoginTest extends BaseApiTestCase
 {
     protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
 
-    public function setUp()
+    public function setUp(): void
     {
         $schema = Schema::getInstance(file_get_contents($this->filePath));
         $this->setSchema($schema);
@@ -55,11 +55,12 @@ class LoginTest extends BaseApiTestCase
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
      * @throws \ByJG\Util\Psr7\MessageException
-     * @expectedException \ByJG\RestServer\Exception\Error401Exception
-     * @expectedExceptionMessage Username or password is invalid
      */
     public function testLoginFail()
     {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Username or password is invalid');
+
         $this->assertRequest(Credentials::requestLogin([
             'username' => 'invalid',
             'password' => 'invalid'
