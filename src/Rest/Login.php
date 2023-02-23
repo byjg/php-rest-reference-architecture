@@ -16,6 +16,7 @@ use RestTemplate\Psr11;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestTemplate\Model\User;
+use RestTemplate\Util\HexUuidLiteral;
 use OpenApi\Annotations as OA;
 
 class Login extends ServiceAbstractBase
@@ -140,7 +141,7 @@ class Login extends ServiceAbstractBase
         }
 
         $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->getById(new Literal("X'" . str_replace("-", "", $result["data"]["userid"]) . "'"));
+        $user = $users->getById(new HexUuidLiteral($result["data"]["userid"]));
 
         $metadata = $this->createUserMetadata($user);
         
