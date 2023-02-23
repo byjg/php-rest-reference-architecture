@@ -21,5 +21,6 @@ COPY template /srv/template
 
 # This is necessary for the migration script
 COPY composer.* /srv
+COPY phpunit.xml.dist /srv
 COPY db /srv/db
 RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader

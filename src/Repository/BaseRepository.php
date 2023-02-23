@@ -8,6 +8,7 @@ use ByJG\MicroOrm\Literal;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
 use ByJG\Serializer\Exception\InvalidArgumentException;
+use RestTemplate\Util\HexUuidLiteral;
 
 abstract class BaseRepository
 {
@@ -24,10 +25,15 @@ abstract class BaseRepository
      */
     public function get($itemId)
     {
+        return $this->repository->get($this->prepareUuidQuery($itemId));
+    }
+
+    protected function prepareUuidQuery($itemId)
+    {
         if (!($itemId instanceof Literal) && preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $itemId)) {
-            $itemId = new Literal("X'" . str_replace("-", "", $itemId) . "'");
+            $itemId = new HexUuidLiteral($itemId);
         }
-        return $this->repository->get($itemId);
+        return $itemId;
     }
 
     /**
@@ -90,7 +96,7 @@ abstract class BaseRepository
                     return null;
                 }
                 if (!($value instanceof Literal)) {
-                    $value = new Literal("X'$value'");
+                    $value = new HexUuidLiteral($value);
                 }
                 return $value;
             },
