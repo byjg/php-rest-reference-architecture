@@ -89,13 +89,31 @@ return [
         ->toSingleton(),
 
     UserDefinition::class => DI::bind(UserDefinition::class)
-        ->withConstructorArgs(['users', User::class, UserDefinition::LOGIN_IS_EMAIL])
+        ->withConstructorArgs(
+            [
+                'users',       // Table name
+                User::class,   // User class
+                UserDefinition::LOGIN_IS_EMAIL,
+                [
+                    // Field name in the User class => Field name in the database
+                    'userid'   => 'userid',
+                    'name'     => 'name',
+                    'email'    => 'email',
+                    'username' => 'username',
+                    'password' => 'password',
+                    'created'  => 'created',
+                    'admin'    => 'admin'
+                ]
+            ]
+        )
         ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
-        ->withMethodCall("defineGenerateKeyClosure", [
-            function () {
-                return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
-            }
-        ])
+        ->withMethodCall("defineGenerateKeyClosure", 
+            [
+                function () {
+                    return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+                }
+            ]
+        )
         ->withMethodCall("defineClosureForSelect", [
             "userid",
             function ($value, $instance) {
