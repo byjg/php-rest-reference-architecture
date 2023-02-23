@@ -78,8 +78,8 @@ class Scripts extends BaseScripts
         });
 
         $exec['reset'] = function () use ($migration, $argumentList) {
-            if (!isset($argumentList["yes"])) {
-                throw new Exception("Reset require the argument 'yes'");
+            if (!isset($argumentList["--yes"])) {
+                throw new Exception("Reset require the argument '--yes'");
             }
             $migration->prepareEnvironment();
             $migration->reset();
