@@ -50,18 +50,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       # Login against a Docker registry to pull the GHCR image
       # https://github.com/docker/login-action
       - name: Log into registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -71,14 +71,14 @@ jobs:
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       # Build image locally to enable to run the test
       # https://github.com/docker/build-push-action
       - name: Build Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: docker/Dockerfile
@@ -106,9 +106,9 @@ jobs:
               --network ${{ job.container.network }} \
               $tag tail -f /dev/null
             docker cp  tests/ tester:/srv
-            docker exec tester composer run migrate reset yes
+            docker exec tester composer run migrate -- reset --yes
             docker exec tester composer install --dev --no-interaction --no-progress
-            docker exec tester vendor/bin/phpunit --colors=always
+            docker exec tester composer run test
             docker stop tester
             break
           done
