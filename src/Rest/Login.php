@@ -7,7 +7,6 @@ use ByJG\Authenticate\UsersDBDataset;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
-use ByJG\MicroOrm\Literal;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
@@ -15,6 +14,7 @@ use ByJG\RestServer\ResponseBag;
 use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use RestTemplate\Util\HexUuidLiteral;
 
 class Login extends ServiceAbstractBase
 {
@@ -138,7 +138,7 @@ class Login extends ServiceAbstractBase
         }
 
         $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->getById(new Literal("X'" . str_replace("-", "", $result["data"]["userid"]) . "'"));
+        $user = $users->getById(new HexUuidLiteral($result["data"]["userid"]));
 
         $metadata = $this->createUserMetadata($user);
 

@@ -13,6 +13,7 @@ use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
 use ByJG\Mail\Envelope;
 use ByJG\Mail\MailerFactory;
+use ByJG\Mail\Wrapper\FakeSenderWrapper;
 use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal;
@@ -27,6 +28,7 @@ use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
 use RestTemplate\Repository\UserRepository;
+use RestTemplate\Util\HexUuidLiteral;
 
 return [
 
@@ -56,6 +58,7 @@ return [
     MailWrapperInterface::class => function () {
         $apiKey = Psr11::container()->get('EMAIL_CONNECTION');
         MailerFactory::registerMailer('mailgun', MailgunApiWrapper::class);
+        MailerFactory::registerMailer('fakesender', FakeSenderWrapper::class);
 
         return MailerFactory::create($apiKey);
     },
@@ -69,10 +72,6 @@ return [
         ->toSingleton(),
 
     DummyHexRepository::class => DI::bind(DummyHexRepository::class)
-        ->withInjectedConstructor()
-        ->toSingleton(),
-
-    UserRepository::class => DI::bind(UserRepository::class)
         ->withInjectedConstructor()
         ->toSingleton(),
 
@@ -92,9 +91,17 @@ return [
     UserDefinition::class => DI::bind(UserDefinition::class)
         ->withConstructorArgs(['users', User::class, UserDefinition::LOGIN_IS_EMAIL])
         ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
+        ->withMethodCall("defineGenerateKeyClosure", [
+            function () {
+                return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+            }
+        ])
         ->withMethodCall("defineClosureForSelect", [
             "userid",
             function ($value, $instance) {
+                if (!method_exists($instance, 'getUuid')) {
+                    return $value;
+                }
                 if (!empty($instance->getUuid())) {
                     return $instance->getUuid();
                 }
@@ -105,9 +112,12 @@ return [
             'userid',
             function ($value, $instance) {
                 if (empty($value)) {
-                    return new Literal("unhex(replace(uuid(),'-',''))");
+                    return null;
                 }
-                return new Literal("X'" . str_replace('-', '', $value) . "'");
+                if (!($value instanceof Literal)) {
+                    $value = new HexUuidLiteral($value);
+                }
+                return $value;
             }
         ])
         ->toSingleton(),
@@ -115,7 +125,11 @@ return [
     UserPropertiesDefinition::class => DI::bind(UserPropertiesDefinition::class)
         ->toSingleton(),
 
-    'CORS_SERVER_LIST' => function () {
+    UsersDBDataset::class => DI::bind(UsersDBDataset::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
+
+        'CORS_SERVER_LIST' => function () {
         return preg_split('/,(?![^{}]*})/', Psr11::container()->get('CORS_SERVERS'));
     },
 
@@ -128,10 +142,6 @@ return [
 
     HttpRequestHandler::class => DI::bind(HttpRequestHandler::class)
         ->withMethodCall("withMiddleware", [Param::get(CorsMiddleware::class)])
-        ->toSingleton(),
-
-    UsersDBDataset::class => DI::bind(UsersDBDataset::class)
-        ->withInjectedConstructor()
         ->toSingleton(),
 
     // ----------------------------------------------------------------------------
