@@ -20,16 +20,6 @@ class SampleProtectedTest extends BaseApiTestCase
         parent::setUp();
     }
 
-    /**
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
-     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
-     */
     public function testGetUnauthorized()
     {
         $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
@@ -45,16 +35,6 @@ class SampleProtectedTest extends BaseApiTestCase
         $this->assertRequest($request);
     }
 
-    /**
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
-     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
-     */
     public function testGetAuthorized()
     {
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
@@ -72,16 +52,6 @@ class SampleProtectedTest extends BaseApiTestCase
         $this->assertRequest($request);
     }
 
-    /**
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
-     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
-     */
     public function testGetAuthorizedRole1()
     {
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
@@ -99,16 +69,6 @@ class SampleProtectedTest extends BaseApiTestCase
         $this->assertRequest($request);
     }
 
-    /**
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
-     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
-     */
     public function testGetAuthorizedRole2()
     {
         $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);

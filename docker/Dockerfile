@@ -17,7 +17,7 @@ COPY builder /srv/builder
 COPY config /srv/config
 COPY src /srv/src
 COPY public /srv/public
-COPY template /srv/template
+COPY templates /srv/templates
 
 # This is necessary for the migration script
 COPY composer.* /srv
