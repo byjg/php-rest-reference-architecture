@@ -4,30 +4,30 @@ namespace RestTemplate\Model;
 
 use OpenApi\Annotations as OA;
 
-// PHPDOC for Dummy class using OpenAPI Zircote annotations
 /**
  * Class Dummy
  * @package RestTemplate\Model
- * @OA\Schema(required={"field"}, type="object", @OA\Xml(name="Dummy"))
+ * @OA\Schema(required={"id"}, type="object", @OA\Xml(name="Dummy"))
  */
 class Dummy
 {
+
     /**
-     * The "fake" key
      * @OA\Property()
      * @var int
      */
     protected $id;
 
     /**
-     * Some field property
-     * @OA\Property()
+     * @OA\Property(nullable=true)
      * @var string
      */
     protected $field;
 
+
+
     /**
-     * @return mixed
+     * @return int
      */
     public function getId()
     {
@@ -35,17 +35,17 @@ class Dummy
     }
 
     /**
-     * @param mixed $value
+     * @param int $id
+     * @return Dummy
      */
-    public function setId($value)
+    public function setId($id)
     {
-        $this->id = $value;
+        $this->id = $id;
+        return $this;
     }
 
-
-
     /**
-     * @return mixed
+     * @return string
      */
     public function getField()
     {
@@ -53,10 +53,14 @@ class Dummy
     }
 
     /**
-     * @param mixed $field
+     * @param string $field
+     * @return Dummy
      */
     public function setField($field)
     {
         $this->field = $field;
+        return $this;
     }
+
+
 }

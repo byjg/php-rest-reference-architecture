@@ -2,12 +2,15 @@
 
 namespace RestTemplate\Repository;
 
+use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\MicroOrm\Literal;
+use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
 use ByJG\Serializer\Exception\InvalidArgumentException;
+use RestTemplate\Psr11;
 use RestTemplate\Util\HexUuidLiteral;
 
 abstract class BaseRepository
@@ -86,6 +89,17 @@ abstract class BaseRepository
         return new Literal("X'" . $this->repository->getDbDriver()->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
     }
 
+    public static function getUuid()
+    {
+        return Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT insert(insert(insert(insert(hex(uuid_to_bin(uuid())),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')");
+    }
+
+    /**
+     * @param Mapper $mapper
+     * @param string $pkFieldName
+     * @param string $modelField
+     * @return void
+     */
     protected function setClosureFieldMapId($mapper, $pkFieldName = 'id', $modelField = 'uuid')
     {
         $mapper->addFieldMap(
@@ -115,6 +129,14 @@ abstract class BaseRepository
      */
     public function save($model)
     {
-        return $this->repository->save($model);
+        $model = $this->repository->save($model);
+
+        $primaryKey = $this->repository->getMapper()->getPrimaryKey();
+
+        if ($model->{"get$primaryKey"}() instanceof Literal) {
+            $model->{"set$primaryKey"}(HexUuidLiteral::getUuidFromLiteral($model->{"get$primaryKey"}()));
+        }
+
+        return $model;
     }
 }

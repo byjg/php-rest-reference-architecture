@@ -1,26 +1,24 @@
 <?php
 
-namespace {{ namespace }}\Rest;
+namespace RestTemplate\Rest;
 
-use ByJG\MicroOrm\Literal;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
-use {{ namespace }}\Psr11;
-use {{ namespace }}\Model\{{ className }};
-use {{ namespace }}\Repository\{{ className }}Repository;
+use RestTemplate\Psr11;
+use RestTemplate\Model\Dummy;
+use RestTemplate\Repository\DummyRepository;
 use OpenApi\Annotations as OA;
-use {{ namespace }}\Util\HexUuidLiteral;
 
-class {{ className }}Rest extends ServiceAbstractBase
+class DummyRest extends ServiceAbstractBase
 {
     /**
-     * Get the {{ className }} by id
+     * Get the Dummy by id
      * @OA\Get(
-     *     path="/{{ tableName }}/{id}",
-     *     tags={"{{ className }}"},
+     *     path="/dummy/{id}",
+     *     tags={"Dummy"},
      *     security={{
      *         "jwt-token":{}
      *     }},
@@ -30,13 +28,13 @@ class {{ className }}Rest extends ServiceAbstractBase
      *         in="path",
      *         required=true,
      *         @OA\Schema(
-     *             type="{{ fields.0.php_type }}"
+     *             type="integer"
      *         ) 
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="The object {{ className }}",
-     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
+     *         description="The object Dummy",
+     *         @OA\JsonContent(ref="#/components/schemas/Dummy")
      *     ),
      *     @OA\Response(
      *         response=401,
@@ -50,14 +48,14 @@ class {{ className }}Rest extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function get{{ className }}($response, $request)
+    public function getDummy($response, $request)
     {
         $data = $this->requireAuthenticated();
 
-        ${{ tableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        $dummyRepo = Psr11::container()->get(DummyRepository::class);
         $id = $request->param('id');
 
-        $result = ${{ tableName }}Repo->get($id);
+        $result = $dummyRepo->get($id);
         if (empty($result)) {
             throw new Error404Exception('Id not found');
         }
@@ -67,23 +65,22 @@ class {{ className }}Rest extends ServiceAbstractBase
     }
 
     /**
-     * Create a new {{ className }} 
+     * Create a new Dummy 
      * @OA\Post(
-     *     path="/{{ tableName }}",
-     *     tags={"{{ className }}"},
+     *     path="/dummy",
+     *     tags={"Dummy"},
      *     security={{
      *         "jwt-token":{}
      *     }},
      *     @OA\RequestBody(
-     *         description="The object {{ className }} to be created",
+     *         description="The object Dummy to be created",
      *         required=true,
      *         @OA\MediaType(
      *           mediaType="application/json",
      *           @OA\Schema(
-     *             {% if nonNullableFields | count > 0 %}required={ "{{ nonNullableFields | join('", "')}}" },{% endif %}
-{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' -%}
-     *             @OA\Property(property="{{ field.field }}", type="{{ field.php_type }}"{% if field.null == "YES" %}, nullable=true{% endif %}){% if loop.last == false %}, {% endif %}
-{% endif %}{% endfor %}
+     *             
+
+     *             @OA\Property(property="field", type="string", nullable=true)
      *           )
      *         )
      *     ),
@@ -93,10 +90,9 @@ class {{ className }}Rest extends ServiceAbstractBase
      *         @OA\MediaType(
      *           mediaType="application/json",
      *           @OA\Schema(
-     *             required={ "{{ primaryKeys | join('", "') }}" },
-{% for field in fields -%}
-{% if field.key == 'PRI' -%}     *             @OA\Property(property="{{ field.field }}", type="{{ field.php_type }}"){% endif %}
-{% endfor %}
+     *             required={ "id" },
+
+     *             @OA\Property(property="id", type="int")
      *           )
      *         )
      *     ),
@@ -112,34 +108,34 @@ class {{ className }}Rest extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function post{{ className }}($response, $request)
+    public function postDummy($response, $request)
     {
         $data = $this->requireAuthenticated();
 
         $payload = $this->validateRequest($request);
         
-        $model = new {{ className }}();
+        $model = new Dummy();
         BinderObject::bind($payload, $model);
 
-        ${{ tableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
-        ${{ tableName }}Repo->save($model);
+        $DummyRepo = Psr11::container()->get(DummyRepository::class);
+        $DummyRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
     }
 
 
     /**
-     * Update an existing {{ className }} 
+     * Update an existing Dummy 
      * @OA\Put(
-     *     path="/{{ tableName }}",
-     *     tags={"{{ className }}"},
+     *     path="/dummy",
+     *     tags={"Dummy"},
      *     security={{
      *         "jwt-token":{}
      *     }},
      *     @OA\RequestBody(
-     *         description="The object {{ className }} to be updated",
+     *         description="The object Dummy to be updated",
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
+     *         @OA\JsonContent(ref="#/components/schemas/Dummy")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -157,20 +153,20 @@ class {{ className }}Rest extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function put{{ className }}($response, $request)
+    public function putDummy($response, $request)
     {
         $data = $this->requireAuthenticated();
 
         $payload = $this->validateRequest($request);
 
-        ${{ tableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
-        $model = ${{ tableName }}Repo->get($payload['{{ fields.0.field }}']);
+        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $model = $dummyRepo->get($payload['id']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');
         }
         BinderObject::bind($payload, $model);
 
-        ${{ tableName }}Repo->save($model);
+        $dummyRepo->save($model);
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ namespace }}\Rest;
+namespace RestTemplate\Rest;
 
 use ByJG\MicroOrm\Literal;
 use ByJG\RestServer\Exception\Error401Exception;
@@ -8,19 +8,19 @@ use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
-use {{ namespace }}\Psr11;
-use {{ namespace }}\Model\{{ className }};
-use {{ namespace }}\Repository\{{ className }}Repository;
+use RestTemplate\Psr11;
+use RestTemplate\Model\DummyHex;
+use RestTemplate\Repository\DummyHexRepository;
 use OpenApi\Annotations as OA;
-use {{ namespace }}\Util\HexUuidLiteral;
+use RestTemplate\Util\HexUuidLiteral;
 
-class {{ className }}Rest extends ServiceAbstractBase
+class DummyHexRest extends ServiceAbstractBase
 {
     /**
-     * Get the {{ className }} by id
+     * Get the DummyHex by id
      * @OA\Get(
-     *     path="/{{ tableName }}/{id}",
-     *     tags={"{{ className }}"},
+     *     path="/dummyhex/{id}",
+     *     tags={"DummyHex"},
      *     security={{
      *         "jwt-token":{}
      *     }},
@@ -30,13 +30,13 @@ class {{ className }}Rest extends ServiceAbstractBase
      *         in="path",
      *         required=true,
      *         @OA\Schema(
-     *             type="{{ fields.0.php_type }}"
+     *             type="string"
      *         ) 
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="The object {{ className }}",
-     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
+     *         description="The object DummyHex",
+     *         @OA\JsonContent(ref="#/components/schemas/DummyHex")
      *     ),
      *     @OA\Response(
      *         response=401,
@@ -50,14 +50,14 @@ class {{ className }}Rest extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function get{{ className }}($response, $request)
+    public function getDummyHex($response, $request)
     {
         $data = $this->requireAuthenticated();
 
-        ${{ tableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        $dummyhexRepo = Psr11::container()->get(DummyHexRepository::class);
         $id = $request->param('id');
 
-        $result = ${{ tableName }}Repo->get($id);
+        $result = $dummyhexRepo->get($id);
         if (empty($result)) {
             throw new Error404Exception('Id not found');
         }
@@ -67,23 +67,22 @@ class {{ className }}Rest extends ServiceAbstractBase
     }
 
     /**
-     * Create a new {{ className }} 
+     * Create a new DummyHex 
      * @OA\Post(
-     *     path="/{{ tableName }}",
-     *     tags={"{{ className }}"},
+     *     path="/dummyhex",
+     *     tags={"DummyHex"},
      *     security={{
      *         "jwt-token":{}
      *     }},
      *     @OA\RequestBody(
-     *         description="The object {{ className }} to be created",
+     *         description="The object DummyHex to be created",
      *         required=true,
      *         @OA\MediaType(
      *           mediaType="application/json",
      *           @OA\Schema(
-     *             {% if nonNullableFields | count > 0 %}required={ "{{ nonNullableFields | join('", "')}}" },{% endif %}
-{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' -%}
-     *             @OA\Property(property="{{ field.field }}", type="{{ field.php_type }}"{% if field.null == "YES" %}, nullable=true{% endif %}){% if loop.last == false %}, {% endif %}
-{% endif %}{% endfor %}
+     *             
+
+     *             @OA\Property(property="field", type="string", nullable=true)
      *           )
      *         )
      *     ),
@@ -93,10 +92,9 @@ class {{ className }}Rest extends ServiceAbstractBase
      *         @OA\MediaType(
      *           mediaType="application/json",
      *           @OA\Schema(
-     *             required={ "{{ primaryKeys | join('", "') }}" },
-{% for field in fields -%}
-{% if field.key == 'PRI' -%}     *             @OA\Property(property="{{ field.field }}", type="{{ field.php_type }}"){% endif %}
-{% endfor %}
+     *             required={ "id" },
+
+     *             @OA\Property(property="id", type="string")
      *           )
      *         )
      *     ),
@@ -112,34 +110,34 @@ class {{ className }}Rest extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function post{{ className }}($response, $request)
+    public function postDummyHex($response, $request)
     {
         $data = $this->requireAuthenticated();
 
         $payload = $this->validateRequest($request);
         
-        $model = new {{ className }}();
+        $model = new DummyHex();
         BinderObject::bind($payload, $model);
 
-        ${{ tableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
-        ${{ tableName }}Repo->save($model);
+        $dummyhexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyhexRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
     }
 
 
     /**
-     * Update an existing {{ className }} 
+     * Update an existing DummyHex 
      * @OA\Put(
-     *     path="/{{ tableName }}",
-     *     tags={"{{ className }}"},
+     *     path="/dummyhex",
+     *     tags={"DummyHex"},
      *     security={{
      *         "jwt-token":{}
      *     }},
      *     @OA\RequestBody(
-     *         description="The object {{ className }} to be updated",
+     *         description="The object DummyHex to be updated",
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
+     *         @OA\JsonContent(ref="#/components/schemas/DummyHex")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -157,20 +155,20 @@ class {{ className }}Rest extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function put{{ className }}($response, $request)
+    public function putDummyHex($response, $request)
     {
         $data = $this->requireAuthenticated();
 
         $payload = $this->validateRequest($request);
 
-        ${{ tableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
-        $model = ${{ tableName }}Repo->get($payload['{{ fields.0.field }}']);
+        $dummyhexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $model = $dummyhexRepo->get($payload['id']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');
         }
         BinderObject::bind($payload, $model);
 
-        ${{ tableName }}Repo->save($model);
+        $dummyhexRepo->save($model);
     }
 
 }

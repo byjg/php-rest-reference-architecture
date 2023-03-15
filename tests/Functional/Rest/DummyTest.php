@@ -5,11 +5,10 @@ namespace Test\Functional\Rest;
 use ByJG\ApiTools\Base\Schema;
 use ByJG\Serializer\BinderObject;
 use ByJG\Serializer\SerializerObject;
-use {{ namespace }}\Util\FakeApiRequester;
-use {{ namespace }}\Model\{{ className }};
-use {{ namespace }}\Repository\BaseRepository;
+use RestTemplate\Util\FakeApiRequester;
+use RestTemplate\Model\Dummy;
 
-class {{ className }}Test extends BaseApiTestCase
+class DummyTest extends BaseApiTestCase
 {
     protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
 
@@ -22,21 +21,20 @@ class {{ className }}Test extends BaseApiTestCase
     }
 
     /**
-     * @return {{ className }}|array
+     * @return Dummy|array
      */
     protected function getSampleData($array = false)
     {
         $sample = [
-{% for field in fields -%}
-{% if field.key != 'PRI' && field.extra != 'VIRTUAL GENERATED' -%}            '{{ field.field }}' => {% if field.php_type == 'int' %}1{% endif %}{% if field.php_type == 'string' %}'{{ field.field }}'{% endif %}{% if field.php_type == 'float' %}1.1{% endif %}{% if field.php_type == 'bool' %}true{% endif %},{% endif %}
-{% endfor %}
+
+            'field' => 'field',
         ];
 
         if ($array) {
             return $sample;
         }
 
-        BinderObject::bind($sample, $model = new {{ className }}());
+        BinderObject::bind($sample, $model = new Dummy());
         return $model;
     }
 
@@ -51,7 +49,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/{{ tableName }}/1")
+            ->withPath("/dummy/1")
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -66,7 +64,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/{{ tableName }}")
+            ->withPath("/dummy")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(401)
         ;
@@ -82,8 +80,8 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/{{ tableName }}")
-            ->withRequestBody(json_encode($this->getSampleData(true) + ['{{ fields.0.field }}' => 1]))
+            ->withPath("/dummy")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -97,7 +95,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/{{ tableName }}/1")
+            ->withPath("/dummy/1")
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
@@ -114,7 +112,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/{{ tableName }}")
+            ->withPath("/dummy")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(200)
             ->withRequestHeader([
@@ -128,7 +126,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/{{ tableName }}/" . $bodyAr['{{ fields.0.field }}'])
+            ->withPath("/dummy/" . $bodyAr['id'])
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
@@ -140,7 +138,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/{{ tableName }}")
+            ->withPath("/dummy")
             ->withRequestBody($body->getBody()->getContents())
             ->assertResponseCode(200)
             ->withRequestHeader([
