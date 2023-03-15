@@ -3,35 +3,35 @@
 namespace RestTemplate\Model;
 
 /**
- * Model that represents the DummyHex table
- *
- * @OA\Schema(required={"field"}, type="object", @OA\Xml(name="DummyHex"))
+ * Class DummyHex
+ * @package RestTemplate\Model
+ * @OA\Schema(required={"id"}, type="object", @OA\Xml(name="DummyHex"))
  */
 class DummyHex
 {
+
     /**
-     * The "fake" key
      * @OA\Property()
      * @var string
      */
     protected $id;
 
     /**
-     * The UUID
-     * @OA\Property()
+     * @OA\Property(nullable=true)
      * @var string
      */
     protected $uuid;
 
     /**
-     * Some field property
-     * @OA\Property()
+     * @OA\Property(nullable=true)
      * @var string
      */
     protected $field;
 
+
+
     /**
-     * @return mixed
+     * @return string
      */
     public function getId()
     {
@@ -39,11 +39,13 @@ class DummyHex
     }
 
     /**
-     * @param mixed $value
+     * @param string $id
+     * @return DummyHex
      */
-    public function setId($value)
+    public function setId($id)
     {
-        $this->id = $value;
+        $this->id = $id;
+        return $this;
     }
 
     /**
@@ -56,15 +58,16 @@ class DummyHex
 
     /**
      * @param string $uuid
+     * @return DummyHex
      */
     public function setUuid($uuid)
     {
         $this->uuid = $uuid;
+        return $this;
     }
 
-
     /**
-     * @return mixed
+     * @return string
      */
     public function getField()
     {
@@ -72,10 +75,14 @@ class DummyHex
     }
 
     /**
-     * @param mixed $field
+     * @param string $field
+     * @return DummyHex
      */
     public function setField($field)
     {
         $this->field = $field;
+        return $this;
     }
+
+
 }

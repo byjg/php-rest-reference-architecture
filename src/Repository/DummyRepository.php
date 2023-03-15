@@ -21,8 +21,15 @@ class DummyRepository extends BaseRepository
         $mapper = new Mapper(
             Dummy::class,
             'dummy',
-            'id'
+            'id',
+            // function () {
+            //     return $this->getClosureNewUUID();
+            // }
         );
+
+        // Table UUID Definition
+        // $this->setClosureFieldMapId($mapper);
+
 
         $this->repository = new Repository($dbDriver, $mapper);
     }

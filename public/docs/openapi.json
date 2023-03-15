@@ -19,6 +19,298 @@
         }
     ],
     "paths": {
+        "/dummyhex/{id}": {
+            "get": {
+                "tags": [
+                    "DummyHex"
+                ],
+                "summary": "Get the DummyHex by id",
+                "operationId": "GET::/dummyhex/{id}::RestTemplate\\Rest\\DummyHexRest::getDummyHex",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object DummyHex",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DummyHex"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/dummyhex": {
+            "put": {
+                "tags": [
+                    "DummyHex"
+                ],
+                "summary": "Update an existing DummyHex",
+                "operationId": "PUT::/dummyhex::RestTemplate\\Rest\\DummyHexRest::putDummyHex",
+                "requestBody": {
+                    "description": "The object DummyHex to be updated",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DummyHex"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Nothing to return"
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "DummyHex"
+                ],
+                "summary": "Create a new DummyHex",
+                "operationId": "POST::/dummyhex::RestTemplate\\Rest\\DummyHexRest::postDummyHex",
+                "requestBody": {
+                    "description": "The object DummyHex to be created",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "field": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The id of the object created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/dummy/{id}": {
+            "get": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Get the Dummy by id",
+                "operationId": "GET::/dummy/{id}::RestTemplate\\Rest\\DummyRest::getDummy",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object Dummy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dummy"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/dummy": {
+            "put": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Update an existing Dummy",
+                "operationId": "PUT::/dummy::RestTemplate\\Rest\\DummyRest::putDummy",
+                "requestBody": {
+                    "description": "The object Dummy to be updated",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Dummy"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Nothing to return"
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Create a new Dummy",
+                "operationId": "POST::/dummy::RestTemplate\\Rest\\DummyRest::postDummy",
+                "requestBody": {
+                    "description": "The object Dummy to be created",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "field": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The id of the object created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
         "/login": {
             "post": {
                 "tags": [
@@ -194,205 +486,6 @@
                 }
             }
         },
-        "/sample/dummy/{field}": {
-            "get": {
-                "tags": [
-                    "zz_sample"
-                ],
-                "summary": "Get the rows from the Dummy table by ID",
-                "operationId": "GET::/sample/dummy/{field}::RestTemplate\\Rest\\Sample::getDummy",
-                "parameters": [
-                    {
-                        "name": "field",
-                        "in": "path",
-                        "description": "The field to search",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The object",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {}
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro Geral",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/sample/dummy": {
-            "post": {
-                "tags": [
-                    "zz_sample"
-                ],
-                "summary": "Insert a new row in the Dummy table",
-                "operationId": "POST::/sample/dummy::RestTemplate\\Rest\\Sample::postDummy",
-                "requestBody": {
-                    "description": "Dummy object that needs to be added to the store",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/Dummy"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "The object",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Dummy"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro Geral",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/sample/dummyhex/{id}": {
-            "get": {
-                "tags": [
-                    "zz_sample"
-                ],
-                "summary": "Get the rows from the DummyHex table by ID",
-                "operationId": "GET::/sample/dummyhex/{id}::RestTemplate\\Rest\\Sample::getDummyHex",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "The field content to be returned",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The object",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DummyHex"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro Geral",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/sample/dummyhex": {
-            "post": {
-                "tags": [
-                    "zz_sample"
-                ],
-                "summary": "Save data content in the table Dummy Hex",
-                "operationId": "POST::/sample/dummyhex::RestTemplate\\Rest\\Sample::postDummyHex",
-                "requestBody": {
-                    "description": "The dummy data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/DummyHex"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "The object",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DummyHex"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro Geral",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/sampleprotected/ping": {
             "get": {
                 "tags": [
@@ -487,16 +580,15 @@
             "Dummy": {
                 "description": "Class Dummy",
                 "required": [
-                    "field"
+                    "id"
                 ],
                 "properties": {
                     "id": {
-                        "description": "The \"fake\" key",
                         "type": "integer"
                     },
                     "field": {
-                        "description": "Some field property",
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object",
@@ -505,22 +597,21 @@
                 }
             },
             "DummyHex": {
-                "description": "Model that represents the DummyHex table",
+                "description": "Class DummyHex",
                 "required": [
-                    "field"
+                    "id"
                 ],
                 "properties": {
                     "id": {
-                        "description": "The \"fake\" key",
                         "type": "string"
                     },
                     "uuid": {
-                        "description": "The UUID",
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     },
                     "field": {
-                        "description": "Some field property",
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object",
