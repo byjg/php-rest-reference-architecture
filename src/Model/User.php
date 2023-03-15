@@ -91,4 +91,14 @@ class User extends UserModel
     {
         $this->uuid = $uuid;
     }
+
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
+    public function setUpdated($updated)
+    {
+        $this->updated = $updated;
+    }
 }

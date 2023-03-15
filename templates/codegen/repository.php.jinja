@@ -1,0 +1,58 @@
+<?php
+
+namespace {{ namespace }}\Repository;
+
+use {{ namespace }}\Psr11;
+use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\MicroOrm\Mapper;
+use ByJG\MicroOrm\Query;
+use ByJG\MicroOrm\Repository;
+use {{ namespace }}\Model\{{ className }};
+
+class {{ className }}Repository extends BaseRepository
+{
+    /**
+     * {{ className }}Repository constructor.
+     *
+     * @param DbDriverInterface $dbDriver
+     *
+     */
+    public function __construct(DbDriverInterface $dbDriver)
+    {
+        $mapper = new Mapper(
+            {{ className }}::class,
+            '{{ tableName }}',
+            'id',
+            // function () {
+            //     return $this->getClosureNewUUID();
+            // }
+        );
+
+        // Table UUID Definition
+        // $this->setClosureFieldMapId($mapper);
+{% for field in fields -%}
+{% if field.extra == 'VIRTUAL GENERATED' -%}
+        $mapper->addFieldMap('{{ field.field }}', '{{ field.field }}', Mapper::doNotUpdateClosure());
+{% endif %}
+{% endfor %}
+
+        $this->repository = new Repository($dbDriver, $mapper);
+    }
+{% for index in indexes -%}
+{% if index.key_name != 'PRIMARY' -%}
+    /**
+     * @param mixed ${{ index.column_name }}
+     * @return {{ className }}[]
+     */
+    public function getBy{{ index.column_name | capitalize }}(${{ index.column_name }})
+    {
+        $query = Query::getInstance()
+             ->table('{{ tableName }}')
+             ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.column_name }}]);
+        $result = $this->repository->getByQuery($query);
+        return $result;
+    }
+{% endif %}
+{% endfor %}
+
+}

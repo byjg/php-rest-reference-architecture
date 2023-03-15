@@ -1,0 +1,10 @@
+<?php
+use {{ namespace }}\\Repository\\{{ className }}Repository;
+
+return [
+
+    {{ className }}Repository::class => DI::bind({{ className }}Repository::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
+
+];

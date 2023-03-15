@@ -2,12 +2,14 @@
 
 namespace Builder;
 
+use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
 use ByJG\DbMigration\Exception\InvalidMigrationFile;
 use ByJG\DbMigration\Migration;
+use ByJG\JinjaPhp\Loader\FileSystemLoader;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
 use RestTemplate\Psr11;
@@ -49,6 +51,20 @@ class Scripts extends BaseScripts
     {
         $build = new Scripts();
         $build->runGenRestDocs($event->getArguments());
+    }
+
+    /**
+     * @param Event $event
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     */
+    public static function codeGenerator(Event $event)
+    {
+        $build = new Scripts();
+        $build->runCodeGenerator($event->getArguments());
     }
 
     /**
@@ -150,5 +166,178 @@ class Scripts extends BaseScripts
             true
         );
         file_put_contents("$docPath/openapi.json", $openapi->toJson());
+    }
+
+    /**
+     * @param $arguments
+     * @throws ConfigNotFoundException
+     * @throws EnvironmentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     */
+    public function runCodeGenerator($arguments)
+    {
+        // Get Table Name
+        $table = null;
+        if (in_array("--table", $arguments)) {
+            $index = array_search("--table", $arguments);
+            $table = isset($arguments[$index + 1]) ? $arguments[$index + 1] : null;
+            unset($arguments[$index + 1]);
+            unset($arguments[$index]);
+        }
+        if (empty($table)) {
+            throw new Exception("Table name is required");
+        }
+
+        // Check Arguments
+        $foundArguments = [];
+        $validArguments = ['model', 'repo', 'config' , 'rest', 'test', 'all', "--save", "--debug"];
+        foreach ($arguments as $argument) {
+            if (!in_array($argument, $validArguments)) {
+                throw new Exception("Invalid argument: $argument\nValids are: " . implode(", ", $validArguments) . "\n");
+            } else {
+                $foundArguments[] = $argument;
+            }
+        }
+        if (empty($foundArguments)) {
+            throw new Exception("At least one argument is required");
+        }
+        $save = in_array("--save", $arguments);        
+
+        /** @var DbDriverInterface $dbDriver */
+        $dbDriver = Psr11::container()->get(DbDriverInterface::class);
+
+        $tableDefinition = $dbDriver->getIterator("EXPLAIN " . strtolower($table))->toArray();
+        $tableIndexes = $dbDriver->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
+
+        // Convert DB Types to PHP Types
+        foreach ($tableDefinition as $key => $field) {
+            $type = preg_replace('/\(.*/', '', $field['type']);
+
+            switch ($type) {
+                case 'int':
+                case 'tinyint':
+                case 'smallint':
+                case 'mediumint':
+                case 'bigint':
+                case 'integer':
+                    $tableDefinition[$key]['php_type'] = 'int';
+                    break;
+                case 'float':
+                case 'double':
+                case 'decimal':
+                    $tableDefinition[$key]['php_type'] = 'float';
+                    break;
+                case 'bool':
+                case 'boolean':
+                    $tableDefinition[$key]['php_type'] = 'bool';
+                    break;
+                case 'date':
+                case 'datetime':
+                case 'timestamp':
+                    $tableDefinition[$key]['php_type'] = 'string';
+                    break;
+                default:
+                    $tableDefinition[$key]['php_type'] = 'string';
+            }
+        }
+
+        // Create an array only with nullable fields
+        $nullableFields = [];
+        foreach ($tableDefinition as $field) {
+            if ($field['null'] == 'YES') {
+                $nullableFields[] = $field["field"];
+            }
+        }
+
+        // Create an array only with primary keys
+        $primaryKeys = [];
+        foreach ($tableDefinition as $field) {
+            if ($field['key'] == 'PRI') {
+                $primaryKeys[] = $field["field"];
+            }
+        }
+
+        // Create an array with non nullable fields but primary keys
+        $nonNullableFields = [];
+        foreach ($tableDefinition as $field) {
+            if ($field['null'] == 'NO' && $field['key'] != 'PRI') {
+                $nonNullableFields[] = $field["field"];
+            }
+        }
+
+        $data = [
+            'namespace' => 'RestTemplate',
+            'className' => ucwords($table),
+            'tableName' => strtolower($table),
+            'fields' => $tableDefinition,
+            'primaryKeys' => $primaryKeys,
+            'nullableFields' => $nullableFields,
+            'nonNullableFields' => $nonNullableFields,
+            'indexes' => $tableIndexes,
+        ];
+
+        if (in_array("--debug", $arguments)) {
+            print_r($data);
+        }
+
+
+
+        $loader = new FileSystemLoader(__DIR__ . '/../templates/codegen');
+
+        if (in_array('all', $arguments) || in_array('model', $arguments)) {
+            echo "Processing Model for table $table...\n";
+            $template = $loader->getTemplate('model.php');
+            if ($save) {
+                $file = __DIR__ . '/../src/Model/' . $data['className'] . '.php';
+                file_put_contents($file, $template->render($data));
+                echo "File saved in $file\n";
+            } else {
+                print_r($template->render($data));
+            }
+        }
+
+        if (in_array('all', $arguments) || in_array('repo', $arguments)) {
+            echo "Processing Repository for table $table...\n";
+            $template = $loader->getTemplate('repository.php');
+            if ($save) {
+                $file = __DIR__ . '/../src/Repository/' . $data['className'] . 'Repository.php';
+                file_put_contents($file, $template->render($data));
+                echo "File saved in $file\n";
+            } else {
+                print_r($template->render($data));
+            }
+        }
+
+        if (in_array('all', $arguments) || in_array('rest', $arguments)) {
+            echo "Processing Rest for table $table...\n";
+            $template = $loader->getTemplate('rest.php');
+            if ($save) {
+                $file = __DIR__ . '/../src/Rest/' . $data['className'] . 'Rest.php';
+                file_put_contents($file, $template->render($data));
+                echo "File saved in $file\n";
+            } else {
+                print_r($template->render($data));
+            }
+        }
+
+        if (in_array('all', $arguments) || in_array('test', $arguments)) {
+            echo "Processing Test for table $table...\n";
+            $template = $loader->getTemplate('test.php');
+            if ($save) {
+                $file = __DIR__ . '/../tests/Functional/Rest/' . $data['className'] . 'Test.php';
+                file_put_contents($file, $template->render($data));
+                echo "File saved in $file\n";
+            } else {
+                print_r($template->render($data));
+            }
+        }
+
+        if (in_array('all', $arguments) || in_array('config', $arguments)) {
+            echo "Processing Config for table $table...\n";
+            $template = $loader->getTemplate('config.php');
+            print_r($template->render($data));
+        }
     }
 }
