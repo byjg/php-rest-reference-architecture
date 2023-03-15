@@ -34,7 +34,7 @@ permissions:
   packages: write
 
 jobs:
-  build-backend-app:
+  build_backend_app:
     runs-on: ubuntu-latest
 
     services:

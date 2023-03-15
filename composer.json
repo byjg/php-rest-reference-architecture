@@ -15,7 +15,10 @@
     "byjg/restserver": "dev-bump",
     "zircote/swagger-php": "^4.6.1",
     "byjg/swagger-test": "dev-bump",
-    "byjg/migration": "dev-bump"
+    "byjg/migration": "dev-bump",
+    "byjg/php-daemonize": "dev-bump",
+    "byjg/shortid": "dev-bump",
+    "byjg/jinja_php": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "5.7.*|7.4.*|^9.5"
@@ -29,6 +32,7 @@
   "scripts": {
     "test": "./vendor/bin/phpunit",
     "migrate": "Builder\\Scripts::migrate",
+    "codegen": "Builder\\Scripts::codeGenerator",
     "restdocs": "Builder\\Scripts::genRestDocs",
     "post-create-project-cmd": "Builder\\PostCreateScript::run"
   },

@@ -108,6 +108,7 @@ return [
             ]
         )
         ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
+        ->withMethodCall("markPropertyAsReadOnly", ["updated"])
         ->withMethodCall("defineGenerateKeyClosure", 
             [
                 function () {

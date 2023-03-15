@@ -1,0 +1,42 @@
+<?php
+
+namespace {{ namespace }}\Model;
+
+use OpenApi\Annotations as OA;
+
+/**
+ * Class {{ className }}
+ * @package {{ namespace }}\Model
+ * @OA\Schema(required={"{{ primaryKeys | join('", "')}}"{% if nonNullableFields | count > 0 %}, "{{ nonNullableFields | join('", "')}}"{% endif %}}, type="object", @OA\Xml(name="{{ className }}"))
+ */
+class {{ className }}
+{
+{% for field in fields %}
+    /**
+     * @OA\Property({% if field.null == "YES" %}nullable=true{% endif %})
+     * @var {{ field.php_type }}
+     */
+    protected ${{ field.field }};
+{% endfor %}
+
+{% for field in fields %}
+    /**
+     * @return {{ field.php_type }}
+     */
+    public function get{{ field.field | capitalize }}()
+    {
+        return $this->{{ field.field }};
+    }
+
+    /**
+     * @param {{ field.php_type }} ${{ field.field }}
+     * @return {{ className }}
+     */
+    public function set{{ field.field | capitalize }}(${{ field.field }})
+    {
+        $this->{{ field.field }} = ${{ field.field }};
+        return $this;
+    }
+{% endfor %}
+
+}

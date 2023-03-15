@@ -1,0 +1,151 @@
+<?php
+
+namespace Test\Functional\Rest;
+
+use ByJG\ApiTools\Base\Schema;
+use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\SerializerObject;
+use {{ namespace }}\Util\FakeApiRequester;
+use {{ namespace }}\Model\{{ className }};
+
+class {{ className }}Test extends BaseApiTestCase
+{
+    protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
+
+    protected function setUp(): void
+    {
+        $schema = Schema::getInstance(file_get_contents($this->filePath));
+        $this->setSchema($schema);
+
+        parent::setUp();
+    }
+
+    /**
+     * @return {{ className }}|array
+     */
+    protected function getSampleData($array = false)
+    {
+        $sample = [
+{% for field in fields -%}
+{% if field.key != 'PRI' -%}            '{{ field.field }}' => {% if field.php_type == 'int' %}1{% endif %}{% if field.php_type == 'string' %}'{{ field.field }}'{% endif %}{% if field.php_type == 'float' %}1.1{% endif %}{% if field.php_type == 'bool' %}true{% endif %},{% endif %}
+{% endfor %}
+        ];
+
+        if ($array) {
+            return $sample;
+        }
+
+        BinderObject::bind($sample, $model = new {{ className }}());
+        return $model;
+    }
+
+
+
+    public function testGetUnauthorized()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/{{ tableName }}/1")
+            ->assertResponseCode(401)
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testPostUnauthorized()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('POST')
+            ->withPath("/{{ tableName }}")
+            ->withRequestBody(json_encode($this->getSampleData(true)))
+            ->assertResponseCode(401)
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testPutUnauthorized()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/{{ tableName }}")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['{{ fields.0.field }}' => 1]))
+            ->assertResponseCode(401)
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testGet()
+    {
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/{{ tableName }}/1")
+            ->assertResponseCode(200)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testFullCrud()
+    {
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('POST')
+            ->withPath("/{{ tableName }}")
+            ->withRequestBody(json_encode($this->getSampleData(true)))
+            ->assertResponseCode(200)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $body = $this->assertRequest($request);
+        $bodyAr = json_decode($body->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/{{ tableName }}/" . $bodyAr['{{ fields.0.field }}'])
+            ->assertResponseCode(200)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $body = $this->assertRequest($request);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/{{ tableName }}")
+            ->withRequestBody($body->getBody()->getContents())
+            ->assertResponseCode(200)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
+}
