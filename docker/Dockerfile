@@ -1,4 +1,4 @@
-FROM byjg/php:7.4-fpm-nginx
+FROM byjg/php:8.1-fpm-nginx
 
 ENV NGINX_ROOT="/srv/public"
 ENV PHP_CONTROLLER="/app.php"

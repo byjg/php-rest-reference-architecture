@@ -8,7 +8,8 @@ create table users
     email varchar(120),
     username varchar(20) not null,
     password char(40) not null,
-    created datetime,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     admin enum('yes','no'),
 
     constraint pk_users primary key (userid)
@@ -23,8 +24,10 @@ ALTER TABLE `users`
 -- Default Password is "pwd"
 -- Please change it!
 insert into users (name, email, username, password, admin) VALUES
-  ('Administrator', 'admin@example.com', 'admin', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'yes'),   -- !P4ssw0rdstr!
-  ('Regular User', 'user@example.com', 'user', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'no')        -- !P4ssw0rdstr!
+  ('Administrator', 'admin@example.com', 'admin', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'yes');   -- !P4ssw0rdstr!
+
+insert into users (userid, name, email, username, password, admin) VALUES
+  (0x5f6e7fe7bd1b11ed8ca90242ac120002, 'Regular User', 'user@example.com', 'user', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'no')        -- !P4ssw0rdstr!
 ;
 
 -- random binary(16) generator
@@ -43,24 +46,5 @@ create table users_property
    constraint fk_custom_user foreign key (userid) references users (userid)
 ) ENGINE=InnoDB;
 
-
-
-
--- This table is used by onboard component
-create table onboard (
-  id binary(16) DEFAULT (uuid_to_bin(uuid())) PRIMARY KEY NOT NULL,
-  `uuid` varchar(36) GENERATED ALWAYS AS (insert(insert(insert(insert(hex(`id`),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')) VIRTUAL,
-  email varchar(255) NOT NULL,
-  emailcode int NULL,
-  emailvalid int NULL,
-  country varchar(5) NULL,
-  phone varchar(20) NULL,
-  smscode int NULL,
-  phonevalid int NULL,
-  name varchar(255) NULL,
-  nationalid varchar(11) NULL,
-  birthdate date null,
-  promocode varchar(20) null,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+insert into users_property (name, value, userid) values 
+  ('picture', 'https://www.gravatar.com/avatar/9f4d313491a7df705b7071c228fc79cd', 0x5f6e7fe7bd1b11ed8ca90242ac120002);
