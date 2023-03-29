@@ -56,6 +56,21 @@ class DummyHexTest extends BaseApiTestCase
         $this->assertRequest($request);
     }
 
+    public function testListUnauthorized()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/dummyhex/" . BaseRepository::getUuid())
+            ->assertResponseCode(401)
+        ;
+        $this->assertRequest($request);
+    }
+
     public function testPostUnauthorized()
     {
         $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
@@ -88,22 +103,47 @@ class DummyHexTest extends BaseApiTestCase
         $this->assertRequest($request);
     }
 
-    // public function testGet()
-    // {
-    //     $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+    public function testPostInsufficientPrivileges()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
 
-    //     $request = new FakeApiRequester();
-    //     $request
-    //         ->withPsr7Request($this->getPsr7Request())
-    //         ->withMethod('GET')
-    //         ->withPath("/dummyhex/1")
-    //         ->assertResponseCode(200)
-    //         ->withRequestHeader([
-    //             "Authorization" => "Bearer " . $result['token']
-    //         ])
-    //     ;
-    //     $this->assertRequest($request);
-    // }
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('POST')
+            ->withPath("/dummyhex")
+            ->withRequestBody(json_encode($this->getSampleData(true)))
+            ->assertResponseCode(403)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testPutInsufficientPrivileges()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/dummyhex")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => BaseRepository::getUuid()]))
+            ->assertResponseCode(403)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
 
     public function testFullCrud()
     {
@@ -148,4 +188,21 @@ class DummyHexTest extends BaseApiTestCase
         ;
         $this->assertRequest($request);
     }
+
+    public function testList()
+    {
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/dummyhex")
+            ->assertResponseCode(200)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    } 
 }

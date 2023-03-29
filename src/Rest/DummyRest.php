@@ -2,6 +2,7 @@
 
 namespace RestTemplate\Rest;
 
+use ByJG\MicroOrm\Literal;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
@@ -11,6 +12,7 @@ use RestTemplate\Psr11;
 use RestTemplate\Model\Dummy;
 use RestTemplate\Repository\DummyRepository;
 use OpenApi\Annotations as OA;
+use RestTemplate\Util\HexUuidLiteral;
 
 class DummyRest extends ServiceAbstractBase
 {
@@ -28,7 +30,8 @@ class DummyRest extends ServiceAbstractBase
      *         in="path",
      *         required=true,
      *         @OA\Schema(
-     *             type="integer"
+     *             type="integer",
+     *             format="int32"
      *         ) 
      *     ),
      *     @OA\Response(
@@ -65,6 +68,87 @@ class DummyRest extends ServiceAbstractBase
     }
 
     /**
+     * List Dummy
+     * @OA\Get(
+     *    path="/dummy",
+     *    tags={"Dummy"},
+     *    security={{
+     *       "jwt-token":{}
+     *    }},
+     *    @OA\Parameter(
+     *       name="page",
+     *       description="Page number",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="integer"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="size",
+     *       description="Page size",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="integer"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="orderBy",
+     *       description="Order by",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="string"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="filter",
+     *       description="Filter",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="string"
+     *       )
+     *    ),
+     *    @OA\Response(
+     *      response=200,
+     *      description="The list of Dummy",
+     *      @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref="#/components/schemas/Dummy")
+     *      )
+     *    ),
+     *    @OA\Response(
+     *      response=401,
+     *      description="Not Authorized",
+     *      @OA\JsonContent(ref="#/components/schemas/error")
+     *    )
+     * )
+     * 
+     * @param mixed $response
+     * @param mixed $request
+     * @return void
+     */
+    public function listDummy($response, $request)
+    {
+        $data = $this->requireAuthenticated();
+
+        $repo = Psr11::container()->get(DummyRepository::class);
+
+        $page = $request->get('page');
+        $size = $request->get('size');
+        // $orderBy = $request->get('orderBy');
+        // $filter = $request->get('filter');
+
+        $result = $repo->list($page, $size);
+        $response->write(
+            $result
+        );
+    }
+
+
+    /**
      * Create a new Dummy 
      * @OA\Post(
      *     path="/dummy",
@@ -80,7 +164,7 @@ class DummyRest extends ServiceAbstractBase
      *           @OA\Schema(
      *             
 
-     *             @OA\Property(property="field", type="string", nullable=true)
+     *             @OA\Property(property="field", type="string", format="string", nullable=true)
      *           )
      *         )
      *     ),
@@ -92,7 +176,7 @@ class DummyRest extends ServiceAbstractBase
      *           @OA\Schema(
      *             required={ "id" },
 
-     *             @OA\Property(property="id", type="int")
+     *             @OA\Property(property="id", type="integer", format="int32")
      *           )
      *         )
      *     ),
@@ -110,15 +194,15 @@ class DummyRest extends ServiceAbstractBase
      */
     public function postDummy($response, $request)
     {
-        $data = $this->requireAuthenticated();
+        $data = $this->requireRole("admin");
 
         $payload = $this->validateRequest($request);
         
         $model = new Dummy();
         BinderObject::bind($payload, $model);
 
-        $DummyRepo = Psr11::container()->get(DummyRepository::class);
-        $DummyRepo->save($model);
+        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $dummyRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
     }
@@ -155,7 +239,7 @@ class DummyRest extends ServiceAbstractBase
      */
     public function putDummy($response, $request)
     {
-        $data = $this->requireAuthenticated();
+        $data = $this->requireRole("admin");
 
         $payload = $this->validateRequest($request);
 

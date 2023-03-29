@@ -47,10 +47,10 @@ class Scripts extends BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function genRestDocs(Event $event)
+    public static function genOpenApiDocs(Event $event)
     {
         $build = new Scripts();
-        $build->runGenRestDocs($event->getArguments());
+        $build->runGenOpenApiDocs($event->getArguments());
     }
 
     /**
@@ -150,7 +150,7 @@ class Scripts extends BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public function runGenRestDocs($arguments)
+    public function runGenOpenApiDocs($arguments)
     {
         $docPath = $this->workdir . '/public/docs/';
 
@@ -187,7 +187,7 @@ class Scripts extends BaseScripts
             unset($arguments[$index]);
         }
         if (empty($table)) {
-            throw new Exception("Table name is required");
+            throw new Exception("Table name is required (--table=table_name)");
         }
 
         // Check Arguments
@@ -201,7 +201,7 @@ class Scripts extends BaseScripts
             }
         }
         if (empty($foundArguments)) {
-            throw new Exception("At least one argument is required");
+            throw new Exception("At least one argument is required (" . implode(", ", $validArguments) . ")");
         }
         $save = in_array("--save", $arguments);        
 
@@ -215,31 +215,53 @@ class Scripts extends BaseScripts
         foreach ($tableDefinition as $key => $field) {
             $type = preg_replace('/\(.*/', '', $field['type']);
 
+            $tableDefinition[$key]['property'] = preg_replace_callback('/_(.?)/', function ($matches) {
+                return strtoupper($matches[1]);
+            }, $field['field']);
+
             switch ($type) {
                 case 'int':
                 case 'tinyint':
                 case 'smallint':
+                    $tableDefinition[$key]['php_type'] = 'int';
+                    $tableDefinition[$key]['openapi_type'] = 'integer';
+                    $tableDefinition[$key]['openapi_format'] = 'int32';
+                    break;
                 case 'mediumint':
                 case 'bigint':
                 case 'integer':
                     $tableDefinition[$key]['php_type'] = 'int';
+                    $tableDefinition[$key]['openapi_type'] = 'integer';
+                    $tableDefinition[$key]['openapi_format'] = 'int64';
                     break;
                 case 'float':
                 case 'double':
                 case 'decimal':
                     $tableDefinition[$key]['php_type'] = 'float';
+                    $tableDefinition[$key]['openapi_type'] = 'number';
+                    $tableDefinition[$key]['openapi_format'] = 'double';
                     break;
                 case 'bool':
                 case 'boolean':
                     $tableDefinition[$key]['php_type'] = 'bool';
+                    $tableDefinition[$key]['openapi_type'] = 'boolean';
+                    $tableDefinition[$key]['openapi_format'] = 'boolean';
                     break;
                 case 'date':
+                    $tableDefinition[$key]['php_type'] = 'string';
+                    $tableDefinition[$key]['openapi_type'] = 'string';
+                    $tableDefinition[$key]['openapi_format'] = 'date';
+                    break;
                 case 'datetime':
                 case 'timestamp':
                     $tableDefinition[$key]['php_type'] = 'string';
+                    $tableDefinition[$key]['openapi_type'] = 'string';
+                    $tableDefinition[$key]['openapi_format'] = 'date-time';
                     break;
                 default:
                     $tableDefinition[$key]['php_type'] = 'string';
+                    $tableDefinition[$key]['openapi_type'] = 'string';
+                    $tableDefinition[$key]['openapi_format'] = 'string';
             }
         }
 
@@ -269,7 +291,14 @@ class Scripts extends BaseScripts
 
         $data = [
             'namespace' => 'RestTemplate',
-            'className' => ucwords($table),
+            'restTag' => ucwords(explode('_', strtolower($table))[0]),
+            'restPath' => str_replace('_', '/', strtolower($table)),
+            'className' => preg_replace_callback('/(?:^|_)(.?)/', function($match) {
+                return strtoupper($match[1]);
+            }, $table),
+            'varTableName' => preg_replace_callback('/_(.?)/', function ($matches) {
+                return strtoupper($matches[1]);
+            }, $table),
             'tableName' => strtolower($table),
             'fields' => $tableDefinition,
             'primaryKeys' => $primaryKeys,

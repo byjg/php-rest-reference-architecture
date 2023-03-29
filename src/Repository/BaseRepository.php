@@ -48,7 +48,7 @@ abstract class BaseRepository
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws InvalidArgumentException
      */
-    public function getAll($page = 0, $size = 20, $orderBy = null, $filter = null)
+    public function list($page = 0, $size = 20, $orderBy = null, $filter = null)
     {
         if (empty($page)) {
             $page = 0;
@@ -75,6 +75,37 @@ abstract class BaseRepository
 
         return $this->repository
             ->getByQuery($query);
+    }
+
+    public function listGeneric($tableName, $page = 0, $size = 20, $orderBy = null, $filter = null)
+    {
+        if (empty($page)) {
+            $page = 0;
+        }
+
+        if (empty($size)) {
+            $size = 20;
+        }
+
+        $query = Query::getInstance()
+            ->table($tableName)
+            ->limit($page*$size, $size);
+
+        if (!empty($orderBy)) {
+            if (!is_array($orderBy)) {
+                $orderBy = [$orderBy];
+            }
+            $query->orderBy($orderBy);
+        }
+
+        foreach ((array)$filter as $item) {
+            $query->where($item[0], $item[1]);
+        }
+
+        $object = $query->build($this->repository->getDbDriver());
+
+        $iterator = $this->repository->getDbDriver()->getIterator($object["sql"], $object["params"]);
+        return $iterator->toArray();
     }
 
     public function model()

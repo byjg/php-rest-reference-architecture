@@ -22,7 +22,7 @@
         "/dummyhex/{id}": {
             "get": {
                 "tags": [
-                    "DummyHex"
+                    "Dummyhex"
                 ],
                 "summary": "Get the DummyHex by id",
                 "operationId": "GET::/dummyhex/{id}::RestTemplate\\Rest\\DummyHexRest::getDummyHex",
@@ -33,7 +33,8 @@
                         "description": "",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "format": "string"
                         }
                     }
                 ],
@@ -67,9 +68,84 @@
             }
         },
         "/dummyhex": {
+            "get": {
+                "tags": [
+                    "Dummyhex"
+                ],
+                "summary": "List DummyHex",
+                "operationId": "GET::/dummyhex::RestTemplate\\Rest\\DummyHexRest::listDummyHex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Page size",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Order by",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The list of DummyHex",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DummyHex"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
-                    "DummyHex"
+                    "Dummyhex"
                 ],
                 "summary": "Update an existing DummyHex",
                 "operationId": "PUT::/dummyhex::RestTemplate\\Rest\\DummyHexRest::putDummyHex",
@@ -107,7 +183,7 @@
             },
             "post": {
                 "tags": [
-                    "DummyHex"
+                    "Dummyhex"
                 ],
                 "summary": "Create a new DummyHex",
                 "operationId": "POST::/dummyhex::RestTemplate\\Rest\\DummyHexRest::postDummyHex",
@@ -120,6 +196,7 @@
                                 "properties": {
                                     "field": {
                                         "type": "string",
+                                        "format": "string",
                                         "nullable": true
                                     }
                                 },
@@ -139,7 +216,8 @@
                                     ],
                                     "properties": {
                                         "id": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "format": "string"
                                         }
                                     },
                                     "type": "object"
@@ -179,7 +257,8 @@
                         "description": "",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "format": "int32"
                         }
                     }
                 ],
@@ -213,6 +292,81 @@
             }
         },
         "/dummy": {
+            "get": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "List Dummy",
+                "operationId": "GET::/dummy::RestTemplate\\Rest\\DummyRest::listDummy",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Page size",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Order by",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The list of Dummy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Dummy"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Dummy"
@@ -266,6 +420,7 @@
                                 "properties": {
                                     "field": {
                                         "type": "string",
+                                        "format": "string",
                                         "nullable": true
                                     }
                                 },
@@ -285,7 +440,8 @@
                                     ],
                                     "properties": {
                                         "id": {
-                                            "type": "integer"
+                                            "type": "integer",
+                                            "format": "int32"
                                         }
                                     },
                                     "type": "object"
@@ -314,7 +470,7 @@
         "/login": {
             "post": {
                 "tags": [
-                    "login"
+                    "Login"
                 ],
                 "summary": "Do login",
                 "operationId": "POST::/login::RestTemplate\\Rest\\Login::post",
@@ -402,7 +558,7 @@
         "/refreshtoken": {
             "post": {
                 "tags": [
-                    "login"
+                    "Login"
                 ],
                 "summary": "Refresh Token",
                 "operationId": "POST::/refreshtoken::RestTemplate\\Rest\\Login::refreshToken",
@@ -455,6 +611,193 @@
                         "jwt-token": []
                     }
                 ]
+            }
+        },
+        "/login/resetrequest": {
+            "post": {
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Initialize the Password Request",
+                "operationId": "POST::/login/resetrequest::RestTemplate\\Rest\\Login::postResetRequest",
+                "requestBody": {
+                    "description": "The email to have the password reset",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "token"
+                                    ],
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login/confirmcode": {
+            "post": {
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Initialize the Password Request",
+                "operationId": "POST::/login/confirmcode::RestTemplate\\Rest\\Login::postConfirmCode",
+                "requestBody": {
+                    "description": "The email and code to confirm the password reset",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "token",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email",
+                                        "type": "string"
+                                    },
+                                    "token": {
+                                        "description": "password reset token",
+                                        "type": "string"
+                                    },
+                                    "code": {
+                                        "description": "password reset code",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "token"
+                                    ],
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login/resetpassword": {
+            "post": {
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Initialize the Password Request",
+                "operationId": "POST::/login/resetpassword::RestTemplate\\Rest\\Login::postResetPassword",
+                "requestBody": {
+                    "description": "The email and the new password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "token",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email",
+                                        "type": "string"
+                                    },
+                                    "token": {
+                                        "description": "password reset token",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "description": "new password",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "token"
+                                    ],
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/sample/ping": {
@@ -584,10 +927,12 @@
                 ],
                 "properties": {
                     "id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "field": {
                         "type": "string",
+                        "format": "string",
                         "nullable": true
                     }
                 },
@@ -603,14 +948,17 @@
                 ],
                 "properties": {
                     "id": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "string"
                     },
                     "uuid": {
                         "type": "string",
+                        "format": "string",
                         "nullable": true
                     },
                     "field": {
                         "type": "string",
+                        "format": "string",
                         "nullable": true
                     }
                 },
@@ -689,14 +1037,6 @@
                 "type": "apiKey",
                 "name": "Authorization",
                 "in": "header"
-            },
-            "query-token": {
-                "type": "apiKey",
-                "name": "token",
-                "in": "query"
-            },
-            "basic-http": {
-                "type": "http"
             }
         }
     },

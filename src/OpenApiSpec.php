@@ -30,16 +30,6 @@ namespace RestTemplate;
  *   in="header",
  *   name="Authorization"
  * )
- * @OA\SecurityScheme(
- *   securityScheme="query-token",
- *   type="apiKey",
- *   in="query",
- *   name="token"
- * )
- * @OA\SecurityScheme(
- *   securityScheme="basic-http",
- *   type="http"
- * )
  * @OA\Schema(
  *   schema="error",
  *   @OA\Property(property="error",

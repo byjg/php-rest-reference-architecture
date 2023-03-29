@@ -51,7 +51,6 @@ class DummyRepository extends BaseRepository
         if (is_null($result)) {
             return null;
         }
-
-        return $result;
     }
+
 }

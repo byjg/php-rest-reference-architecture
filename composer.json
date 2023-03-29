@@ -33,7 +33,7 @@
     "test": "./vendor/bin/phpunit",
     "migrate": "Builder\\Scripts::migrate",
     "codegen": "Builder\\Scripts::codeGenerator",
-    "restdocs": "Builder\\Scripts::genRestDocs",
+    "openapi": "Builder\\Scripts::genOpenApiDocs",
     "post-create-project-cmd": "Builder\\PostCreateScript::run"
   },
   "autoload-dev": {
