@@ -31,9 +31,11 @@ class {{ className }}Repository extends BaseRepository
         // Table UUID Definition
         // $this->setClosureFieldMapId($mapper);
 {% for field in fields -%}
-{% if field.extra == 'VIRTUAL GENERATED' -%}
-        $mapper->addFieldMap('{{ field.field }}', '{{ field.field }}', Mapper::doNotUpdateClosure());
-{% endif %}
+{% if 'GENERATED' in field.extra -%}
+        $mapper->addFieldMap('{{ field.property }}', '{{ field.field }}', Mapper::doNotUpdateClosure());
+{% else %}{% if field.property != field.field -%}
+        $mapper->addFieldMap('{{ field.property }}', '{{ field.field }}');
+{% endif %}{% endif %}
 {% endfor %}
 
         $this->repository = new Repository($dbDriver, $mapper);

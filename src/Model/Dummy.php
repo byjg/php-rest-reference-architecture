@@ -13,13 +13,13 @@ class Dummy
 {
 
     /**
-     * @OA\Property()
+     * @OA\Property(type="integer", format="int32")
      * @var int
      */
     protected $id;
 
     /**
-     * @OA\Property(nullable=true)
+     * @OA\Property(type="string", format="string", nullable=true)
      * @var string
      */
     protected $field;

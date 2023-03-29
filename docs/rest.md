@@ -110,7 +110,7 @@ class Login extends ServiceAbstractBase
 After document you code, you can generate the OpenAPI specification with the following command:
 
 ```bash
-APP_ENV=dev composer run restdocs
+APP_ENV=dev composer run openapi
 ```
 
 The OpenAPI specification will be generated in the folder `public/docs`.

@@ -71,7 +71,7 @@ class SampleProtectedTest extends BaseApiTestCase
 
     public function testGetAuthorizedRole2()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
 
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);

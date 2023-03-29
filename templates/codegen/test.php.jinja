@@ -28,7 +28,7 @@ class {{ className }}Test extends BaseApiTestCase
     {
         $sample = [
 {% for field in fields -%}
-{% if field.key != 'PRI' && field.extra != 'VIRTUAL GENERATED' -%}            '{{ field.field }}' => {% if field.php_type == 'int' %}1{% endif %}{% if field.php_type == 'string' %}'{{ field.field }}'{% endif %}{% if field.php_type == 'float' %}1.1{% endif %}{% if field.php_type == 'bool' %}true{% endif %},{% endif %}
+{% if field.key != 'PRI' && field.extra != 'VIRTUAL GENERATED' -%}            '{{ field.property }}' => {% if field.php_type == 'int' %}1{% endif %}{% if field.php_type == 'string' %}'{{ field.property }}'{% endif %}{% if field.php_type == 'float' %}1.1{% endif %}{% if field.php_type == 'bool' %}true{% endif %},{% endif %}
 {% endfor %}
         ];
 
@@ -51,7 +51,22 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/{{ tableName }}/1")
+            ->withPath("/{{ restPath }}/{% if fields.0.type == 'int' %}1"{% else %}" . BaseRepository::getUuid(){% endif %})
+            ->assertResponseCode(401)
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testListUnauthorized()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/{{ restPath }}/{% if fields.0.type == 'int' %}1"{% else %}" . BaseRepository::getUuid(){% endif %})
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -66,7 +81,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/{{ tableName }}")
+            ->withPath("/{{ restPath }}")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(401)
         ;
@@ -82,23 +97,48 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/{{ tableName }}")
-            ->withRequestBody(json_encode($this->getSampleData(true) + ['{{ fields.0.field }}' => 1]))
+            ->withPath("/{{ restPath }}")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['{{ fields.0.field }}' => {% if fields.0.type == 'int' %}1{% else %}BaseRepository::getUuid(){% endif %}]))
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
     }
 
-    public function testGet()
+    public function testPostInsufficientPrivileges()
     {
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
-            ->withMethod('GET')
-            ->withPath("/{{ tableName }}/1")
-            ->assertResponseCode(200)
+            ->withMethod('POST')
+            ->withPath("/{{ restPath }}")
+            ->withRequestBody(json_encode($this->getSampleData(true)))
+            ->assertResponseCode(403)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testPutInsufficientPrivileges()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/{{ restPath }}")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['{{ fields.0.field }}' => {% if fields.0.type == 'int' %}1{% else %}BaseRepository::getUuid(){% endif %}]))
+            ->assertResponseCode(403)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
@@ -114,7 +154,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/{{ tableName }}")
+            ->withPath("/{{ restPath }}")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(200)
             ->withRequestHeader([
@@ -128,7 +168,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/{{ tableName }}/" . $bodyAr['{{ fields.0.field }}'])
+            ->withPath("/{{ restPath }}/" . $bodyAr['{{ fields.0.field }}'])
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
@@ -140,7 +180,7 @@ class {{ className }}Test extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/{{ tableName }}")
+            ->withPath("/{{ restPath }}")
             ->withRequestBody($body->getBody()->getContents())
             ->assertResponseCode(200)
             ->withRequestHeader([
@@ -149,4 +189,21 @@ class {{ className }}Test extends BaseApiTestCase
         ;
         $this->assertRequest($request);
     }
+
+    public function testList()
+    {
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/{{ restPath }}")
+            ->assertResponseCode(200)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    } 
 }

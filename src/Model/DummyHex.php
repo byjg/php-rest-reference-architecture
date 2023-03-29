@@ -13,19 +13,19 @@ class DummyHex
 {
 
     /**
-     * @OA\Property()
+     * @OA\Property(type="string", format="string")
      * @var string
      */
     protected $id;
 
     /**
-     * @OA\Property(nullable=true)
+     * @OA\Property(type="string", format="string", nullable=true)
      * @var string
      */
     protected $uuid;
 
     /**
-     * @OA\Property(nullable=true)
+     * @OA\Property(type="string", format="string", nullable=true)
      * @var string
      */
     protected $field;

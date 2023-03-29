@@ -13,28 +13,28 @@ class {{ className }}
 {
 {% for field in fields %}
     /**
-     * @OA\Property({% if field.null == "YES" %}nullable=true{% endif %})
+     * @OA\Property(type="{{ field.openapi_type }}", format="{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable=true{% endif %})
      * @var {{ field.php_type }}
      */
-    protected ${{ field.field }};
+    protected ${{ field.property }};
 {% endfor %}
 
 {% for field in fields %}
     /**
      * @return {{ field.php_type }}
      */
-    public function get{{ field.field | capitalize }}()
+    public function get{{ field.property | capitalize }}()
     {
-        return $this->{{ field.field }};
+        return $this->{{ field.property }};
     }
 
     /**
-     * @param {{ field.php_type }} ${{ field.field }}
+     * @param {{ field.php_type }} ${{ field.property }}
      * @return {{ className }}
      */
-    public function set{{ field.field | capitalize }}(${{ field.field }})
+    public function set{{ field.property | capitalize }}(${{ field.property }})
     {
-        $this->{{ field.field }} = ${{ field.field }};
+        $this->{{ field.property }} = ${{ field.property }};
         return $this;
     }
 {% endfor %}

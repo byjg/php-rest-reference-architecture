@@ -12,6 +12,7 @@ use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
+use ByJG\JinjaPhp\Loader\FileSystemLoader;
 use ByJG\Mail\Envelope;
 use ByJG\Mail\MailerFactory;
 use ByJG\Mail\Wrapper\MailgunApiWrapper;
@@ -108,6 +109,7 @@ return [
             ]
         )
         ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
+        ->withMethodCall("markPropertyAsReadOnly", ["created"])
         ->withMethodCall("markPropertyAsReadOnly", ["updated"])
         ->withMethodCall("defineGenerateKeyClosure", 
             [
@@ -169,14 +171,10 @@ return [
     'MAIL_ENVELOPE' => function ($to, $subject, $template, $mapVariables = []) {
         $body = "";
 
-        if (!empty($template)) {
-            $body = file_get_contents(__DIR__ . "/../template/$template");
-            if (!empty($mapVariables)) {
-                foreach ($mapVariables as $key => $value) {
-                    $body = str_replace("{{ $key }}", $value, $body);
-                }
-            }
-        }
+        $loader = new FileSystemLoader(__DIR__ . "/../templates/emails", ".html");
+        $template = $loader->getTemplate($template);
+        $body = $template->render($mapVariables);
+
         $prefix = "";
         if (Psr11::environment()->getCurrentConfig() != "prod") {
             $prefix = "[" . Psr11::environment()->getCurrentConfig() . "] ";
