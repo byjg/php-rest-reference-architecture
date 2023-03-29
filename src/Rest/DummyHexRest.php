@@ -17,7 +17,7 @@ class DummyHexRest extends ServiceAbstractBase
      * Get the DummyHex by id
      * @OA\Get(
      *     path="/dummyhex/{id}",
-     *     tags={"DummyHex"},
+     *     tags={"Dummyhex"},
      *     security={{
      *         "jwt-token":{}
      *     }},
@@ -27,7 +27,8 @@ class DummyHexRest extends ServiceAbstractBase
      *         in="path",
      *         required=true,
      *         @OA\Schema(
-     *             type="string"
+     *             type="string",
+     *             format="string"
      *         )
      *     ),
      *     @OA\Response(
@@ -51,10 +52,10 @@ class DummyHexRest extends ServiceAbstractBase
     {
         $data = $this->requireAuthenticated();
 
-        $dummyhexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
         $id = $request->param('id');
 
-        $result = $dummyhexRepo->get($id);
+        $result = $dummyHexRepo->get($id);
         if (empty($result)) {
             throw new Error404Exception('Id not found');
         }
@@ -64,10 +65,91 @@ class DummyHexRest extends ServiceAbstractBase
     }
 
     /**
+     * List DummyHex
+     * @OA\Get(
+     *    path="/dummyhex",
+     *    tags={"Dummyhex"},
+     *    security={{
+     *       "jwt-token":{}
+     *    }},
+     *    @OA\Parameter(
+     *       name="page",
+     *       description="Page number",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="integer"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="size",
+     *       description="Page size",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="integer"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="orderBy",
+     *       description="Order by",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="string"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="filter",
+     *       description="Filter",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="string"
+     *       )
+     *    ),
+     *    @OA\Response(
+     *      response=200,
+     *      description="The list of DummyHex",
+     *      @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref="#/components/schemas/DummyHex")
+     *      )
+     *    ),
+     *    @OA\Response(
+     *      response=401,
+     *      description="Not Authorized",
+     *      @OA\JsonContent(ref="#/components/schemas/error")
+     *    )
+     * )
+     *
+     * @param mixed $response
+     * @param mixed $request
+     * @return void
+     */
+    public function listDummyHex($response, $request)
+    {
+        $data = $this->requireAuthenticated();
+
+        $repo = Psr11::container()->get(DummyHexRepository::class);
+
+        $page = $request->get('page');
+        $size = $request->get('size');
+        // $orderBy = $request->get('orderBy');
+        // $filter = $request->get('filter');
+
+        $result = $repo->list($page, $size);
+        $response->write(
+            $result
+        );
+    }
+
+
+    /**
      * Create a new DummyHex
      * @OA\Post(
      *     path="/dummyhex",
-     *     tags={"DummyHex"},
+     *     tags={"Dummyhex"},
      *     security={{
      *         "jwt-token":{}
      *     }},
@@ -79,7 +161,7 @@ class DummyHexRest extends ServiceAbstractBase
      *           @OA\Schema(
      *
 
-     *             @OA\Property(property="field", type="string", nullable=true)
+     *             @OA\Property(property="field", type="string", format="string", nullable=true)
      *           )
      *         )
      *     ),
@@ -91,7 +173,7 @@ class DummyHexRest extends ServiceAbstractBase
      *           @OA\Schema(
      *             required={ "id" },
 
-     *             @OA\Property(property="id", type="string")
+     *             @OA\Property(property="id", type="string", format="string")
      *           )
      *         )
      *     ),
@@ -109,15 +191,15 @@ class DummyHexRest extends ServiceAbstractBase
      */
     public function postDummyHex($response, $request)
     {
-        $data = $this->requireAuthenticated();
+        $data = $this->requireRole("admin");
 
         $payload = $this->validateRequest($request);
 
         $model = new DummyHex();
         BinderObject::bind($payload, $model);
 
-        $dummyhexRepo = Psr11::container()->get(DummyHexRepository::class);
-        $dummyhexRepo->save($model);
+        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
     }
@@ -127,7 +209,7 @@ class DummyHexRest extends ServiceAbstractBase
      * Update an existing DummyHex
      * @OA\Put(
      *     path="/dummyhex",
-     *     tags={"DummyHex"},
+     *     tags={"Dummyhex"},
      *     security={{
      *         "jwt-token":{}
      *     }},
@@ -154,18 +236,18 @@ class DummyHexRest extends ServiceAbstractBase
      */
     public function putDummyHex($response, $request)
     {
-        $data = $this->requireAuthenticated();
+        $data = $this->requireRole("admin");
 
         $payload = $this->validateRequest($request);
 
-        $dummyhexRepo = Psr11::container()->get(DummyHexRepository::class);
-        $model = $dummyhexRepo->get($payload['id']);
+        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $model = $dummyHexRepo->get($payload['id']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');
         }
         BinderObject::bind($payload, $model);
 
-        $dummyhexRepo->save($model);
+        $dummyHexRepo->save($model);
     }
 
 }

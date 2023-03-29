@@ -8,6 +8,7 @@ use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\Util\JwtWrapper;
 use Exception;
@@ -69,7 +70,7 @@ class ServiceAbstractBase extends ServiceAbstract
     {
         $data = $this->requireAuthenticated($token);
         if ($data['role'] !== $role) {
-            throw new Error401Exception('Insufficient privileges - ' . print_r($data, true));
+            throw new Error403Exception('Insufficient privileges');
         }
         return $data;
     }

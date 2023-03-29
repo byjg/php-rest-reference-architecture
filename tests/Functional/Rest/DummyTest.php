@@ -5,7 +5,6 @@ namespace Test\Functional\Rest;
 use ByJG\ApiTools\Base\Schema;
 use ByJG\Serializer\BinderObject;
 use RestTemplate\Model\Dummy;
-use RestTemplate\Util\FakeApiRequester;
 
 class DummyTest extends BaseApiTestCase
 {
@@ -54,6 +53,21 @@ class DummyTest extends BaseApiTestCase
         $this->assertRequest($request);
     }
 
+    public function testListUnauthorized()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/dummy/1")
+            ->assertResponseCode(401)
+        ;
+        $this->assertRequest($request);
+    }
+
     public function testPostUnauthorized()
     {
         $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
@@ -86,16 +100,41 @@ class DummyTest extends BaseApiTestCase
         $this->assertRequest($request);
     }
 
-    public function testGet()
+    public function testPostInsufficientPrivileges()
     {
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
-            ->withMethod('GET')
-            ->withPath("/dummy/1")
-            ->assertResponseCode(200)
+            ->withMethod('POST')
+            ->withPath("/dummy")
+            ->withRequestBody(json_encode($this->getSampleData(true)))
+            ->assertResponseCode(403)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testPutInsufficientPrivileges()
+    {
+        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/dummy")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
+            ->assertResponseCode(403)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
@@ -139,6 +178,23 @@ class DummyTest extends BaseApiTestCase
             ->withMethod('PUT')
             ->withPath("/dummy")
             ->withRequestBody($body->getBody()->getContents())
+            ->assertResponseCode(200)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testList()
+    {
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('GET')
+            ->withPath("/dummy")
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
