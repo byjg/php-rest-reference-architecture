@@ -204,5 +204,5 @@ class DummyTest extends BaseApiTestCase
             ])
         ;
         $this->assertRequest($request);
-    } 
+    }
 }
