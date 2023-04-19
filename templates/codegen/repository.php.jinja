@@ -4,6 +4,7 @@ namespace {{ namespace }}\Repository;
 
 use {{ namespace }}\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
@@ -22,19 +23,20 @@ class {{ className }}Repository extends BaseRepository
         $mapper = new Mapper(
             {{ className }}::class,
             '{{ tableName }}',
-            'id',
-            // function () {
-            //     return $this->getClosureNewUUID();
-            // }
+            'id'
         );
+        // $mapper->withPrimaryKeySeedFunction(function () {
+        //     return $this->getClosureNewUUID();
+        // });
+
 
         // Table UUID Definition
-        // $this->setClosureFieldMapId($mapper);
+        // $this->setClosureFixBinaryUUID($mapper);
 {% for field in fields -%}
 {% if 'GENERATED' in field.extra -%}
-        $mapper->addFieldMap('{{ field.property }}', '{{ field.field }}', Mapper::doNotUpdateClosure());
+        $mapper->addFieldMapping(FieldMapping::create('{{ field.property }}')->withFieldName('{{ field.field }}')->withUpdateFunction(Mapper::doNotUpdateClosure()));
 {% else %}{% if field.property != field.field -%}
-        $mapper->addFieldMap('{{ field.property }}', '{{ field.field }}');
+        $mapper->addFieldMapping(FieldMapping::create('{{ field.property }}')->withFieldName('{{ field.field }}'));
 {% endif %}{% endif %}
 {% endfor %}
 

@@ -5,6 +5,7 @@ namespace RestTemplate\Repository;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Literal;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
@@ -33,10 +34,19 @@ abstract class BaseRepository
 
     protected function prepareUuidQuery($itemId)
     {
-        if (!($itemId instanceof Literal) && preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $itemId)) {
-            $itemId = new HexUuidLiteral($itemId);
+        $result = [];
+        foreach ((array)$itemId as $item) {
+            if (!($item instanceof Literal) && preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $item)) {
+                $result[] = new HexUuidLiteral($item);
+            } else {
+                $result[] = $item;
+            }
         }
-        return $itemId;
+
+        if (count($result) == 1) {
+            return $result[0];
+        }
+        return $result;
     }
 
     /**
@@ -131,12 +141,10 @@ abstract class BaseRepository
      * @param string $modelField
      * @return void
      */
-    protected function setClosureFieldMapId($mapper, $pkFieldName = 'id', $modelField = 'uuid')
+    protected function setClosureFixBinaryUUID($mapper, $pkFieldName = 'id', $modelField = 'uuid')
     {
-        $mapper->addFieldMap(
-            $pkFieldName,
-            $pkFieldName,
-            function ($value, $instance) {
+        $mapper->addFieldMapping(FieldMapping::create($pkFieldName)
+            ->withUpdateFunction(function ($value, $instance) {
                 if (empty($value)) {
                     return null;
                 }
@@ -144,10 +152,10 @@ abstract class BaseRepository
                     $value = new HexUuidLiteral($value);
                 }
                 return $value;
-            },
-            function ($value, $instance) use ($modelField) {
+            })
+            ->withSelectFunction(function ($value, $instance) use ($modelField) {
                 return str_replace('-', '', $instance->{'get' . $modelField}());
-            }
+            })
         );
     }
 
@@ -162,7 +170,7 @@ abstract class BaseRepository
     {
         $model = $this->repository->save($model);
 
-        $primaryKey = $this->repository->getMapper()->getPrimaryKey();
+        $primaryKey = $this->repository->getMapper()->getPrimaryKey()[0];
 
         if ($model->{"get$primaryKey"}() instanceof Literal) {
             $model->{"set$primaryKey"}(HexUuidLiteral::getUuidFromLiteral($model->{"get$primaryKey"}()));
