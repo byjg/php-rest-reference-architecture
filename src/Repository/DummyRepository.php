@@ -3,6 +3,7 @@
 namespace RestTemplate\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
@@ -21,14 +22,15 @@ class DummyRepository extends BaseRepository
         $mapper = new Mapper(
             Dummy::class,
             'dummy',
-            'id',
-            // function () {
-            //     return $this->getClosureNewUUID();
-            // }
+            'id'
         );
+        // $mapper->withPrimaryKeySeedFunction(function () {
+        //     return $this->getClosureNewUUID();
+        // });
+
 
         // Table UUID Definition
-        // $this->setClosureFieldMapId($mapper);
+        // $this->setClosureFixBinaryUUID($mapper);
 
 
         $this->repository = new Repository($dbDriver, $mapper);

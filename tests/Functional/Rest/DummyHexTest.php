@@ -203,5 +203,5 @@ class DummyHexTest extends BaseApiTestCase
             ])
         ;
         $this->assertRequest($request);
-    } 
+    }
 }
