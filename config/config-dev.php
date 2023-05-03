@@ -58,8 +58,8 @@ return [
 
     MailWrapperInterface::class => function () {
         $apiKey = Psr11::container()->get('EMAIL_CONNECTION');
-        MailerFactory::registerMailer('mailgun', MailgunApiWrapper::class);
-        MailerFactory::registerMailer('fakesender', FakeSenderWrapper::class);
+        MailerFactory::registerMailer(MailgunApiWrapper::class);
+        MailerFactory::registerMailer(FakeSenderWrapper::class);
 
         return MailerFactory::create($apiKey);
     },

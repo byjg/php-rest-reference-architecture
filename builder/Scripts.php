@@ -89,8 +89,8 @@ class Scripts extends BaseScripts
 
         $dbConnection = Psr11::container($argumentList["--env"])->get('DBDRIVER_CONNECTION');
 
+        Migration::registerDatabase(MySqlDatabase::class);
         $migration = new Migration(new Uri($dbConnection), $this->workdir . "/db");
-        $migration->registerDatabase("mysql", MySqlDatabase::class);
         $migration->addCallbackProgress(function ($cmd, $version) {
             echo "Doing $cmd, $version\n";
         });

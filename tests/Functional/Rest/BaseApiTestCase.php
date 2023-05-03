@@ -28,8 +28,8 @@ class BaseApiTestCase extends \ByJG\ApiTools\ApiTestCase
             if (Psr11::environment()->getCurrentConfig() != "test") {
                 throw new \Exception("This test can only be executed in test environment");
             }
+            Migration::registerDatabase(MySqlDatabase::class);
             $migration = new Migration(new Uri(Psr11::container()->get('DBDRIVER_CONNECTION')), __DIR__ . "/../../../db");
-            $migration->registerDatabase("mysql", MySqlDatabase::class);
             $migration->prepareEnvironment();
             $migration->reset();
             self::$databaseReset = true;
