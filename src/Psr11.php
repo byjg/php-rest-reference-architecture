@@ -2,6 +2,8 @@
 
 namespace RestTemplate;
 
+use ByJG\Cache\Psr16\FileSystemCacheEngine;
+use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\Container;
 use ByJG\Config\Definition;
 use ByJG\Config\Exception\ConfigNotFoundException;
@@ -29,7 +31,6 @@ class Psr11
         return self::$container;
     }
 
-
     /**
      * @return Definition
      * @throws EnvironmentException
@@ -45,8 +46,10 @@ class Psr11
                     ->inheritFrom('dev')
                 ->addConfig('prod')
                     ->inheritFrom('staging')
-                    ->inheritFrom('dev');
-            // ->setCache($somePsr16Implementation); // This will cache the result;
+                    ->inheritFrom('dev')
+                ->setCache(['dev', 'test'], new NoCacheEngine())
+                ->setCache(['prod', 'staging'], new FileSystemCacheEngine())
+            ;
         }
 
         return self::$definition;
