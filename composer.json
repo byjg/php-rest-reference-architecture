@@ -5,20 +5,20 @@
   "prefer-stable": true,
   "license": "MIT",
   "require": {
-    "php": ">5.6.0",
+    "php": ">=7.4",
     "ext-json": "*",
     "ext-openssl": "*",
-    "byjg/config": "dev-bump",
-    "byjg/micro-orm": "dev-bump",
-    "byjg/authuser": "dev-bump",
-    "byjg/mailwrapper": "dev-bump",
-    "byjg/restserver": "dev-bump",
+    "byjg/config": "4.9.*",
+    "byjg/micro-orm": "4.9.*",
+    "byjg/authuser": "4.9.*",
+    "byjg/mailwrapper": "4.9.*",
+    "byjg/restserver": "4.9.*",
     "zircote/swagger-php": "^4.6.1",
-    "byjg/swagger-test": "dev-bump",
-    "byjg/migration": "dev-bump",
-    "byjg/php-daemonize": "dev-bump",
-    "byjg/shortid": "dev-bump",
-    "byjg/jinja_php": "dev-master"
+    "byjg/swagger-test": "4.9.*",
+    "byjg/migration": "4.9.*",
+    "byjg/php-daemonize": "4.9.*",
+    "byjg/shortid": "4.9.*",
+    "byjg/jinja-php": "4.9.*"
   },
   "require-dev": {
     "phpunit/phpunit": "5.7.*|7.4.*|^9.5"
