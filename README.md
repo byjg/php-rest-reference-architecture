@@ -33,17 +33,18 @@ This project requires in order to run:
 ### Create a Project from the Stable Release
 
 ```bash
-composer create-project byjg/resttemplate YOURPATH 5.0.*
+composer create-project byjg/resttemplate YOURPATH 4.9.*
 ```
 
 ### Create a Project from Development Release
+
+In the case you want to use the development version you can use the following command:
 
 ```bash
 composer -sdev create-project byjg/resttemplate YOURPATH master
 ```
 
 Use instead of `master` branch the feature branch version like `5.0.0.x-dev` 
-
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
