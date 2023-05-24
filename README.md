@@ -1,6 +1,6 @@
 # Boilerplate Project Template for RESTFul API
 
-[![Build Status](https://github.com/byjg/php-rest-template/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-rest-template/actions/workflows/phpunit.yml)
+[![Build Status](https://github.com/byjg/php-rest-template/actions/workflows/build-app-image.yml/badge.svg?branch=master)](https://github.com/byjg/php-rest-template/actions/workflows/build-app-image.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-rest-template/)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-rest-template.svg)](https://opensource.byjg.com/opensource/licensing.html)
