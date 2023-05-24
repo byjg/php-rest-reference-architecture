@@ -1,0 +1,62 @@
+<?php
+
+namespace {{ namespace }}\Repository;
+
+use {{ namespace }}\Psr11;
+use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\MicroOrm\FieldMapping;
+use ByJG\MicroOrm\Mapper;
+use ByJG\MicroOrm\Query;
+use ByJG\MicroOrm\Repository;
+use {{ namespace }}\Model\{{ className }};
+
+class {{ className }}Repository extends BaseRepository
+{
+    /**
+     * {{ className }}Repository constructor.
+     *
+     * @param DbDriverInterface $dbDriver
+     *
+     */
+    public function __construct(DbDriverInterface $dbDriver)
+    {
+        $mapper = new Mapper(
+            {{ className }}::class,
+            '{{ tableName }}',
+            'id'
+        );
+        // $mapper->withPrimaryKeySeedFunction(function () {
+        //     return $this->getClosureNewUUID();
+        // });
+
+
+        // Table UUID Definition
+        // $this->setClosureFixBinaryUUID($mapper);
+{% for field in fields -%}
+{% if 'GENERATED' in field.extra -%}
+        $mapper->addFieldMapping(FieldMapping::create('{{ field.property }}')->withFieldName('{{ field.field }}')->withUpdateFunction(Mapper::doNotUpdateClosure()));
+{% else %}{% if field.property != field.field -%}
+        $mapper->addFieldMapping(FieldMapping::create('{{ field.property }}')->withFieldName('{{ field.field }}'));
+{% endif %}{% endif %}
+{% endfor %}
+
+        $this->repository = new Repository($dbDriver, $mapper);
+    }
+{% for index in indexes -%}
+{% if index.key_name != 'PRIMARY' -%}
+    /**
+     * @param mixed ${{ index.column_name }}
+     * @return {{ className }}[]
+     */
+    public function getBy{{ index.column_name | capitalize }}(${{ index.column_name }})
+    {
+        $query = Query::getInstance()
+             ->table('{{ tableName }}')
+             ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.column_name }}]);
+        $result = $this->repository->getByQuery($query);
+        return $result;
+    }
+{% endif %}
+{% endfor %}
+
+}

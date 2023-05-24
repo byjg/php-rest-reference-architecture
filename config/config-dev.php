@@ -1,8 +1,10 @@
 <?php
 
-use Builder\Psr11;
+use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
+use ByJG\ApiTools\Base\Schema;
+use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Definition\UserDefinition;
 use ByJG\Authenticate\Definition\UserPropertiesDefinition;
 use ByJG\Authenticate\UsersDBDataset;
@@ -10,38 +12,41 @@ use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
+use ByJG\JinjaPhp\Loader\FileSystemLoader;
 use ByJG\Mail\Envelope;
 use ByJG\Mail\MailerFactory;
 use ByJG\Mail\Wrapper\MailgunApiWrapper;
+use ByJG\Mail\Wrapper\FakeSenderWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal;
+use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
-use ByJG\RestServer\Route\OpenApiRouteDefinition;
+use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
 use RestTemplate\Model\User;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
 use RestTemplate\Repository\UserRepository;
+use RestTemplate\Util\HexUuidLiteral;
+use RestTemplate\Util\HexUuidMysqlLiteral;
 
 return [
-
-    'WEB_SERVER' => 'localhost',
-    'DASH_SERVER' => 'localhost',
-    'WEB_SCHEMA' => "http",
-    'API_SERVER' => "localhost",
-    'API_SCHEMA' => "http",
-    'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/mydb',
 
     BaseCacheEngine::class => DI::bind(NoCacheEngine::class)
         ->toSingleton(),
 
-    OpenApiRouteDefinition::class => DI::bind(OpenApiRouteDefinition::class)
+    OpenAPiRouteList::class => DI::bind(OpenAPiRouteList::class)
         ->withConstructorArgs([
-            __DIR__ . '/../web/docs/swagger.json',
-            Param::get(BaseCacheEngine::class)
+            __DIR__ . '/../public/docs/openapi.json'
         ])
         ->withMethodCall("withDefaultProcessor", [JsonCleanOutputProcessor::class])
+        ->withMethodCall("withCache", [Param::get(BaseCacheEngine::class)])
+        ->toSingleton(),
+
+    Schema::class => DI::bind(Schema::class)
+        ->withFactoryMethod('getInstance', [file_get_contents(__DIR__ . '/../public/docs/openapi.json')])
         ->toSingleton(),
 
     JwtKeySecret::class => DI::bind(JwtKeySecret::class)
@@ -53,8 +58,9 @@ return [
         ->toSingleton(),
 
     MailWrapperInterface::class => function () {
-        $apiKey = "mailgun://uri";
-        MailerFactory::registerMailer('mailgun', MailgunApiWrapper::class);
+        $apiKey = Psr11::container()->get('EMAIL_CONNECTION');
+        MailerFactory::registerMailer(MailgunApiWrapper::class);
+        MailerFactory::registerMailer(FakeSenderWrapper::class);
 
         return MailerFactory::create($apiKey);
     },
@@ -71,16 +77,53 @@ return [
         ->withInjectedConstructor()
         ->toSingleton(),
 
-    UserRepository::class => DI::bind(UserRepository::class)
-        ->withInjectedConstructor()
+    PasswordDefinition::class => DI::bind(PasswordDefinition::class)
+        ->withConstructorArgs([[
+            PasswordDefinition::MINIMUM_CHARS => 12,
+            PasswordDefinition::REQUIRE_UPPERCASE => 1,  // Number of uppercase characters
+            PasswordDefinition::REQUIRE_LOWERCASE => 1,  // Number of lowercase characters
+            PasswordDefinition::REQUIRE_SYMBOLS => 1,    // Number of symbols
+            PasswordDefinition::REQUIRE_NUMBERS => 1,    // Number of numbers
+            PasswordDefinition::ALLOW_WHITESPACE => 0,   // Allow whitespace
+            PasswordDefinition::ALLOW_SEQUENTIAL => 0,   // Allow sequential characters
+            PasswordDefinition::ALLOW_REPEATED => 0      // Allow repeated characters
+        ]])
         ->toSingleton(),
 
     UserDefinition::class => DI::bind(UserDefinition::class)
-        ->withConstructorArgs(['users', User::class, UserDefinition::LOGIN_IS_EMAIL])
+        ->withConstructorArgs(
+            [
+                'users',       // Table name
+                User::class,   // User class
+                UserDefinition::LOGIN_IS_EMAIL,
+                [
+                    // Field name in the User class => Field name in the database
+                    'userid'   => 'userid',
+                    'name'     => 'name',
+                    'email'    => 'email',
+                    'username' => 'username',
+                    'password' => 'password',
+                    'created'  => 'created',
+                    'admin'    => 'admin'
+                ]
+            ]
+        )
         ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
+        ->withMethodCall("markPropertyAsReadOnly", ["created"])
+        ->withMethodCall("markPropertyAsReadOnly", ["updated"])
+        ->withMethodCall("defineGenerateKeyClosure", 
+            [
+                function () {
+                    return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+                }
+            ]
+        )
         ->withMethodCall("defineClosureForSelect", [
             "userid",
             function ($value, $instance) {
+                if (!method_exists($instance, 'getUuid')) {
+                    return $value;
+                }
                 if (!empty($instance->getUuid())) {
                     return $instance->getUuid();
                 }
@@ -91,9 +134,12 @@ return [
             'userid',
             function ($value, $instance) {
                 if (empty($value)) {
-                    return new Literal("unhex(replace(uuid(),'-',''))");
+                    return null;
                 }
-                return new Literal("X'" . str_replace('-', '', $value) . "'");
+                if (!($value instanceof Literal)) {
+                    $value = new HexUuidLiteral($value);
+                }
+                return $value;
             }
         ])
         ->toSingleton(),
@@ -101,9 +147,23 @@ return [
     UserPropertiesDefinition::class => DI::bind(UserPropertiesDefinition::class)
         ->toSingleton(),
 
-
     UsersDBDataset::class => DI::bind(UsersDBDataset::class)
         ->withInjectedConstructor()
+        ->toSingleton(),
+
+        'CORS_SERVER_LIST' => function () {
+        return preg_split('/,(?![^{}]*})/', Psr11::container()->get('CORS_SERVERS'));
+    },
+
+    CorsMiddleware::class => DI::bind(CorsMiddleware::class)
+        ->withNoConstructor()
+        ->withMethodCall("withCorsOrigins", [Param::get("CORS_SERVER_LIST")])  // Required to enable CORS
+        // ->withMethodCall("withAcceptCorsMethods", [[/* list of methods */]])     // Optional. Default all methods. Don't need to pass 'OPTIONS'
+        // ->withMethodCall("withAcceptCorsHeaders", [[/* list of headers */]])     // Optional. Default all headers
+        ->toSingleton(),
+
+    HttpRequestHandler::class => DI::bind(HttpRequestHandler::class)
+        ->withMethodCall("withMiddleware", [Param::get(CorsMiddleware::class)])
         ->toSingleton(),
 
     // ----------------------------------------------------------------------------
@@ -111,65 +171,15 @@ return [
     'MAIL_ENVELOPE' => function ($to, $subject, $template, $mapVariables = []) {
         $body = "";
 
-        if (!empty($template)) {
-            $body = file_get_contents(__DIR__ . "/../template/$template");
-            if (!empty($mapVariables)) {
-                foreach ($mapVariables as $key => $value) {
-                    $body = str_replace("{{ $key }}", $value, $body);
-                }
-            }
-        }
+        $loader = new FileSystemLoader(__DIR__ . "/../templates/emails", ".html");
+        $template = $loader->getTemplate($template);
+        $body = $template->render($mapVariables);
+
         $prefix = "";
-        if (Psr11::environment()->getCurrentEnv() != "prod") {
-            $prefix = "[" . Psr11::environment()->getCurrentEnv() . "] ";
+        if (Psr11::environment()->getCurrentConfig() != "prod") {
+            $prefix = "[" . Psr11::environment()->getCurrentConfig() . "] ";
         }
-        return new Envelope("info@example.org", $to, $prefix . $subject, $body, true);
-    },
-
-
-    // -------------------------------------------------------------------------------
-    // Use the closure below to add UUID to the MySQL keys instead of auto increment
-    // -------------------------------------------------------------------------------
-
-    '_CLOSURE_NEWKEY' => function () {
-        return new Literal("X'" . bin2hex(openssl_random_pseudo_bytes(16)) . "'");
-    },
-    '_CLOSURE_FIELDMAP_ID' => function ($mapper) {
-        $mapper->addFieldMap(
-            'id',
-            'id',
-            function ($value, $instance) {
-                if (empty($value)) {
-                    return null;
-                }
-                if (!($value instanceof Literal)) {
-                    $value = new Literal("X'$value'");
-                }
-                return $value;
-            },
-            function ($value, $instance) {
-                return str_replace('-', '', $instance->getUuid());
-            }
-        );
-    },
-
-    '_CLOSURE_FIELDMAP_FKID' => function ($mapper, $fk) {
-        $mapper->addFieldMap(
-            $fk,
-            $fk,
-            function ($value, $instance) {
-                if (empty($value)) {
-                    return null;
-                }
-                if (!($value instanceof Literal)) {
-                    $value = new Literal("X'$value'");
-                }
-                return $value;
-            },
-            function ($value, $instance) use ($fk) {
-                return str_replace('-', '', $instance->{'get' . $fk . 'uuid'}());
-            }
-        );
+        return new Envelope(Psr11::container()->get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
     },
 
 ];

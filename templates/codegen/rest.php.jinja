@@ -1,0 +1,258 @@
+<?php
+
+namespace {{ namespace }}\Rest;
+
+use ByJG\MicroOrm\Literal;
+use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use ByJG\Serializer\BinderObject;
+use {{ namespace }}\Psr11;
+use {{ namespace }}\Model\{{ className }};
+use {{ namespace }}\Repository\{{ className }}Repository;
+use OpenApi\Annotations as OA;
+use {{ namespace }}\Util\HexUuidLiteral;
+
+class {{ className }}Rest extends ServiceAbstractBase
+{
+    /**
+     * Get the {{ className }} by id
+     * @OA\Get(
+     *     path="/{{ restPath }}/{id}",
+     *     tags={"{{ restTag }}"},
+     *     security={{
+     *         "jwt-token":{}
+     *     }},
+     *     @OA\Parameter(
+     *         name="id",
+     *         description="",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="{{ fields.0.openapi_type }}",
+     *             format="{{ fields.0.openapi_format }}"
+     *         ) 
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="The object {{ className }}",
+     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Not Authorized",
+     *         @OA\JsonContent(ref="#/components/schemas/error")
+     *     )
+     * )
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     */
+    public function get{{ className }}($response, $request)
+    {
+        $data = $this->requireAuthenticated();
+
+        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        $id = $request->param('id');
+
+        $result = ${{ varTableName }}Repo->get($id);
+        if (empty($result)) {
+            throw new Error404Exception('Id not found');
+        }
+        $response->write(
+            $result
+        );
+    }
+
+    /**
+     * List {{ className }}
+     * @OA\Get(
+     *    path="/{{ restPath }}",
+     *    tags={"{{ restTag }}"},
+     *    security={{
+     *       "jwt-token":{}
+     *    }},
+     *    @OA\Parameter(
+     *       name="page",
+     *       description="Page number",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="integer"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="size",
+     *       description="Page size",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="integer"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="orderBy",
+     *       description="Order by",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="string"
+     *       )
+     *    ),
+     *    @OA\Parameter(
+     *       name="filter",
+     *       description="Filter",
+     *       in="query",
+     *       required=false,
+     *       @OA\Schema(
+     *          type="string"
+     *       )
+     *    ),
+     *    @OA\Response(
+     *      response=200,
+     *      description="The list of {{ className }}",
+     *      @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref="#/components/schemas/{{ className }}")
+     *      )
+     *    ),
+     *    @OA\Response(
+     *      response=401,
+     *      description="Not Authorized",
+     *      @OA\JsonContent(ref="#/components/schemas/error")
+     *    )
+     * )
+     * 
+     * @param mixed $response
+     * @param mixed $request
+     * @return void
+     */
+    public function list{{ className }}($response, $request)
+    {
+        $data = $this->requireAuthenticated();
+
+        $repo = Psr11::container()->get({{ className }}Repository::class);
+
+        $page = $request->get('page');
+        $size = $request->get('size');
+        // $orderBy = $request->get('orderBy');
+        // $filter = $request->get('filter');
+
+        $result = $repo->list($page, $size);
+        $response->write(
+            $result
+        );
+    }
+
+
+    /**
+     * Create a new {{ className }} 
+     * @OA\Post(
+     *     path="/{{ restPath }}",
+     *     tags={"{{ restTag }}"},
+     *     security={{
+     *         "jwt-token":{}
+     *     }},
+     *     @OA\RequestBody(
+     *         description="The object {{ className }} to be created",
+     *         required=true,
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             {% if nonNullableFields | count > 0 %}required={ "{{ nonNullableFields | join('", "')}}" },{% endif %}
+{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' -%}
+     *             @OA\Property(property="{{ field.property }}", type="{{ field.openapi_type }}", format="{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable=true{% endif %}){% if loop.last == false %}, {% endif %}
+{% endif %}{% endfor %}
+     *           )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="The id of the object created",
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             required={ "{{ primaryKeys | join('", "') }}" },
+{% for field in fields -%}
+{% if field.key == 'PRI' -%}     *             @OA\Property(property="{{ field.property }}", type="{{ field.openapi_type }}", format="{{ field.openapi_format }}"){% endif %}
+{% endfor %}
+     *           )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Not Authorized",
+     *         @OA\JsonContent(ref="#/components/schemas/error")
+     *     )
+     * )
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     */
+    public function post{{ className }}($response, $request)
+    {
+        $data = $this->requireRole("admin");
+
+        $payload = $this->validateRequest($request);
+        
+        $model = new {{ className }}();
+        BinderObject::bind($payload, $model);
+
+        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        ${{ varTableName }}Repo->save($model);
+
+        $response->write([ "id" => $model->getId()]);
+    }
+
+
+    /**
+     * Update an existing {{ className }} 
+     * @OA\Put(
+     *     path="/{{ restPath }}",
+     *     tags={"{{ restTag }}"},
+     *     security={{
+     *         "jwt-token":{}
+     *     }},
+     *     @OA\RequestBody(
+     *         description="The object {{ className }} to be updated",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Nothing to return"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Not Authorized",
+     *         @OA\JsonContent(ref="#/components/schemas/error")
+     *     )
+     * )
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     */
+    public function put{{ className }}($response, $request)
+    {
+        $data = $this->requireRole("admin");
+
+        $payload = $this->validateRequest($request);
+
+        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        $model = ${{ varTableName }}Repo->get($payload['{{ fields.0.field }}']);
+        if (empty($model)) {
+            throw new Error404Exception('Id not found');
+        }
+        BinderObject::bind($payload, $model);
+
+        ${{ varTableName }}Repo->save($model);
+    }
+
+}
