@@ -1,32 +1,24 @@
--- This table are using by the component byjg/authuser
-create table users
-(
-    userid integer AUTO_INCREMENT not null,
-    name varchar(50),
-    email varchar(120),
-    username varchar(15) not null,
-    password char(40) not null,
-    created datetime,
-    admin enum('yes','no'),
 
-    constraint pk_users primary key (userid)
-) ENGINE=InnoDB;
 
--- Default Password is "pwd"
--- Please change it!
-insert into users (name, email, username, password, admin) VALUES
-  ('Administrator', 'admin@example.com', 'admin', '37fa265330ad83eaa879efb1e2db6380896cf639', 'yes'),
-  ('Regular User', 'user@example.com', 'user', '37fa265330ad83eaa879efb1e2db6380896cf639', 'no')
-;
+-- Migration 1 --> 2 can be removed
+-- Just for demo
 
--- This table are using by the component byjg/authuser
-create table users_property
-(
-   customid integer AUTO_INCREMENT not null,
-   name varchar(20),
-   value varchar(100),
-   userid integer not null,
+create table dummy (
+  id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
+  field varchar(10)
+);
 
-   constraint pk_custom primary key (customid),
-   constraint fk_custom_user foreign key (userid) references users (userid)
-) ENGINE=InnoDB;
+insert into dummy (field) values ('fld value');
+insert into dummy (field) values ('Test 1');
+insert into dummy (field) values ('Test 2');
+
+create table dummyhex (
+  id binary(16) DEFAULT (uuid_to_bin(uuid())) PRIMARY KEY NOT NULL,
+  `uuid` varchar(36) GENERATED ALWAYS AS (insert(insert(insert(insert(hex(`id`),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')) VIRTUAL,
+  field varchar(10)
+);
+
+insert into dummyhex (field) values ('fld value');
+insert into dummyhex (id, field) values (X'11111111222233334444555555555555', 'Test 1');
+insert into dummyhex (field) values ('Test 2');
+

@@ -5,38 +5,35 @@
   "prefer-stable": true,
   "license": "MIT",
   "require": {
-    "php": ">5.6.0",
+    "php": ">=7.4",
     "ext-json": "*",
     "ext-openssl": "*",
-    "byjg/config": "4.0.*",
-    "byjg/micro-orm": "4.1.*",
-    "byjg/authuser": "4.2.*",
-    "byjg/restserver": "4.0.*",
-    "byjg/jwt-wrapper": "2.0.*",
-    "byjg/mailwrapper": "2.1.*",
-    "zircote/swagger-php": "2.0.13.1",
-    "byjg/swagger-test": "3.1.*",
-    "byjg/migration": "4.1.*"
+    "byjg/config": "4.9.*",
+    "byjg/micro-orm": "4.9.*",
+    "byjg/authuser": "4.9.*",
+    "byjg/mailwrapper": "4.9.*",
+    "byjg/restserver": "4.9.*",
+    "zircote/swagger-php": "^4.6.1",
+    "byjg/swagger-test": "4.9.*",
+    "byjg/migration": "4.9.*",
+    "byjg/php-daemonize": "4.9.*",
+    "byjg/shortid": "4.9.*",
+    "byjg/jinja-php": "4.9.*"
   },
   "require-dev": {
-    "phpunit/phpunit": "5.7.*|7.4.*"
+    "phpunit/phpunit": "5.7.*|7.4.*|^9.5"
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/byjg/swagger-php"
-    }
-  ],
   "autoload": {
     "psr-4": {
-      "RestTemplate\\": "src/project/",
-      "Builder\\": "src/builder/"
+      "RestTemplate\\": "src/",
+      "Builder\\": "builder/"
     }
   },
   "scripts": {
     "test": "./vendor/bin/phpunit",
     "migrate": "Builder\\Scripts::migrate",
-    "restdocs": "Builder\\Scripts::genRestDocs",
+    "codegen": "Builder\\Scripts::codeGenerator",
+    "openapi": "Builder\\Scripts::genOpenApiDocs",
     "post-create-project-cmd": "Builder\\PostCreateScript::run"
   },
   "autoload-dev": {
