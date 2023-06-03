@@ -10,13 +10,8 @@ use RestTemplate\Util\FakeApiRequester;
 
 class DummyHexTest extends BaseApiTestCase
 {
-    protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
-
     protected function setUp(): void
     {
-        $schema = Schema::getInstance(file_get_contents($this->filePath));
-        $this->setSchema($schema);
-
         parent::setUp();
     }
 

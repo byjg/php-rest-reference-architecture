@@ -12,12 +12,9 @@ use RestTemplate\Util\FakeApiRequester;
  */
 class LoginTest extends BaseApiTestCase
 {
-    protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
-
-    public function setUp(): void
+    protected function setUp(): void
     {
-        $schema = Schema::getInstance(file_get_contents($this->filePath));
-        $this->setSchema($schema);
+        parent::setUp();
     }
 
     public function testLoginOk()
