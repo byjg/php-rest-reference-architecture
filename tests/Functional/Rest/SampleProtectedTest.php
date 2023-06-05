@@ -2,7 +2,8 @@
 
 namespace Test\Functional\Rest;
 
-use ByJG\ApiTools\Base\Schema;
+use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use RestTemplate\Util\FakeApiRequester;
 
 /**
@@ -10,14 +11,10 @@ use RestTemplate\Util\FakeApiRequester;
  */
 class SampleProtectedTest extends BaseApiTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
 
     public function testGetUnauthorized()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage('Absent authorization token');
 
         $request = new FakeApiRequester();
@@ -66,7 +63,7 @@ class SampleProtectedTest extends BaseApiTestCase
 
     public function testGetAuthorizedRole2()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
 
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);

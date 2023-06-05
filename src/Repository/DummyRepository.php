@@ -2,12 +2,11 @@
 
 namespace RestTemplate\Repository;
 
-use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
-use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
+use ByJG\Serializer\Exception\InvalidArgumentException;
 use RestTemplate\Model\Dummy;
 
 class DummyRepository extends BaseRepository
@@ -41,7 +40,7 @@ class DummyRepository extends BaseRepository
      * @param $field string
      * @return null|Dummy[]
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getByField($field)
     {
@@ -53,6 +52,7 @@ class DummyRepository extends BaseRepository
         if (is_null($result)) {
             return null;
         }
+        return $result;
     }
 
 }

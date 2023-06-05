@@ -13,7 +13,6 @@ use ByJG\RestServer\ResponseBag;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\BaseRepository;
 use RestTemplate\Util\HexUuidLiteral;
-use OpenApi\Annotations as OA;
 
 class Login extends ServiceAbstractBase
 {
@@ -198,10 +197,33 @@ class Login extends ServiceAbstractBase
         $response->write(['token' => $token]);
     }
 
+    protected function validateResetToken($response, $request)
+    {
+        $this->validateRequest($request);
+
+        $json = json_decode($request->payload());
+
+        $users = Psr11::container()->get(UsersDBDataset::class);
+        $user = $users->getByEmail($json->email);
+
+        if (is_null($user)) {
+            throw new Error422Exception("Invalid data");
+        }
+
+        if ($user->get("resettoken") != $json->token) {
+            throw new Error422Exception("Invalid data");
+        }
+
+        if (strtotime($user->get("resettokenexpire")) < time()) {
+            throw new Error422Exception("Invalid data");
+        }
+
+        return [$users, $user, $json];
+    }
 
     /**
      * Initialize the Password Request
-     * 
+     *
      * @OA\Post(
      *     path="/login/confirmcode",
      *     tags={"Login"},
@@ -238,29 +260,13 @@ class Login extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws Error422Exception
      */
     public function postConfirmCode($response, $request)
     {
-        $this->validateRequest($request);
-
-        $json = json_decode($request->payload());
-
-        $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->getByEmail($json->email);
-
-        if (is_null($user)) {
-            throw new Error422Exception("Invalid data");
-        }
-
-        if ($user->get("resettoken") != $json->token) {
-            throw new Error422Exception("Invalid data");
-        }
+        list($users, $user, $json) = $this->validateResetToken($response, $request);
 
         if ($user->get("resetcode") != $json->code) {
-            throw new Error422Exception("Invalid data");
-        }
-
-        if (strtotime($user->get("resettokenexpire")) < time()) {
             throw new Error422Exception("Invalid data");
         }
 
@@ -272,7 +278,7 @@ class Login extends ServiceAbstractBase
 
     /**
      * Initialize the Password Request
-     * 
+     *
      * @OA\Post(
      *     path="/login/resetpassword",
      *     tags={"Login"},
@@ -309,29 +315,13 @@ class Login extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws Error422Exception
      */
     public function postResetPassword($response, $request)
     {
-        $this->validateRequest($request);
-
-        $json = json_decode($request->payload());
-
-        $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->getByEmail($json->email);
-
-        if (is_null($user)) {
-            throw new Error422Exception("Invalid data");
-        }
-
-        if ($user->get("resettoken") != $json->token) {
-            throw new Error422Exception("Invalid data");
-        }
+        list($users, $user, $json) = $this->validateResetToken($response, $request);
 
         if ($user->get("resetallowed") != "yes") {
-            throw new Error422Exception("Invalid data");
-        }
-
-        if (strtotime($user->get("resettokenexpire")) < time()) {
             throw new Error422Exception("Invalid data");
         }
 
