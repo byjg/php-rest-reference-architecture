@@ -6,8 +6,9 @@ use ByJG\Cache\Psr16\FileSystemCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\Container;
 use ByJG\Config\Definition;
+use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\InvalidDateException;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class Psr11
@@ -16,11 +17,12 @@ class Psr11
     private static $container = null;
 
     /**
-     * @param string $env
+     * @param null $env
      * @return Container
+     * @throws ConfigException
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      */
     public static function container($env = null)
     {
@@ -33,7 +35,8 @@ class Psr11
 
     /**
      * @return Definition
-     * @throws EnvironmentException
+     * @throws ConfigException
+     * @throws InvalidDateException
      */
     public static function environment()
     {

@@ -3,10 +3,10 @@
 namespace RestTemplate\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use Psr\SimpleCache\InvalidArgumentException;
-use OpenApi\Annotations as OA;
 
 class SampleProtected extends ServiceAbstractBase
 {
@@ -41,7 +41,7 @@ class SampleProtected extends ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function getPing($response, $request)
+    public function getPing(HttpResponse $response, HttpRequest $request)
     {
         $this->requireAuthenticated();
 
@@ -80,8 +80,9 @@ class SampleProtected extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws Error401Exception
      * @throws InvalidArgumentException
+     * @throws Error403Exception
      */
-    public function getPingAdm($response, $request)
+    public function getPingAdm(HttpResponse $response, HttpRequest $request)
     {
         $this->requireRole('admin');
 

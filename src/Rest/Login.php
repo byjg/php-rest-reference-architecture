@@ -2,14 +2,25 @@
 
 namespace RestTemplate\Rest;
 
+use ByJG\Authenticate\Exception\UserExistsException;
 use ByJG\Authenticate\Model\UserModel;
 use ByJG\Authenticate\UsersDBDataset;
+use ByJG\Config\Exception\ConfigException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
+use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
+use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
+use ByJG\Serializer\Exception\InvalidArgumentException;
+use ReflectionException;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\BaseRepository;
 use RestTemplate\Util\HexUuidLiteral;
@@ -62,8 +73,18 @@ class Login extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function post($response, $request)
+    public function post(HttpResponse $response, HttpRequest $request)
     {
         $this->validateRequest($request);
 
@@ -110,8 +131,17 @@ class Login extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function refreshToken($response, $request)
+    public function refreshToken(HttpResponse $response, HttpRequest $request)
     {
         $result = $this->requireAuthenticated(null, true);
 
@@ -134,7 +164,7 @@ class Login extends ServiceAbstractBase
 
     /**
      * Initialize the Password Request
-     * 
+     *
      * @OA\Post(
      *     path="/login/resetrequest",
      *     tags={"Login"},
@@ -164,8 +194,20 @@ class Login extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws UserExistsException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function postResetRequest($response, $request)
+    public function postResetRequest(HttpResponse $response, HttpRequest $request)
     {
         $this->validateRequest($request);
 
@@ -262,7 +304,7 @@ class Login extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws Error422Exception
      */
-    public function postConfirmCode($response, $request)
+    public function postConfirmCode(HttpResponse $response, HttpRequest $request)
     {
         list($users, $user, $json) = $this->validateResetToken($response, $request);
 
@@ -317,7 +359,7 @@ class Login extends ServiceAbstractBase
      * @param HttpRequest $request
      * @throws Error422Exception
      */
-    public function postResetPassword($response, $request)
+    public function postResetPassword(HttpResponse $response, HttpRequest $request)
     {
         list($users, $user, $json) = $this->validateResetToken($response, $request);
 
@@ -338,11 +380,11 @@ class Login extends ServiceAbstractBase
 
 
     /**
-     * @param UserModel $user
-     * @return mixed
+     * @param ?UserModel $user
+     * @return array
      * @throws Error401Exception
      */
-    private function createUserMetadata($user)
+    private function createUserMetadata(?UserModel $user)
     {
         if (is_null($user)) {
             throw new Error401Exception('Username or password is invalid');

@@ -1,6 +1,5 @@
 <?php
 
-use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
 use ByJG\ApiTools\Base\Schema;
@@ -15,8 +14,8 @@ use ByJG\Config\Param;
 use ByJG\JinjaPhp\Loader\FileSystemLoader;
 use ByJG\Mail\Envelope;
 use ByJG\Mail\MailerFactory;
-use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\FakeSenderWrapper;
+use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal;
 use ByJG\RestServer\HttpRequestHandler;
@@ -26,11 +25,10 @@ use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
 use RestTemplate\Model\User;
+use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
-use RestTemplate\Repository\UserRepository;
 use RestTemplate\Util\HexUuidLiteral;
-use RestTemplate\Util\HexUuidMysqlLiteral;
 
 return [
 

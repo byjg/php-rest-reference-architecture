@@ -2,23 +2,8 @@
 
 namespace RestTemplate\Rest;
 
-use RestTemplate\Psr11;
-use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\EnvironmentException;
-use ByJG\Config\Exception\KeyNotFoundException;
-use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
-use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
-use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\BinderObject;
-use Psr\SimpleCache\InvalidArgumentException;
-use ReflectionException;
-use RestTemplate\Model\Dummy;
-use RestTemplate\Model\DummyHex;
-use RestTemplate\Repository\DummyHexRepository;
-use RestTemplate\Repository\DummyRepository;
-use OpenApi\Annotations as OA;
 
 class Sample extends ServiceAbstractBase
 {
@@ -43,7 +28,7 @@ class Sample extends ServiceAbstractBase
      * @param HttpResponse $response
      * @param HttpRequest $request
      */
-    public function getPing($response, $request)
+    public function getPing(HttpResponse $response, HttpRequest $request)
     {
         $response->write([
             'result' => 'pong'

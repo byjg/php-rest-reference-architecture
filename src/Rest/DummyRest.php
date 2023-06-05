@@ -2,17 +2,25 @@
 
 namespace RestTemplate\Rest;
 
-use ByJG\MicroOrm\Literal;
+use ByJG\Config\Exception\ConfigException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
+use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
+use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
-use RestTemplate\Psr11;
+use ReflectionException;
 use RestTemplate\Model\Dummy;
+use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyRepository;
-use OpenApi\Annotations as OA;
-use RestTemplate\Util\HexUuidLiteral;
 
 class DummyRest extends ServiceAbstractBase
 {
@@ -32,7 +40,7 @@ class DummyRest extends ServiceAbstractBase
      *         @OA\Schema(
      *             type="integer",
      *             format="int32"
-     *         ) 
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -48,10 +56,19 @@ class DummyRest extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
      * @throws Error401Exception
+     * @throws Error404Exception
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function getDummy($response, $request)
+    public function getDummy(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireAuthenticated();
 
@@ -125,10 +142,20 @@ class DummyRest extends ServiceAbstractBase
      *      @OA\JsonContent(ref="#/components/schemas/error")
      *    )
      * )
-     * 
+     *
      * @param mixed $response
      * @param mixed $request
      * @return void
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     public function listDummy($response, $request)
     {
@@ -149,7 +176,7 @@ class DummyRest extends ServiceAbstractBase
 
 
     /**
-     * Create a new Dummy 
+     * Create a new Dummy
      * @OA\Post(
      *     path="/dummy",
      *     tags={"Dummy"},
@@ -162,8 +189,7 @@ class DummyRest extends ServiceAbstractBase
      *         @OA\MediaType(
      *           mediaType="application/json",
      *           @OA\Schema(
-     *             
-
+     *
      *             @OA\Property(property="field", type="string", format="string", nullable=true)
      *           )
      *         )
@@ -175,7 +201,6 @@ class DummyRest extends ServiceAbstractBase
      *           mediaType="application/json",
      *           @OA\Schema(
      *             required={ "id" },
-
      *             @OA\Property(property="id", type="integer", format="int32")
      *           )
      *         )
@@ -189,10 +214,22 @@ class DummyRest extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
      * @throws Error401Exception
+     * @throws Error403Exception
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function postDummy($response, $request)
+    public function postDummy(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");
 
@@ -209,7 +246,7 @@ class DummyRest extends ServiceAbstractBase
 
 
     /**
-     * Update an existing Dummy 
+     * Update an existing Dummy
      * @OA\Put(
      *     path="/dummy",
      *     tags={"Dummy"},
@@ -234,10 +271,23 @@ class DummyRest extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
      * @throws Error401Exception
+     * @throws Error404Exception
      * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws ConfigException
+     * @throws InvalidDateException
+     * @throws Error403Exception
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function putDummy($response, $request)
+    public function putDummy(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");
 
