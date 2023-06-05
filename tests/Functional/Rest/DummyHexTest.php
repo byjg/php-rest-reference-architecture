@@ -17,7 +17,7 @@ class DummyHexTest extends BaseApiTestCase
      * @return DummyHex|array
      * @throws InvalidArgumentException
      */
-    protected function getSampleData($array = false)
+    protected function getSampleData(bool $array = false)
     {
         $sample = [
 

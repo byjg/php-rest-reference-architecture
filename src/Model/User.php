@@ -14,50 +14,15 @@ class User extends UserModel
 {
     /**
      * @OA\Property()
-     * @var string
+     * @var ?string
      */
-    protected $userid;
-    /**
-     * @OA\Property()
-     * @var string
-     */
-    protected $name;
-    /**
-     * @OA\Property()
-     * @var string
-     */
-    protected $email;
-    /**
-     * @OA\Property()
-     * @var string
-     */
-    protected $username;
-    /**
-     * @OA\Property()
-     * @var string
-     */
-    protected $password;
-    /**
-     * @OA\Property()
-     * @var string
-     */
-    protected $created;
-    /**
-     * @OA\Property()
-     * @var string
-     */
-    protected $updated;
-    /**
-     * @OA\Property()
-     * @var string
-     */
-    protected $admin = "no";
+    protected ?string $updated = null;
 
     /**
      * @OA\Property()
-     * @var string
+     * @var ?string
      */
-    protected $uuid;
+    protected ?string $uuid = null;
 
     /**
      * User constructor.
@@ -76,9 +41,9 @@ class User extends UserModel
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getUuid()
+    public function getUuid(): ?string
     {
         return $this->uuid;
     }
@@ -86,17 +51,17 @@ class User extends UserModel
     /**
      * @param mixed $uuid
      */
-    public function setUuid($uuid)
+    public function setUuid(?string $uuid)
     {
         $this->uuid = $uuid;
     }
 
-    public function getUpdated()
+    public function getUpdated(): ?string
     {
         return $this->updated;
     }
 
-    public function setUpdated($updated)
+    public function setUpdated(?string $updated)
     {
         $this->updated = $updated;
     }

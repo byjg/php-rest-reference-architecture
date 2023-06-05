@@ -20,7 +20,7 @@ APP_TEST=test composer run test
 
 ## Creating your tests
 
-We can test the RestAPI as follow:
+We can test the RestAPI as follows:
 
 ```php
 namespace Test\Functional\Rest;
@@ -67,7 +67,7 @@ However, as it is a functional test you need to have the database and other reso
 
 ## Send body data to the test
 
-We can send body data to the test as follow:
+We can send body data to the test as follows:
 
 ```php
 public function testPing()

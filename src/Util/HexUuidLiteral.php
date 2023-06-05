@@ -11,7 +11,7 @@ class HexUuidLiteral extends Literal
         parent::__construct("X'" . str_replace("-", "", $value) . "'");
     }
 
-    public static function getUuidFromLiteral($literal)
+    public static function getUuidFromLiteral($literal): string
     {
         $value = $literal->__toString();
         return substr($value, 2, 8) . "-" . substr($value, 10, 4) . "-" . substr($value, 14, 4) . "-" . substr($value, 18, 4) . "-" . substr($value, 22, 12);

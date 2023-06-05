@@ -2,7 +2,7 @@
 
 This project comes with a management user, login and JWT out of the box.
 
-For most of use cases you don't need to change the application. Just the dependency injection configuration.
+For most of the use cases you don't need to change the application. Just the dependency injection configuration.
 
 ## Configure the Login
 
@@ -73,7 +73,7 @@ You can configure how the password will be saved by changing here:
 
 ## Configure the JWT
 
-There is a endpoint to generate the JWT token. The endpoint is `/login` and the method is `POST`.
+There is an endpoint to generate the JWT token. The endpoint is `/login` and the method is `POST`.
 
 You can test it using the endpoint `/sampleprotected/ping` with the method `GET` passing the header `Authorization: Bearer <token>`.
 

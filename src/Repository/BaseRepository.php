@@ -19,7 +19,7 @@ abstract class BaseRepository
     /**
      * @var Repository
      */
-    protected $repository;
+    protected Repository $repository;
 
     /**
      * @param $itemId
@@ -36,8 +36,13 @@ abstract class BaseRepository
     {
         $result = [];
         foreach ((array)$itemId as $item) {
-            if (!($item instanceof Literal) && preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $item)) {
-                $result[] = new HexUuidLiteral($item);
+            if ($item instanceof Literal) {
+                $result[] = $item;
+                continue;
+            }
+            $hydratedItem = preg_replace('/[^0-9A-F\-]/', '', $item);
+            if (preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $hydratedItem)) {
+                $result[] = new HexUuidLiteral($hydratedItem);
             } else {
                 $result[] = $item;
             }
@@ -58,7 +63,7 @@ abstract class BaseRepository
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws InvalidArgumentException
      */
-    public function list($page = 0, $size = 20, $orderBy = null, $filter = null)
+    public function list(?int $page = 0, int $size = 20, $orderBy = null, $filter = null): array
     {
         if (empty($page)) {
             $page = 0;
@@ -87,7 +92,7 @@ abstract class BaseRepository
             ->getByQuery($query);
     }
 
-    public function listGeneric($tableName, $page = 0, $size = 20, $orderBy = null, $filter = null)
+    public function listGeneric($tableName, $page = 0, $size = 20, $orderBy = null, $filter = null): array
     {
         if (empty($page)) {
             $page = 0;
@@ -125,7 +130,7 @@ abstract class BaseRepository
         return new $class();
     }
 
-    protected function getClosureNewUUID()
+    protected function getClosureNewUUID(): Literal
     {
         return new Literal("X'" . $this->repository->getDbDriver()->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
     }
@@ -141,7 +146,7 @@ abstract class BaseRepository
      * @param string $modelField
      * @return void
      */
-    protected function setClosureFixBinaryUUID($mapper, $pkFieldName = 'id', $modelField = 'uuid')
+    protected function setClosureFixBinaryUUID(Mapper $mapper, string $pkFieldName = 'id', string $modelField = 'uuid')
     {
         $mapper->addFieldMapping(FieldMapping::create($pkFieldName)
             ->withUpdateFunction(function ($value, $instance) {

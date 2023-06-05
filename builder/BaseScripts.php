@@ -15,14 +15,14 @@ use RestTemplate\Psr11;
 class BaseScripts
 {
     protected $workdir;
-    protected $systemOs;
+    protected string $systemOs;
 
     public function __construct()
     {
         $this->workdir = realpath(__DIR__ . '/..');
     }
 
-    public function getSystemOs()
+    public function getSystemOs(): string
     {
         if (!$this->systemOs) {
             $this->systemOs = php_uname('s');
@@ -58,7 +58,7 @@ class BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    protected function liveExecuteCommand($cmd)
+    protected function liveExecuteCommand($cmd): ?array
     {
         // while (@ ob_end_flush()); // end all output buffers if any
 
