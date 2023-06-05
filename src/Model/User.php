@@ -76,7 +76,7 @@ class User extends UserModel
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getUuid()
     {

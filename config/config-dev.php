@@ -28,7 +28,6 @@ use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
-use RestTemplate\Repository\UserRepository;
 use RestTemplate\Util\HexUuidLiteral;
 
 return [

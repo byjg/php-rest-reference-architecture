@@ -2,11 +2,22 @@
 
 namespace RestTemplate\Rest;
 
+use ByJG\Config\Exception\ConfigException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
+use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
+use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
+use ReflectionException;
 use RestTemplate\Model\DummyHex;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
@@ -45,10 +56,19 @@ class DummyHexRest extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
      * @throws Error401Exception
+     * @throws Error404Exception
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function getDummyHex($response, $request)
+    public function getDummyHex(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireAuthenticated();
 
@@ -126,6 +146,16 @@ class DummyHexRest extends ServiceAbstractBase
      * @param mixed $response
      * @param mixed $request
      * @return void
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     public function listDummyHex($response, $request)
     {
@@ -160,7 +190,6 @@ class DummyHexRest extends ServiceAbstractBase
      *           mediaType="application/json",
      *           @OA\Schema(
      *
-
      *             @OA\Property(property="field", type="string", format="string", nullable=true)
      *           )
      *         )
@@ -172,7 +201,6 @@ class DummyHexRest extends ServiceAbstractBase
      *           mediaType="application/json",
      *           @OA\Schema(
      *             required={ "id" },
-
      *             @OA\Property(property="id", type="string", format="string")
      *           )
      *         )
@@ -186,10 +214,22 @@ class DummyHexRest extends ServiceAbstractBase
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
      * @throws Error401Exception
+     * @throws Error403Exception
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function postDummyHex($response, $request)
+    public function postDummyHex(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");
 
@@ -232,9 +272,22 @@ class DummyHexRest extends ServiceAbstractBase
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @throws Error401Exception
+     * @throws Error404Exception
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
      * @throws InvalidArgumentException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws Error400Exception
+     * @throws Error403Exception
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function putDummyHex($response, $request)
+    public function putDummyHex(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");
 

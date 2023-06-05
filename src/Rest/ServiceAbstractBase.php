@@ -3,8 +3,10 @@
 namespace RestTemplate\Rest;
 
 use ByJG\ApiTools\Base\Schema;
+use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
@@ -12,11 +14,11 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\Util\JwtWrapper;
 use Exception;
-use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use ReflectionException;
+use RestTemplate\Psr11;
 
 class ServiceAbstractBase extends ServiceAbstract
 {
@@ -25,10 +27,12 @@ class ServiceAbstractBase extends ServiceAbstract
      * @param array $properties
      * @return mixed
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
+     * @throws ConfigException
+     * @throws DependencyInjectionException
+     * @throws InvalidDateException
      */
     public function createToken($properties = [])
     {
@@ -64,6 +68,7 @@ class ServiceAbstractBase extends ServiceAbstract
      * @param null $token
      * @return mixed
      * @throws Error401Exception
+     * @throws Error403Exception
      * @throws InvalidArgumentException
      */
     public function requireRole($role, $token = null)

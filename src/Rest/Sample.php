@@ -2,7 +2,6 @@
 
 namespace RestTemplate\Rest;
 
-use ByJG\Config\Exception\EnvironmentException;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 
@@ -29,7 +28,7 @@ class Sample extends ServiceAbstractBase
      * @param HttpResponse $response
      * @param HttpRequest $request
      */
-    public function getPing()
+    public function getPing(HttpResponse $response, HttpRequest $request)
     {
         $this->getResponse()->write([
             'result' => 'pong'

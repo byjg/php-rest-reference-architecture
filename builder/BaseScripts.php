@@ -2,17 +2,19 @@
 
 namespace Builder;
 
+use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\InvalidDateException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use Closure;
+use Closure;
+use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\EnvironmentException;
-use ByJG\Config\Exception\KeyNotFoundException;
-use Closure;
-use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 class _Lib
@@ -53,9 +55,11 @@ class _Lib
      * @param string|array $cmd :  command to be executed
      * @return array   exit_status  :  exit status of the executed command
      *                  output       :  console output of the executed command
+     * @throws ConfigException
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
@@ -107,12 +111,14 @@ class _Lib
 
     /**
      * @param string|Closure $variableValue
-     * @return mixed
+     * @return array|Closure|string|string[]
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
+     * @throws ConfigException
+     * @throws InvalidDateException
      */
     protected function replaceVariables($variableValue)
     {

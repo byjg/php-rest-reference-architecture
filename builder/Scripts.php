@@ -3,9 +3,10 @@
 namespace Builder;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
-use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
 use ByJG\DbMigration\Exception\InvalidMigrationFile;
@@ -31,12 +32,14 @@ class Scripts extends BaseScripts
     /**
      * @param Event $event
      * @return void
+     * @throws ConfigException
      * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws DependencyInjectionException
      */
     public static function migrate(Event $event)
     {
@@ -62,9 +65,11 @@ class Scripts extends BaseScripts
      * @param Event $event
      * @return void
      * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      */
     public static function codeGenerator(Event $event)
     {
@@ -81,6 +86,8 @@ class Scripts extends BaseScripts
      * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
      * @throws ReflectionException
+     * @throws ConfigException
+     * @throws InvalidDateException
      */
     public function runMigrate($arguments)
     {
