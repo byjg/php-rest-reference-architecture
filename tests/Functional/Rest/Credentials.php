@@ -2,14 +2,14 @@
 
 namespace Test\Functional\Rest;
 
-use RestTemplate\Psr11;
 use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
+use RestTemplate\Psr11;
 use RestTemplate\Util\FakeApiRequester;
 
 class Credentials
 {
-    public static function getAdminUser()
+    public static function getAdminUser(): array
     {
         return [
             'username' => (getenv('TEST_ADMIN_USER') ? getenv('TEST_ADMIN_USER') : 'admin@example.com'),
@@ -17,7 +17,7 @@ class Credentials
         ];
     }
 
-    public static function getRegularUser()
+    public static function getRegularUser(): array
     {
         return [
             'username' => (getenv('TEST_REGULAR_USER') ? getenv('TEST_REGULAR_USER') : 'user@example.com'),
@@ -25,7 +25,7 @@ class Credentials
         ];
     }
 
-    public static function requestLogin($cred)
+    public static function requestLogin($cred): FakeApiRequester
     {
         $uri = Uri::getInstanceFromString()
             ->withScheme(Psr11::container()->get("API_SCHEMA"))

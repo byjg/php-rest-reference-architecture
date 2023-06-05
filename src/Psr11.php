@@ -13,8 +13,8 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 class Psr11
 {
-    private static $definition = null;
-    private static $container = null;
+    private static ?Definition $definition = null;
+    private static ?Container $container = null;
 
     /**
      * @param null $env
@@ -24,7 +24,7 @@ class Psr11
      * @throws InvalidArgumentException
      * @throws InvalidDateException
      */
-    public static function container($env = null)
+    public static function container($env = null): ?Container
     {
         if (is_null(self::$container)) {
             self::$container = self::environment()->build($env);
@@ -38,7 +38,7 @@ class Psr11
      * @throws ConfigException
      * @throws InvalidDateException
      */
-    public static function environment()
+    public static function environment(): ?Definition
     {
         if (is_null(self::$definition)) {
             self::$definition = (new Definition())

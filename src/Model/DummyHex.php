@@ -2,8 +2,6 @@
 
 namespace RestTemplate\Model;
 
-use OpenApi\Annotations as OA;
-
 /**
  * Class DummyHex
  * @package RestTemplate\Model
@@ -14,73 +12,73 @@ class DummyHex
 
     /**
      * @OA\Property(type="string", format="string")
-     * @var string
+     * @var ?string
      */
-    protected $id;
+    protected ?string $id = null;
 
     /**
      * @OA\Property(type="string", format="string", nullable=true)
-     * @var string
+     * @var ?string
      */
-    protected $uuid;
+    protected ?string $uuid = null;
 
     /**
      * @OA\Property(type="string", format="string", nullable=true)
-     * @var string
+     * @var ?string
      */
-    protected $field;
+    protected ?string $field = null;
 
 
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getId()
+    public function getId(): ?string
     {
         return $this->id;
     }
 
     /**
-     * @param string $id
+     * @param string|null $id
      * @return DummyHex
      */
-    public function setId($id)
+    public function setId(?string $id): DummyHex
     {
         $this->id = $id;
         return $this;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getUuid()
+    public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
     /**
-     * @param string $uuid
+     * @param string|null $uuid
      * @return DummyHex
      */
-    public function setUuid($uuid)
+    public function setUuid(?string $uuid): DummyHex
     {
         $this->uuid = $uuid;
         return $this;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getField()
+    public function getField(): ?string
     {
         return $this->field;
     }
 
     /**
-     * @param string $field
+     * @param string|null $field
      * @return DummyHex
      */
-    public function setField($field)
+    public function setField(?string $field): DummyHex
     {
         $this->field = $field;
         return $this;

@@ -32,7 +32,7 @@ class ServiceAbstractBase
      * @throws DependencyInjectionException
      * @throws InvalidDateException
      */
-    public function createToken($properties = [])
+    public function createToken(array $properties = [])
     {
         $jwt = Psr11::container()->get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 1800);
@@ -46,7 +46,7 @@ class ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function requireAuthenticated($token = null, $fullToken = false)
+    public function requireAuthenticated($token = null, bool $fullToken = false)
     {
         try {
             $jwt = Psr11::container()->get(JwtWrapper::class);

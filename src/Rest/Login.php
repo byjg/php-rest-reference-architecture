@@ -3,7 +3,6 @@
 namespace RestTemplate\Rest;
 
 use ByJG\Authenticate\Exception\UserExistsException;
-use ByJG\Authenticate\Model\UserModel;
 use ByJG\Authenticate\UsersDBDataset;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
@@ -21,6 +20,7 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use ByJG\Serializer\Exception\InvalidArgumentException;
 use ReflectionException;
+use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\BaseRepository;
 use RestTemplate\Util\HexUuidLiteral;
@@ -239,7 +239,7 @@ class Login extends ServiceAbstractBase
         $response->write(['token' => $token]);
     }
 
-    protected function validateResetToken($response, $request)
+    protected function validateResetToken($response, $request): array
     {
         $this->validateRequest($request);
 
@@ -380,11 +380,11 @@ class Login extends ServiceAbstractBase
 
 
     /**
-     * @param ?UserModel $user
+     * @param User|null $user
      * @return array
      * @throws Error401Exception
      */
-    private function createUserMetadata(?UserModel $user)
+    private function createUserMetadata(?User $user): array
     {
         if (is_null($user)) {
             throw new Error401Exception('Username or password is invalid');

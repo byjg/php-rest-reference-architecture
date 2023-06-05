@@ -14,9 +14,9 @@ use RestTemplate\Psr11;
 
 class BaseApiTestCase extends ApiTestCase
 {
-    protected static $databaseReset = false;
+    protected static bool $databaseReset = false;
 
-    protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
+    protected string $filePath = __DIR__ . '/../../../public/docs/openapi.json';
 
     protected function setUp(): void
     {
@@ -28,7 +28,7 @@ class BaseApiTestCase extends ApiTestCase
         $this->setSchema(null);
     }
 
-    public function getPsr7Request()
+    public function getPsr7Request(): Request
     {
         $uri = Uri::getInstanceFromString()
             ->withScheme(Psr11::container()->get("API_SCHEMA"))
