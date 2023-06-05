@@ -34,6 +34,8 @@
     "migrate": "Builder\\Scripts::migrate",
     "codegen": "Builder\\Scripts::codeGenerator",
     "openapi": "Builder\\Scripts::genOpenApiDocs",
+    "up-local-dev": "docker-compose -f docker-compose-dev.yml up -d",
+    "down-local-dev": "docker-compose -f docker-compose-dev.yml down",
     "post-create-project-cmd": "Builder\\PostCreateScript::run"
   },
   "autoload-dev": {

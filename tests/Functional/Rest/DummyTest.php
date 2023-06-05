@@ -2,19 +2,14 @@
 
 namespace Test\Functional\Rest;
 
-use ByJG\ApiTools\Base\Schema;
+use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\BinderObject;
-use ByJG\Serializer\SerializerObject;
-use RestTemplate\Util\FakeApiRequester;
 use RestTemplate\Model\Dummy;
-use RestTemplate\Repository\BaseRepository;
+use RestTemplate\Util\FakeApiRequester;
 
 class DummyTest extends BaseApiTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
 
     /**
      * @return Dummy|array
@@ -38,7 +33,7 @@ class DummyTest extends BaseApiTestCase
 
     public function testGetUnauthorized()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage('Absent authorization token');
 
         $request = new FakeApiRequester();
@@ -53,7 +48,7 @@ class DummyTest extends BaseApiTestCase
 
     public function testListUnauthorized()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage('Absent authorization token');
 
         $request = new FakeApiRequester();
@@ -68,7 +63,7 @@ class DummyTest extends BaseApiTestCase
 
     public function testPostUnauthorized()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage('Absent authorization token');
 
         $request = new FakeApiRequester();
@@ -84,7 +79,7 @@ class DummyTest extends BaseApiTestCase
 
     public function testPutUnauthorized()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage('Absent authorization token');
 
         $request = new FakeApiRequester();
@@ -100,7 +95,7 @@ class DummyTest extends BaseApiTestCase
 
     public function testPostInsufficientPrivileges()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
 
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
@@ -121,7 +116,7 @@ class DummyTest extends BaseApiTestCase
 
     public function testPutInsufficientPrivileges()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error403Exception::class);
+        $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
 
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
