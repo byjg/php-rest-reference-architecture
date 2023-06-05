@@ -12,31 +12,31 @@ class Dummy
 
     /**
      * @OA\Property(type="integer", format="int32")
-     * @var int
+     * @var ?int
      */
-    protected $id;
+    protected ?int $id = null;
 
     /**
      * @OA\Property(type="string", format="string", nullable=true)
-     * @var string
+     * @var string|null
      */
-    protected $field;
+    protected ?string $field = null;
 
 
 
     /**
-     * @return int
+     * @return ?int
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
     /**
-     * @param int $id
+     * @param int|null $id
      * @return Dummy
      */
-    public function setId($id)
+    public function setId(?int $id): Dummy
     {
         $this->id = $id;
         return $this;
@@ -45,16 +45,16 @@ class Dummy
     /**
      * @return string
      */
-    public function getField()
+    public function getField(): ?string
     {
         return $this->field;
     }
 
     /**
-     * @param string $field
+     * @param string|null $field
      * @return Dummy
      */
-    public function setField($field)
+    public function setField(?string $field): Dummy
     {
         $this->field = $field;
         return $this;

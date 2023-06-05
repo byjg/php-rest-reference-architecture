@@ -107,7 +107,7 @@ class Login extends ServiceAbstractBase
 }
 ```
 
-After document you code, you can generate the OpenAPI specification with the following command:
+After documenting you code, you can generate the OpenAPI specification with the following command:
 
 ```bash
 APP_ENV=dev composer run openapi

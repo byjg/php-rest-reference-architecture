@@ -42,7 +42,7 @@ class DummyRepository extends BaseRepository
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws InvalidArgumentException
      */
-    public function getByField($field)
+    public function getByField(string $field): ?array
     {
         $query = Query::getInstance()
             ->table('dummy')

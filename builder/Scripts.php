@@ -133,7 +133,8 @@ class Scripts extends BaseScripts
      * @param bool $hasCmd
      * @return array
      */
-    protected function extractArguments($arguments, bool $hasCmd = true) {
+    protected function extractArguments(array $arguments, bool $hasCmd = true): array
+    {
         $ret = [
             '--up-to' => null,
             '--yes' => null,
@@ -159,7 +160,7 @@ class Scripts extends BaseScripts
      * @param array $arguments
      * @return void
      */
-    public function runGenOpenApiDocs($arguments)
+    public function runGenOpenApiDocs(array $arguments)
     {
         $docPath = $this->workdir . '/public/docs/';
 
@@ -186,7 +187,7 @@ class Scripts extends BaseScripts
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      * @throws Exception
      */
-    public function runCodeGenerator($arguments)
+    public function runCodeGenerator(array $arguments)
     {
         // Get Table Name
         $table = null;
