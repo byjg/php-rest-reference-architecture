@@ -4,6 +4,7 @@ namespace Builder;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
@@ -13,11 +14,12 @@ use ByJG\JinjaPhp\Loader\FileSystemLoader;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
 use Exception;
-use Exception;
+use OpenApi\Generator;
 use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use ReflectionException;
+use RestTemplate\Psr11;
 
 class Scripts extends BaseScripts
 {
@@ -28,12 +30,13 @@ class Scripts extends BaseScripts
 
     /**
      * @param Event $event
+     * @return void
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
      * @throws InvalidArgumentException
      * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
      * @throws ReflectionException
+     * @throws DependencyInjectionException
      */
     public static function migrate(Event $event)
     {
@@ -43,8 +46,8 @@ class Scripts extends BaseScripts
 
     /**
      * @param Event $event
+     * @return void
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
@@ -57,8 +60,8 @@ class Scripts extends BaseScripts
 
     /**
      * @param Event $event
+     * @return void
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
@@ -71,8 +74,9 @@ class Scripts extends BaseScripts
 
     /**
      * @param $arguments
+     * @return void
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
      * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
@@ -118,11 +122,11 @@ class Scripts extends BaseScripts
     }
 
     /**
-     * @param $arguments
+     * @param array $arguments
      * @param bool $hasCmd
      * @return array
      */
-    protected function extractArguments($arguments, $hasCmd = true) {
+    protected function extractArguments($arguments, bool $hasCmd = true) {
         $ret = [
             '--up-to' => null,
             '--yes' => null,
@@ -132,51 +136,48 @@ class Scripts extends BaseScripts
 
         $start = 0;
         if ($hasCmd) {
-            $ret['command'] = isset($arguments[0]) ? $arguments[0] : null;
+            $ret['command'] = $arguments[0] ?? null;
             $start = 1;
         }
 
         for ($i=$start; $i < count($arguments); $i++) {
             $args = explode("=", $arguments[$i]);
-            $ret[$args[0]] = isset($args[1]) ? $args[1] : true;
+            $ret[$args[0]] = $args[1] ?? true;
         }
 
         return $ret;
     }
 
     /**
-     * @param $arguments
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws InvalidArgumentException
-     * @throws KeyNotFoundException
-     * @throws ReflectionException
+     * @param array $arguments
+     * @return void
      */
     public function runGenOpenApiDocs($arguments)
     {
         $docPath = $this->workdir . '/public/docs/';
 
-        $generator = (new \OpenApi\Generator())
+        $generator = (new Generator())
             ->setConfig([
                 "operationId.hash" => false
             ]);
         $openapi = $generator->generate(
             [
                 $this->workdir . '/src',
-            ],
-            null,
-            true
+            ]
         );
         file_put_contents("$docPath/openapi.json", $openapi->toJson());
     }
 
     /**
-     * @param $arguments
+     * @param array $arguments
+     * @return void
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws Exception
      */
     public function runCodeGenerator($arguments)
     {
@@ -184,7 +185,7 @@ class Scripts extends BaseScripts
         $table = null;
         if (in_array("--table", $arguments)) {
             $index = array_search("--table", $arguments);
-            $table = isset($arguments[$index + 1]) ? $arguments[$index + 1] : null;
+            $table = $arguments[$index + 1] ?? null;
             unset($arguments[$index + 1]);
             unset($arguments[$index]);
         }
@@ -205,7 +206,7 @@ class Scripts extends BaseScripts
         if (empty($foundArguments)) {
             throw new Exception("At least one argument is required (" . implode(", ", $validArguments) . ")");
         }
-        $save = in_array("--save", $arguments);        
+        $save = in_array("--save", $arguments);
 
         /** @var DbDriverInterface $dbDriver */
         $dbDriver = Psr11::container()->get(DbDriverInterface::class);
@@ -283,7 +284,7 @@ class Scripts extends BaseScripts
             }
         }
 
-        // Create an array with non nullable fields but primary keys
+        // Create an array with non-nullable fields but primary keys
         $nonNullableFields = [];
         foreach ($tableDefinition as $field) {
             if ($field['null'] == 'NO' && $field['key'] != 'PRI') {

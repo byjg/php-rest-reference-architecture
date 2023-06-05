@@ -2,8 +2,9 @@
 
 namespace Test\Functional\Rest;
 
-use ByJG\ApiTools\Base\Schema;
 use ByJG\Authenticate\UsersDBDataset;
+use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error422Exception;
 use RestTemplate\Psr11;
 use RestTemplate\Util\FakeApiRequester;
 
@@ -12,10 +13,6 @@ use RestTemplate\Util\FakeApiRequester;
  */
 class LoginTest extends BaseApiTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
 
     public function testLoginOk()
     {
@@ -29,7 +26,7 @@ class LoginTest extends BaseApiTestCase
 
     public function testLoginFail()
     {
-        $this->expectException(\ByJG\RestServer\Exception\Error401Exception::class);
+        $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage('Username or password is invalid');
 
         $this->assertRequest(Credentials::requestLogin([
@@ -93,7 +90,7 @@ class LoginTest extends BaseApiTestCase
         $this->assertNotEmpty($user->get("resetcode"));
         $this->assertEmpty($user->get("resetallowed"));
 
-        $this->expectException(\ByJG\RestServer\Exception\Error422Exception::class);
+        $this->expectException(Error422Exception::class);
 
         // Execute the request, expecting an error
         $request = new FakeApiRequester();

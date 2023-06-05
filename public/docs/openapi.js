@@ -1,5 +1,5 @@
 function readTextFile(file, callback) {
-    var rawFile = new XMLHttpRequest();
+    let rawFile = new XMLHttpRequest();
     rawFile.overrideMimeType("application/json");
     rawFile.open("GET", file, true);
     rawFile.onreadystatechange = function() {
@@ -10,9 +10,8 @@ function readTextFile(file, callback) {
     rawFile.send(null);
 }
 
-var spec = {}
 readTextFile("./openapi.json", function(text){
-    const ui = SwaggerUIBundle({
+    window.ui = SwaggerUIBundle({
         spec: JSON.parse(text),
         dom_id: '#swagger-ui',
         deepLinking: true,
@@ -25,6 +24,4 @@ readTextFile("./openapi.json", function(text){
         ],
         layout: "StandaloneLayout"
       })
-   
-      window.ui = ui
 });

@@ -3,7 +3,6 @@
 namespace Test\Functional\Rest;
 
 
-use ByJG\ApiTools\Base\Schema;
 use RestTemplate\Util\FakeApiRequester;
 
 /**
@@ -11,10 +10,6 @@ use RestTemplate\Util\FakeApiRequester;
  */
 class SampleTest extends BaseApiTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
 
     protected function setUp()
     {
