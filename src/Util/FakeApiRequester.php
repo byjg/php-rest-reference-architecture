@@ -3,10 +3,11 @@
 
 namespace RestTemplate\Util;
 
-use RestTemplate\Psr11;
 use ByJG\ApiTools\AbstractRequester;
+use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
@@ -22,6 +23,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use RestTemplate\Psr11;
 
 
 /**
@@ -32,17 +34,19 @@ class FakeApiRequester extends AbstractRequester
     /**
      * @param RequestInterface $request
      * @return Response|ResponseInterface
-     * @throws MessageException
-     * @throws ConfigNotFoundException
-     * @throws EnvironmentException
-     * @throws KeyNotFoundException
      * @throws ClassNotFoundException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
-     * @throws InvalidClassException
      * @throws InvalidArgumentException
+     * @throws InvalidClassException
+     * @throws KeyNotFoundException
+     * @throws MessageException
      * @throws ReflectionException
+     * @throws ConfigException
+     * @throws InvalidDateException
      */
     protected function handleRequest(RequestInterface $request)
     {

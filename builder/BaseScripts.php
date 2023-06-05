@@ -2,8 +2,10 @@
 
 namespace Builder;
 
+use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\EnvironmentException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use Closure;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -48,9 +50,11 @@ class BaseScripts
      * @param string|array $cmd :  command to be executed
      * @return array   exit_status  :  exit status of the executed command
      *                  output       :  console output of the executed command
+     * @throws ConfigException
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
@@ -102,12 +106,14 @@ class BaseScripts
 
     /**
      * @param string|Closure $variableValue
-     * @return mixed
+     * @return array|Closure|string|string[]
      * @throws ConfigNotFoundException
-     * @throws EnvironmentException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
+     * @throws ConfigException
+     * @throws InvalidDateException
      */
     protected function replaceVariables($variableValue)
     {

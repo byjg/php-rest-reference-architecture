@@ -161,10 +161,11 @@ abstract class BaseRepository
 
     /**
      * @param $model
-     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @return mixed
+     * @throws InvalidArgumentException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
-     * @throws InvalidArgumentException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      */
     public function save($model)
     {

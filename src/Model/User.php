@@ -6,7 +6,6 @@ use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Model\UserModel;
 use Exception;
 use RestTemplate\Psr11;
-use OpenApi\Annotations as OA;
 
 /**
  * @OA\Schema(required={"email"}, type="object", @OA\Xml(name="User"))
@@ -77,7 +76,7 @@ class User extends UserModel
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getUuid()
     {
