@@ -5,23 +5,22 @@ namespace RestTemplate\Model;
 use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Model\UserModel;
 use Exception;
+use OpenApi\Attributes as OA;
 use RestTemplate\Psr11;
 
-/**
- * @OA\Schema(required={"email"}, type="object", @OA\Xml(name="User"))
- */
+#[OA\Schema(required: ["email"], type: "object", xml: new \OpenApi\Attributes\Xml(name: "User"))]
 class User extends UserModel
 {
     /**
-     * @OA\Property()
      * @var ?string
      */
+    #[OA\Property(type: "string", format: "string")]
     protected ?string $updated = null;
 
     /**
-     * @OA\Property()
      * @var ?string
      */
+    #[OA\Property(type: "string", format: "string")]
     protected ?string $uuid = null;
 
     /**
