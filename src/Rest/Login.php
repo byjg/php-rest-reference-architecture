@@ -19,6 +19,7 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use ByJG\Serializer\Exception\InvalidArgumentException;
+use OpenApi\Attributes as OA;
 use ReflectionException;
 use RestTemplate\Model\User;
 use RestTemplate\Psr11;
@@ -29,47 +30,6 @@ class Login extends ServiceAbstractBase
 {
     /**
      * Do login
-     * @OA\Post(
-     *     path="/login",
-     *     tags={"Login"},
-     *     @OA\RequestBody(
-     *         description="The login data",
-     *         required=true,
-     *         @OA\MediaType(
-     *            mediaType="application/json",
-     *            @OA\Schema(
-     *              required={"username","password"},
-     *              @OA\Property(property="username", type="string", description="The username"),
-     *              @OA\Property(property="password", type="string", description="The password"),
-     *           )
-     *        )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={"token"},
-     *             @OA\Property(property="token", type="string"),
-     *             @OA\Property(property="data",
-     *             @OA\Property(property="role", type="string"),
-     *             @OA\Property(property="userid", type="string"),
-     *             @OA\Property(property="name",type="string"))
-     *          )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Não autorizado",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Erro Geral",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -84,6 +44,36 @@ class Login extends ServiceAbstractBase
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
+    #[OA\Post(
+        path: "/login",
+        tags: ["Login"],
+    )]
+    #[OA\RequestBody(
+        description: "The Login Data",
+        required: true,
+        content: new OA\JsonContent(
+            required: [ "username", "password" ],
+            properties: [
+                new OA\Property(property: "username", description: "The Username", type: "string", format: "string"),
+                new OA\Property(property: "password", description: "The Password",  type: "string", format: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object to be created",
+        content: new OA\JsonContent(
+            required: [ "token" ],
+            properties: [
+                new OA\Property(property: "token", type: "string"),
+                new OA\Property(property: "data", properties: [
+                    new OA\Property(property: "userid", type: "string"),
+                    new OA\Property(property: "name", type: "string"),
+                    new OA\Property(property: "role", type: "string"),
+                ])
+            ]
+        )
+    )]
     public function post(HttpResponse $response, HttpRequest $request)
     {
         $this->validateRequest($request);
@@ -101,33 +91,6 @@ class Login extends ServiceAbstractBase
 
     /**
      * Refresh Token
-     * @OA\Post(
-     *     path="/refreshtoken",
-     *     tags={"Login"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *              required={"token"},
-     *              @OA\Property(property="token", type="string"),
-     *              @OA\Property(property="data",
-     *              @OA\Property(property="role", type="string"),
-     *              @OA\Property(property="userid", type="string"),
-     *              @OA\Property(property="name", type="string"))
-     *          )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Não autorizado",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -141,6 +104,33 @@ class Login extends ServiceAbstractBase
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
+    #[OA\Post(
+        path: "/refreshtoken",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["Login"]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object rto be created",
+        content: new OA\JsonContent(
+            required: [ "token" ],
+            properties: [
+                new OA\Property(property: "token", type: "string"),
+                new OA\Property(property: "data", properties: [
+                    new OA\Property(property: "role", type: "string"),
+                    new OA\Property(property: "userid", type: "string"),
+                    new OA\Property(property: "name", type: "string")
+                ], type: "object")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Não autorizado",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
     public function refreshToken(HttpResponse $response, HttpRequest $request)
     {
         $result = $this->requireAuthenticated(null, true);
@@ -165,33 +155,6 @@ class Login extends ServiceAbstractBase
     /**
      * Initialize the Password Request
      *
-     * @OA\Post(
-     *     path="/login/resetrequest",
-     *     tags={"Login"},
-     *     @OA\RequestBody(
-     *         description="The email to have the password reset",
-     *         required=true,
-     *         @OA\MediaType(
-     *            mediaType="application/json",
-     *            @OA\Schema(
-     *              required={"email"},
-     *              @OA\Property(property="email", type="string", description="Email"),
-     *           )
-     *        )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={"token"},
-     *             @OA\Property(property="token", type="string"),
-     *          )
-     *       )
-     *     ),
-     * )
-     *
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @throws ConfigException
@@ -207,6 +170,29 @@ class Login extends ServiceAbstractBase
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
+    #[OA\Post(
+        path: "/login/resetrequest",
+        tags: ["Login"]
+    )]
+    #[OA\RequestBody(
+        description: "The email to have the password reset",
+        content: new OA\JsonContent(
+            required: [ "email" ],
+            properties: [
+                new OA\Property(property: "email", type: "string"),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The token for reset",
+        content: new OA\JsonContent(
+            required: [ "token" ],
+            properties: [
+                new OA\Property(property: "token", type: "string"),
+            ]
+        )
+    )]
     public function postResetRequest(HttpResponse $response, HttpRequest $request)
     {
         $this->validateRequest($request);
@@ -266,44 +252,40 @@ class Login extends ServiceAbstractBase
     /**
      * Initialize the Password Request
      *
-     * @OA\Post(
-     *     path="/login/confirmcode",
-     *     tags={"Login"},
-     *     @OA\RequestBody(
-     *         description="The email and code to confirm the password reset",
-     *         required=true,
-     *         @OA\MediaType(
-     *            mediaType="application/json",
-     *            @OA\Schema(
-     *              required={"email", "token", "code"},
-     *              @OA\Property(property="email", type="string", description="Email"),
-     *              @OA\Property(property="token", type="string", description="password reset token"),
-     *              @OA\Property(property="code", type="string", description="password reset code"),
-     *           )
-     *        )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={"token"},
-     *             @OA\Property(property="token", type="string"),
-     *          )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *        response=422,
-     *        description="Invalid data",
-     *        @OA\JsonContent(ref="#/components/schemas/error")
-     *     ),
-     * )
-     *
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @throws Error422Exception
      */
+    #[OA\Post(
+        path: "/login/confirmcode",
+        tags: ["Login"]
+    )]
+    #[OA\RequestBody(
+        description: "The email and code to confirm the password reset",
+        content: new OA\JsonContent(
+            required: [ "email", "token", "code" ],
+            properties: [
+                new OA\Property(property: "email", type: "string"),
+                new OA\Property(property: "token", type: "string"),
+                new OA\Property(property: "code", type: "string"),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The token for reset",
+        content: new OA\JsonContent(
+            required: [ "token" ],
+            properties: [
+                new OA\Property(property: "token", type: "string"),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 422,
+        description: "Invalid data",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
     public function postConfirmCode(HttpResponse $response, HttpRequest $request)
     {
         list($users, $user, $json) = $this->validateResetToken($response, $request);
@@ -321,44 +303,40 @@ class Login extends ServiceAbstractBase
     /**
      * Initialize the Password Request
      *
-     * @OA\Post(
-     *     path="/login/resetpassword",
-     *     tags={"Login"},
-     *     @OA\RequestBody(
-     *         description="The email and the new password",
-     *         required=true,
-     *         @OA\MediaType(
-     *            mediaType="application/json",
-     *            @OA\Schema(
-     *              required={"email", "token", "password"},
-     *              @OA\Property(property="email", type="string", description="Email"),
-     *              @OA\Property(property="token", type="string", description="password reset token"),
-     *              @OA\Property(property="password", type="string", description="new password"),
-     *           )
-     *        )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={"token"},
-     *             @OA\Property(property="token", type="string"),
-     *          )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *        response=422,
-     *        description="Invalid data",
-     *        @OA\JsonContent(ref="#/components/schemas/error")
-     *     ),
-     * )
-     *
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @throws Error422Exception
      */
+    #[OA\Post(
+        path: "/login/resetpassword",
+        tags: ["Login"]
+    )]
+    #[OA\RequestBody(
+        description: "The email and the new password",
+        content: new OA\JsonContent(
+            required: [ "email", "token", "password" ],
+            properties: [
+                new OA\Property(property: "email", type: "string"),
+                new OA\Property(property: "token", type: "string"),
+                new OA\Property(property: "password", type: "string"),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The token for reset",
+        content: new OA\JsonContent(
+            required: [ "token" ],
+            properties: [
+                new OA\Property(property: "token", type: "string"),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 422,
+        description: "Invalid data",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
     public function postResetPassword(HttpResponse $response, HttpRequest $request)
     {
         list($users, $user, $json) = $this->validateResetToken($response, $request);
