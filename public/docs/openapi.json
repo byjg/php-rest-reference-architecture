@@ -30,7 +30,6 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -45,16 +44,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/DummyHex"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Not Authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
                                 }
                             }
                         }
@@ -114,7 +103,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "The list of DummyHex",
+                        "description": "The object DummyHex",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -193,11 +182,13 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "field"
+                                ],
                                 "properties": {
                                     "field": {
                                         "type": "string",
-                                        "format": "string",
-                                        "nullable": true
+                                        "format": "string"
                                     }
                                 },
                                 "type": "object"
@@ -207,7 +198,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "The id of the object created",
+                        "description": "The object rto be created",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -254,7 +245,6 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -269,16 +259,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Dummy"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Not Authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
                                 }
                             }
                         }
@@ -338,7 +318,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "The list of Dummy",
+                        "description": "The object Dummy",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -412,16 +392,18 @@
                 "summary": "Create a new Dummy",
                 "operationId": "POST::/dummy::RestTemplate\\Rest\\DummyRest::postDummy",
                 "requestBody": {
-                    "description": "The object Dummy to be created",
+                    "description": "The object DummyHex to be created",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "field"
+                                ],
                                 "properties": {
                                     "field": {
                                         "type": "string",
-                                        "format": "string",
-                                        "nullable": true
+                                        "format": "string"
                                     }
                                 },
                                 "type": "object"
@@ -431,7 +413,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "The id of the object created",
+                        "description": "The object rto be created",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -923,7 +905,8 @@
             "Dummy": {
                 "description": "Class Dummy",
                 "required": [
-                    "id"
+                    "id",
+                    "field"
                 ],
                 "properties": {
                     "id": {
@@ -932,8 +915,7 @@
                     },
                     "field": {
                         "type": "string",
-                        "format": "string",
-                        "nullable": true
+                        "format": "string"
                     }
                 },
                 "type": "object",
@@ -944,7 +926,8 @@
             "DummyHex": {
                 "description": "Class DummyHex",
                 "required": [
-                    "id"
+                    "id",
+                    "field"
                 ],
                 "properties": {
                     "id": {
@@ -958,8 +941,7 @@
                     },
                     "field": {
                         "type": "string",
-                        "format": "string",
-                        "nullable": true
+                        "format": "string"
                     }
                 },
                 "type": "object",
@@ -972,32 +954,13 @@
                     "email"
                 ],
                 "properties": {
-                    "userid": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "username": {
-                        "type": "string"
-                    },
-                    "password": {
-                        "type": "string"
-                    },
-                    "created": {
-                        "type": "string"
-                    },
                     "updated": {
-                        "type": "string"
-                    },
-                    "admin": {
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     },
                     "uuid": {
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object",

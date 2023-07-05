@@ -17,6 +17,7 @@ use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
+use OpenApi\Attributes as OA;
 use ReflectionException;
 use RestTemplate\Model\DummyHex;
 use RestTemplate\Psr11;
@@ -26,33 +27,6 @@ class DummyHexRest extends ServiceAbstractBase
 {
     /**
      * Get the DummyHex by id
-     * @OA\Get(
-     *     path="/dummyhex/{id}",
-     *     tags={"Dummyhex"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\Parameter(
-     *         name="id",
-     *         description="",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="string",
-     *             format="string"
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object DummyHex",
-     *         @OA\JsonContent(ref="#/components/schemas/DummyHex")
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Not Authorized",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -68,6 +42,27 @@ class DummyHexRest extends ServiceAbstractBase
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
+    #[OA\Get(
+        path: "/dummyhex/{id}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["Dummyhex"],
+    )]
+    #[OA\Parameter(
+        name: "id",
+        in: "path",
+        required: true,
+        schema: new OA\Schema(
+            type: "string",
+            format: "string"
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object DummyHex",
+        content: new OA\JsonContent(ref: "#/components/schemas/DummyHex")
+    )]
     public function getDummyHex(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireAuthenticated();
@@ -86,62 +81,6 @@ class DummyHexRest extends ServiceAbstractBase
 
     /**
      * List DummyHex
-     * @OA\Get(
-     *    path="/dummyhex",
-     *    tags={"Dummyhex"},
-     *    security={{
-     *       "jwt-token":{}
-     *    }},
-     *    @OA\Parameter(
-     *       name="page",
-     *       description="Page number",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="integer"
-     *       )
-     *    ),
-     *    @OA\Parameter(
-     *       name="size",
-     *       description="Page size",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="integer"
-     *       )
-     *    ),
-     *    @OA\Parameter(
-     *       name="orderBy",
-     *       description="Order by",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="string"
-     *       )
-     *    ),
-     *    @OA\Parameter(
-     *       name="filter",
-     *       description="Filter",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="string"
-     *       )
-     *    ),
-     *    @OA\Response(
-     *      response=200,
-     *      description="The list of DummyHex",
-     *      @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(ref="#/components/schemas/DummyHex")
-     *      )
-     *    ),
-     *    @OA\Response(
-     *      response=401,
-     *      description="Not Authorized",
-     *      @OA\JsonContent(ref="#/components/schemas/error")
-     *    )
-     * )
      *
      * @param mixed $response
      * @param mixed $request
@@ -157,7 +96,60 @@ class DummyHexRest extends ServiceAbstractBase
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
-    public function listDummyHex($response, $request)
+    #[OA\Get(
+        path: "/dummyhex",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["Dummyhex"]
+    )]
+    #[OA\Parameter(
+        name: "page",
+        description: "Page number",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "integer",
+        )
+    )]
+    #[OA\Parameter(
+        name: "size",
+        description: "Page size",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "integer",
+        )
+    )]
+    #[OA\Parameter(
+        name: "orderBy",
+        description: "Order by",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "string",
+        )
+    )]
+    #[OA\Parameter(
+        name: "filter",
+        description: "Filter",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "string",
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object DummyHex",
+        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/DummyHex"))
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    public function listDummyHex(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireAuthenticated();
 
@@ -176,44 +168,11 @@ class DummyHexRest extends ServiceAbstractBase
 
 
     /**
-     * Create a new DummyHex
-     * @OA\Post(
-     *     path="/dummyhex",
-     *     tags={"Dummyhex"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\RequestBody(
-     *         description="The object DummyHex to be created",
-     *         required=true,
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *
-     *             @OA\Property(property="field", type="string", format="string", nullable=true)
-     *           )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The id of the object created",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={ "id" },
-     *             @OA\Property(property="id", type="string", format="string")
-     *           )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Not Authorized",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
+     * Create a new DummyHex 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @return void
      * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
@@ -229,6 +188,40 @@ class DummyHexRest extends ServiceAbstractBase
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
+    #[OA\Post(
+        path: "/dummyhex",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["Dummyhex"]
+    )]
+    #[OA\RequestBody(
+        description: "The object DummyHex to be created",
+        required: true,
+        content: new OA\JsonContent(
+            required: [ "field" ],
+            properties: [
+
+                new OA\Property(property: "field", type: "string", format: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object rto be created",
+        content: new OA\JsonContent(
+            required: [ "id" ],
+            properties: [
+
+                new OA\Property(property: "id", type: "string", format: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
     public function postDummyHex(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");
@@ -246,31 +239,11 @@ class DummyHexRest extends ServiceAbstractBase
 
 
     /**
-     * Update an existing DummyHex
-     * @OA\Put(
-     *     path="/dummyhex",
-     *     tags={"Dummyhex"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\RequestBody(
-     *         description="The object DummyHex to be updated",
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/DummyHex")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Nothing to return"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Not Authorized",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
+     * Update an existing DummyHex 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @return void
      * @throws Error401Exception
      * @throws Error404Exception
      * @throws ConfigException
@@ -287,6 +260,27 @@ class DummyHexRest extends ServiceAbstractBase
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
+    #[OA\Put(
+        path: "/dummyhex",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["Dummyhex"]
+    )]
+    #[OA\RequestBody(
+        description: "The object DummyHex to be updated",
+        required: true,
+        content: new OA\JsonContent(ref: "#/components/schemas/DummyHex")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Nothing to return"
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
     public function putDummyHex(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");

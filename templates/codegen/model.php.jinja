@@ -1,38 +1,37 @@
 <?php
 
 namespace {{ namespace }}\Model;
-
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 
 /**
  * Class {{ className }}
  * @package {{ namespace }}\Model
- * @OA\Schema(required={"{{ primaryKeys | join('", "')}}"{% if nonNullableFields | count > 0 %}, "{{ nonNullableFields | join('", "')}}"{% endif %}}, type="object", @OA\Xml(name="{{ className }}"))
  */
+#[OA\Schema(required: ["{{ primaryKeys | join('", "')}}"{% if nonNullableFields | count > 0 %}, "{{ nonNullableFields | join('", "')}}"{% endif %}], type: "object", xml: new OA\Xml(name: "{{ className }}"))]
 class {{ className }}
 {
 {% for field in fields %}
     /**
-     * @OA\Property(type="{{ field.openapi_type }}", format="{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable=true{% endif %})
-     * @var {{ field.php_type }}
+     * @var {{ field.php_type }}|null
      */
-    protected ${{ field.property }};
+    #[OA\Property(type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %})]
+    protected ?{{ field.php_type }} ${{ field.property }} = null;
 {% endfor %}
 
 {% for field in fields %}
     /**
-     * @return {{ field.php_type }}
+     * @return {{ field.php_type }}|null
      */
-    public function get{{ field.property | capitalize }}()
+    public function get{{ field.property | capitalize }}(): ?{{ field.php_type }}
     {
         return $this->{{ field.property }};
     }
 
     /**
-     * @param {{ field.php_type }} ${{ field.property }}
+     * @param {{ field.php_type }}|null ${{ field.property }}
      * @return {{ className }}
      */
-    public function set{{ field.property | capitalize }}(${{ field.property }})
+    public function set{{ field.property | capitalize }}(?{{ field.php_type }} ${{ field.property }}): {{ className }}
     {
         $this->{{ field.property }} = ${{ field.property }};
         return $this;

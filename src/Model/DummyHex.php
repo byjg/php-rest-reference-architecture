@@ -1,37 +1,38 @@
 <?php
 
 namespace RestTemplate\Model;
+use OpenApi\Attributes as OA;
 
 /**
  * Class DummyHex
  * @package RestTemplate\Model
- * @OA\Schema(required={"id"}, type="object", @OA\Xml(name="DummyHex"))
  */
+#[OA\Schema(required: ["id", "field"], type: "object", xml: new OA\Xml(name: "DummyHex"))]
 class DummyHex
 {
 
     /**
-     * @OA\Property(type="string", format="string")
-     * @var ?string
+     * @var string|null
      */
+    #[OA\Property(type: "string", format: "string")]
     protected ?string $id = null;
 
     /**
-     * @OA\Property(type="string", format="string", nullable=true)
-     * @var ?string
+     * @var string|null
      */
+    #[OA\Property(type: "string", format: "string", nullable: true)]
     protected ?string $uuid = null;
 
     /**
-     * @OA\Property(type="string", format="string", nullable=true)
-     * @var ?string
+     * @var string|null
      */
+    #[OA\Property(type: "string", format: "string")]
     protected ?string $field = null;
 
 
 
     /**
-     * @return ?string
+     * @return string|null
      */
     public function getId(): ?string
     {
@@ -49,7 +50,7 @@ class DummyHex
     }
 
     /**
-     * @return ?string
+     * @return string|null
      */
     public function getUuid(): ?string
     {
@@ -67,7 +68,7 @@ class DummyHex
     }
 
     /**
-     * @return ?string
+     * @return string|null
      */
     public function getField(): ?string
     {
