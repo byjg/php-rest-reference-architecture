@@ -57,49 +57,43 @@ namespace RestTemplate\Rest;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 
 class Login extends ServiceAbstractBase
 
     /**
      * Do login
-     * @OA\Post(
-     *     path="/login",
-     *     tags={"login"},
-     *     @OA\RequestBody(
-     *         description="The login data",
-     *         required=true,
-     *         @OA\MediaType(
-     *            mediaType="application/json",
-     *            @OA\Schema(
-     *              required={"username","password"},
-     *              @OA\Property(property="username", type="string", description="The username"),
-     *              @OA\Property(property="password", type="string", description="The password"),
-     *           )
-     *        )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={"token"},
-     *             @OA\Property(property="token", type="string"),
-     *             @OA\Property(property="data",
-     *             @OA\Property(property="role", type="string"),
-     *             @OA\Property(property="userid", type="string"),
-     *             @OA\Property(property="name",type="string"))
-     *          )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Not Authorized",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      */
+    #[OA\Post(
+        path: "/login",
+        tags: ["Login"],
+    )]
+    #[OA\RequestBody(
+        description: "The Login Data",
+        required: true,
+        content: new OA\JsonContent(
+            required: [ "username", "password" ],
+            properties: [
+                new OA\Property(property: "username", description: "The Username", type: "string", format: "string"),
+                new OA\Property(property: "password", description: "The Password",  type: "string", format: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object to be created",
+        content: new OA\JsonContent(
+            required: [ "token" ],
+            properties: [
+                new OA\Property(property: "token", type: "string"),
+                new OA\Property(property: "data", properties: [
+                    new OA\Property(property: "userid", type: "string"),
+                    new OA\Property(property: "name", type: "string"),
+                    new OA\Property(property: "role", type: "string"),
+                ])
+            ]
+        )
+    )]
     public function mymethod(HttpRequest $request, HttpResponse $response)
     {
         // ...

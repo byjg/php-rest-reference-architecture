@@ -6,41 +6,41 @@ use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
+use OpenApi\Attributes as OA;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class SampleProtected extends ServiceAbstractBase
 {
     /**
      * Sample Ping Only Authenticated
-     * @OA\Get(
-     *     path="/sampleprotected/ping",
-     *     tags={"zz_sampleprotected"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={"result"},
-     *             @OA\Property(property="result", type="string")
-     *           )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Não autorizado",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
+    #[OA\Get(
+        path: "/sampleprotected/ping",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["zz_sampleprotected"],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object",
+        content: new OA\JsonContent(
+            required: [ "result" ],
+            properties: [
+                new OA\Property(property: "result", type: "string", format: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Não autorizado",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
     public function getPing(HttpResponse $response, HttpRequest $request)
     {
         $this->requireAuthenticated();
@@ -52,29 +52,6 @@ class SampleProtected extends ServiceAbstractBase
 
     /**
      * Sample Ping Only Admin
-     * @OA\Get(
-     *     path="/sampleprotected/pingadm",
-     *     tags={"zz_sampleprotected"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={"result"},
-     *             @OA\Property(property="result", type="string")
-     *           )
-     *        )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Não autorizado",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -82,6 +59,28 @@ class SampleProtected extends ServiceAbstractBase
      * @throws InvalidArgumentException
      * @throws Error403Exception
      */
+    #[OA\Get(
+        path: "/sampleprotected/pingadm",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["zz_sampleprotected"],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object",
+        content: new OA\JsonContent(
+            required: [ "result" ],
+            properties: [
+                new OA\Property(property: "result", type: "string", format: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Não autorizado",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
     public function getPingAdm(HttpResponse $response, HttpRequest $request)
     {
         $this->requireRole('admin');
