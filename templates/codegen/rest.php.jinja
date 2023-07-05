@@ -2,56 +2,68 @@
 
 namespace {{ namespace }}\Rest;
 
-use ByJG\MicroOrm\Literal;
+use ByJG\Config\Exception\ConfigException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
+use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
+use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
-use {{ namespace }}\Psr11;
+use OpenApi\Attributes as OA;
+use ReflectionException;
 use {{ namespace }}\Model\{{ className }};
+use {{ namespace }}\Psr11;
 use {{ namespace }}\Repository\{{ className }}Repository;
-use OpenApi\Annotations as OA;
-use {{ namespace }}\Util\HexUuidLiteral;
 
 class {{ className }}Rest extends ServiceAbstractBase
 {
     /**
      * Get the {{ className }} by id
-     * @OA\Get(
-     *     path="/{{ restPath }}/{id}",
-     *     tags={"{{ restTag }}"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\Parameter(
-     *         name="id",
-     *         description="",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="{{ fields.0.openapi_type }}",
-     *             format="{{ fields.0.openapi_format }}"
-     *         ) 
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The object {{ className }}",
-     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Not Authorized",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
      * @throws Error401Exception
+     * @throws Error404Exception
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function get{{ className }}($response, $request)
+    #[OA\Get(
+        path: "/{{ restPath }}/{id}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"],
+    )]
+    #[OA\Parameter(
+        name: "id",
+        in: "path",
+        required: true,
+        schema: new OA\Schema(
+            type: "{{ fields.0.openapi_type }}",
+            format: "{{ fields.0.openapi_format }}"
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object {{ className }}",
+        content: new OA\JsonContent(ref: "#/components/schemas/{{ className }}")
+    )]
+    public function get{{ className }}(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireAuthenticated();
 
@@ -69,68 +81,75 @@ class {{ className }}Rest extends ServiceAbstractBase
 
     /**
      * List {{ className }}
-     * @OA\Get(
-     *    path="/{{ restPath }}",
-     *    tags={"{{ restTag }}"},
-     *    security={{
-     *       "jwt-token":{}
-     *    }},
-     *    @OA\Parameter(
-     *       name="page",
-     *       description="Page number",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="integer"
-     *       )
-     *    ),
-     *    @OA\Parameter(
-     *       name="size",
-     *       description="Page size",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="integer"
-     *       )
-     *    ),
-     *    @OA\Parameter(
-     *       name="orderBy",
-     *       description="Order by",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="string"
-     *       )
-     *    ),
-     *    @OA\Parameter(
-     *       name="filter",
-     *       description="Filter",
-     *       in="query",
-     *       required=false,
-     *       @OA\Schema(
-     *          type="string"
-     *       )
-     *    ),
-     *    @OA\Response(
-     *      response=200,
-     *      description="The list of {{ className }}",
-     *      @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(ref="#/components/schemas/{{ className }}")
-     *      )
-     *    ),
-     *    @OA\Response(
-     *      response=401,
-     *      description="Not Authorized",
-     *      @OA\JsonContent(ref="#/components/schemas/error")
-     *    )
-     * )
-     * 
+     *
      * @param mixed $response
      * @param mixed $request
      * @return void
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function list{{ className }}($response, $request)
+    #[OA\Get(
+        path: "/{{ restPath }}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"]
+    )]
+    #[OA\Parameter(
+        name: "page",
+        description: "Page number",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "integer",
+        )
+    )]
+    #[OA\Parameter(
+        name: "size",
+        description: "Page size",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "integer",
+        )
+    )]
+    #[OA\Parameter(
+        name: "orderBy",
+        description: "Order by",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "string",
+        )
+    )]
+    #[OA\Parameter(
+        name: "filter",
+        description: "Filter",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "string",
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object {{ className }}",
+        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/{{ className }}"))
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    public function list{{ className }}(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireAuthenticated();
 
@@ -150,51 +169,62 @@ class {{ className }}Rest extends ServiceAbstractBase
 
     /**
      * Create a new {{ className }} 
-     * @OA\Post(
-     *     path="/{{ restPath }}",
-     *     tags={"{{ restTag }}"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\RequestBody(
-     *         description="The object {{ className }} to be created",
-     *         required=true,
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             {% if nonNullableFields | count > 0 %}required={ "{{ nonNullableFields | join('", "')}}" },{% endif %}
-{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' -%}
-     *             @OA\Property(property="{{ field.property }}", type="{{ field.openapi_type }}", format="{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable=true{% endif %}){% if loop.last == false %}, {% endif %}
-{% endif %}{% endfor %}
-     *           )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="The id of the object created",
-     *         @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *             required={ "{{ primaryKeys | join('", "') }}" },
-{% for field in fields -%}
-{% if field.key == 'PRI' -%}     *             @OA\Property(property="{{ field.property }}", type="{{ field.openapi_type }}", format="{{ field.openapi_format }}"){% endif %}
-{% endfor %}
-     *           )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Not Authorized",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @return void
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
      * @throws Error401Exception
+     * @throws Error403Exception
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function post{{ className }}($response, $request)
+    #[OA\Post(
+        path: "/{{ restPath }}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"]
+    )]
+    #[OA\RequestBody(
+        description: "The object DummyHex to be created",
+        required: true,
+        content: new OA\JsonContent(
+            {% if nonNullableFields | count > 0 %}required: [ "{{ nonNullableFields | join('", "')}}" ],{% endif %}
+            properties: [
+{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' -%}
+                new OA\Property(property: "{{ field.property }}", type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %}){% if loop.last == false %}, {% endif %}
+{% endif %}{% endfor %}
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object rto be created",
+        content: new OA\JsonContent(
+            required: [ "{{ primaryKeys | join('", "') }}" ],
+            properties: [
+{% for field in fields -%}
+{% if field.key == 'PRI' -%}                new OA\Property(property: "{{ field.property }}", type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"){% endif %}
+{% endfor %}
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    public function post{{ className }}(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");
 
@@ -212,34 +242,48 @@ class {{ className }}Rest extends ServiceAbstractBase
 
     /**
      * Update an existing {{ className }} 
-     * @OA\Put(
-     *     path="/{{ restPath }}",
-     *     tags={"{{ restTag }}"},
-     *     security={{
-     *         "jwt-token":{}
-     *     }},
-     *     @OA\RequestBody(
-     *         description="The object {{ className }} to be updated",
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/{{ className }}")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Nothing to return"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Not Authorized",
-     *         @OA\JsonContent(ref="#/components/schemas/error")
-     *     )
-     * )
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @return void
      * @throws Error401Exception
+     * @throws Error404Exception
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
      * @throws InvalidArgumentException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws Error400Exception
+     * @throws Error403Exception
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function put{{ className }}($response, $request)
+    #[OA\Put(
+        path: "/{{ restPath }}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"]
+    )]
+    #[OA\RequestBody(
+        description: "The object {{ className }} to be updated",
+        required: true,
+        content: new OA\JsonContent(ref: "#/components/schemas/{{ className }}")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Nothing to return"
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    public function put{{ className }}(HttpResponse $response, HttpRequest $request)
     {
         $data = $this->requireRole("admin");
 

@@ -1,31 +1,32 @@
 <?php
 
 namespace RestTemplate\Model;
+use OpenApi\Attributes as OA;
 
 /**
  * Class Dummy
  * @package RestTemplate\Model
- * @OA\Schema(required={"id"}, type="object", @OA\Xml(name="Dummy"))
  */
+#[OA\Schema(required: ["id", "field"], type: "object", xml: new OA\Xml(name: "Dummy"))]
 class Dummy
 {
 
     /**
-     * @OA\Property(type="integer", format="int32")
-     * @var ?int
+     * @var int|null
      */
+    #[OA\Property(type: "integer", format: "int32")]
     protected ?int $id = null;
 
     /**
-     * @OA\Property(type="string", format="string", nullable=true)
      * @var string|null
      */
+    #[OA\Property(type: "string", format: "string")]
     protected ?string $field = null;
 
 
 
     /**
-     * @return ?int
+     * @return int|null
      */
     public function getId(): ?int
     {
@@ -43,7 +44,7 @@ class Dummy
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getField(): ?string
     {
