@@ -57,15 +57,16 @@ Doing migrate, 1
 ## Generate the CRUD
 
 ```bash
+APP_ENV=dev composer run migrate -- update                              # Make sure DB is update
 APP_ENV=dev composer run codegen -- --table example_crud --save all     # (can be rest, model, test, repo, config)
 ```
 
 This will create the following files:
 
-./src/Rest/ExampleCrudRest.php
-./src/Model/ExampleCrud.php
-./src/Repository/ExampleCrudRepository.php
-./tests/Functional/Rest/ExampleCrudTest.php
+- ./src/Rest/ExampleCrudRest.php
+- ./src/Model/ExampleCrud.php
+- ./src/Repository/ExampleCrudRepository.php
+- ./tests/Functional/Rest/ExampleCrudTest.php
 
 To finalize the setup we need to generate the config. 
 Run the command bellow copy it contents and save it into the file `config/config-dev.php`
@@ -96,7 +97,7 @@ Script ./vendor/bin/phpunit handling the test event returned with error code 2
 
 Let's create them now.
 
-## Generate the OpenAPI Documentation
+## Generate the endpoints from the OpenAPI Documentation
 
 The OpenAPI documentation is generated automatically based on the code.
 It is an important step because the documentation is used to create the endpoints and map them to the code. 
