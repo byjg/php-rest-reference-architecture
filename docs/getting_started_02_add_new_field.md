@@ -44,7 +44,7 @@ Open the file: `src/Model/ExampleCrud.php` and add the field `status`:
     {
         return $this->status;
     }
-+
+
     /**
      * @param string|null $status
      * @return ExampleCrud
