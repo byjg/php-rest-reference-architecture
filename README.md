@@ -9,7 +9,34 @@
 
 This project is a boilerplate for create Rest Applications API Ready to Use with the best techniques to improve your productivity.
 
-## Features
+## What is a PHP Rest Template?
+
+It is a PHP-based RESTful API template or boilerplate that aims to simplify the development process of RESTful web services in PHP.
+It provides a foundation or starting point for building APIs following REST architectural principles.
+
+Using PHP Rest Template you can focus on the business logic of your application and not in the infrastructure as for example:
+
+- Rapid Development: By offering a pre-defined structure and essential components, the template can expedite the process of building RESTful APIs in PHP.
+- Standardization: The template promotes consistency and adherence to RESTful design principles, making it easier for developers to understand and collaborate on the codebase.
+- Customizability: Developers can modify and extend the template to fit their specific requirements, allowing for flexibility in implementing additional features or business logic.
+
+Key features and components:
+
+- Uses [OpenAPI](https://swagger.io/specification/) specification for API documentation and endpoint creation.
+- Routing: Includes a routing system that helps map incoming HTTP requests to specific API endpoints or resources.
+- Middleware: It allows developers to add custom logic or perform operations before and after the request is processed.
+- Handling: The project offer utilities to handle and parse incoming requests, extract parameters, and handle request methods (GET, POST, PUT, DELETE, etc.).
+- Response Formatting: It provide mechanisms to format and structure API responses, including JSON serialization, error handling, and status codes.
+- Authentication and Authorization: The template include support for implementing authentication and authorization mechanisms to secure API endpoints using JWT.
+- Database Integration: It offer integration for connecting to databases, executing queries, and managing data persistence.
+- Error Handling: The project include error handling mechanisms to properly handle and format error responses.
+- Dependency Injection: It include support for dependency injection and inversion of control (IoC) containers.
+- Testing: It include support for testing the API endpoints and resources, including unit testing and functional testing.
+- PHP Standards: PSR-7 (Http Message Interface), PSR-11 (Container), PSR-16 and PSR-6 (Cache Interface) and others.
+
+This project is not a framework. It is a template that you can use to create your own project. You can use the template as a starting point for your own project and customize it to fit your specific requirements.
+
+## Some Features Explained
 
 This project install the follow components (click on the link for more details):
 
@@ -21,30 +48,14 @@ This project install the follow components (click on the link for more details):
 - [Database Migration](docs/migration.md)
 - [Database ORM](docs/orm.md)
 
-## Install
+## Getting Started
 
-### Requirements
+Here some examples of how to use the template:
 
-This project requires in order to run:
-
-- PHP
-- composer
-
-### Create a Project from the Stable Release
-
-```bash
-composer create-project byjg/resttemplate YOURPATH 4.9.*
-```
-
-### Create a Project from Development Release
-
-In the case you want to use the development version you can use the following command:
-
-```bash
-composer -sdev create-project byjg/resttemplate YOURPATH master
-```
-
-Use instead of `master` branch the feature branch version like `5.0.0.x-dev` 
+- [Getting Started, Installing and create a new project](docs/getting_started.md)
+- [Add a new Table](docs/getting_started_01_create_table.md)
+- [Add a new Field](docs/getting_started_02_add_field.md)
+- [Add a new Rest Method](docs/getting_started_03_add_rest_method.md)
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
