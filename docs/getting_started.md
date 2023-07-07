@@ -78,3 +78,7 @@ APP_ENV=dev composer run test    # Alternatively you can run `./vendor/bin/phpun
 ```bash
 open http://localhost:8080/docs
 ```
+
+## Continue the Tutorial
+
+You can continue this tutorial by following the next step: [creating a new table and crud](getting_started_01_create_table.md).
