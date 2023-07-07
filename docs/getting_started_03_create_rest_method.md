@@ -16,7 +16,7 @@ We will cover the following topics:
 The first step is to add the OpenAPI attributes to the Rest Method. 
 We use the [zircote/swagger-php](https://zircote.github.io/swagger-php/guide/) library to add the attributes.
 
-There are 3 set of attributes to define the attributes.
+The list of OpenAPI attributes is to vast, however, there are a minimal of 3 sets of of attributes we must define.
 
 The first set is to define what will be the method attribute. It can be:
 
@@ -151,7 +151,7 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 ...
     $exampleCrudRepo = Psr11::container()->get(ExampleCrudRepository::class);
     $model = $exampleCrudRepo->get($payload["id"]);
-    $model->status = $payload["status"];
+    $model->setStatus($payload["status"]);
     $exampleCrudRepo->save($model);
 ```
 
