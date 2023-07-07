@@ -159,3 +159,6 @@ composer run test
 
 And voila! The test passed!
 
+## Continue the Tutorial
+
+You can continue this tutorial by following the next step: [Add a new field](getting_started_02_add_new_field.md)

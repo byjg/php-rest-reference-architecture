@@ -1,6 +1,7 @@
 # Getting Started - Creating a Table
 
-Now we have the table `example_crud` let's modify it to add a new field `status`.
+Now we have the table `example_crud` created in the [previous tutorial](getting_started_01_create_table.md), 
+let's modify it to add a new field `status`.
 
 ## Changing the table
 
@@ -117,4 +118,8 @@ If everything is ok, the tests should pass:
 ```bash
 composer run test
 ```
+
+## Continue the tutorial
+
+[Next: Creating a rest method](getting_started_03_create_rest_method.md)
 
