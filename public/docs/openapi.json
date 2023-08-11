@@ -485,7 +485,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "The object rto be created",
+                        "description": "The object to be created",
                         "content": {
                             "application/json": {
                                 "schema": {
