@@ -63,7 +63,7 @@ class {{ className }}Rest extends ServiceAbstractBase
         description: "The object {{ className }}",
         content: new OA\JsonContent(ref: "#/components/schemas/{{ className }}")
     )]
-    public function get{{ className }}(HttpResponse $response, HttpRequest $request)
+    public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -149,7 +149,7 @@ class {{ className }}Rest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function list{{ className }}(HttpResponse $response, HttpRequest $request)
+    public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -224,7 +224,7 @@ class {{ className }}Rest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function post{{ className }}(HttpResponse $response, HttpRequest $request)
+    public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireRole("admin");
 
@@ -283,7 +283,7 @@ class {{ className }}Rest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function put{{ className }}(HttpResponse $response, HttpRequest $request)
+    public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireRole("admin");
 

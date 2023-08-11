@@ -3,17 +3,36 @@
 namespace RestTemplate\Util;
 
 use ByJG\MicroOrm\Literal;
+use InvalidArgumentException;
 
 class HexUuidLiteral extends Literal
 {
     public function __construct($value)
     {
-        parent::__construct("X'" . str_replace("-", "", $value) . "'");
+        parent::__construct("X'" . preg_replace('/[^0-9A-Fa-f]/', '', $value) . "'");
     }
 
-    public static function getUuidFromLiteral($literal): string
+    public static function getUuidFromLiteral($literal)
     {
-        $value = $literal->__toString();
-        return substr($value, 2, 8) . "-" . substr($value, 10, 4) . "-" . substr($value, 14, 4) . "-" . substr($value, 18, 4) . "-" . substr($value, 22, 12);
+        return self::getFormattedUuid($literal);
+    }
+
+    public static function getFormattedUuid($item)
+    {
+        if ($item instanceof Literal) {
+            $item = preg_replace("/^X'(.*)'$/", "$1", $item->__toString());
+        }
+
+        if (preg_match("/^X'(.*)'$/", $item, $matches)) {
+            $item = $matches[1];
+        }
+
+        if (preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $item)) {
+            $item = preg_replace("/^(\w{8})-?(\w{4})-?(\w{4})-?(\w{4})-?(\w{12})$/", "$1-$2-$3-$4-$5", $item);
+        } else {
+            throw new InvalidArgumentException("Invalid UUID format");
+        }
+
+        return $item;
     }
 }
