@@ -34,6 +34,7 @@ class PostCreateScript
 
         $composerName = strtolower($composerName);
         $composerParts = explode("/", $composerName);
+        $phpVersionMSimple = str_replace(".", "", $phpVersion);
 
         // ------------------------------------------------
         //Replace composer name:
@@ -45,13 +46,15 @@ class PostCreateScript
 
         // ------------------------------------------------
         // Replace Docker PHP Version
-        $files = [ 'docker/Dockerfile', 'docker/Dockerfile' ];
+        $files = [ 'docker/Dockerfile' ];
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
             $contents = str_replace('ENV TZ=UTC', "ENV TZ=$timezone", $contents);
+            $contents = str_replace('php:8.1-fpm', "php:$phpVersion-fpm", $contents);
+            $contents = str_replace('php81', "php$phpVersionMSimple", $contents);
             file_put_contents(
                 "$workdir/$file",
-                str_replace('FROM byjg/php:7.4-fpm-nginx', "FROM byjg/php:$phpVersion-fpm-nginx", $contents)
+                $contents
             );
         }
 

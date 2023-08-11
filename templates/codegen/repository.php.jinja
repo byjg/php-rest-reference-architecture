@@ -51,8 +51,8 @@ class {{ className }}Repository extends BaseRepository
     public function getBy{{ index.column_name | capitalize }}(${{ index.column_name }})
     {
         $query = Query::getInstance()
-             ->table('{{ tableName }}')
-             ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.column_name }}]);
+            ->table('{{ tableName }}')
+            ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.column_name }}]);
         $result = $this->repository->getByQuery($query);
         return $result;
     }

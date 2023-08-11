@@ -3,6 +3,8 @@
 namespace RestTemplate\Rest;
 
 use ByJG\ApiTools\Base\Schema;
+use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
+use ByJG\ApiTools\Exception\PathNotFoundException;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -27,28 +29,21 @@ class ServiceAbstractBase extends ServiceAbstract
      * @param array $properties
      * @return mixed
      * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
      * @throws ReflectionException
      * @throws ConfigException
-     * @throws DependencyInjectionException
      * @throws InvalidDateException
      */
-    public function createToken(array $properties = [])
+    public function createToken($properties = [])
     {
         $jwt = Psr11::container()->get(JwtWrapper::class);
-        $jwtData = $jwt->createJwtData($properties, 1800);
+        $jwtData = $jwt->createJwtData($properties, 60 * 60 * 10); // 10 hours
         return $jwt->generateToken($jwtData);
     }
 
-    /**
-     * @param null $token
-     * @param bool $fullToken
-     * @return mixed
-     * @throws Error401Exception
-     * @throws InvalidArgumentException
-     */
-    public function requireAuthenticated($token = null, bool $fullToken = false)
+    public function extractToken($token = null, $fullToken = false, $throwException = false)
     {
         try {
             $jwt = Psr11::container()->get(JwtWrapper::class);
@@ -59,13 +54,29 @@ class ServiceAbstractBase extends ServiceAbstract
                 return $tokenInfo['data'];
             }
         } catch (Exception $ex) {
-            throw new Error401Exception($ex->getMessage());
+            if ($throwException) {
+                throw new Error401Exception($ex->getMessage());
+            } else {
+                return false;
+            }
         }
     }
 
     /**
+     * @param string|null $token
+     * @param bool $fullToken
+     * @return mixed
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     */
+    public function requireAuthenticated($token = null, $fullToken = false)
+    {
+        return $this->extractToken($token, $fullToken, true);
+    }
+
+    /**
      * @param $role
-     * @param null $token
+     * @param string|null $token
      * @return mixed
      * @throws Error401Exception
      * @throws Error403Exception
@@ -80,6 +91,18 @@ class ServiceAbstractBase extends ServiceAbstract
         return $data;
     }
 
+    /**
+     * @throws DependencyInjectionException
+     * @throws InvalidDateException
+     * @throws ConfigNotFoundException
+     * @throws KeyNotFoundException
+     * @throws Error400Exception
+     * @throws InvalidArgumentException
+     * @throws ConfigException
+     * @throws PathNotFoundException
+     * @throws ReflectionException
+     * @throws HttpMethodNotFoundException
+     */
     public function validateRequest(HttpRequest $request)
     {
         $schema = Psr11::container()->get(Schema::class);
@@ -91,7 +114,14 @@ class ServiceAbstractBase extends ServiceAbstract
         $bodyRequestDef = $schema->getRequestParameters($path, $method);
 
         // Validate the request body (payload)
-        $requestBody = json_decode($request->payload(), true);
+        if (str_contains($request->getHeader('Content-Type'), 'multipart/')) {
+            $requestBody = $request->post();
+            $files = $request->uploadedFiles()->getKeys();
+            $requestBody = array_merge($requestBody, array_combine($files, $files));
+        } else {
+            $requestBody = json_decode($request->payload(), true);
+        }
+
         try {
             $bodyRequestDef->match($requestBody);
         } catch (Exception $ex) {
