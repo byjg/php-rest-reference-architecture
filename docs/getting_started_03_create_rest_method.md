@@ -160,10 +160,8 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 The last step is to return the result as specified in the OpenAPI attributes.
 
 ```php
-public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
-{
 ... 
-    $response->json([
+    $response->write([
         "result" => "ok"
     ]);
 }
