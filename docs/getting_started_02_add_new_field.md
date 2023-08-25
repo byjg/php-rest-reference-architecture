@@ -1,4 +1,4 @@
-# Getting Started - Creating a Table
+# Getting Started - Adding a new field to the Table
 
 Now we have the table `example_crud` created in the [previous tutorial](getting_started_01_create_table.md), 
 let's modify it to add a new field `status`.
