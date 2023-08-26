@@ -9,9 +9,7 @@ class HexUuidLiteral extends Literal
 {
     public function __construct($value)
     {
-        if (strlen($value) === 16) {
-            $value = bin2hex($value);
-        }
+        $value = HexUuidLiteral::getFormattedUuid($value);
         parent::__construct("X'" . preg_replace('/[^0-9A-Fa-f]/', '', $value) . "'");
     }
 
@@ -20,7 +18,7 @@ class HexUuidLiteral extends Literal
         return self::getFormattedUuid($literal);
     }
 
-    public static function getFormattedUuid($item)
+    public static function getFormattedUuid($item, $throwErrorIfInvalid = true)
     {
         if ($item instanceof Literal) {
             $item = preg_replace("/^X'(.*)'$/", "$1", $item->__toString());
@@ -30,12 +28,18 @@ class HexUuidLiteral extends Literal
             $item = $matches[1];
         }
 
-        if (preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $item)) {
-            $item = preg_replace("/^(\w{8})-?(\w{4})-?(\w{4})-?(\w{4})-?(\w{12})$/", "$1-$2-$3-$4-$5", $item);
-        } else {
-            throw new InvalidArgumentException("Invalid UUID format");
+        if (is_string($item) && !ctype_print($item) && strlen($item) === 16) {
+            $item = bin2hex($item);
         }
 
-        return $item;
+        if (preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $item)) {
+            $item = preg_replace("/^(\w{8})-?(\w{4})-?(\w{4})-?(\w{4})-?(\w{12})$/", "$1-$2-$3-$4-$5", $item);
+        } else if ($throwErrorIfInvalid) {
+            throw new InvalidArgumentException("Invalid UUID format");
+        } else {
+            return $item;
+        }
+
+        return strtoupper($item);
     }
 }
