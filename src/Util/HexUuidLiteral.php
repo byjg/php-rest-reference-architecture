@@ -9,6 +9,9 @@ class HexUuidLiteral extends Literal
 {
     public function __construct($value)
     {
+        if (strlen($value) === 16) {
+            $value = bin2hex($value);
+        }
         parent::__construct("X'" . preg_replace('/[^0-9A-Fa-f]/', '', $value) . "'");
     }
 
