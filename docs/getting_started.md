@@ -1,5 +1,30 @@
 # Getting Started
 
+## Requirements
+
+Docker engine, PHP and an IDE.
+
+You'll need PHP 8.1 or higher installed in your machine. Preferrable the same version as you want to work with your project. 
+
+Required PHP extensions:
+- ctype
+- curl
+- dom
+- filter
+- hash
+- json
+- libxml
+- mbstring
+- openssl
+- pcre
+- pdo
+- pdo_mysql
+- phar
+- simplexml
+- tokenizer
+- xml
+- xmlwriter
+
 ## Installation
 
 ```bash
@@ -32,6 +57,14 @@ Timezone [UTC]:
 Press <ENTER> to continue
 ```
 
+Tip: The docker composer will create MySQL container named as `mysql-container` ([ref](https://github.com/byjg/php-rest-template/blob/master/docker-compose-dev.yml#L20)). 
+If you want to be able to access your MySQL container from your machine you need to add the following entry in your `/etc/hosts` file:
+
+```
+127.0.0.1  mysql-container
+```
+
+
 ## Running the Project
 
 ```bash
@@ -44,6 +77,10 @@ docker-compose -f docker-compose-dev.yml up -d
 ```bash
 # Important this will destroy ALL DB data and create a fresh new database based on the migration
 APP_ENV=dev composer run migrate -- reset --yes
+
+# *IF* your local PHP is not properly setup you can run this instead:
+# export CONTAINER_NAME=# it is the second part of the composer name. e.g. me/myrest, it should be "myrest"
+# docker exec -it $CONTAINER_NAME composer run migrate -- reset --yes
 ```
 
 The result should be:
@@ -71,6 +108,8 @@ The result:
 
 ```bash
 APP_ENV=dev composer run test    # Alternatively you can run `./vendor/bin/phpunit`
+
+# OR: docker exec -it $CONTAINER_NAME composer run test
 ```
 
 ## Accessing the Swagger Documentation
