@@ -45,14 +45,14 @@ class {{ className }}Repository extends BaseRepository
 {% for index in indexes -%}
 {% if index.key_name != 'PRIMARY' -%}
     /**
-     * @param mixed ${{ index.column_name }}
-     * @return {{ className }}[]
+     * @param mixed ${{ index.camelColumnName }}
+     * @return null|{{ className }}[]
      */
-    public function getBy{{ index.column_name | capitalize }}(${{ index.column_name }})
+    public function getBy{{ index.camelColumnName | capitalize }}(${{ index.camelColumnName }})
     {
         $query = Query::getInstance()
             ->table('{{ tableName }}')
-            ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.column_name }}]);
+            ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.camelColumnName }}]);
         $result = $this->repository->getByQuery($query);
         return $result;
     }

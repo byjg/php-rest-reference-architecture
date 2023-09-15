@@ -6,7 +6,6 @@ use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
-use ByJG\Serializer\Exception\InvalidArgumentException;
 use RestTemplate\Model\Dummy;
 
 class DummyRepository extends BaseRepository
@@ -36,22 +35,17 @@ class DummyRepository extends BaseRepository
         $this->repository = new Repository($dbDriver, $mapper);
     }
 
+
     /**
-     * @param $field string
+     * @param mixed $field
      * @return null|Dummy[]
-     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws InvalidArgumentException
      */
-    public function getByField(string $field): ?array
+    public function getByField($field)
     {
         $query = Query::getInstance()
             ->table('dummy')
-            ->where('dummy.field like :field', ['field' => "%$field%"]);
-
+            ->where('dummy.field = :value', ['value' => $field]);
         $result = $this->repository->getByQuery($query);
-        if (is_null($result)) {
-            return null;
-        }
         return $result;
     }
 

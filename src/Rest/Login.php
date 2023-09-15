@@ -21,7 +21,6 @@ use ByJG\RestServer\ResponseBag;
 use ByJG\Serializer\Exception\InvalidArgumentException;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\BaseRepository;
 use RestTemplate\Util\HexUuidLiteral;
@@ -353,25 +352,5 @@ class Login extends ServiceAbstractBase
         $users->save($user);
 
         $response->write(['token' => $json->token]);
-    }
-
-
-
-    /**
-     * @param User|null $user
-     * @return array
-     * @throws Error401Exception
-     */
-    private function createUserMetadata(?User $user): array
-    {
-        if (is_null($user)) {
-            throw new Error401Exception('Username or password is invalid');
-        }
-
-        return [
-            'role' => ($user->getAdmin() === 'yes' ? 'admin' : 'user'),
-            'userid' => $user->getUserid(),
-            'name' => $user->getName()
-        ];
     }
 }

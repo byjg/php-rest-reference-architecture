@@ -5,19 +5,20 @@ namespace Test\Functional\Rest;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\BinderObject;
-use ByJG\Serializer\Exception\InvalidArgumentException;
 use RestTemplate\Model\Dummy;
 use RestTemplate\Util\FakeApiRequester;
 
 class DummyTest extends BaseApiTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+    }
 
     /**
-     * @param bool $array
      * @return Dummy|array
-     * @throws InvalidArgumentException
      */
-    protected function getSampleData(bool $array = false)
+    protected function getSampleData($array = false)
     {
         $sample = [
 

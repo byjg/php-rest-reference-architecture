@@ -20,6 +20,10 @@ class HexUuidLiteral extends Literal
 
     public static function getFormattedUuid($item, $throwErrorIfInvalid = true)
     {
+        if (empty($item)) {
+            return $item;
+        }
+
         if ($item instanceof Literal) {
             $item = preg_replace("/^X'(.*)'$/", "$1", $item->__toString());
         }

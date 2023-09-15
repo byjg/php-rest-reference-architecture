@@ -20,6 +20,7 @@ use ByJG\Serializer\BinderObject;
 use OpenApi\Attributes as OA;
 use ReflectionException;
 use RestTemplate\Model\Dummy;
+use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyRepository;
 
@@ -63,7 +64,7 @@ class DummyRest extends ServiceAbstractBase
         description: "The object Dummy",
         content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
     )]
-    public function getDummy(HttpResponse $response, HttpRequest $request)
+    public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -149,7 +150,7 @@ class DummyRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function listDummy(HttpResponse $response, HttpRequest $request)
+    public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -168,7 +169,7 @@ class DummyRest extends ServiceAbstractBase
 
 
     /**
-     * Create a new Dummy 
+     * Create a new Dummy
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -196,7 +197,7 @@ class DummyRest extends ServiceAbstractBase
         tags: ["Dummy"]
     )]
     #[OA\RequestBody(
-        description: "The object DummyHex to be created",
+        description: "The object Dummy to be created",
         required: true,
         content: new OA\JsonContent(
             required: [ "field" ],
@@ -222,9 +223,9 @@ class DummyRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function postDummy(HttpResponse $response, HttpRequest $request)
+    public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
 
@@ -239,7 +240,7 @@ class DummyRest extends ServiceAbstractBase
 
 
     /**
-     * Update an existing Dummy 
+     * Update an existing Dummy
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -281,9 +282,9 @@ class DummyRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function putDummy(HttpResponse $response, HttpRequest $request)
+    public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
 

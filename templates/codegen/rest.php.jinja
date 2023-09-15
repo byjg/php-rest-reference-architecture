@@ -22,6 +22,7 @@ use ReflectionException;
 use {{ namespace }}\Model\{{ className }};
 use {{ namespace }}\Psr11;
 use {{ namespace }}\Repository\{{ className }}Repository;
+use {{ namespace }}\Model\User;
 
 class {{ className }}Rest extends ServiceAbstractBase
 {
@@ -196,7 +197,7 @@ class {{ className }}Rest extends ServiceAbstractBase
         tags: ["{{ restTag }}"]
     )]
     #[OA\RequestBody(
-        description: "The object DummyHex to be created",
+        description: "The object {{ className }} to be created",
         required: true,
         content: new OA\JsonContent(
             {% if nonNullableFields | count > 0 %}required: [ "{{ nonNullableFields | join('", "')}}" ],{% endif %}
@@ -226,7 +227,7 @@ class {{ className }}Rest extends ServiceAbstractBase
     )]
     public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
         
@@ -285,7 +286,7 @@ class {{ className }}Rest extends ServiceAbstractBase
     )]
     public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
 

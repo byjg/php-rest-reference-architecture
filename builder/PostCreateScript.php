@@ -121,13 +121,15 @@ class PostCreateScript
         $workdir = realpath(__DIR__ . '/..');
         $stdIo = $event->getIO();
 
+        $currentPhpVersion = PHP_MAJOR_VERSION . "." .PHP_MINOR_VERSION;
+
         $stdIo->write("========================================================");
         $stdIo->write(" Setup Project");
         $stdIo->write(" Answer the questions below");
         $stdIo->write("========================================================");
         $stdIo->write("");
         $stdIo->write("Project Directory: " . $workdir);
-        $phpVersion = $stdIo->ask('PHP Version [7.4]: ', '7.4');
+        $phpVersion = $stdIo->ask("PHP Version [$currentPhpVersion]: ", $currentPhpVersion);
         $namespace = $stdIo->ask('Project namespace [MyRest]: ', 'MyRest');
         $composerName = $stdIo->ask('Composer name [me/myrest]: ', 'me/myrest');
         $mysqlConnection = $stdIo->ask('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
