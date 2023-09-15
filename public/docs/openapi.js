@@ -15,6 +15,9 @@ readTextFile("./openapi.json", function(text){
         spec: JSON.parse(text),
         dom_id: '#swagger-ui',
         deepLinking: true,
+        docExpansion: "none",
+        tryItOutEnabled: true,
+        syntaxHighlight: true,
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset
