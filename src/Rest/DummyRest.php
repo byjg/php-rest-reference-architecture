@@ -22,6 +22,7 @@ use ReflectionException;
 use RestTemplate\Model\Dummy;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyRepository;
+use RestTemplate\Model\User;
 
 class DummyRest extends ServiceAbstractBase
 {
@@ -63,7 +64,7 @@ class DummyRest extends ServiceAbstractBase
         description: "The object Dummy",
         content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
     )]
-    public function getDummy(HttpResponse $response, HttpRequest $request)
+    public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -149,7 +150,7 @@ class DummyRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function listDummy(HttpResponse $response, HttpRequest $request)
+    public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -196,7 +197,7 @@ class DummyRest extends ServiceAbstractBase
         tags: ["Dummy"]
     )]
     #[OA\RequestBody(
-        description: "The object DummyHex to be created",
+        description: "The object Dummy to be created",
         required: true,
         content: new OA\JsonContent(
             required: [ "field" ],
@@ -222,9 +223,9 @@ class DummyRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function postDummy(HttpResponse $response, HttpRequest $request)
+    public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
         
@@ -281,9 +282,9 @@ class DummyRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function putDummy(HttpResponse $response, HttpRequest $request)
+    public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
 

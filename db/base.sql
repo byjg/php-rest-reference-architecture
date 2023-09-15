@@ -8,6 +8,8 @@ create table dummy (
   field varchar(10) not null
 );
 
+create index ix_field on dummy(field);
+
 insert into dummy (field) values ('fld value');
 insert into dummy (field) values ('Test 1');
 insert into dummy (field) values ('Test 2');

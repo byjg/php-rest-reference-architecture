@@ -22,6 +22,7 @@ use ReflectionException;
 use RestTemplate\Model\DummyHex;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
+use RestTemplate\Model\User;
 
 class DummyHexRest extends ServiceAbstractBase
 {
@@ -63,7 +64,7 @@ class DummyHexRest extends ServiceAbstractBase
         description: "The object DummyHex",
         content: new OA\JsonContent(ref: "#/components/schemas/DummyHex")
     )]
-    public function getDummyHex(HttpResponse $response, HttpRequest $request)
+    public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -149,7 +150,7 @@ class DummyHexRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function listDummyHex(HttpResponse $response, HttpRequest $request)
+    public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
         $data = $this->requireAuthenticated();
 
@@ -222,9 +223,9 @@ class DummyHexRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function postDummyHex(HttpResponse $response, HttpRequest $request)
+    public function postDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
         
@@ -281,9 +282,9 @@ class DummyHexRest extends ServiceAbstractBase
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
-    public function putDummyHex(HttpResponse $response, HttpRequest $request)
+    public function putDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole("admin");
+        $data = $this->requireRole(User::ROLE_ADMIN);
 
         $payload = $this->validateRequest($request);
 

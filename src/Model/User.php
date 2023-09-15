@@ -11,17 +11,72 @@ use RestTemplate\Psr11;
 #[OA\Schema(required: ["email"], type: "object", xml: new \OpenApi\Attributes\Xml(name: "User"))]
 class User extends UserModel
 {
-    /**
-     * @var ?string
-     */
-    #[OA\Property(type: "string", format: "string")]
-    protected ?string $updated = null;
+    // Property Fields
+    const PROP_RESETTOKENEXPIRE = 'resettokenexpire';
+    const PROP_RESETTOKEN = 'resettoken';
+    const PROP_RESETCODE = 'resetcode';
+    const PROP_RESETALLOWED = 'resetallowed';
+
+    // Property Values
+    const VALUE_YES = 'yes';
+    const VALUE_NO = 'no';
+
+    // Roles
+    const ROLE_ADMIN = 'admin';
+    const ROLE_USER = 'user';
 
     /**
      * @var ?string
      */
     #[OA\Property(type: "string", format: "string")]
-    protected ?string $uuid = null;
+    protected $userid;
+
+    /**
+     * @var ?string
+     */
+    #[OA\Property(type: "string", format: "string")]
+    protected $name;
+
+    /**
+     * @var ?string
+     */
+    #[OA\Property(type: "string", format: "string")]
+    protected $email;
+
+    /**
+     * @var ?string
+     */
+    #[OA\Property(type: "string", format: "string")]
+    protected $username;
+    /**
+     * @var ?string
+     */
+    #[OA\Property(type: "string", format: "string")]
+    protected $password;
+
+    /**
+     * @var ?string
+     */
+    #[OA\Property(type: "string", format: "string")]
+    protected $created;
+
+    /**
+     * @var ?string
+     */
+    #[OA\Property(type: "string", format: "string")]
+    protected $updated;
+
+    /**
+     * @var ?string
+     */
+    #[OA\Property(type: "string", format: "string")]
+    protected $admin = "no";
+
+    /**
+     * @OA\Property()
+     * @var ?string
+     */
+    protected $uuid;
 
     /**
      * User constructor.

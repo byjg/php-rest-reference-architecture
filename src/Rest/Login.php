@@ -354,24 +354,4 @@ class Login extends ServiceAbstractBase
 
         $response->write(['token' => $json->token]);
     }
-
-
-
-    /**
-     * @param User|null $user
-     * @return array
-     * @throws Error401Exception
-     */
-    private function createUserMetadata(?User $user): array
-    {
-        if (is_null($user)) {
-            throw new Error401Exception('Username or password is invalid');
-        }
-
-        return [
-            'role' => ($user->getAdmin() === 'yes' ? 'admin' : 'user'),
-            'userid' => $user->getUserid(),
-            'name' => $user->getName()
-        ];
-    }
 }

@@ -280,7 +280,7 @@ class Scripts extends BaseScripts
         $nullableFields = [];
         foreach ($tableDefinition as $field) {
             if ($field['null'] == 'YES') {
-                $nullableFields[] = $field["field"];
+                $nullableFields[] = $field["property"];
             }
         }
 
@@ -288,16 +288,23 @@ class Scripts extends BaseScripts
         $primaryKeys = [];
         foreach ($tableDefinition as $field) {
             if ($field['key'] == 'PRI') {
-                $primaryKeys[] = $field["field"];
+                $primaryKeys[] = $field["property"];
             }
         }
 
-        // Create an array with non-nullable fields but primary keys
+        // Create an array with non nullable fields but primary keys
         $nonNullableFields = [];
         foreach ($tableDefinition as $field) {
             if ($field['null'] == 'NO' && $field['key'] != 'PRI') {
-                $nonNullableFields[] = $field["field"];
+                $nonNullableFields[] = $field["property"];
             }
+        }
+
+        // Create an array with non nullable fields but primary keys
+        foreach ($tableIndexes as $key => $field) {
+            $tableIndexes[$key]['camelColumnName'] = preg_replace_callback('/_(.?)/', function($match) {
+                return strtoupper($match[1]);
+            }, $field['column_name']);
         }
 
         $data = [

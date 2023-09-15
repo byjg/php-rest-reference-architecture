@@ -142,13 +142,13 @@ abstract class BaseRepository
 
     /**
      * @param Mapper $mapper
-     * @param string $pkFieldName
-     * @param string $modelField
-     * @return void
+     * @param string $binPropertyName
+     * @param string $uuidStrPropertyName
+     * @return FieldMapping
      */
-    protected function setClosureFixBinaryUUID(Mapper $mapper, string $pkFieldName = 'id', string $modelField = 'uuid')
+    protected function setClosureFixBinaryUUID(?Mapper $mapper, $binPropertyName = 'id', $uuidStrPropertyName = 'uuid')
     {
-        $mapper->addFieldMapping(FieldMapping::create($pkFieldName)
+        $fieldMapping = FieldMapping::create($binPropertyName)
             ->withUpdateFunction(function ($value, $instance) {
                 if (empty($value)) {
                     return null;
@@ -158,10 +158,23 @@ abstract class BaseRepository
                 }
                 return $value;
             })
-            ->withSelectFunction(function ($value, $instance) use ($modelField) {
-                return str_replace('-', '', $instance->{'get' . $modelField}());
-            })
-        );
+            ->withSelectFunction(function ($value, $instance) use ($binPropertyName, $uuidStrPropertyName) {
+                if (!empty($uuidStrPropertyName)) {
+                    $fieldValue = $instance->{'get' . $uuidStrPropertyName}();
+                } else {
+                    $fieldValue = HexUuidLiteral::getFormattedUuid($instance->{'get' . $binPropertyName}(), false);
+                }
+                if (is_null($fieldValue)) {
+                    return null;
+                }
+                return $fieldValue;
+            });
+
+        if (!empty($mapper)) {
+            $mapper->addFieldMapping($fieldMapping);
+        }
+
+        return $fieldMapping;
     }
 
     /**

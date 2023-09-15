@@ -5,6 +5,7 @@ namespace RestTemplate\Rest;
 use ByJG\ApiTools\Base\Schema;
 use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
 use ByJG\ApiTools\Exception\PathNotFoundException;
+use ByJG\Authenticate\Model\UserModel;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -18,10 +19,30 @@ use ByJG\Util\JwtWrapper;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 
 class ServiceAbstractBase
 {
+
+    /**
+     * @param ?UserModel $user
+     * @return array
+     * @throws Error401Exception
+     * @throws Error403Exception
+     */
+    protected function createUserMetadata(?UserModel $user): array
+    {
+        if (is_null($user)) {
+            throw new Error401Exception('Username or password is invalid');
+        }
+
+        return [
+            'role' => ($user->getAdmin() === User::VALUE_YES ? User::ROLE_ADMIN : User::ROLE_USER),
+            'userid' => $user->getUserid(),
+            'name' => $user->getName()
+        ];
+    }
 
     /**
      * @param array $properties
