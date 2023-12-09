@@ -13,22 +13,22 @@ This project is a boilerplate for create Rest Applications API Ready to Use with
 
 ```mermaid
 mindmap
-  root((Reference Architecture))
-    PSR Standards
-        PSR-7(WebRequests)
-        PSR-11(Container & Dependency Injection)
-        PSR-6(Cache)
-    Authentication & Authorization
-    Decoupled Code
-    Database
-        orm(ORM Integration)
-        migration(Migration)
-        routing(Routing)
-    OpenAPI Integration
-        rest(Rest Methods)
-        rest(Contract Testing)
-        rest(Documentation)
-    Error Handling
+  (("Reference Architecture"))
+    ("PSR Standards")
+      ("WebRequests")
+      ("Container & Dependency Injection")
+      ("Cache")
+    ("Authentication & Authorization")
+    ("Decoupled Code")
+    ("Database")
+      ("ORM Integration")
+      ("Migration")
+      ("Routing")
+    ("OpenAPI Integration")
+      ("Rest Methods")
+      ("Contract Testing")
+      ("Documentation")
+    ("Error Handling")
 ```
 
 It is a PHP-based RESTful API template or boilerplate that aims to simplify the development process of RESTful web services in PHP.
