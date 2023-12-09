@@ -23,9 +23,7 @@ class DummyRepository extends BaseRepository
             'dummy',
             'id'
         );
-        // $mapper->withPrimaryKeySeedFunction(function () {
-        //     return $this->getClosureNewUUID();
-        // });
+        // $mapper->withPrimaryKeySeedFunction(BaseRepository::getClosureNewUUID());
 
 
         // Table UUID Definition
