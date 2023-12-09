@@ -2,25 +2,15 @@
 
 namespace RestTemplate\Rest;
 
-use ByJG\Authenticate\Exception\UserExistsException;
 use ByJG\Authenticate\UsersDBDataset;
-use ByJG\Config\Exception\ConfigException;
-use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\DependencyInjectionException;
-use ByJG\Config\Exception\InvalidDateException;
-use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
-use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
-use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
-use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
-use ByJG\Serializer\Exception\InvalidArgumentException;
 use OpenApi\Attributes as OA;
-use ReflectionException;
+use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\BaseRepository;
 use RestTemplate\Util\HexUuidLiteral;
@@ -30,18 +20,6 @@ class Login extends ServiceAbstractBase
     /**
      * Do login
      *
-     * @param HttpResponse $response
-     * @param HttpRequest $request
-     * @throws ConfigException
-     * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
-     * @throws Error400Exception
-     * @throws Error401Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws ReflectionException
      */
     #[OA\Post(
         path: "/login",
@@ -91,17 +69,6 @@ class Login extends ServiceAbstractBase
     /**
      * Refresh Token
      *
-     * @param HttpResponse $response
-     * @param HttpRequest $request
-     * @throws ConfigException
-     * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
-     * @throws Error401Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws ReflectionException
      */
     #[OA\Post(
         path: "/refreshtoken",
@@ -154,20 +121,6 @@ class Login extends ServiceAbstractBase
     /**
      * Initialize the Password Request
      *
-     * @param HttpResponse $response
-     * @param HttpRequest $request
-     * @throws ConfigException
-     * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
-     * @throws Error400Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws KeyNotFoundException
-     * @throws OrmBeforeInvalidException
-     * @throws OrmInvalidFieldsException
-     * @throws UserExistsException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws ReflectionException
      */
     #[OA\Post(
         path: "/login/resetrequest",
@@ -205,10 +158,10 @@ class Login extends ServiceAbstractBase
         $code = rand(10000, 99999);
 
         if (!is_null($user)) {
-            $user->set('resettoken', $token);
-            $user->set('resettokenexpire', date('Y-m-d H:i:s', strtotime('+10 minutes')));
-            $user->set("resetcode", $code);
-            $user->set("resetallowed", null);
+            $user->set(User::PROP_RESETTOKEN, $token);
+            $user->set(User::PROP_RESETTOKENEXPIRE, date('Y-m-d H:i:s', strtotime('+10 minutes')));
+            $user->set(User::PROP_RESETCODE, $code);
+            $user->set(User::PROP_RESETALLOWED, null);
             $users->save($user);
 
             // Send email using MailWrapper
@@ -251,9 +204,6 @@ class Login extends ServiceAbstractBase
     /**
      * Initialize the Password Request
      *
-     * @param HttpResponse $response
-     * @param HttpRequest $request
-     * @throws Error422Exception
      */
     #[OA\Post(
         path: "/login/confirmcode",
@@ -302,9 +252,6 @@ class Login extends ServiceAbstractBase
     /**
      * Initialize the Password Request
      *
-     * @param HttpResponse $response
-     * @param HttpRequest $request
-     * @throws Error422Exception
      */
     #[OA\Post(
         path: "/login/resetpassword",

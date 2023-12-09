@@ -17,7 +17,6 @@ use ByJG\Mail\MailerFactory;
 use ByJG\Mail\Wrapper\FakeSenderWrapper;
 use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
-use ByJG\MicroOrm\Literal;
 use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
@@ -28,7 +27,7 @@ use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 use RestTemplate\Repository\DummyHexRepository;
 use RestTemplate\Repository\DummyRepository;
-use RestTemplate\Util\HexUuidLiteral;
+use RestTemplate\Repository\UserDefinition as UserDefinitionAlias;
 
 return [
 
@@ -88,7 +87,7 @@ return [
         ]])
         ->toSingleton(),
 
-    UserDefinition::class => DI::bind(UserDefinition::class)
+    UserDefinition::class => DI::bind(UserDefinitionAlias::class)
         ->withConstructorArgs(
             [
                 'users',       // Table name
@@ -96,50 +95,16 @@ return [
                 UserDefinition::LOGIN_IS_EMAIL,
                 [
                     // Field name in the User class => Field name in the database
-                    'userid'   => 'userid',
-                    'name'     => 'name',
-                    'email'    => 'email',
+                    'userid' => 'userid',
+                    'name' => 'name',
+                    'email' => 'email',
                     'username' => 'username',
                     'password' => 'password',
-                    'created'  => 'created',
-                    'admin'    => 'admin'
+                    'created' => 'created',
+                    'admin' => 'admin'
                 ]
             ]
         )
-        ->withMethodCall("markPropertyAsReadOnly", ["uuid"])
-        ->withMethodCall("markPropertyAsReadOnly", ["created"])
-        ->withMethodCall("markPropertyAsReadOnly", ["updated"])
-        ->withMethodCall("defineGenerateKeyClosure", 
-            [
-                function () {
-                    return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
-                }
-            ]
-        )
-        ->withMethodCall("defineClosureForSelect", [
-            "userid",
-            function ($value, $instance) {
-                if (!method_exists($instance, 'getUuid')) {
-                    return $value;
-                }
-                if (!empty($instance->getUuid())) {
-                    return $instance->getUuid();
-                }
-                return $value;
-            }
-        ])
-        ->withMethodCall("defineClosureForUpdate", [
-            'userid',
-            function ($value, $instance) {
-                if (empty($value)) {
-                    return null;
-                }
-                if (!($value instanceof Literal)) {
-                    $value = new HexUuidLiteral($value);
-                }
-                return $value;
-            }
-        ])
         ->toSingleton(),
 
     UserPropertiesDefinition::class => DI::bind(UserPropertiesDefinition::class)
@@ -149,7 +114,7 @@ return [
         ->withInjectedConstructor()
         ->toSingleton(),
 
-        'CORS_SERVER_LIST' => function () {
+    'CORS_SERVER_LIST' => function () {
         return preg_split('/,(?![^{}]*})/', Psr11::container()->get('CORS_SERVERS'));
     },
 

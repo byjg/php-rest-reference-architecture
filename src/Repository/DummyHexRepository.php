@@ -23,9 +23,7 @@ class DummyHexRepository extends BaseRepository
             'dummyhex',
             'id'
         );
-        $mapper->withPrimaryKeySeedFunction(function () {
-            return $this->getClosureNewUUID();
-        });
+        $mapper->withPrimaryKeySeedFunction(BaseRepository::getClosureNewUUID());
 
 
         $this->setClosureFixBinaryUUID($mapper);

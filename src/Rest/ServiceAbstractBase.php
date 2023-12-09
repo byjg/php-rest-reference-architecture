@@ -23,6 +23,7 @@ use ReflectionException;
 use ReflectionException;
 use RestTemplate\Model\User;
 use RestTemplate\Psr11;
+use RestTemplate\Util\HexUuidLiteral;
 
 class ServiceAbstractBase extends ServiceAbstract
 {
@@ -41,8 +42,8 @@ class ServiceAbstractBase extends ServiceAbstract
 
         return [
             'role' => ($user->getAdmin() === User::VALUE_YES ? User::ROLE_ADMIN : User::ROLE_USER),
-            'userid' => $user->getUserid(),
-            'name' => $user->getName()
+            'userid' => HexUuidLiteral::getFormattedUuid($user->getUserid()),
+            'name' => $user->getName(),
         ];
     }
 
