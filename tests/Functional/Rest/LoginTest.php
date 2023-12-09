@@ -56,6 +56,7 @@ class LoginTest extends BaseApiTestCase
         $this->assertEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
         $this->assertEmpty($user->get(User::PROP_RESETCODE));
         $this->assertEmpty($user->get(User::PROP_RESETALLOWED));
+        
         // Execute the request
         $request = new FakeApiRequester();
         $request
@@ -89,6 +90,7 @@ class LoginTest extends BaseApiTestCase
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
         $this->assertNotEmpty($user->get(User::PROP_RESETCODE));
         $this->assertEmpty($user->get(User::PROP_RESETALLOWED));
+        
         $this->expectException(Error422Exception::class);
 
         // Execute the request, expecting an error
@@ -115,6 +117,7 @@ class LoginTest extends BaseApiTestCase
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
         $this->assertNotEmpty($user->get(User::PROP_RESETCODE));
         $this->assertEmpty($user->get(User::PROP_RESETALLOWED));
+        
         // Execute the request, now with the correct code
         $request = new FakeApiRequester();
         $request
@@ -148,6 +151,7 @@ class LoginTest extends BaseApiTestCase
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
         $this->assertNotEmpty($user->get(User::PROP_RESETCODE));
         $this->assertEquals(User::VALUE_YES, $user->get(User::PROP_RESETALLOWED));
+        
         // Execute the request, now with the correct code
         $request = new FakeApiRequester();
         $request

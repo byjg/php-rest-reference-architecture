@@ -55,7 +55,7 @@ class Login extends ServiceAbstractBase
     {
         $this->validateRequest($request);
 
-        $json = json_decode($this->getRequest()->payload());
+        $json = json_decode($request->payload());
 
         $users = Psr11::container()->get(UsersDBDataset::class);
         $user = $users->isValidUser($json->username, $json->password);

@@ -4,20 +4,15 @@ namespace Builder;
 
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
-use ByJG\Config\Exception\EnvironmentException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
-use ByJG\Config\Exception\KeyNotFoundException;
-use Closure;
 use Closure;
 use Psr\SimpleCache\InvalidArgumentException;
-use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use ReflectionException;
+use RestTemplate\Psr11;
 
-class _Lib
+class BaseScripts
 {
     protected $workdir;
     protected string $systemOs;

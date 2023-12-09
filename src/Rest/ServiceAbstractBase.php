@@ -18,14 +18,12 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\Util\JwtWrapper;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
-use Psr\SimpleCache\InvalidArgumentException;
-use ReflectionException;
 use ReflectionException;
 use RestTemplate\Model\User;
 use RestTemplate\Psr11;
 use RestTemplate\Util\HexUuidLiteral;
 
-class ServiceAbstractBase extends ServiceAbstract
+class ServiceAbstractBase
 {
 
     /**

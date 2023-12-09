@@ -45,7 +45,7 @@ class SampleProtected extends ServiceAbstractBase
     {
         $this->requireAuthenticated();
 
-        $this->getResponse()->write([
+        $response->write([
             'result' => 'pong'
         ]);
     }
@@ -85,7 +85,7 @@ class SampleProtected extends ServiceAbstractBase
     {
         $this->requireRole('admin');
 
-        $this->getResponse()->write([
+        $response->write([
             'result' => 'pongadm'
         ]);
     }

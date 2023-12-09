@@ -30,7 +30,7 @@ class Sample extends ServiceAbstractBase
     )]
     public function getPing(HttpResponse $response, HttpRequest $request)
     {
-        $this->getResponse()->write([
+        $response->write([
             'result' => 'pong'
         ]);
     }

@@ -17,8 +17,6 @@ use Composer\Script\Event;
 use Exception;
 use OpenApi\Generator;
 use Psr\SimpleCache\InvalidArgumentException;
-use Psr\SimpleCache\InvalidArgumentException;
-use ReflectionException;
 use ReflectionException;
 use RestTemplate\Psr11;
 
