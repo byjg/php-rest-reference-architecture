@@ -32,6 +32,11 @@ abstract class BaseRepository
         return $this->repository->get($this->prepareUuidQuery($itemId));
     }
 
+    public function getMapper()
+    {
+        return $this->repository->getMapper();
+    }
+
     protected function prepareUuidQuery($itemId)
     {
         $result = [];
@@ -57,42 +62,35 @@ abstract class BaseRepository
     /**
      * @param int|null $page
      * @param int $size
-     * @param null $orderBy
-     * @param null $filter
+     * @param string|array|null $orderBy
+     * @param string|array|null $filter
      * @return array
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws InvalidArgumentException
      */
-    public function list(?int $page = 0, int $size = 20, $orderBy = null, $filter = null): array
+    public function list($page = 0, $size = 20, $orderBy = null, $filter = null)
     {
-        if (empty($page)) {
-            $page = 0;
-        }
-
-        if (empty($size)) {
-            $size = 20;
-        }
-
-        $query = Query::getInstance()
-            ->table($this->repository->getMapper()->getTable())
-            ->limit($page*$size, $size);
-
-        if (!empty($orderBy)) {
-            if (!is_array($orderBy)) {
-                $orderBy = [$orderBy];
-            }
-            $query->orderBy($orderBy);
-        }
-
-        foreach ((array)$filter as $item) {
-            $query->where($item[0], $item[1]);
-        }
+        $query = $this->listQuery(page: $page, size: $size, orderBy: $orderBy, filter: $filter);
 
         return $this->repository
             ->getByQuery($query);
     }
 
-    public function listGeneric($tableName, $page = 0, $size = 20, $orderBy = null, $filter = null): array
+    /**
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
+     */
+    public function listGeneric($tableName, $fields = [], $page = 0, $size = 20, $orderBy = null, $filter = null)
+    {
+        $query = $this->listQuery($tableName, $fields, $page, $size, $orderBy, $filter);
+
+        $object = $query->build($this->repository->getDbDriver());
+
+        $iterator = $this->repository->getDbDriver()->getIterator($object["sql"], $object["params"]);
+        return $iterator->toArray();
+    }
+
+    public function listQuery($tableName = null, $fields = [], $page = 0, $size = 20, $orderBy = null, $filter = null): Query
     {
         if (empty($page)) {
             $page = 0;
@@ -103,8 +101,12 @@ abstract class BaseRepository
         }
 
         $query = Query::getInstance()
-            ->table($tableName)
-            ->limit($page*$size, $size);
+            ->table($tableName ?? $this->repository->getMapper()->getTable())
+            ->limit($page * $size, $size);
+
+        if (!empty($fields)) {
+            $query->fields($fields);
+        }
 
         if (!empty($orderBy)) {
             if (!is_array($orderBy)) {
@@ -113,14 +115,11 @@ abstract class BaseRepository
             $query->orderBy($orderBy);
         }
 
-        foreach ((array)$filter as $item) {
+        foreach ((array) $filter as $item) {
             $query->where($item[0], $item[1]);
         }
 
-        $object = $query->build($this->repository->getDbDriver());
-
-        $iterator = $this->repository->getDbDriver()->getIterator($object["sql"], $object["params"]);
-        return $iterator->toArray();
+        return $query;
     }
 
     public function model()
@@ -130,9 +129,11 @@ abstract class BaseRepository
         return new $class();
     }
 
-    protected function getClosureNewUUID(): Literal
+    public static function getClosureNewUUID(): \Closure
     {
-        return new Literal("X'" . $this->repository->getDbDriver()->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+        return function () {
+            return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+        };
     }
 
     public static function getUuid()

@@ -2,11 +2,9 @@
 
 namespace RestTemplate\Repository;
 
-use RestTemplate\Psr11;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Mapper;
-use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
 use RestTemplate\Model\DummyHex;
 
@@ -25,9 +23,7 @@ class DummyHexRepository extends BaseRepository
             'dummyhex',
             'id'
         );
-        $mapper->withPrimaryKeySeedFunction(function () {
-            return $this->getClosureNewUUID();
-        });
+        $mapper->withPrimaryKeySeedFunction(BaseRepository::getClosureNewUUID());
 
 
         $this->setClosureFixBinaryUUID($mapper);

@@ -25,9 +25,7 @@ class {{ className }}Repository extends BaseRepository
             '{{ tableName }}',
             'id'
         );
-        // $mapper->withPrimaryKeySeedFunction(function () {
-        //     return $this->getClosureNewUUID();
-        // });
+        // $mapper->withPrimaryKeySeedFunction(BaseRepository::getClosureNewUUID());
 
 
         // Table UUID Definition

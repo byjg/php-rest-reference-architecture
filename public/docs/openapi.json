@@ -392,7 +392,7 @@
                 "summary": "Create a new Dummy",
                 "operationId": "POST::/dummy::RestTemplate\\Rest\\DummyRest::postDummy",
                 "requestBody": {
-                    "description": "The object DummyHex to be created",
+                    "description": "The object Dummy to be created",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -929,14 +929,39 @@
                     "email"
                 ],
                 "properties": {
+                    "userid": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "name": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "username": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "created": {
+                        "type": "string",
+                        "format": "string"
+                    },
                     "updated": {
                         "type": "string",
                         "format": "string"
                     },
-                    "uuid": {
+                    "admin": {
                         "type": "string",
                         "format": "string"
-                    }
+                    },
+                    "uuid": {}
                 },
                 "type": "object",
                 "xml": {

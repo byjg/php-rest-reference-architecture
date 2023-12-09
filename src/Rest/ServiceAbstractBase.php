@@ -21,6 +21,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestTemplate\Model\User;
 use RestTemplate\Psr11;
+use RestTemplate\Util\HexUuidLiteral;
 
 class ServiceAbstractBase
 {
@@ -39,8 +40,8 @@ class ServiceAbstractBase
 
         return [
             'role' => ($user->getAdmin() === User::VALUE_YES ? User::ROLE_ADMIN : User::ROLE_USER),
-            'userid' => $user->getUserid(),
-            'name' => $user->getName()
+            'userid' => HexUuidLiteral::getFormattedUuid($user->getUserid()),
+            'name' => $user->getName(),
         ];
     }
 
@@ -128,10 +129,10 @@ class ServiceAbstractBase
 
         $path = $request->getRequestPath();
         $method = $request->server('REQUEST_METHOD');
-        
+
         // Returns a SwaggerRequestBody instance
         $bodyRequestDef = $schema->getRequestParameters($path, $method);
-        
+
         // Validate the request body (payload)
         if (str_contains($request->getHeader('Content-Type'), 'multipart/')) {
             $requestBody = $request->post();

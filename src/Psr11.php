@@ -43,13 +43,9 @@ class Psr11
         if (is_null(self::$definition)) {
             self::$definition = (new Definition())
                 ->addConfig('dev')
-                ->addConfig('test')
-                    ->inheritFrom('dev')
-                ->addConfig('staging')
-                    ->inheritFrom('dev')
-                ->addConfig('prod')
-                    ->inheritFrom('staging')
-                    ->inheritFrom('dev')
+                ->addConfig('test' , inheritFrom: ['dev'])
+                ->addConfig('staging', inheritFrom: ['dev'])
+                ->addConfig('prod', inheritFrom: ['staging', 'dev'])
                 ->setCache(['dev', 'test'], new NoCacheEngine())
                 ->setCache(['prod', 'staging'], new FileSystemCacheEngine())
             ;
