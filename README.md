@@ -15,19 +15,19 @@ This project is a boilerplate for create Rest Applications API Ready to Use with
 mindmap
   root((Reference Architecture))
     PSR Standards
-        PSR-7 (WebRequests)
-        PSR-11 (Container & Dependency Injection)
-        PSR-16 & PSR-6 (Cache)
+        PSR-7(WebRequests)
+        PSR-11(Container & Dependency Injection)
+        PSR-6(Cache)
     Authentication & Authorization
     Decoupled Code
     Database
-        (ORM Integration)
-        (Migration)
-        (Routing)
-    OpenAPI
-        (Rest Methods)
-        (Contract Testing)
-        (Documentation)
+        orm(ORM Integration)
+        migration(Migration)
+        routing(Routing)
+    OpenAPI Integration
+        rest(Rest Methods)
+        rest(Contract Testing)
+        rest(Documentation)
     Error Handling
 ```
 
