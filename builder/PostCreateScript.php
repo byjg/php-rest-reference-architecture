@@ -41,7 +41,7 @@ class PostCreateScript
         $contents = file_get_contents($workdir . '/composer.json');
         file_put_contents(
             $workdir . '/composer.json',
-            str_replace('byjg/resttemplate', $composerName, $contents)
+            str_replace('byjg/rest-reference-architecture', $composerName, $contents)
         );
 
         // ------------------------------------------------
@@ -87,22 +87,22 @@ class PostCreateScript
         $objects = new RecursiveIteratorIterator($filter);
         foreach ($objects as $name => $object) {
             $contents = file_get_contents($name);
-            if (strpos($contents, 'RestTemplate') !== false) {
+            if (strpos($contents, 'RestReferenceArchitecture') !== false) {
                 echo "$name\n";
 
                 // Replace inside Quotes
                 $contents = preg_replace(
-                    "/([\'\"])RestTemplate(.*?[\'\"])/",
+                    "/([\'\"])RestReferenceArchitecture(.*?[\'\"])/",
                     '$1' . str_replace('\\', '\\\\\\\\', $namespace) . '$2',
                     $contents
                 );
 
                 // Replace reserved name
-                $contents = str_replace('RestTemplate', $namespace, $contents);
+                $contents = str_replace('RestReferenceArchitecture', $namespace, $contents);
 
                 // Replace reserved name
                 $contents = str_replace(
-                    'resttemplate',
+                    'rest-reference-architecture',
                     str_replace('/', '', $composerName),
                     $contents
                 );

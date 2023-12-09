@@ -24,7 +24,7 @@ CREATE TABLE `users` (
 );
 ```
 
-and the RestTemplate/Model/User.php has the mapping for this table.
+and the RestReferenceArchitecture/Model/User.php has the mapping for this table.
 
 If you have the same fields but named differently, you can change the mapping in the `config/config_dev.php` file:
 

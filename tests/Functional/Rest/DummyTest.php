@@ -5,8 +5,8 @@ namespace Test\Functional\Rest;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\BinderObject;
-use RestTemplate\Model\Dummy;
-use RestTemplate\Util\FakeApiRequester;
+use RestReferenceArchitecture\Model\Dummy;
+use RestReferenceArchitecture\Util\FakeApiRequester;
 
 class DummyTest extends BaseApiTestCase
 {

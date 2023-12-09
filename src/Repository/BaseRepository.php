@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate\Repository;
+namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
@@ -11,8 +11,8 @@ use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
 use ByJG\Serializer\Exception\InvalidArgumentException;
-use RestTemplate\Psr11;
-use RestTemplate\Util\HexUuidLiteral;
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Util\HexUuidLiteral;
 
 abstract class BaseRepository
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate\Rest;
+namespace RestReferenceArchitecture\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;

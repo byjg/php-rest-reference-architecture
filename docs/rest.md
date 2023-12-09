@@ -16,7 +16,7 @@ There are one requirement in your specification. You need for each method to def
     "paths": {
         "/login": {
             "post": {
-                "operationId": "POST::/login::RestTemplate\\Rest\\Login::mymethod",
+                "operationId": "POST::/login::RestReferenceArchitecture\\Rest\\Login::mymethod",
         }
     }
 ```
@@ -28,12 +28,12 @@ The `operationId` is composed by the following parts:
 - Namespace of the class (required)
 - Method of the class (required)
 
-With definition above every request to `POST /login` will be handled by the method `mymethod` of the class `RestTemplate\Rest\Login`.
+With definition above every request to `POST /login` will be handled by the method `mymethod` of the class `RestReferenceArchitecture\Rest\Login`.
 
 The only requirement is that the method must receive two parameters:
 
 ```php
-namespace RestTemplate\Rest;
+namespace RestReferenceArchitecture\Rest;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
@@ -53,7 +53,7 @@ We use the package byjg/restserver to handle the requests. Please refer to the d
 If you don't have an OpenAPI specification, you can document your application with PHPDOC and generate the OpenAPI specification from your code.
 
 ```php
-namespace RestTemplate\Rest;
+namespace RestReferenceArchitecture\Rest;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;

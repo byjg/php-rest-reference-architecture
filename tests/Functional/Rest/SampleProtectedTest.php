@@ -4,7 +4,7 @@ namespace Test\Functional\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
-use RestTemplate\Util\FakeApiRequester;
+use RestReferenceArchitecture\Util\FakeApiRequester;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase

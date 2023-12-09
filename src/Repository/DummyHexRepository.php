@@ -1,12 +1,12 @@
 <?php
 
-namespace RestTemplate\Repository;
+namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Repository;
-use RestTemplate\Model\DummyHex;
+use RestReferenceArchitecture\Model\DummyHex;
 
 class DummyHexRepository extends BaseRepository
 {

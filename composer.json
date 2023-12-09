@@ -1,6 +1,6 @@
 {
-  "name": "byjg/resttemplate",
-  "description": "Boilerplate project template for create RESTFul services with docker and database integrated",
+  "name": "byjg/rest-reference-architecture",
+  "description": "ByJG's Reference Architecture project for RESTFul services in PHP{ with docker and database integrated",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "license": "MIT",
@@ -27,7 +27,7 @@
   },
   "autoload": {
     "psr-4": {
-      "RestTemplate\\": "src/",
+      "RestReferenceArchitecture\\": "src/",
       "Builder\\": "builder/"
     }
   },

@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate;
+namespace RestReferenceArchitecture;
 use OpenApi\Attributes as OA;
 
 #[OA\Info(

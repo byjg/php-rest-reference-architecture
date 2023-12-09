@@ -27,7 +27,7 @@ namespace Test\Functional\Rest;
 
 
 use ByJG\ApiTools\Base\Schema;
-use RestTemplate\Util\FakeApiRequester;
+use RestReferenceArchitecture\Util\FakeApiRequester;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase

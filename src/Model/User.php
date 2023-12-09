@@ -1,12 +1,12 @@
 <?php
 
-namespace RestTemplate\Model;
+namespace RestReferenceArchitecture\Model;
 
 use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Model\UserModel;
 use Exception;
 use OpenApi\Attributes as OA;
-use RestTemplate\Psr11;
+use RestReferenceArchitecture\Psr11;
 
 #[OA\Schema(required: ["email"], type: "object", xml: new \OpenApi\Attributes\Xml(name: "User"))]
 class User extends UserModel

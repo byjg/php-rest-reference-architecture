@@ -45,7 +45,7 @@ Psr11::container()->get('WEB_SERVER');
 
 ## Defining the available environments
 
-The available environments are defined in the class `RestTemplate\Psr11` in the method `environment()`.
+The available environments are defined in the class `RestReferenceArchitecture\Psr11` in the method `environment()`.
 
 The project has 4 environments:
 
@@ -58,7 +58,7 @@ The project has 4 environments:
 
 It means that the environment `dev` is the parent of `test` and `staging` and `staging` is the parent of `prod`. A configuration of the bottom environment will override the configuration of the parent environment.
 
-You can change the environments in the `RestTemplate\Psr11` class as your needs.
+You can change the environments in the `RestReferenceArchitecture\Psr11` class as your needs.
 
 ```php
     public static function environment()

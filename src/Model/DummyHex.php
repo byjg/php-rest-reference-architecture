@@ -1,11 +1,11 @@
 <?php
 
-namespace RestTemplate\Model;
+namespace RestReferenceArchitecture\Model;
 use OpenApi\Attributes as OA;
 
 /**
  * Class DummyHex
- * @package RestTemplate\Model
+ * @package RestReferenceArchitecture\Model
  */
 #[OA\Schema(required: ["id", "field"], type: "object", xml: new OA\Xml(name: "DummyHex"))]
 class DummyHex

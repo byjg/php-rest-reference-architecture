@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate;
+namespace RestReferenceArchitecture;
 
 use ByJG\Cache\Psr16\FileSystemCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;

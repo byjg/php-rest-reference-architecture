@@ -23,11 +23,11 @@ use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
-use RestTemplate\Model\User;
-use RestTemplate\Psr11;
-use RestTemplate\Repository\DummyHexRepository;
-use RestTemplate\Repository\DummyRepository;
-use RestTemplate\Repository\UserDefinition as UserDefinitionAlias;
+use RestReferenceArchitecture\Model\User;
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Repository\DummyHexRepository;
+use RestReferenceArchitecture\Repository\DummyRepository;
+use RestReferenceArchitecture\Repository\UserDefinition as UserDefinitionAlias;
 
 return [
 

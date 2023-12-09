@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate\Rest;
+namespace RestReferenceArchitecture\Rest;
 
 use ByJG\Authenticate\UsersDBDataset;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
@@ -10,10 +10,10 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use OpenApi\Attributes as OA;
-use RestTemplate\Model\User;
-use RestTemplate\Psr11;
-use RestTemplate\Repository\BaseRepository;
-use RestTemplate\Util\HexUuidLiteral;
+use RestReferenceArchitecture\Model\User;
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Repository\BaseRepository;
+use RestReferenceArchitecture\Util\HexUuidLiteral;
 
 class Login extends ServiceAbstractBase
 {
@@ -166,7 +166,7 @@ class Login extends ServiceAbstractBase
 
             // Send email using MailWrapper
             $mailWrapper = Psr11::container()->get(MailWrapperInterface::class);
-            $envelope = Psr11::container()->get('MAIL_ENVELOPE', [$json->email, "RestTemplate - Password Reset", "email_code.html", [
+            $envelope = Psr11::container()->get('MAIL_ENVELOPE', [$json->email, "RestReferenceArchitecture - Password Reset", "email_code.html", [
                 "code" => trim(chunk_split($code, 1, ' ')),
                 "expire" => 10
             ]]);

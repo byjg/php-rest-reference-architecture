@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate\Util;
+namespace RestReferenceArchitecture\Util;
 
 use ByJG\MicroOrm\Literal;
 

@@ -3,7 +3,7 @@
 namespace Test\Functional\Rest;
 
 
-use RestTemplate\Util\FakeApiRequester;
+use RestReferenceArchitecture\Util\FakeApiRequester;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase

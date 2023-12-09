@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate\Rest;
+namespace RestReferenceArchitecture\Rest;
 
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
@@ -19,10 +19,10 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\BinderObject;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use RestTemplate\Model\DummyHex;
-use RestTemplate\Model\User;
-use RestTemplate\Psr11;
-use RestTemplate\Repository\DummyHexRepository;
+use RestReferenceArchitecture\Model\DummyHex;
+use RestReferenceArchitecture\Model\User;
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Repository\DummyHexRepository;
 
 class DummyHexRest extends ServiceAbstractBase
 {

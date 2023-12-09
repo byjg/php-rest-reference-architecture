@@ -10,7 +10,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use Closure;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use RestTemplate\Psr11;
+use RestReferenceArchitecture\Psr11;
 
 class BaseScripts
 {

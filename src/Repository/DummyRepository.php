@@ -1,12 +1,12 @@
 <?php
 
-namespace RestTemplate\Repository;
+namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
-use RestTemplate\Model\Dummy;
+use RestReferenceArchitecture\Model\Dummy;
 
 class DummyRepository extends BaseRepository
 {

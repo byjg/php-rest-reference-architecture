@@ -10,7 +10,7 @@ use ByJG\DbMigration\Migration;
 use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
 use Exception;
-use RestTemplate\Psr11;
+use RestReferenceArchitecture\Psr11;
 
 class BaseApiTestCase extends ApiTestCase
 {

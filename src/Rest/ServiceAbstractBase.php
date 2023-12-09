@@ -1,6 +1,6 @@
 <?php
 
-namespace RestTemplate\Rest;
+namespace RestReferenceArchitecture\Rest;
 
 use ByJG\ApiTools\Base\Schema;
 use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
@@ -19,9 +19,9 @@ use ByJG\Util\JwtWrapper;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use RestTemplate\Model\User;
-use RestTemplate\Psr11;
-use RestTemplate\Util\HexUuidLiteral;
+use RestReferenceArchitecture\Model\User;
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Util\HexUuidLiteral;
 
 class ServiceAbstractBase
 {
