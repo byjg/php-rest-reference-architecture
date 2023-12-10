@@ -66,12 +66,9 @@ You can change the environments in the `RestReferenceArchitecture\Psr11` class a
         if (is_null(self::$definition)) {
             self::$definition = (new Definition())
                 ->addConfig('dev')
-                ->addConfig('test')
-                    ->inheritFrom('dev')
-                ->addConfig('staging')
-                    ->inheritFrom('dev')
-                ->addConfig('prod')
-                    ->inheritFrom('staging')
+                ->addConfig('test', inheritFrom: ['dev'])
+                ->addConfig('staging', inheritFrom: ['dev'])
+                ->addConfig('prod', inheritFrom: ['staging'])
                     ->inheritFrom('dev');
             // ->setCache($somePsr16Implementation); // This will cache the result;
         }
