@@ -23,8 +23,10 @@ use {{ namespace }}\Model\{{ className }};
 use {{ namespace }}\Psr11;
 use {{ namespace }}\Repository\{{ className }}Repository;
 use {{ namespace }}\Model\User;
+use {{ namespace }}\Util\Jwt;
+use {{ namespace }}\Util\OpenApiContext;
 
-class {{ className }}Rest extends ServiceAbstractBase
+class {{ className }}Rest
 {
     /**
      * Get the {{ className }} by id
@@ -66,7 +68,7 @@ class {{ className }}Rest extends ServiceAbstractBase
     )]
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireAuthenticated();
+        $data = JwtContext::requireAuthenticated();
 
         ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
         $id = $request->param('id');
@@ -152,7 +154,7 @@ class {{ className }}Rest extends ServiceAbstractBase
     )]
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireAuthenticated();
+        $data = JwtContext::requireAuthenticated();
 
         $repo = Psr11::container()->get({{ className }}Repository::class);
 
@@ -227,9 +229,9 @@ class {{ className }}Rest extends ServiceAbstractBase
     )]
     public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole(User::ROLE_ADMIN);
+        $data = JwtContext::requireRole(User::ROLE_ADMIN);
 
-        $payload = $this->validateRequest($request);
+        $payload = OpenApiContext::validateRequest($request);
         
         $model = new {{ className }}();
         BinderObject::bind($payload, $model);
@@ -286,9 +288,9 @@ class {{ className }}Rest extends ServiceAbstractBase
     )]
     public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole(User::ROLE_ADMIN);
+        $data = JwtContext::requireRole(User::ROLE_ADMIN);
 
-        $payload = $this->validateRequest($request);
+        $payload = OpenApiContext::validateRequest($request);
 
         ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
         $model = ${{ varTableName }}Repo->get($payload['{{ fields.0.field }}']);

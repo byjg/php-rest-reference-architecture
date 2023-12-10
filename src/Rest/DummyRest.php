@@ -23,8 +23,10 @@ use RestReferenceArchitecture\Model\Dummy;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyRepository;
+use RestReferenceArchitecture\Util\JwtContext;
+use RestReferenceArchitecture\Util\OpenApiContext;
 
-class DummyRest extends ServiceAbstractBase
+class DummyRest
 {
     /**
      * Get the Dummy by id
@@ -66,7 +68,7 @@ class DummyRest extends ServiceAbstractBase
     )]
     public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireAuthenticated();
+        $data = JwtContext::requireAuthenticated();
 
         $dummyRepo = Psr11::container()->get(DummyRepository::class);
         $id = $request->param('id');
@@ -152,7 +154,7 @@ class DummyRest extends ServiceAbstractBase
     )]
     public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireAuthenticated();
+        $data = JwtContext::requireAuthenticated();
 
         $repo = Psr11::container()->get(DummyRepository::class);
 
@@ -225,9 +227,9 @@ class DummyRest extends ServiceAbstractBase
     )]
     public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole(User::ROLE_ADMIN);
+        $data = JwtContext::requireRole(User::ROLE_ADMIN);
 
-        $payload = $this->validateRequest($request);
+        $payload = OpenApiContext::validateRequest($request);
 
         $model = new Dummy();
         BinderObject::bind($payload, $model);
@@ -284,9 +286,9 @@ class DummyRest extends ServiceAbstractBase
     )]
     public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole(User::ROLE_ADMIN);
+        $data = JwtContext::requireRole(User::ROLE_ADMIN);
 
-        $payload = $this->validateRequest($request);
+        $payload = OpenApiContext::validateRequest($request);
 
         $dummyRepo = Psr11::container()->get(DummyRepository::class);
         $model = $dummyRepo->get($payload['id']);

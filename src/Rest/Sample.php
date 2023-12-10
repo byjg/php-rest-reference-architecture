@@ -6,7 +6,7 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 
-class Sample extends ServiceAbstractBase
+class Sample
 {
     /**
      * Simple ping

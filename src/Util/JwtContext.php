@@ -1,38 +1,30 @@
 <?php
 
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Util;
 
-use ByJG\ApiTools\Base\Schema;
-use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
-use ByJG\ApiTools\Exception\PathNotFoundException;
 use ByJG\Authenticate\Model\UserModel;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
-use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
-use ByJG\RestServer\HttpRequest;
 use ByJG\Util\JwtWrapper;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
-use ReflectionException;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
-use RestReferenceArchitecture\Util\HexUuidLiteral;
 
-class ServiceAbstractBase
+class JwtContext
 {
-
     /**
      * @param ?UserModel $user
      * @return array
      * @throws Error401Exception
      * @throws Error403Exception
      */
-    protected function createUserMetadata(?UserModel $user): array
+    public static function createUserMetadata(?UserModel $user): array
     {
         if (is_null($user)) {
             throw new Error401Exception('Username or password is invalid');
@@ -52,18 +44,17 @@ class ServiceAbstractBase
      * @throws DependencyInjectionException
      * @throws InvalidArgumentException
      * @throws KeyNotFoundException
-     * @throws ReflectionException
      * @throws ConfigException
      * @throws InvalidDateException
      */
-    public function createToken($properties = [])
+    public static function createToken($properties = [])
     {
         $jwt = Psr11::container()->get(JwtWrapper::class);
-        $jwtData = $jwt->createJwtData($properties, 60 * 60 * 10); // 10 hours
+        $jwtData = $jwt->createJwtData($properties, 60 * 60 * 24 * 7); // 7 Dias
         return $jwt->generateToken($jwtData);
     }
 
-    public function extractToken($token = null, $fullToken = false, $throwException = false)
+    public static function extractToken($token = null, $fullToken = false, $throwException = false)
     {
         try {
             $jwt = Psr11::container()->get(JwtWrapper::class);
@@ -89,9 +80,9 @@ class ServiceAbstractBase
      * @throws Error401Exception
      * @throws InvalidArgumentException
      */
-    public function requireAuthenticated($token = null, $fullToken = false)
+    public static function requireAuthenticated($token = null, $fullToken = false)
     {
-        return $this->extractToken($token, $fullToken, true);
+        return self::extractToken($token, $fullToken, true);
     }
 
     /**
@@ -102,52 +93,12 @@ class ServiceAbstractBase
      * @throws Error403Exception
      * @throws InvalidArgumentException
      */
-    public function requireRole($role, $token = null)
+    public static function requireRole($role, $token = null)
     {
-        $data = $this->requireAuthenticated($token);
+        $data = self::requireAuthenticated($token);
         if ($data['role'] !== $role) {
             throw new Error403Exception('Insufficient privileges');
         }
         return $data;
-    }
-
-    /**
-     * @throws DependencyInjectionException
-     * @throws InvalidDateException
-     * @throws ConfigNotFoundException
-     * @throws KeyNotFoundException
-     * @throws Error400Exception
-     * @throws InvalidArgumentException
-     * @throws ConfigException
-     * @throws PathNotFoundException
-     * @throws ReflectionException
-     * @throws HttpMethodNotFoundException
-     */
-    public function validateRequest(HttpRequest $request)
-    {
-        $schema = Psr11::container()->get(Schema::class);
-
-        $path = $request->getRequestPath();
-        $method = $request->server('REQUEST_METHOD');
-
-        // Returns a SwaggerRequestBody instance
-        $bodyRequestDef = $schema->getRequestParameters($path, $method);
-
-        // Validate the request body (payload)
-        if (str_contains($request->getHeader('Content-Type'), 'multipart/')) {
-            $requestBody = $request->post();
-            $files = $request->uploadedFiles()->getKeys();
-            $requestBody = array_merge($requestBody, array_combine($files, $files));
-        } else {
-            $requestBody = json_decode($request->payload(), true);
-        }
-
-        try {
-            $bodyRequestDef->match($requestBody);
-        } catch (Exception $ex) {
-            throw new Error400Exception(explode("\n", $ex->getMessage())[0]);
-        }
-
-        return $requestBody;
     }
 }

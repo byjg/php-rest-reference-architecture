@@ -23,8 +23,10 @@ use RestReferenceArchitecture\Model\DummyHex;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyHexRepository;
+use RestReferenceArchitecture\Util\JwtContext;
+use RestReferenceArchitecture\Util\OpenApiContext;
 
-class DummyHexRest extends ServiceAbstractBase
+class DummyHexRest
 {
     /**
      * Get the DummyHex by id
@@ -66,7 +68,7 @@ class DummyHexRest extends ServiceAbstractBase
     )]
     public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireAuthenticated();
+        $data = JwtContext::requireAuthenticated();
 
         $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
         $id = $request->param('id');
@@ -152,7 +154,7 @@ class DummyHexRest extends ServiceAbstractBase
     )]
     public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireAuthenticated();
+        $data = JwtContext::requireAuthenticated();
 
         $repo = Psr11::container()->get(DummyHexRepository::class);
 
@@ -225,9 +227,9 @@ class DummyHexRest extends ServiceAbstractBase
     )]
     public function postDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole(User::ROLE_ADMIN);
+        $data = JwtContext::requireRole(User::ROLE_ADMIN);
 
-        $payload = $this->validateRequest($request);
+        $payload = OpenApiContext::validateRequest($request);
 
         $model = new DummyHex();
         BinderObject::bind($payload, $model);
@@ -284,9 +286,9 @@ class DummyHexRest extends ServiceAbstractBase
     )]
     public function putDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = $this->requireRole(User::ROLE_ADMIN);
+        $data = JwtContext::requireRole(User::ROLE_ADMIN);
 
-        $payload = $this->validateRequest($request);
+        $payload = OpenApiContext::validateRequest($request);
 
         $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
         $model = $dummyHexRepo->get($payload['id']);

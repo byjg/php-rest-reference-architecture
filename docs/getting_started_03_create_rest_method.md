@@ -102,10 +102,10 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
     // Use one of the following methods:
     
     // a. Require a user with role admin
-    $data = $this->requireRole("admin");
+    $data = JwtContext::requireRole("admin");
     
     // b. OR require any logged user
-    $data = $this->requireAuthenticated();
+    $data = JwtContext::requireAuthenticated();
     
     // c. OR do nothing to make the endpoint public
 }
@@ -137,7 +137,7 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
     // The line below will validate again the OpenAPI attributes
     // If the request doesn't match, an exception `Error400Exception` will be thrown
     // If the request matches, the payload will be returned
-    $payload = $this->validateRequest($request);
+    $payload = OpenApiContext::validateRequest($request);
 }
 ```
 

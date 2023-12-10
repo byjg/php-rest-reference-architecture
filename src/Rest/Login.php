@@ -14,8 +14,10 @@ use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\BaseRepository;
 use RestReferenceArchitecture\Util\HexUuidLiteral;
+use RestReferenceArchitecture\Util\JwtContext;
+use RestReferenceArchitecture\Util\OpenApiContext;
 
-class Login extends ServiceAbstractBase
+class Login
 {
     /**
      * Do login
@@ -53,16 +55,16 @@ class Login extends ServiceAbstractBase
     )]
     public function post(HttpResponse $response, HttpRequest $request)
     {
-        $this->validateRequest($request);
+        OpenApiContext::validateRequest($request);
 
         $json = json_decode($request->payload());
 
         $users = Psr11::container()->get(UsersDBDataset::class);
         $user = $users->isValidUser($json->username, $json->password);
-        $metadata = $this->createUserMetadata($user);
+        $metadata = JwtContext::createUserMetadata($user);
 
         $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
-        $response->write(['token' => $this->createToken($metadata)]);
+        $response->write(['token' => JwtContext::createToken($metadata)]);
         $response->write(['data' => $metadata]);
     }
 
@@ -99,7 +101,7 @@ class Login extends ServiceAbstractBase
     )]
     public function refreshToken(HttpResponse $response, HttpRequest $request)
     {
-        $result = $this->requireAuthenticated(null, true);
+        $result = JwtContext::requireAuthenticated(null, true);
 
         $diff = ($result["exp"] - time()) / 60;
 
@@ -110,10 +112,10 @@ class Login extends ServiceAbstractBase
         $users = Psr11::container()->get(UsersDBDataset::class);
         $user = $users->getById(new HexUuidLiteral($result["data"]["userid"]));
 
-        $metadata = $this->createUserMetadata($user);
+        $metadata = JwtContext::createUserMetadata($user);
 
         $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
-        $response->write(['token' => $this->createToken($metadata)]);
+        $response->write(['token' => JwtContext::createToken($metadata)]);
         $response->write(['data' => $metadata]);
 
     }
@@ -147,7 +149,7 @@ class Login extends ServiceAbstractBase
     )]
     public function postResetRequest(HttpResponse $response, HttpRequest $request)
     {
-        $this->validateRequest($request);
+        OpenApiContext::validateRequest($request);
 
         $json = json_decode($request->payload());
 
@@ -179,7 +181,7 @@ class Login extends ServiceAbstractBase
 
     protected function validateResetToken($response, $request): array
     {
-        $this->validateRequest($request);
+        OpenApiContext::validateRequest($request);
 
         $json = json_decode($request->payload());
 

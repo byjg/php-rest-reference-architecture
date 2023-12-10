@@ -10,6 +10,7 @@ use ByJG\MicroOrm\Literal;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
+use ByJG\MicroOrm\UpdateConstraint;
 use ByJG\Serializer\Exception\InvalidArgumentException;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Util\HexUuidLiteral;
@@ -186,9 +187,9 @@ abstract class BaseRepository
      * @throws OrmInvalidFieldsException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      */
-    public function save($model)
+    public function save($model, ?UpdateConstraint $updateConstraint = null)
     {
-        $model = $this->repository->save($model);
+        $model = $this->repository->save($model, $updateConstraint);
 
         $primaryKey = $this->repository->getMapper()->getPrimaryKey()[0];
 

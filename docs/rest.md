@@ -38,7 +38,7 @@ namespace RestReferenceArchitecture\Rest;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 
-class Login extends ServiceAbstractBase
+class Login
     public function mymethod(HttpRequest $request, HttpResponse $response)
     {
         // ...
@@ -59,7 +59,7 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 
-class Login extends ServiceAbstractBase
+class Login
 
     /**
      * Do login

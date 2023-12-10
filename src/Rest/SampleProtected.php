@@ -8,8 +8,9 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use Psr\SimpleCache\InvalidArgumentException;
+use RestReferenceArchitecture\Util\JwtContext;
 
-class SampleProtected extends ServiceAbstractBase
+class SampleProtected
 {
     /**
      * Sample Ping Only Authenticated
@@ -43,7 +44,7 @@ class SampleProtected extends ServiceAbstractBase
     )]
     public function getPing(HttpResponse $response, HttpRequest $request)
     {
-        $this->requireAuthenticated();
+        JwtContext::requireAuthenticated();
 
         $response->write([
             'result' => 'pong'
@@ -83,7 +84,7 @@ class SampleProtected extends ServiceAbstractBase
     )]
     public function getPingAdm(HttpResponse $response, HttpRequest $request)
     {
-        $this->requireRole('admin');
+        JwtContext::requireRole('admin');
 
         $response->write([
             'result' => 'pongadm'

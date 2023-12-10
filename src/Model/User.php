@@ -8,7 +8,7 @@ use Exception;
 use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Psr11;
 
-#[OA\Schema(required: ["email"], type: "object", xml: new \OpenApi\Attributes\Xml(name: "User"))]
+#[OA\Schema(required: ["email"], type: "object", xml: new OA\Xml(name: "User"))]
 class User extends UserModel
 {
     // Property Fields
