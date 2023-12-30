@@ -139,8 +139,8 @@ return [
         $body = $template->render($mapVariables);
 
         $prefix = "";
-        if (Psr11::environment()->getCurrentConfig() != "prod") {
-            $prefix = "[" . Psr11::environment()->getCurrentConfig() . "] ";
+        if (Psr11::environment()->getCurrentEnvironment() != "prod") {
+            $prefix = "[" . Psr11::environment()->getCurrentEnvironment() . "] ";
         }
         return new Envelope(Psr11::container()->get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
     },

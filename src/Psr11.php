@@ -3,9 +3,9 @@
 namespace RestReferenceArchitecture;
 
 use ByJG\Cache\Psr16\FileSystemCacheEngine;
-use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\Container;
 use ByJG\Config\Definition;
+use ByJG\Config\Environment;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\InvalidDateException;
@@ -40,14 +40,17 @@ class Psr11
      */
     public static function environment(): ?Definition
     {
+        $dev = new Environment('dev');
+        $test = new Environment('test', [$dev]);
+        $staging = new Environment('staging', [$dev], new FileSystemCacheEngine());
+        $prod = new Environment('prod', [$staging, $dev], new FileSystemCacheEngine());
+
         if (is_null(self::$definition)) {
             self::$definition = (new Definition())
-                ->addConfig('dev')
-                ->addConfig('test' , inheritFrom: ['dev'])
-                ->addConfig('staging', inheritFrom: ['dev'])
-                ->addConfig('prod', inheritFrom: ['staging', 'dev'])
-                ->setCache(['dev', 'test'], new NoCacheEngine())
-                ->setCache(['prod', 'staging'], new FileSystemCacheEngine())
+                ->addEnvironment($dev)
+                ->addEnvironment($test)
+                ->addEnvironment($staging)
+                ->addEnvironment($prod)
             ;
         }
 

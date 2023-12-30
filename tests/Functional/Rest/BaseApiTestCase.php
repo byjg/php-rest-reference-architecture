@@ -40,7 +40,7 @@ class BaseApiTestCase extends ApiTestCase
     public function resetDb()
     {
         if (!self::$databaseReset) {
-            if (Psr11::environment()->getCurrentConfig() != "test") {
+            if (Psr11::environment()->getCurrentEnvironment() != "test") {
                 throw new Exception("This test can only be executed in test environment");
             }
             Migration::registerDatabase(MySqlDatabase::class);
