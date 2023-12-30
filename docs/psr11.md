@@ -63,14 +63,18 @@ You can change the environments in the `RestReferenceArchitecture\Psr11` class a
 ```php
     public static function environment()
     {
+        $dev = new Environment('dev');
+        $test = new Environment('test', [$dev]);
+        $staging = new Environment('staging', [$dev], new FileSystemCacheEngine());
+        $prod = new Environment('prod', [$staging, $dev], new FileSystemCacheEngine());
+
         if (is_null(self::$definition)) {
             self::$definition = (new Definition())
-                ->addConfig('dev')
-                ->addConfig('test', inheritFrom: ['dev'])
-                ->addConfig('staging', inheritFrom: ['dev'])
-                ->addConfig('prod', inheritFrom: ['staging'])
-                    ->inheritFrom('dev');
-            // ->setCache($somePsr16Implementation); // This will cache the result;
+                ->addEnvironment($dev)
+                ->addEnvironment($test)
+                ->addEnvironment($staging)
+                ->addEnvironment($prod)
+            ;
         }
 
         return self::$definition;
