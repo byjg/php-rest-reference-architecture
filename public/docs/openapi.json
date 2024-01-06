@@ -12,12 +12,6 @@
         },
         "version": "1.0.0"
     },
-    "servers": [
-        {
-            "url": "http://localhost:8080",
-            "description": "Local Development server"
-        }
-    ],
     "paths": {
         "/dummyhex/{id}": {
             "get": {
@@ -960,8 +954,7 @@
                     "admin": {
                         "type": "string",
                         "format": "string"
-                    },
-                    "uuid": {}
+                    }
                 },
                 "type": "object",
                 "xml": {
