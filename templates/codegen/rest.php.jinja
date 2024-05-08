@@ -23,7 +23,7 @@ use {{ namespace }}\Model\{{ className }};
 use {{ namespace }}\Psr11;
 use {{ namespace }}\Repository\{{ className }}Repository;
 use {{ namespace }}\Model\User;
-use {{ namespace }}\Util\Jwt;
+use {{ namespace }}\Util\JwtContext;
 use {{ namespace }}\Util\OpenApiContext;
 
 class {{ className }}Rest
@@ -68,7 +68,7 @@ class {{ className }}Rest
     )]
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireAuthenticated();
+        JwtContext::requireAuthenticated($request);
 
         ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
         $id = $request->param('id');
@@ -154,7 +154,7 @@ class {{ className }}Rest
     )]
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireAuthenticated();
+        JwtContext::requireAuthenticated($request);
 
         $repo = Psr11::container()->get({{ className }}Repository::class);
 
@@ -229,7 +229,7 @@ class {{ className }}Rest
     )]
     public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireRole(User::ROLE_ADMIN);
+        JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         $payload = OpenApiContext::validateRequest($request);
         
@@ -288,7 +288,7 @@ class {{ className }}Rest
     )]
     public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireRole(User::ROLE_ADMIN);
+        JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         $payload = OpenApiContext::validateRequest($request);
 

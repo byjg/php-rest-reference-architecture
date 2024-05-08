@@ -68,7 +68,7 @@ class DummyHexRest
     )]
     public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireAuthenticated();
+        JwtContext::requireAuthenticated($request);
 
         $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
         $id = $request->param('id');
@@ -154,7 +154,7 @@ class DummyHexRest
     )]
     public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireAuthenticated();
+        JwtContext::requireAuthenticated($request);
 
         $repo = Psr11::container()->get(DummyHexRepository::class);
 
@@ -227,7 +227,7 @@ class DummyHexRest
     )]
     public function postDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireRole(User::ROLE_ADMIN);
+        JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         $payload = OpenApiContext::validateRequest($request);
 
@@ -286,7 +286,7 @@ class DummyHexRest
     )]
     public function putDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireRole(User::ROLE_ADMIN);
+        JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         $payload = OpenApiContext::validateRequest($request);
 

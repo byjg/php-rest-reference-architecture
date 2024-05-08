@@ -10,19 +10,22 @@ use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\Util\JwtWrapper;
-use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 
 class JwtContext
 {
+    protected static ?HttpRequest $request;
+
     /**
      * @param ?UserModel $user
      * @return array
      * @throws Error401Exception
-     * @throws Error403Exception
      */
     public static function createUserMetadata(?UserModel $user): array
     {
@@ -40,12 +43,13 @@ class JwtContext
     /**
      * @param array $properties
      * @return mixed
+     * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
      * @throws InvalidArgumentException
-     * @throws KeyNotFoundException
-     * @throws ConfigException
      * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
      */
     public static function createToken($properties = [])
     {
@@ -54,51 +58,64 @@ class JwtContext
         return $jwt->generateToken($jwtData);
     }
 
-    public static function extractToken($token = null, $fullToken = false, $throwException = false)
+    /**
+     * @param HttpRequest $request
+     * @return void
+     * @throws Error401Exception
+     */
+    public static function requireAuthenticated(HttpRequest $request): void
     {
-        try {
-            $jwt = Psr11::container()->get(JwtWrapper::class);
-            $tokenInfo = json_decode(json_encode($jwt->extractData($token)), true);
-            if ($fullToken) {
-                return $tokenInfo;
-            } else {
-                return $tokenInfo['data'];
-            }
-        } catch (Exception $ex) {
-            if ($throwException) {
-                throw new Error401Exception($ex->getMessage());
-            } else {
-                return false;
-            }
+        self::$request = $request;
+        if ($request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS) !== JwtMiddleware::JWT_SUCCESS) {
+            throw new Error401Exception($request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE));
         }
     }
 
-    /**
-     * @param string|null $token
-     * @param bool $fullToken
-     * @return mixed
-     * @throws Error401Exception
-     * @throws InvalidArgumentException
-     */
-    public static function requireAuthenticated($token = null, $fullToken = false)
+    public static function parseJwt(HttpRequest $request): void
     {
-        return self::extractToken($token, $fullToken, true);
+        self::$request = $request;
     }
 
     /**
-     * @param $role
-     * @param string|null $token
-     * @return mixed
+     * @param HttpRequest $request
+     * @param string $role
+     * @return void
      * @throws Error401Exception
      * @throws Error403Exception
      * @throws InvalidArgumentException
      */
-    public static function requireRole($role, $token = null)
+    public static function requireRole(HttpRequest $request, string $role): void
     {
-        $data = self::requireAuthenticated($token);
-        if ($data['role'] !== $role) {
+        self::requireAuthenticated($request);
+        if (JwtContext::getRole() !== $role) {
             throw new Error403Exception('Insufficient privileges');
         }
-        return $data;
     }
+
+    protected static function getRequestParam(string $value): ?string
+    {
+        if (isset(self::$request)) {
+            $data = (array)self::$request->param("jwt.data");
+            if (isset($data[$value])) {
+                return $data[$value];
+            }
+        }
+        return null;
+    }
+
+    public static function getUserId(): ?string
+    {
+        return self::getRequestParam("userid");
+    }
+
+    public static function getRole(): ?string
+    {
+        return self::getRequestParam("role");
+    }
+
+    public static function getName(): ?string
+    {
+        return self::getRequestParam("name");
+    }
+
 }

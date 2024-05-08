@@ -9,16 +9,14 @@ use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
-use ByJG\RestServer\Exception\ClassNotFoundException;
-use ByJG\RestServer\Exception\Error404Exception;
-use ByJG\RestServer\Exception\Error405Exception;
-use ByJG\RestServer\Exception\Error520Exception;
-use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\Middleware\CorsMiddleware;
+use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\MockRequestHandler;
 use ByJG\RestServer\Route\OpenApiRouteList;
+use ByJG\Util\Exception\MessageException;
 use ByJG\Util\MockClient;
-use ByJG\Util\Psr7\MessageException;
 use ByJG\Util\Psr7\Response;
+use KingPandaApi\Middleware\BlockMultiRequestsMiddleware;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -34,23 +32,23 @@ class FakeApiRequester extends AbstractRequester
     /**
      * @param RequestInterface $request
      * @return Response|ResponseInterface
-     * @throws ClassNotFoundException
+     * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
-     * @throws Error404Exception
-     * @throws Error405Exception
-     * @throws Error520Exception
      * @throws InvalidArgumentException
-     * @throws InvalidClassException
-     * @throws KeyNotFoundException
-     * @throws MessageException
-     * @throws ReflectionException
-     * @throws ConfigException
      * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws MessageException
      */
     protected function handleRequest(RequestInterface $request)
     {
-        $mock = MockRequestHandler::mock(Psr11::container()->get(OpenApiRouteList::class), $request);
+
+        $mock = new MockRequestHandler($request);
+        $mock->withMiddleware(Psr11::container()->get(JwtMiddleware::class));
+        $mock->withMiddleware(Psr11::container()->get(CorsMiddleware::class));
+        $mock->withRequestObject($request);
+        $mock->handle(Psr11::container()->get(OpenApiRouteList::class));
 
         $httpClient = new MockClient($mock->getPsr7Response());
         return $httpClient->sendRequest($request);

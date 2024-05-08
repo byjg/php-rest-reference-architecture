@@ -44,7 +44,7 @@ class SampleProtected
     )]
     public function getPing(HttpResponse $response, HttpRequest $request)
     {
-        JwtContext::requireAuthenticated();
+        JwtContext::requireAuthenticated($request);
 
         $response->write([
             'result' => 'pong'
@@ -84,7 +84,7 @@ class SampleProtected
     )]
     public function getPingAdm(HttpResponse $response, HttpRequest $request)
     {
-        JwtContext::requireRole('admin');
+        JwtContext::requireRole($request, 'admin');
 
         $response->write([
             'result' => 'pongadm'

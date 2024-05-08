@@ -102,10 +102,10 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
     // Use one of the following methods:
     
     // a. Require a user with role admin
-    $data = JwtContext::requireRole("admin");
+    JwtContext::requireRole($request, "admin");
     
     // b. OR require any logged user
-    $data = JwtContext::requireAuthenticated();
+    JwtContext::requireAuthenticated($request);
     
     // c. OR do nothing to make the endpoint public
 }

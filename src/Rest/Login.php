@@ -101,16 +101,16 @@ class Login
     )]
     public function refreshToken(HttpResponse $response, HttpRequest $request)
     {
-        $result = JwtContext::requireAuthenticated(null, true);
+        JwtContext::requireAuthenticated($request);
 
-        $diff = ($result["exp"] - time()) / 60;
+        $diff = ($request->param("jwt.exp") - time()) / 60;
 
         if ($diff > 5) {
             throw new Error401Exception("You only can refresh the token 5 minutes before expire");
         }
 
         $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->getById(new HexUuidLiteral($result["data"]["userid"]));
+        $user = $users->getById(new HexUuidLiteral(JwtContext::getUserId()));
 
         $metadata = JwtContext::createUserMetadata($user);
 

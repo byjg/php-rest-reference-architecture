@@ -100,10 +100,10 @@ class DummyHexTest extends BaseApiTestCase
 
     public function testPostInsufficientPrivileges()
     {
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
         $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
-
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request

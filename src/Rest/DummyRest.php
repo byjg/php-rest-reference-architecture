@@ -68,7 +68,7 @@ class DummyRest
     )]
     public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireAuthenticated();
+        JwtContext::requireAuthenticated($request);
 
         $dummyRepo = Psr11::container()->get(DummyRepository::class);
         $id = $request->param('id');
@@ -154,7 +154,7 @@ class DummyRest
     )]
     public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireAuthenticated();
+        JwtContext::requireAuthenticated($request);
 
         $repo = Psr11::container()->get(DummyRepository::class);
 
@@ -227,7 +227,7 @@ class DummyRest
     )]
     public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireRole(User::ROLE_ADMIN);
+        JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         $payload = OpenApiContext::validateRequest($request);
 
@@ -286,7 +286,7 @@ class DummyRest
     )]
     public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $data = JwtContext::requireRole(User::ROLE_ADMIN);
+        JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         $payload = OpenApiContext::validateRequest($request);
 

@@ -19,6 +19,7 @@ use ByJG\Mail\Wrapper\MailgunApiWrapper;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Middleware\CorsMiddleware;
+use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\Util\JwtKeySecret;
@@ -118,6 +119,12 @@ return [
         return preg_split('/,(?![^{}]*})/', Psr11::container()->get('CORS_SERVERS'));
     },
 
+    JwtMiddleware::class => DI::bind(JwtMiddleware::class)
+        ->withConstructorArgs([
+            Param::get(JwtWrapper::class)
+        ])
+        ->toSingleton(),
+
     CorsMiddleware::class => DI::bind(CorsMiddleware::class)
         ->withNoConstructor()
         ->withMethodCall("withCorsOrigins", [Param::get("CORS_SERVER_LIST")])  // Required to enable CORS
@@ -126,6 +133,7 @@ return [
         ->toSingleton(),
 
     HttpRequestHandler::class => DI::bind(HttpRequestHandler::class)
+        ->withMethodCall('withMiddleware', [Param::get(JwtMiddleware::class)])
         ->withMethodCall("withMiddleware", [Param::get(CorsMiddleware::class)])
         ->toSingleton(),
 

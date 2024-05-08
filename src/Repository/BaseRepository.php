@@ -38,6 +38,17 @@ abstract class BaseRepository
         return $this->repository->getMapper();
     }
 
+    public function getDbDriver()
+    {
+        return $this->repository->getDbDriver();
+    }
+
+    public function getByQuery($query)
+    {
+        $query->table($this->repository->getMapper()->getTable());
+        return $this->repository->getByQuery($query);
+    }
+
     protected function prepareUuidQuery($itemId)
     {
         $result = [];
