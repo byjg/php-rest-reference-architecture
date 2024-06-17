@@ -12,6 +12,8 @@ services:
       - .:/srv/
     environment:
       - APP_ENV=dev
+      - PHP_FPM_SERVER=0.0.0.0:9000
+      - VERBOSE=true
     networks:
       - net
 

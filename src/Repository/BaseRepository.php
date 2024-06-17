@@ -3,6 +3,11 @@
 namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\Config\Exception\ConfigException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
+use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\MicroOrm\FieldMapping;
@@ -12,6 +17,7 @@ use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
 use ByJG\MicroOrm\UpdateConstraint;
 use ByJG\Serializer\Exception\InvalidArgumentException;
+use ReflectionException;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Util\HexUuidLiteral;
 
@@ -148,13 +154,23 @@ abstract class BaseRepository
         };
     }
 
+    /**
+     * @return mixed
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     */
     public static function getUuid()
     {
         return Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT insert(insert(insert(insert(hex(uuid_to_bin(uuid())),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')");
     }
 
     /**
-     * @param Mapper $mapper
+     * @param Mapper|null $mapper
      * @param string $binPropertyName
      * @param string $uuidStrPropertyName
      * @return FieldMapping

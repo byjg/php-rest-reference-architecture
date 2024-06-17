@@ -34,9 +34,8 @@ class Psr11
     }
 
     /**
-     * @return Definition
+     * @return Definition|null
      * @throws ConfigException
-     * @throws InvalidDateException
      */
     public static function environment(): ?Definition
     {

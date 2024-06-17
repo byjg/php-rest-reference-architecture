@@ -24,6 +24,8 @@ use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyHexRepository;
@@ -132,9 +134,16 @@ return [
         // ->withMethodCall("withAcceptCorsHeaders", [[/* list of headers */]])     // Optional. Default all headers
         ->toSingleton(),
 
+    LoggerInterface::class => DI::bind(NullLogger::class)
+        ->toSingleton(),
+
     HttpRequestHandler::class => DI::bind(HttpRequestHandler::class)
-        ->withMethodCall('withMiddleware', [Param::get(JwtMiddleware::class)])
+        ->withConstructorArgs([
+            Param::get(LoggerInterface::class)
+        ])
+        ->withMethodCall("withMiddleware", [Param::get(JwtMiddleware::class)])
         ->withMethodCall("withMiddleware", [Param::get(CorsMiddleware::class)])
+//        ->withMethodCall("withDetailedErrorHandler", [])
         ->toSingleton(),
 
     // ----------------------------------------------------------------------------
