@@ -221,6 +221,7 @@ class Scripts extends BaseScripts
 
         $tableDefinition = $dbDriver->getIterator("EXPLAIN " . strtolower($table))->toArray();
         $tableIndexes = $dbDriver->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
+        $autoIncrement = false;
 
         // Convert DB Types to PHP Types
         foreach ($tableDefinition as $key => $field) {
@@ -229,6 +230,10 @@ class Scripts extends BaseScripts
             $tableDefinition[$key]['property'] = preg_replace_callback('/_(.?)/', function ($matches) {
                 return strtoupper($matches[1]);
             }, $field['field']);
+
+            if ($field['extra'] == 'auto_increment') {
+                $autoIncrement = true;
+            }
 
             switch ($type) {
                 case 'int':
@@ -292,7 +297,7 @@ class Scripts extends BaseScripts
             }
         }
 
-        // Create an array with non nullable fields but primary keys
+        // Create an array with non-nullable fields but primary keys
         $nonNullableFields = [];
         foreach ($tableDefinition as $field) {
             if ($field['null'] == 'NO' && $field['key'] != 'PRI') {
@@ -300,7 +305,7 @@ class Scripts extends BaseScripts
             }
         }
 
-        // Create an array with non nullable fields but primary keys
+        // Create an array with non-nullable fields but primary keys
         foreach ($tableIndexes as $key => $field) {
             $tableIndexes[$key]['camelColumnName'] = preg_replace_callback('/_(.?)/', function($match) {
                 return strtoupper($match[1]);
@@ -309,6 +314,7 @@ class Scripts extends BaseScripts
 
         $data = [
             'namespace' => 'RestReferenceArchitecture',
+            'autoIncrement' => $autoIncrement ? 'yes' : 'no',
             'restTag' => ucwords(explode('_', strtolower($table))[0]),
             'restPath' => str_replace('_', '/', strtolower($table)),
             'className' => preg_replace_callback('/(?:^|_)(.?)/', function($match) {

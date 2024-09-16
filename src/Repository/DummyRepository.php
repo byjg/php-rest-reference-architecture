@@ -3,9 +3,10 @@
 namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
-use ByJG\MicroOrm\Mapper;
+use ByJG\MicroOrm\Exception\OrmModelInvalidException;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
+use ReflectionException;
 use RestReferenceArchitecture\Model\Dummy;
 
 class DummyRepository extends BaseRepository
@@ -14,23 +15,12 @@ class DummyRepository extends BaseRepository
      * DummyRepository constructor.
      *
      * @param DbDriverInterface $dbDriver
-     *
+     * @throws OrmModelInvalidException
+     * @throws ReflectionException
      */
     public function __construct(DbDriverInterface $dbDriver)
     {
-        $mapper = new Mapper(
-            Dummy::class,
-            'dummy',
-            'id'
-        );
-        // $mapper->withPrimaryKeySeedFunction(BaseRepository::getClosureNewUUID());
-
-
-        // Table UUID Definition
-        // $this->setClosureFixBinaryUUID($mapper);
-
-
-        $this->repository = new Repository($dbDriver, $mapper);
+        $this->repository = new Repository($dbDriver, Dummy::class);
     }
 
 

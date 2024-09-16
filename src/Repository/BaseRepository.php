@@ -10,6 +10,8 @@ use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\MicroOrm\Exception\RepositoryReadOnlyException;
+use ByJG\MicroOrm\Exception\UpdateConstraintException;
 use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\MicroOrm\Literal\Literal;
@@ -36,7 +38,7 @@ abstract class BaseRepository
      */
     public function get($itemId)
     {
-        return $this->repository->get($this->prepareUuidQuery($itemId));
+        return $this->repository->get(HexUuidLiteral::create($itemId));
     }
 
     public function getMapper()
@@ -53,28 +55,6 @@ abstract class BaseRepository
     {
         $query->table($this->repository->getMapper()->getTable());
         return $this->repository->getByQuery($query);
-    }
-
-    protected function prepareUuidQuery($itemId)
-    {
-        $result = [];
-        foreach ((array)$itemId as $item) {
-            if ($item instanceof Literal) {
-                $result[] = $item;
-                continue;
-            }
-            $hydratedItem = preg_replace('/[^0-9A-F\-]/', '', $item);
-            if (preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $hydratedItem)) {
-                $result[] = new HexUuidLiteral($hydratedItem);
-            } else {
-                $result[] = $item;
-            }
-        }
-
-        if (count($result) == 1) {
-            return $result[0];
-        }
-        return $result;
     }
 
     /**
@@ -208,11 +188,14 @@ abstract class BaseRepository
 
     /**
      * @param $model
+     * @param UpdateConstraint|null $updateConstraint
      * @return mixed
      * @throws InvalidArgumentException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws RepositoryReadOnlyException
+     * @throws UpdateConstraintException
      */
     public function save($model, ?UpdateConstraint $updateConstraint = null)
     {
