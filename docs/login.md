@@ -82,7 +82,7 @@ Also, there is an endpoint to refresh the token. The endpoint is `/refresh` and 
 To configure the key you can change here:
 
 ```php
-    JwtKeySecret::class => DI::bind(JwtKeySecret::class)
+    JwtKeyInterface::class => DI::bind(\ByJG\JwtWrapper\JwtHashHmacSecret::class)
         ->withConstructorArgs(['supersecretkeyyoushouldnotcommittogithub'])
         ->toSingleton(),
 ```

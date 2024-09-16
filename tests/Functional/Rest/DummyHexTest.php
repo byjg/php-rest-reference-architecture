@@ -4,7 +4,7 @@ namespace Test\Functional\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
-use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\ObjectCopy;
 use RestReferenceArchitecture\Model\DummyHex;
 use RestReferenceArchitecture\Repository\BaseRepository;
 use RestReferenceArchitecture\Util\FakeApiRequester;
@@ -30,7 +30,7 @@ class DummyHexTest extends BaseApiTestCase
             return $sample;
         }
 
-        BinderObject::bind($sample, $model = new DummyHex());
+        ObjectCopy::copy($sample, $model = new DummyHex());
         return $model;
     }
 

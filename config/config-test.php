@@ -1,10 +1,10 @@
 <?php
 
 use ByJG\Config\DependencyInjection as DI;
-use ByJG\Util\JwtKeySecret;
+use ByJG\JwtWrapper\JwtKeyInterface;
 
 return [
-    JwtKeySecret::class => DI::bind(JwtKeySecret::class)
+    JwtKeyInterface::class => DI::bind(\ByJG\JwtWrapper\JwtHashHmacSecret::class)
         ->withConstructorArgs(['jwt_super_secret_key'])
         ->toSingleton(),
 ];

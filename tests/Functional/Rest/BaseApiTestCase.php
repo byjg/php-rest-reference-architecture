@@ -7,8 +7,8 @@ use ByJG\ApiTools\ApiTestCase;
 use ByJG\ApiTools\Base\Schema;
 use ByJG\DbMigration\Database\MySqlDatabase;
 use ByJG\DbMigration\Migration;
-use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
+use ByJG\WebRequest\Psr7\Request;
 use Exception;
 use RestReferenceArchitecture\Psr11;
 

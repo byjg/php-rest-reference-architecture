@@ -2,7 +2,7 @@
 
 namespace Builder;
 
-use ByJG\Util\JwtWrapper;
+use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
 use RecursiveCallbackFilterIterator;

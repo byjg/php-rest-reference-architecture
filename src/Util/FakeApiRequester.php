@@ -9,12 +9,15 @@ use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error520Exception;
+use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\MockRequestHandler;
 use ByJG\RestServer\Route\OpenApiRouteList;
-use ByJG\Util\Exception\MessageException;
-use ByJG\Util\MockClient;
-use ByJG\Util\Psr7\Response;
+use ByJG\WebRequest\MockClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -30,7 +33,7 @@ class FakeApiRequester extends AbstractRequester
 {
     /**
      * @param RequestInterface $request
-     * @return Response|ResponseInterface
+     * @return ResponseInterface
      * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
@@ -38,9 +41,13 @@ class FakeApiRequester extends AbstractRequester
      * @throws InvalidDateException
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws MessageException
+     * @throws ClassNotFoundException
+     * @throws Error404Exception
+     * @throws Error405Exception
+     * @throws Error520Exception
+     * @throws InvalidClassException
      */
-    protected function handleRequest(RequestInterface $request)
+    protected function handleRequest(RequestInterface $request): ResponseInterface
     {
         $mock = new MockRequestHandler(Psr11::container()->get(LoggerInterface::class));
         $mock->withMiddleware(Psr11::container()->get(JwtMiddleware::class));

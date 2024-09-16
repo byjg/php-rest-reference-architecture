@@ -11,7 +11,8 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\MicroOrm\FieldMapping;
-use ByJG\MicroOrm\Literal;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\MicroOrm\Literal\Literal;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
@@ -19,7 +20,6 @@ use ByJG\MicroOrm\UpdateConstraint;
 use ByJG\Serializer\Exception\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Psr11;
-use RestReferenceArchitecture\Util\HexUuidLiteral;
 
 abstract class BaseRepository
 {

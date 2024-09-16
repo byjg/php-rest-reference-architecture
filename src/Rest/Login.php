@@ -4,16 +4,16 @@ namespace RestReferenceArchitecture\Rest;
 
 use ByJG\Authenticate\UsersDBDataset;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\SerializationRuleEnum;
 use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\BaseRepository;
-use RestReferenceArchitecture\Util\HexUuidLiteral;
 use RestReferenceArchitecture\Util\JwtContext;
 use RestReferenceArchitecture\Util\OpenApiContext;
 
@@ -63,7 +63,7 @@ class Login
         $user = $users->isValidUser($json->username, $json->password);
         $metadata = JwtContext::createUserMetadata($user);
 
-        $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
+        $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
         $response->write(['token' => JwtContext::createToken($metadata)]);
         $response->write(['data' => $metadata]);
     }
@@ -114,7 +114,7 @@ class Login
 
         $metadata = JwtContext::createUserMetadata($user);
 
-        $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
+        $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
         $response->write(['token' => JwtContext::createToken($metadata)]);
         $response->write(['data' => $metadata]);
 

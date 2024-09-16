@@ -2,8 +2,8 @@
 
 namespace Test\Functional\Rest;
 
-use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
+use ByJG\WebRequest\Psr7\Request;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 

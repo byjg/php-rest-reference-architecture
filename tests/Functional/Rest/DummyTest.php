@@ -4,7 +4,7 @@ namespace Test\Functional\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
-use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\ObjectCopy;
 use RestReferenceArchitecture\Model\Dummy;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
@@ -29,7 +29,7 @@ class DummyTest extends BaseApiTestCase
             return $sample;
         }
 
-        BinderObject::bind($sample, $model = new Dummy());
+        ObjectCopy::copy($sample, $model = new Dummy());
         return $model;
     }
 

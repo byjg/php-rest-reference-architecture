@@ -16,7 +16,7 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
 use {{ namespace }}\Model\{{ className }};
@@ -234,7 +234,7 @@ class {{ className }}Rest
         $payload = OpenApiContext::validateRequest($request);
         
         $model = new {{ className }}();
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
         ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
         ${{ varTableName }}Repo->save($model);
@@ -297,7 +297,7 @@ class {{ className }}Rest
         if (empty($model)) {
             throw new Error404Exception('Id not found');
         }
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
         ${{ varTableName }}Repo->save($model);
     }

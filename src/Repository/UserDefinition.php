@@ -4,9 +4,9 @@ namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\Authenticate\Model\UserModel;
-use ByJG\MicroOrm\Literal;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\MicroOrm\Literal\Literal;
 use RestReferenceArchitecture\Psr11;
-use RestReferenceArchitecture\Util\HexUuidLiteral;
 
 class UserDefinition extends \ByJG\Authenticate\Definition\UserDefinition
 {
