@@ -17,6 +17,7 @@ use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\MockRequestHandler;
 use ByJG\RestServer\Route\OpenApiRouteList;
+use ByJG\WebRequest\Exception\RequestException;
 use ByJG\WebRequest\MockClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -34,18 +35,19 @@ class FakeApiRequester extends AbstractRequester
     /**
      * @param RequestInterface $request
      * @return ResponseInterface
+     * @throws ClassNotFoundException
      * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
-     * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws KeyNotFoundException
-     * @throws ReflectionException
-     * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
+     * @throws InvalidArgumentException
      * @throws InvalidClassException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws RequestException
      */
     protected function handleRequest(RequestInterface $request): ResponseInterface
     {

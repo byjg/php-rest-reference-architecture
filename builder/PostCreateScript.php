@@ -2,6 +2,7 @@
 
 namespace Builder;
 
+use ByJG\AnyDataset\Db\Factory;
 use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
@@ -123,17 +124,57 @@ class PostCreateScript
 
         $currentPhpVersion = PHP_MAJOR_VERSION . "." .PHP_MINOR_VERSION;
 
+        $validatePHPVersion = function ($arg) {
+            $validPHPVersions = ['8.1', '8.2', '8.3'];
+            if (in_array($arg, $validPHPVersions)) {
+                return $arg;
+            }
+            throw new \Exception('Only the PHP versions ' . implode(', ', $validPHPVersions) . ' are supported');
+        };
+
+        $validateNamespace = function ($arg) {
+            if (empty($arg) || !preg_match('/^[A-Z][a-zA-Z0-9]*$/', $arg)) {
+                throw new \Exception('Namespace must be one word in CamelCase');
+            }
+            return $arg;
+        };
+
+        $validateComposer = function ($arg) {
+            if (empty($arg) || !preg_match('/^[a-z0-9-]+\/[a-z0-9-]+$/', $arg)) {
+                throw new \Exception('Invalid Composer name');
+            }
+            return $arg;
+        };
+
+        $validateURI = function ($arg) {
+            $uri = new Uri($arg);
+            if (empty($uri->getScheme())) {
+                throw new \Exception('Invalid URI');
+            }
+            Factory::getRegisteredDrivers($uri->getScheme());
+            return $arg;
+        };
+
+        $validateTimeZone = function ($arg) {
+            if (empty($arg) || !in_array($arg, timezone_identifiers_list())) {
+                throw new \Exception('Invalid Timezone');
+            }
+            return $arg;
+        };
+
+        $maxRetries = 5;
+
         $stdIo->write("========================================================");
         $stdIo->write(" Setup Project");
         $stdIo->write(" Answer the questions below");
         $stdIo->write("========================================================");
         $stdIo->write("");
         $stdIo->write("Project Directory: " . $workdir);
-        $phpVersion = $stdIo->ask("PHP Version [$currentPhpVersion]: ", $currentPhpVersion);
-        $namespace = $stdIo->ask('Project namespace [MyRest]: ', 'MyRest');
-        $composerName = $stdIo->ask('Composer name [me/myrest]: ', 'me/myrest');
-        $mysqlConnection = $stdIo->ask('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
-        $timezone = $stdIo->ask('Timezone [UTC]: ', 'UTC');
+        $phpVersion = $stdIo->askAndValidate("PHP Version [$currentPhpVersion]: ", $validatePHPVersion, $maxRetries, $currentPhpVersion);
+        $namespace = $stdIo->askAndValidate('Project namespace [MyRest]: ', $validateNamespace, $maxRetries, 'MyRest');
+        $composerName = $stdIo->askAndValidate('Composer name [me/myrest]: ', $validateComposer, $maxRetries, 'me/myrest');
+        $mysqlConnection = $stdIo->askAndValidate('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', $validateURI, $maxRetries, 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
+        $timezone = $stdIo->askAndValidate('Timezone [UTC]: ', $validateTimeZone, $maxRetries, 'UTC');
         $stdIo->ask('Press <ENTER> to continue');
 
         $script = new PostCreateScript();
