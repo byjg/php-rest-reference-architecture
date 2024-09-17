@@ -203,8 +203,10 @@ abstract class BaseRepository
 
         $primaryKey = $this->repository->getMapper()->getPrimaryKey()[0];
 
-        if ($model->{"get$primaryKey"}() instanceof Literal) {
-            $model->{"set$primaryKey"}(HexUuidLiteral::getUuidFromLiteral($model->{"get$primaryKey"}()));
+        if ($model->{"get$primaryKey"}() instanceof HexUuidLiteral) {
+            /** @var HexUuidLiteral $literal */
+            $literal = $model->{"get$primaryKey"}();
+            $model->{"set$primaryKey"}($literal->formatUuid());
         }
 
         return $model;
