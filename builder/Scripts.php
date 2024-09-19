@@ -87,7 +87,7 @@ class Scripts extends BaseScripts
      * @throws ConfigException
      * @throws InvalidDateException
      */
-    public function runMigrate($arguments)
+    public function runMigrate($arguments): void
     {
         $argumentList = $this->extractArguments($arguments);
         if (isset($argumentList["command"])) {
@@ -160,7 +160,7 @@ class Scripts extends BaseScripts
      * @param array $arguments
      * @return void
      */
-    public function runGenOpenApiDocs(array $arguments)
+    public function runGenOpenApiDocs(array $arguments): void
     {
         $docPath = $this->workdir . '/public/docs/';
 
@@ -187,7 +187,7 @@ class Scripts extends BaseScripts
      * @throws \ByJG\Serializer\Exception\InvalidArgumentException
      * @throws Exception
      */
-    public function runCodeGenerator(array $arguments)
+    public function runCodeGenerator(array $arguments): void
     {
         // Get Table Name
         $table = null;
@@ -379,7 +379,7 @@ class Scripts extends BaseScripts
             echo "Processing Test for table $table...\n";
             $template = $loader->getTemplate('test.php');
             if ($save) {
-                $file = __DIR__ . '/../tests/Functional/Rest/' . $data['className'] . 'Test.php';
+                $file = __DIR__ . '/../tests/Rest/' . $data['className'] . 'Test.php';
                 file_put_contents($file, $template->render($data));
                 echo "File saved in $file\n";
             } else {

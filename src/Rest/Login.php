@@ -55,12 +55,10 @@ class Login
     )]
     public function post(HttpResponse $response, HttpRequest $request)
     {
-        OpenApiContext::validateRequest($request);
-
-        $json = json_decode($request->payload());
+        $json = OpenApiContext::validateRequest($request);
 
         $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->isValidUser($json->username, $json->password);
+        $user = $users->isValidUser($json["username"], $json["password"]);
         $metadata = JwtContext::createUserMetadata($user);
 
         $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
@@ -149,12 +147,10 @@ class Login
     )]
     public function postResetRequest(HttpResponse $response, HttpRequest $request)
     {
-        OpenApiContext::validateRequest($request);
-
-        $json = json_decode($request->payload());
+        $json = OpenApiContext::validateRequest($request);
 
         $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->getByEmail($json->email);
+        $user = $users->getByEmail($json["email"]);
 
         $token = BaseRepository::getUuid();
         $code = rand(10000, 99999);
@@ -168,7 +164,7 @@ class Login
 
             // Send email using MailWrapper
             $mailWrapper = Psr11::container()->get(MailWrapperInterface::class);
-            $envelope = Psr11::container()->get('MAIL_ENVELOPE', [$json->email, "RestReferenceArchitecture - Password Reset", "email_code.html", [
+            $envelope = Psr11::container()->get('MAIL_ENVELOPE', [$json["email"], "RestReferenceArchitecture - Password Reset", "email_code.html", [
                 "code" => trim(chunk_split($code, 1, ' ')),
                 "expire" => 10
             ]]);
@@ -181,18 +177,16 @@ class Login
 
     protected function validateResetToken($response, $request): array
     {
-        OpenApiContext::validateRequest($request);
-
-        $json = json_decode($request->payload());
+        $json = OpenApiContext::validateRequest($request);
 
         $users = Psr11::container()->get(UsersDBDataset::class);
-        $user = $users->getByEmail($json->email);
+        $user = $users->getByEmail($json["email"]);
 
         if (is_null($user)) {
             throw new Error422Exception("Invalid data");
         }
 
-        if ($user->get("resettoken") != $json->token) {
+        if ($user->get("resettoken") != $json["token"]) {
             throw new Error422Exception("Invalid data");
         }
 
@@ -241,14 +235,14 @@ class Login
     {
         list($users, $user, $json) = $this->validateResetToken($response, $request);
 
-        if ($user->get("resetcode") != $json->code) {
+        if ($user->get("resetcode") != $json["code"]) {
             throw new Error422Exception("Invalid data");
         }
 
         $user->set("resetallowed", "yes");
         $users->save($user);
 
-        $response->write(['token' => $json->token]);
+        $response->write(['token' => $json["token"]]);
     }
 
     /**
@@ -293,13 +287,13 @@ class Login
             throw new Error422Exception("Invalid data");
         }
 
-        $user->setPassword($json->password);
+        $user->setPassword($json["password"]);
         $user->set("resettoken", null);
         $user->set("resettokenexpire", null);
         $user->set("resetcode", null);
         $user->set("resetallowed", null);
         $users->save($user);
 
-        $response->write(['token' => $json->token]);
+        $response->write(['token' => $json["token"]]);
     }
 }

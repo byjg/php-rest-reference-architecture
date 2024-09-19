@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Functional\Rest;
+namespace Test\Rest;
 
 use ByJG\ApiTools\ApiTestCase;
 use ByJG\ApiTools\Base\Schema;
@@ -16,7 +16,7 @@ class BaseApiTestCase extends ApiTestCase
 {
     protected static bool $databaseReset = false;
 
-    protected string $filePath = __DIR__ . '/../../../public/docs/openapi.json';
+    protected string $filePath = __DIR__ . '/../../public/docs/openapi.json';
 
     protected function setUp(): void
     {

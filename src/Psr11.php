@@ -17,16 +17,19 @@ class Psr11
     private static ?Container $container = null;
 
     /**
-     * @param null $env
+     * @param string|null $env
      * @return Container
      * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws InvalidArgumentException
      * @throws InvalidDateException
      */
-    public static function container($env = null): ?Container
+    public static function container(?string $env = null): ?Container
     {
         if (is_null(self::$container)) {
+            if (PHP_INT_SIZE < 8) {
+                throw new \Exception("This application requires 64-bit PHP");
+            }
             self::$container = self::environment()->build($env);
         }
 

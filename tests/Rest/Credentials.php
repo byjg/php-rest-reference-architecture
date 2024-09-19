@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Functional\Rest;
+namespace Test\Rest;
 
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Psr7\Request;

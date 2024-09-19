@@ -31,4 +31,5 @@ COPY templates /srv/templates
 COPY composer.* /srv
 COPY phpunit.xml.dist /srv
 COPY db /srv/db
-RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader
+RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader && \
+    composer dump-autoload --optimize --classmap-authoritative -q

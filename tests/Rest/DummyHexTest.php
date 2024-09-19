@@ -1,14 +1,15 @@
 <?php
 
-namespace Test\Functional\Rest;
+namespace Test\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\ObjectCopy;
-use RestReferenceArchitecture\Model\Dummy;
+use RestReferenceArchitecture\Model\DummyHex;
+use RestReferenceArchitecture\Repository\BaseRepository;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
-class DummyTest extends BaseApiTestCase
+class DummyHexTest extends BaseApiTestCase
 {
     protected function setUp(): void
     {
@@ -16,7 +17,7 @@ class DummyTest extends BaseApiTestCase
     }
 
     /**
-     * @return Dummy|array
+     * @return DummyHex|array
      */
     protected function getSampleData($array = false)
     {
@@ -29,7 +30,7 @@ class DummyTest extends BaseApiTestCase
             return $sample;
         }
 
-        ObjectCopy::copy($sample, $model = new Dummy());
+        ObjectCopy::copy($sample, $model = new DummyHex());
         return $model;
     }
 
@@ -44,7 +45,7 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummy/1")
+            ->withPath("/dummyhex/" . BaseRepository::getUuid())
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -59,7 +60,7 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummy/1")
+            ->withPath("/dummyhex/" . BaseRepository::getUuid())
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -74,7 +75,7 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/dummy")
+            ->withPath("/dummyhex")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(401)
         ;
@@ -90,8 +91,8 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/dummy")
-            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
+            ->withPath("/dummyhex")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => BaseRepository::getUuid()]))
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -99,16 +100,16 @@ class DummyTest extends BaseApiTestCase
 
     public function testPostInsufficientPrivileges()
     {
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
         $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
-
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/dummy")
+            ->withPath("/dummyhex")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(403)
             ->withRequestHeader([
@@ -129,8 +130,8 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/dummy")
-            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
+            ->withPath("/dummyhex")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => BaseRepository::getUuid()]))
             ->assertResponseCode(403)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
@@ -147,7 +148,7 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/dummy")
+            ->withPath("/dummyhex")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(200)
             ->withRequestHeader([
@@ -161,7 +162,7 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummy/" . $bodyAr['id'])
+            ->withPath("/dummyhex/" . $bodyAr['id'])
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
@@ -173,7 +174,7 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/dummy")
+            ->withPath("/dummyhex")
             ->withRequestBody($body->getBody()->getContents())
             ->assertResponseCode(200)
             ->withRequestHeader([
@@ -191,7 +192,7 @@ class DummyTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummy")
+            ->withPath("/dummyhex")
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']

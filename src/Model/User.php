@@ -2,11 +2,11 @@
 
 namespace RestReferenceArchitecture\Model;
 
-use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Model\UserModel;
 use ByJG\Authenticate\Model\UserPropertiesModel;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use InvalidArgumentException;
 use OpenApi\Attributes as OA;
-use RestReferenceArchitecture\Psr11;
 
 #[OA\Schema(required: ["email"], type: "object", xml: new OA\Xml(name: "User"))]
 class User extends UserModel
@@ -26,10 +26,10 @@ class User extends UserModel
     const ROLE_USER = 'user';
 
     /**
-     * @var ?string
+     * @var ?string|int|HexUuidLiteral
      */
     #[OA\Property(type: "string", format: "string")]
-    protected ?string $userid = null;
+    protected string|int|HexUuidLiteral|null $userid = null;
 
     /**
      * @var ?string
@@ -90,26 +90,24 @@ class User extends UserModel
      * @param string $password
      * @param string $admin
      */
-    public function __construct(string $name = "", string $email = "", string $username = "", string $password = "", string $admin = "")
+    public function __construct(string $name = "", string $email = "", string $username = "", string $password = "", string $admin = "no")
     {
         parent::__construct($name, $email, $username, $password, $admin);
-
-        $this->withPasswordDefinition(Psr11::container()->get(PasswordDefinition::class));
     }
 
 
     /**
-     * @return string|null
+     * @return string|HexUuidLiteral|int|null
      */
-    public function getUserid(): ?string
+    public function getUserid(): string|HexUuidLiteral|int|null
     {
         return $this->userid;
     }
 
     /**
-     * @param string|null $userid
+     * @param string|HexUuidLiteral|int|null $userid
      */
-    public function setUserid(?string $userid): void
+    public function setUserid(string|HexUuidLiteral|int|null $userid): void
     {
         $this->userid = $userid;
     }

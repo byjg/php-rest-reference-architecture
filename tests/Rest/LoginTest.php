@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Functional\Rest;
+namespace Test\Rest;
 
 use ByJG\Authenticate\UsersDBDataset;
 use ByJG\RestServer\Exception\Error401Exception;
