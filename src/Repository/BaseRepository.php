@@ -10,8 +10,6 @@ use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
-use ByJG\MicroOrm\Exception\RepositoryReadOnlyException;
-use ByJG\MicroOrm\Exception\UpdateConstraintException;
 use ByJG\MicroOrm\FieldMapping;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\MicroOrm\Literal\Literal;
@@ -39,6 +37,11 @@ abstract class BaseRepository
     public function get($itemId)
     {
         return $this->repository->get(HexUuidLiteral::create($itemId));
+    }
+
+    public function getRepository(): Repository
+    {
+        return $this->repository;
     }
 
     public function getMapper()
@@ -84,7 +87,7 @@ abstract class BaseRepository
 
         $object = $query->build($this->repository->getDbDriver());
 
-        $iterator = $this->repository->getDbDriver()->getIterator($object["sql"], $object["params"]);
+        $iterator = $this->repository->getDbDriver()->getIterator($object->getSql(), $object->getParameters());
         return $iterator->toArray();
     }
 
@@ -158,26 +161,31 @@ abstract class BaseRepository
     protected function setClosureFixBinaryUUID(?Mapper $mapper, $binPropertyName = 'id', $uuidStrPropertyName = 'uuid')
     {
         $fieldMapping = FieldMapping::create($binPropertyName)
-            ->withUpdateFunction(function ($value, $instance) {
-                if (empty($value)) {
-                    return null;
+            ->withUpdateFunction(
+                function ($value, $instance) {
+                    if (empty($value)) {
+                        return null;
+                    }
+                    if (!($value instanceof Literal)) {
+                        $value = new HexUuidLiteral($value);
+                    }
+                    return $value;
                 }
-                if (!($value instanceof Literal)) {
-                    $value = new HexUuidLiteral($value);
+            )
+            ->withSelectFunction(
+                function ($value, $instance) use ($binPropertyName, $uuidStrPropertyName) {
+                    if (!empty($uuidStrPropertyName)) {
+                        $fieldValue = $instance->{'get' . $uuidStrPropertyName}();
+                    } else {
+                        $itemValue = $instance->{'get' . $binPropertyName}();
+                        $fieldValue = HexUuidLiteral::getFormattedUuid($itemValue, false, $itemValue);
+                    }
+                    if (is_null($fieldValue)) {
+                        return null;
+                    }
+                    return $fieldValue;
                 }
-                return $value;
-            })
-            ->withSelectFunction(function ($value, $instance) use ($binPropertyName, $uuidStrPropertyName) {
-                if (!empty($uuidStrPropertyName)) {
-                    $fieldValue = $instance->{'get' . $uuidStrPropertyName}();
-                } else {
-                    $fieldValue = HexUuidLiteral::getFormattedUuid($instance->{'get' . $binPropertyName}(), false);
-                }
-                if (is_null($fieldValue)) {
-                    return null;
-                }
-                return $fieldValue;
-            });
+            );
 
         if (!empty($mapper)) {
             $mapper->addFieldMapping($fieldMapping);
@@ -187,15 +195,12 @@ abstract class BaseRepository
     }
 
     /**
-     * @param $model
-     * @param UpdateConstraint|null $updateConstraint
+     * @param  $model
      * @return mixed
      * @throws InvalidArgumentException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws RepositoryReadOnlyException
-     * @throws UpdateConstraintException
      */
     public function save($model, ?UpdateConstraint $updateConstraint = null)
     {
@@ -203,10 +208,8 @@ abstract class BaseRepository
 
         $primaryKey = $this->repository->getMapper()->getPrimaryKey()[0];
 
-        if ($model->{"get$primaryKey"}() instanceof HexUuidLiteral) {
-            /** @var HexUuidLiteral $literal */
-            $literal = $model->{"get$primaryKey"}();
-            $model->{"set$primaryKey"}($literal->formatUuid());
+        if ($model->{"get$primaryKey"}() instanceof Literal) {
+            $model->{"set$primaryKey"}(HexUuidLiteral::create($model->{"get$primaryKey"}()));
         }
 
         return $model;

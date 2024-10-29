@@ -18,9 +18,6 @@ class OpenApiContext
         $path = $request->getRequestPath();
         $method = $request->server('REQUEST_METHOD');
 
-        // Returns a SwaggerRequestBody instance
-        $bodyRequestDef = $schema->getRequestParameters($path, $method);
-
         // Validate the request body (payload)
         if (str_contains($request->getHeader('Content-Type') ?? "", 'multipart/')) {
             $requestBody = $request->post();
@@ -31,7 +28,16 @@ class OpenApiContext
         }
 
         try {
-            $bodyRequestDef->match($requestBody);
+            // Validate the request path and query against the OpenAPI schema
+            $schema->getPathDefinition($path, $method);
+
+            if (!empty($requestBody)) {
+                // Returns a SwaggerRequestBody instance
+                $bodyRequestDef = $schema->getRequestParameters($path, $method);
+                $bodyRequestDef->match($requestBody);
+            } else {
+                return [];
+            }
         } catch (Exception $ex) {
             throw new Error400Exception(explode("\n", $ex->getMessage())[0]);
         }
