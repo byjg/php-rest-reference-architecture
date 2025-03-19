@@ -117,6 +117,10 @@ class PostCreateScript
         }
 
         shell_exec("composer update");
+        shell_exec("git init");
+        shell_exec("git branch -m main");
+        shell_exec("git add .");
+        shell_exec("git commit -m 'Initial commit'");
     }
 
     /**
