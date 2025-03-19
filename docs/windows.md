@@ -19,9 +19,12 @@ cd C:\Users\MyUser\Projects
 3. Launch a containerized PHP environment with the following command:
 
 ```textmate
-docker run -it --rm -v %cd%:/root -w /root byjg/php:8.3-cli bash
+docker run -it --rm -v %cd%:/root/tutorial -w /root/tutorial byjg/php:8.3-cli bash
 ```
 
-4. Once inside the container shell, you can run all PHP commands normally as if you had PHP installed locally.
+4. Once inside the container shell, you can run all PHP commands normally as if you had PHP installed locally. 
+The docker commands you'll run outside.
 
-When referencing the current directory, use `/root/something` instead of `~/something`.
+**Note:**
+> Inside the container shell, the folder `~/tutorial` or else `/root/tutorial` 
+is mapped to your current directory on Windows.

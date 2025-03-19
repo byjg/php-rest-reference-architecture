@@ -35,7 +35,7 @@ Choose one of the following installation methods:
 ```shell script
 # Standard installation
 mkdir ~/tutorial
-composer create-project byjg/rest-reference-architecture ~/tutorial 5.0.*
+composer create-project byjg/rest-reference-architecture ~/tutorial ^5.0
 
 # OR Latest development version
 mkdir ~/tutorial
