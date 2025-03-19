@@ -1,31 +1,35 @@
-# Getting Started - Creating a Rest Method
+I'll help you fix and improve this text. Let me analyze the Markdown document first.
 
-This part of the tutorial we are going to create a new Rest Method to update the status of the `example_crud` table.
+# Getting Started - Creating a REST Method
 
-We will cover the following topics:
+In this tutorial, we'll create a new REST method to update the status of the `example_crud` table.
+
+We'll cover the following topics:
 
 - OpenAPI Attributes
-- Protect the endpoint
-- Validate the input
-- Save to the Database
-- Return the result
-- Unit Test
+- Protecting the endpoint
+- Validating input
+- Saving to the database
+- Returning results
+- Unit testing
 
 ## OpenAPI Attributes
 
-The first step is to add the OpenAPI attributes to the Rest Method. 
-We use the [zircote/swagger-php](https://zircote.github.io/swagger-php/guide/) library to add the attributes.
+First, we'll add OpenAPI attributes to our REST method using 
+the [zircote/swagger-php](https://zircote.github.io/swagger-php/guide/) library.
 
-The list of OpenAPI attributes is to vast, however, there are a minimal of 3 sets of of attributes we must define.
+While the OpenAPI specification offers numerous attributes, we must define at least these three essential sets:
 
-The first set is to define what will be the method attribute. It can be:
+### 1. Method Attribute
 
-- OA\Get - to retrieve data
-- OA\Post - to create data
-- OA\Put - For Update
-- OA\Delete - For Delete/Cancel
+This defines the HTTP method:
 
-e.g.
+- `OA\Get` - For retrieving data
+- `OA\Post` - For creating data
+- `OA\Put` - For updating data
+- `OA\Delete` - For deleting/canceling data
+
+Example:
 
 ```php
 #[OA\Put(
@@ -34,101 +38,96 @@ e.g.
         ["jwt-token" => []]
     ],
     tags: ["Example"],
-    description: 'Update the status of the ExampleCrud',
+    description: "Update the status of the ExampleCrud"
 )]
 ```
 
-The `security` attribute is used to define the security schema. If you don't define it, the endpoint will be public.
+The `security` attribute defines the security schema. Without it, the endpoint remains public.
 
-The second set it the request attribute. It can be, `OA\RequestBody` or `OA\Parameter` attribute. 
-It is used to define the input of the method.
+### 2. Request Attribute
 
-e.g.
+This defines the input to the method using `OA\RequestBody` or `OA\Parameter`.
+
+Example:
 
 ```php
 #[OA\RequestBody(
     description: "The status to be updated",
     required: true,
     content: new OA\JsonContent(
-        required: [ "status" ],
+        required: ["status"],
         properties: [
             new OA\Property(property: "id", type: "integer", format: "int32"),
-            new OA\Property(property: "status", type: "string", format: "string")
+            new OA\Property(property: "status", type: "string")
         ]
     )
 )]
 ```
 
-The third set is the response attribute. It is `OA\Response` attribute.
+### 3. Response Attribute
+
+This defines the expected output using `OA\Response`.
 
 ```php
 #[OA\Response(
     response: 200,
-    description: "The object rto be created",
+    description: "The operation result",
     content: new OA\JsonContent(
-        required: [ "result" ],
+        required: ["result"],
         properties: [
-            new OA\Property(property: "result", type: "string", format: "string")
+            new OA\Property(property: "result", type: "string")
         ]
     )
 )]
 ```
 
-The attributes need to be in the beginning of the method. The method can be anywhere in the code,
-but the follow the pattern we will put it in the end of the class `ExampleCrudRest`.
-
-e.g
+Place these attributes at the beginning of your method. Following our pattern, we'll add this method at the end of the `ExampleCrudRest` class:
 
 ```php
-<?php
-#[OA\Put()]                 # complete with the attributes above
-#[OA\RequestBody()]         # complete with the attributes above
-#[OA\Response()]            # complete with the attributes above
-public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request)  // <-- required
+#[OA\Put()]                 // complete with the attributes above
+#[OA\RequestBody()]         // complete with the attributes above
+#[OA\Response()]            // complete with the attributes above
+public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request)
 {
     // Code to be added
 }
 ```
 
-## Protect the endpoint
+## Protecting the Endpoint
 
-The next step is to protect the endpoint. We will use the `JwtToken` to protect the endpoint.
-If in the attribute you set the `security` property, then you need to say how to validate the token.
+If you've set the `security` property in your attributes, you need to validate the token:
 
 ```php
 public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
 {
-    // Secure the encpoint 
+    // Secure the endpoint 
     // Use one of the following methods:
     
-    // a. Require a user with role admin
+    // a. Require a user with admin role
     JwtContext::requireRole($request, "admin");
     
-    // b. OR require any logged user
+    // b. OR require any authenticated user
     JwtContext::requireAuthenticated($request);
     
     // c. OR do nothing to make the endpoint public
 }
 ```
 
-Both methods will return the content of the token. If there is no token or the token is invalid,
-an exception `Error401Exception` will be thrown.
+Both methods return the token content. If the token is invalid or missing, an `Error401Exception` will be thrown. If the user lacks the required role, an `Error403Exception` will be thrown.
 
-If the token is valid, but the user doesn't have the required role, an exception `Error403Exception` will be thrown.
-
-The default token content is:
+The default token content structure is:
 
 ```php
 $data = [
     "userid" => "123",
     "name" => "John Doe",
-    "role" => "admin" or "user"
+    "role" => "admin" // or "user"
 ]
 ```
 
-## Validate the input
+## Validating Input
 
-The next step is to validate the input. We will check if the request matches with the OpenAPI attributes.
+Next, validate that the incoming request matches the OpenAPI specifications:
 
 ```php
 public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
@@ -141,66 +140,111 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 }
 ```
 
-## Call the Repository
+## Updating Status in the Repository
 
-As we have the payload with the correct information, we can call the repository to update the status.
+After validating the payload, we can update the record status using the repository pattern:
 
 ```php
+/**
+ * Update the status of an Example CRUD record
+ * 
+ * @param HttpResponse $response 
+ * @param HttpRequest $request 
+ * @return void
+ */
 public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
 {
-...
-    $exampleCrudRepo = Psr11::container()->get(ExampleCrudRepository::class);
+    // Previous code for payload validation...
+    
+    // Update the record status
+    $exampleCrudRepo = Psr11::get(ExampleCrudRepository::class);
     $model = $exampleCrudRepo->get($payload["id"]);
+    
+    if (!$model) {
+        throw new NotFoundException("Record not found");
+    }
+    
     $model->setStatus($payload["status"]);
     $exampleCrudRepo->save($model);
+    
+    // Return response...
+}
 ```
 
-## Return the result
+## Returning the Response
 
-The last step is to return the result as specified in the OpenAPI attributes.
+After updating the record, we need to return a standardized response as specified in our OpenAPI schema:
 
 ```php
 public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
 {
-... 
+    // Previous code for update logic...
+    
+    // Return standardized response
     $response->write([
         "result" => "ok"
     ]);
 }
 ```
 
-## Unit Test
+## Unit Testing
 
-A vital piece of our code is to guarantee it will continue to run as expected.
-To do that we need to create a unit test to validate the code.
+To ensure our endpoint works correctly and continues to function as expected, we'll create a functional test. This test simulates calling the endpoint and validates both the response format and the business logic.
 
-The test we will create is a functional test that will fake calling the endpoint 
-and validate the result if is matching with the OpenAPI attributes and if processing what is expected.
-
-We will add the test in the file `tests/Functional/Rest/ExampleCrudTest.php`.
+Create or update the test file `tests/Functional/Rest/ExampleCrudTest.php`:
 
 ```php
+/**
+ * @covers \YourNamespace\Controller\ExampleCrudController
+ */
 public function testUpdateStatus()
 {
-    // If you need to login to get a token, use the code below
-    $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+    // Authenticate to get a valid token (if required)
+    $authResult = json_decode(
+        $this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))
+            ->getBody()
+            ->getContents(), 
+        true
+    );
+    
+    // Prepare test data
+    $recordId = 1;
+    $newStatus = 'new status';
 
-    // Execute the unit test
-    $request = new FakeApiRequester();                              // It will mock the API call
+    // Create mock API request
+    $request = new FakeApiRequester();
     $request
-        ->withPsr7Request($this->getPsr7Request())                  // PSR7 Request to be used
-        ->withMethod('PUT')                                         // Method to be used
-        ->withPath("/example/crud/status")                          // Path to be used
-        ->withRequestBody(json_encode([                             // Request Body to be used
-            'id' => 1,
-            'status' => 'new status'
+        ->withPsr7Request($this->getPsr7Request())
+        ->withMethod('PUT')
+        ->withPath("/example/crud/status")
+        ->withRequestBody(json_encode([
+            'id' => $recordId,
+            'status' => $newStatus
         ]))
-        ->assertResponseCode(200)                                   // Expected Response Code
-        ->withRequestHeader([                                       // If your method requires a token use this.
-            "Authorization" => "Bearer " . $result['token']
+        ->withRequestHeader([
+            "Authorization" => "Bearer " . $authResult['token'],
+            "Content-Type" => "application/json"
         ])
-    ;
-    $body = $this->assertRequest($request);
-    $bodyAr = json_decode($body->getBody()->getContents(), true);  // If necessary work with the result of the request
+        ->assertResponseCode(200);
+    
+    // Execute the request and get response
+    $response = $this->assertRequest($request);
+    $responseData = json_decode($response->getBody()->getContents(), true);
+    
+    // There is no necessary to Assert expected response format and data
+    // because the assertRequest will do it for you.
+    // $this->assertIsArray($responseData);
+    // $this->assertArrayHasKey('result', $responseData);
+    // $this->assertEquals('ok', $responseData['result']);
+    
+    // Verify the database was updated correctly
+    $repository = Psr11::get(ExampleCrudRepository::class);
+    $updatedRecord = $repository->get($recordId);
+    $this->assertEquals($newStatus, $updatedRecord->getStatus());
 }
 ```
+
+This test performs the following validations:
+1. Ensures the endpoint returns a 200 status code
+2. Verifies the response has the expected JSON structure
+3. Confirms the database record was actually updated with the new status

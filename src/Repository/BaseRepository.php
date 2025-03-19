@@ -11,7 +11,8 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\MicroOrm\FieldMapping;
-use ByJG\MicroOrm\Literal;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\MicroOrm\Literal\Literal;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
@@ -19,7 +20,6 @@ use ByJG\MicroOrm\UpdateConstraint;
 use ByJG\Serializer\Exception\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Psr11;
-use RestReferenceArchitecture\Util\HexUuidLiteral;
 
 abstract class BaseRepository
 {
@@ -36,7 +36,12 @@ abstract class BaseRepository
      */
     public function get($itemId)
     {
-        return $this->repository->get($this->prepareUuidQuery($itemId));
+        return $this->repository->get(HexUuidLiteral::create($itemId));
+    }
+
+    public function getRepository(): Repository
+    {
+        return $this->repository;
     }
 
     public function getMapper()
@@ -53,28 +58,6 @@ abstract class BaseRepository
     {
         $query->table($this->repository->getMapper()->getTable());
         return $this->repository->getByQuery($query);
-    }
-
-    protected function prepareUuidQuery($itemId)
-    {
-        $result = [];
-        foreach ((array)$itemId as $item) {
-            if ($item instanceof Literal) {
-                $result[] = $item;
-                continue;
-            }
-            $hydratedItem = preg_replace('/[^0-9A-F\-]/', '', $item);
-            if (preg_match("/^\w{8}-?\w{4}-?\w{4}-?\w{4}-?\w{12}$/", $hydratedItem)) {
-                $result[] = new HexUuidLiteral($hydratedItem);
-            } else {
-                $result[] = $item;
-            }
-        }
-
-        if (count($result) == 1) {
-            return $result[0];
-        }
-        return $result;
     }
 
     /**
@@ -104,7 +87,7 @@ abstract class BaseRepository
 
         $object = $query->build($this->repository->getDbDriver());
 
-        $iterator = $this->repository->getDbDriver()->getIterator($object["sql"], $object["params"]);
+        $iterator = $this->repository->getDbDriver()->getIterator($object->getSql(), $object->getParameters());
         return $iterator->toArray();
     }
 
@@ -150,7 +133,7 @@ abstract class BaseRepository
     public static function getClosureNewUUID(): \Closure
     {
         return function () {
-            return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+            return new Literal("X'" . Psr11::get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
         };
     }
 
@@ -166,7 +149,7 @@ abstract class BaseRepository
      */
     public static function getUuid()
     {
-        return Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT insert(insert(insert(insert(hex(uuid_to_bin(uuid())),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')");
+        return Psr11::get(DbDriverInterface::class)->getScalar("SELECT insert(insert(insert(insert(hex(uuid_to_bin(uuid())),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')");
     }
 
     /**
@@ -178,26 +161,31 @@ abstract class BaseRepository
     protected function setClosureFixBinaryUUID(?Mapper $mapper, $binPropertyName = 'id', $uuidStrPropertyName = 'uuid')
     {
         $fieldMapping = FieldMapping::create($binPropertyName)
-            ->withUpdateFunction(function ($value, $instance) {
-                if (empty($value)) {
-                    return null;
+            ->withUpdateFunction(
+                function ($value, $instance) {
+                    if (empty($value)) {
+                        return null;
+                    }
+                    if (!($value instanceof Literal)) {
+                        $value = new HexUuidLiteral($value);
+                    }
+                    return $value;
                 }
-                if (!($value instanceof Literal)) {
-                    $value = new HexUuidLiteral($value);
+            )
+            ->withSelectFunction(
+                function ($value, $instance) use ($binPropertyName, $uuidStrPropertyName) {
+                    if (!empty($uuidStrPropertyName)) {
+                        $fieldValue = $instance->{'get' . $uuidStrPropertyName}();
+                    } else {
+                        $itemValue = $instance->{'get' . $binPropertyName}();
+                        $fieldValue = HexUuidLiteral::getFormattedUuid($itemValue, false, $itemValue);
+                    }
+                    if (is_null($fieldValue)) {
+                        return null;
+                    }
+                    return $fieldValue;
                 }
-                return $value;
-            })
-            ->withSelectFunction(function ($value, $instance) use ($binPropertyName, $uuidStrPropertyName) {
-                if (!empty($uuidStrPropertyName)) {
-                    $fieldValue = $instance->{'get' . $uuidStrPropertyName}();
-                } else {
-                    $fieldValue = HexUuidLiteral::getFormattedUuid($instance->{'get' . $binPropertyName}(), false);
-                }
-                if (is_null($fieldValue)) {
-                    return null;
-                }
-                return $fieldValue;
-            });
+            );
 
         if (!empty($mapper)) {
             $mapper->addFieldMapping($fieldMapping);
@@ -207,7 +195,7 @@ abstract class BaseRepository
     }
 
     /**
-     * @param $model
+     * @param  $model
      * @return mixed
      * @throws InvalidArgumentException
      * @throws OrmBeforeInvalidException
@@ -221,7 +209,7 @@ abstract class BaseRepository
         $primaryKey = $this->repository->getMapper()->getPrimaryKey()[0];
 
         if ($model->{"get$primaryKey"}() instanceof Literal) {
-            $model->{"set$primaryKey"}(HexUuidLiteral::getUuidFromLiteral($model->{"get$primaryKey"}()));
+            $model->{"set$primaryKey"}(HexUuidLiteral::create($model->{"get$primaryKey"}()));
         }
 
         return $model;

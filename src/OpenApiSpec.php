@@ -1,6 +1,7 @@
 <?php
 
 namespace RestReferenceArchitecture;
+
 use OpenApi\Attributes as OA;
 
 #[OA\Info(
@@ -23,18 +24,15 @@ use OpenApi\Attributes as OA;
 )]
 #[OA\Schema(
     schema: 'error',
-    required: ['error'],
     properties: [
         new OA\Property(
-            property: 'error',
-            required: ['type', 'message', 'file', 'line'],
+            'error',
             properties: [
                 new OA\Property(property: 'type', description: 'A class de Exceção', type: 'string'),
                 new OA\Property(property: 'message', description: 'A mensagem de erro', type: 'string'),
                 new OA\Property(property: 'file', description: 'O arquivo que gerou o erro', type: 'string'),
-                new OA\Property(property: 'line', description: 'A linha do erro', type: 'integer')
-            ],
-            type: 'object'
+                new OA\Property(property: 'line', description: 'A linha do erro', type: 'integer'),
+            ]
         )
     ],
     type: 'object'

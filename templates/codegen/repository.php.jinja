@@ -3,9 +3,9 @@
 namespace {{ namespace }}\Repository;
 
 use {{ namespace }}\Psr11;
+use ByJG\MicroOrm\Exception\OrmModelInvalidException;
+use ReflectionException;
 use ByJG\AnyDataset\Db\DbDriverInterface;
-use ByJG\MicroOrm\FieldMapping;
-use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
 use {{ namespace }}\Model\{{ className }};
@@ -16,29 +16,12 @@ class {{ className }}Repository extends BaseRepository
      * {{ className }}Repository constructor.
      *
      * @param DbDriverInterface $dbDriver
-     *
+     * @throws OrmModelInvalidException
+     * @throws ReflectionException
      */
     public function __construct(DbDriverInterface $dbDriver)
     {
-        $mapper = new Mapper(
-            {{ className }}::class,
-            '{{ tableName }}',
-            'id'
-        );
-        // $mapper->withPrimaryKeySeedFunction(BaseRepository::getClosureNewUUID());
-
-
-        // Table UUID Definition
-        // $this->setClosureFixBinaryUUID($mapper);
-{% for field in fields -%}
-{% if 'GENERATED' in field.extra -%}
-        $mapper->addFieldMapping(FieldMapping::create('{{ field.property }}')->withFieldName('{{ field.field }}')->withUpdateFunction(Mapper::doNotUpdateClosure()));
-{% else %}{% if field.property != field.field -%}
-        $mapper->addFieldMapping(FieldMapping::create('{{ field.property }}')->withFieldName('{{ field.field }}'));
-{% endif %}{% endif %}
-{% endfor %}
-
-        $this->repository = new Repository($dbDriver, $mapper);
+        $this->repository = new Repository($dbDriver, {{ className }}::class);
     }
 {% for index in indexes -%}
 {% if index.key_name != 'PRIMARY' -%}

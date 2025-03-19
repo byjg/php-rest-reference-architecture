@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Functional\Rest;
+namespace Test\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;

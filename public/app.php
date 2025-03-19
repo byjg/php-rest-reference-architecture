@@ -10,8 +10,8 @@ class App
 {
     public static function run()
     {
-        $server = Psr11::container()->get(HttpRequestHandler::class);
-        $server->handle(Psr11::container()->get(OpenApiRouteList::class));
+        $server = Psr11::get(HttpRequestHandler::class);
+        $server->handle(Psr11::get(OpenApiRouteList::class));
     }
 }
 

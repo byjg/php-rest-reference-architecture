@@ -2,19 +2,21 @@
 
 namespace Builder;
 
-use ByJG\Util\JwtWrapper;
+use ByJG\AnyDataset\Db\Factory;
+use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
+use Exception;
 use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 class PostCreateScript
 {
-    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone)
+    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone): void
     {
         // ------------------------------------------------
-        // Defining function to interatively walking through the directories
+        // Defining function to interactively walking through the directories
         $directory = new RecursiveDirectoryIterator($workdir);
         $filter = new RecursiveCallbackFilterIterator($directory, function ($current/*, $key, $iterator*/) {
             // Skip hidden files and directories.
@@ -50,8 +52,8 @@ class PostCreateScript
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
             $contents = str_replace('ENV TZ=UTC', "ENV TZ=$timezone", $contents);
-            $contents = str_replace('php:8.1-fpm', "php:$phpVersion-fpm", $contents);
-            $contents = str_replace('php81', "php$phpVersionMSimple", $contents);
+            $contents = str_replace('php:8.3-fpm', "php:$phpVersion-fpm", $contents);
+            $contents = str_replace('php83', "php$phpVersionMSimple", $contents);
             file_put_contents(
                 "$workdir/$file",
                 $contents
@@ -66,7 +68,6 @@ class PostCreateScript
             'config/config-prod.php',
             'config/config-test.php',
             'docker-compose-dev.yml',
-            'docker-compose-image.yml'
         ];
         $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
@@ -87,12 +88,12 @@ class PostCreateScript
         $objects = new RecursiveIteratorIterator($filter);
         foreach ($objects as $name => $object) {
             $contents = file_get_contents($name);
-            if (strpos($contents, 'RestReferenceArchitecture') !== false) {
+            if (str_contains($contents, 'RestReferenceArchitecture')) {
                 echo "$name\n";
 
                 // Replace inside Quotes
                 $contents = preg_replace(
-                    "/([\'\"])RestReferenceArchitecture(.*?[\'\"])/",
+                    "/(['\"])RestReferenceArchitecture(.*?['\"])/",
                     '$1' . str_replace('\\', '\\\\\\\\', $namespace) . '$2',
                     $contents
                 );
@@ -114,8 +115,19 @@ class PostCreateScript
                 );
             }
         }
+
+        shell_exec("composer update");
+        shell_exec("git init");
+        shell_exec("git branch -m main");
+        shell_exec("git add .");
+        shell_exec("git commit -m 'Initial commit'");
     }
 
+    /**
+     * @param Event $event
+     * @return void
+     * @throws Exception
+     */
     public static function run(Event $event)
     {
         $workdir = realpath(__DIR__ . '/..');
@@ -123,17 +135,57 @@ class PostCreateScript
 
         $currentPhpVersion = PHP_MAJOR_VERSION . "." .PHP_MINOR_VERSION;
 
+        $validatePHPVersion = function ($arg) {
+            $validPHPVersions = ['8.1', '8.2', '8.3'];
+            if (in_array($arg, $validPHPVersions)) {
+                return $arg;
+            }
+            throw new Exception('Only the PHP versions ' . implode(', ', $validPHPVersions) . ' are supported');
+        };
+
+        $validateNamespace = function ($arg) {
+            if (empty($arg) || !preg_match('/^[A-Z][a-zA-Z0-9]*$/', $arg)) {
+                throw new Exception('Namespace must be one word in CamelCase');
+            }
+            return $arg;
+        };
+
+        $validateComposer = function ($arg) {
+            if (empty($arg) || !preg_match('/^[a-z0-9-]+\/[a-z0-9-]+$/', $arg)) {
+                throw new Exception('Invalid Composer name');
+            }
+            return $arg;
+        };
+
+        $validateURI = function ($arg) {
+            $uri = new Uri($arg);
+            if (empty($uri->getScheme())) {
+                throw new Exception('Invalid URI');
+            }
+            Factory::getRegisteredDrivers($uri->getScheme());
+            return $arg;
+        };
+
+        $validateTimeZone = function ($arg) {
+            if (empty($arg) || !in_array($arg, timezone_identifiers_list())) {
+                throw new Exception('Invalid Timezone');
+            }
+            return $arg;
+        };
+
+        $maxRetries = 5;
+
         $stdIo->write("========================================================");
         $stdIo->write(" Setup Project");
         $stdIo->write(" Answer the questions below");
         $stdIo->write("========================================================");
         $stdIo->write("");
         $stdIo->write("Project Directory: " . $workdir);
-        $phpVersion = $stdIo->ask("PHP Version [$currentPhpVersion]: ", $currentPhpVersion);
-        $namespace = $stdIo->ask('Project namespace [MyRest]: ', 'MyRest');
-        $composerName = $stdIo->ask('Composer name [me/myrest]: ', 'me/myrest');
-        $mysqlConnection = $stdIo->ask('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
-        $timezone = $stdIo->ask('Timezone [UTC]: ', 'UTC');
+        $phpVersion = $stdIo->askAndValidate("PHP Version [$currentPhpVersion]: ", $validatePHPVersion, $maxRetries, $currentPhpVersion);
+        $namespace = $stdIo->askAndValidate('Project namespace [MyRest]: ', $validateNamespace, $maxRetries, 'MyRest');
+        $composerName = $stdIo->askAndValidate('Composer name [me/myrest]: ', $validateComposer, $maxRetries, 'me/myrest');
+        $mysqlConnection = $stdIo->askAndValidate('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', $validateURI, $maxRetries, 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
+        $timezone = $stdIo->askAndValidate('Timezone [UTC]: ', $validateTimeZone, $maxRetries, 'UTC');
         $stdIo->ask('Press <ENTER> to continue');
 
         $script = new PostCreateScript();

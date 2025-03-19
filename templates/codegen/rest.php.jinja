@@ -16,7 +16,7 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
 use {{ namespace }}\Model\{{ className }};
@@ -70,7 +70,7 @@ class {{ className }}Rest
     {
         JwtContext::requireAuthenticated($request);
 
-        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         $id = $request->param('id');
 
         $result = ${{ varTableName }}Repo->get($id);
@@ -156,7 +156,7 @@ class {{ className }}Rest
     {
         JwtContext::requireAuthenticated($request);
 
-        $repo = Psr11::container()->get({{ className }}Repository::class);
+        $repo = Psr11::get({{ className }}Repository::class);
 
         $page = $request->get('page');
         $size = $request->get('size');
@@ -234,9 +234,9 @@ class {{ className }}Rest
         $payload = OpenApiContext::validateRequest($request);
         
         $model = new {{ className }}();
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
-        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         ${{ varTableName }}Repo->save($model);
 
         $response->write([ "id" => $model->getId()]);
@@ -292,12 +292,12 @@ class {{ className }}Rest
 
         $payload = OpenApiContext::validateRequest($request);
 
-        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         $model = ${{ varTableName }}Repo->get($payload['{{ fields.0.field }}']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');
         }
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
         ${{ varTableName }}Repo->save($model);
     }

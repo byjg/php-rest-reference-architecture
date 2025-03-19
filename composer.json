@@ -5,22 +5,22 @@
   "prefer-stable": true,
   "license": "MIT",
   "require": {
-    "php": ">=8.1",
+    "php": ">=8.1 <8.4",
     "ext-json": "*",
     "ext-openssl": "*",
     "ext-curl": "*",
-    "byjg/config": "^4.9",
-    "byjg/anydataset-db": "^4.9",
-    "byjg/micro-orm": "^4.9",
-    "byjg/authuser": "^4.9",
-    "byjg/mailwrapper": "^4.9",
-    "byjg/restserver": "^4.9",
+    "byjg/config": "^5.0",
+    "byjg/anydataset-db": "^5.0",
+    "byjg/micro-orm": "^5.0",
+    "byjg/authuser": "^5.0",
+    "byjg/mailwrapper": "^5.0",
+    "byjg/restserver": "^5.0",
     "zircote/swagger-php": "^4.6.1",
-    "byjg/swagger-test": "^4.9",
-    "byjg/migration": "^4.9",
-    "byjg/php-daemonize": "^4.9",
-    "byjg/shortid": "^4.9",
-    "byjg/jinja-php": "^4.9"
+    "byjg/swagger-test": "^5.0",
+    "byjg/migration": "^5.0",
+    "byjg/php-daemonize": "^5.0",
+    "byjg/shortid": "^5.0",
+    "byjg/jinja-php": "^5.0"
   },
   "require-dev": {
     "phpunit/phpunit": "5.7.*|7.4.*|^9.5"
@@ -36,7 +36,7 @@
     "migrate": "Builder\\Scripts::migrate",
     "codegen": "Builder\\Scripts::codeGenerator",
     "openapi": "Builder\\Scripts::genOpenApiDocs",
-    "compile": "composer run openapi && composer run test",
+    "compile": "git pull && composer run openapi && composer run test",
     "up-local-dev": "docker compose -f docker-compose-dev.yml up -d",
     "down-local-dev": "docker compose -f docker-compose-dev.yml down",
     "post-create-project-cmd": "Builder\\PostCreateScript::run"

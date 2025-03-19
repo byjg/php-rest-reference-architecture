@@ -1,6 +1,12 @@
 <?php
 
 namespace {{ namespace }}\Model;
+
+use ByJG\MicroOrm\Attributes\FieldAttribute;
+use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
+use ByJG\MicroOrm\Attributes\TableAttribute;
+use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use OpenApi\Attributes as OA;
 
 /**
@@ -8,6 +14,7 @@ use OpenApi\Attributes as OA;
  * @package {{ namespace }}\Model
  */
 #[OA\Schema(required: ["{{ primaryKeys | join('", "')}}"{% if nonNullableFields | count > 0 %}, "{{ nonNullableFields | join('", "')}}"{% endif %}], type: "object", xml: new OA\Xml(name: "{{ className }}"))]
+#[Table{% if autoIncrement == "no" %}MySqlUuidPK{% endif %}Attribute("{{ tableName }}")]
 class {{ className }}
 {
 {% for field in fields %}
@@ -15,23 +22,24 @@ class {{ className }}
      * @var {{ field.php_type }}|null
      */
     #[OA\Property(type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %})]
-    protected ?{{ field.php_type }} ${{ field.property }} = null;
+    #[Field{% if 'binary' in field.type %}Uuid{% endif %}Attribute({% if field.key == "PRI" %}primaryKey: true, {% endif %}fieldName: "{{ field.field }}"{% if 'VIRTUAL' in field.extra %}, syncWithDb: false{% endif %})]
+    protected {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }} = null;
 {% endfor %}
 
 {% for field in fields %}
     /**
-     * @return {{ field.php_type }}|null
+     * @return {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null
      */
-    public function get{{ field.property | capitalize }}(): ?{{ field.php_type }}
+    public function get{{ field.property | capitalize }}(): {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null
     {
         return $this->{{ field.property }};
     }
 
     /**
-     * @param {{ field.php_type }}|null ${{ field.property }}
-     * @return {{ className }}
+     * @param {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }}
+     * @return $this
      */
-    public function set{{ field.property | capitalize }}(?{{ field.php_type }} ${{ field.property }}): {{ className }}
+    public function set{{ field.property | capitalize }}({{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }}): static
     {
         $this->{{ field.property }} = ${{ field.property }};
         return $this;

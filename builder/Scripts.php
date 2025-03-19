@@ -11,6 +11,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
 use ByJG\DbMigration\Exception\InvalidMigrationFile;
 use ByJG\DbMigration\Migration;
+use ByJG\JinjaPhp\Exception\TemplateParseException;
 use ByJG\JinjaPhp\Loader\FileSystemLoader;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
@@ -39,7 +40,7 @@ class Scripts extends BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function migrate(Event $event)
+    public static function migrate(Event $event): void
     {
         $migrate = new Scripts();
         $migrate->runMigrate($event->getArguments());
@@ -53,7 +54,7 @@ class Scripts extends BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function genOpenApiDocs(Event $event)
+    public static function genOpenApiDocs(Event $event): void
     {
         $build = new Scripts();
         $build->runGenOpenApiDocs($event->getArguments());
@@ -62,14 +63,16 @@ class Scripts extends BaseScripts
     /**
      * @param Event $event
      * @return void
+     * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws TemplateParseException
      */
-    public static function codeGenerator(Event $event)
+    public static function codeGenerator(Event $event): void
     {
         $build = new Scripts();
         $build->runCodeGenerator($event->getArguments());
@@ -86,8 +89,9 @@ class Scripts extends BaseScripts
      * @throws ReflectionException
      * @throws ConfigException
      * @throws InvalidDateException
+     * @throws Exception
      */
-    public function runMigrate($arguments)
+    public function runMigrate($arguments): void
     {
         $argumentList = $this->extractArguments($arguments);
         if (isset($argumentList["command"])) {
@@ -160,7 +164,7 @@ class Scripts extends BaseScripts
      * @param array $arguments
      * @return void
      */
-    public function runGenOpenApiDocs(array $arguments)
+    public function runGenOpenApiDocs(array $arguments): void
     {
         $docPath = $this->workdir . '/public/docs/';
 
@@ -179,15 +183,17 @@ class Scripts extends BaseScripts
     /**
      * @param array $arguments
      * @return void
+     * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws TemplateParseException
      * @throws Exception
      */
-    public function runCodeGenerator(array $arguments)
+    public function runCodeGenerator(array $arguments): void
     {
         // Get Table Name
         $table = null;
@@ -217,10 +223,11 @@ class Scripts extends BaseScripts
         $save = in_array("--save", $arguments);
 
         /** @var DbDriverInterface $dbDriver */
-        $dbDriver = Psr11::container()->get(DbDriverInterface::class);
+        $dbDriver = Psr11::get(DbDriverInterface::class);
 
         $tableDefinition = $dbDriver->getIterator("EXPLAIN " . strtolower($table))->toArray();
         $tableIndexes = $dbDriver->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
+        $autoIncrement = false;
 
         // Convert DB Types to PHP Types
         foreach ($tableDefinition as $key => $field) {
@@ -229,6 +236,10 @@ class Scripts extends BaseScripts
             $tableDefinition[$key]['property'] = preg_replace_callback('/_(.?)/', function ($matches) {
                 return strtoupper($matches[1]);
             }, $field['field']);
+
+            if ($field['extra'] == 'auto_increment') {
+                $autoIncrement = true;
+            }
 
             switch ($type) {
                 case 'int':
@@ -292,7 +303,7 @@ class Scripts extends BaseScripts
             }
         }
 
-        // Create an array with non nullable fields but primary keys
+        // Create an array with non-nullable fields but primary keys
         $nonNullableFields = [];
         foreach ($tableDefinition as $field) {
             if ($field['null'] == 'NO' && $field['key'] != 'PRI') {
@@ -300,7 +311,7 @@ class Scripts extends BaseScripts
             }
         }
 
-        // Create an array with non nullable fields but primary keys
+        // Create an array with non-nullable fields but primary keys
         foreach ($tableIndexes as $key => $field) {
             $tableIndexes[$key]['camelColumnName'] = preg_replace_callback('/_(.?)/', function($match) {
                 return strtoupper($match[1]);
@@ -309,6 +320,7 @@ class Scripts extends BaseScripts
 
         $data = [
             'namespace' => 'RestReferenceArchitecture',
+            'autoIncrement' => $autoIncrement ? 'yes' : 'no',
             'restTag' => ucwords(explode('_', strtolower($table))[0]),
             'restPath' => str_replace('_', '/', strtolower($table)),
             'className' => preg_replace_callback('/(?:^|_)(.?)/', function($match) {
@@ -373,7 +385,7 @@ class Scripts extends BaseScripts
             echo "Processing Test for table $table...\n";
             $template = $loader->getTemplate('test.php');
             if ($save) {
-                $file = __DIR__ . '/../tests/Functional/Rest/' . $data['className'] . 'Test.php';
+                $file = __DIR__ . '/../tests/Rest/' . $data['className'] . 'Test.php';
                 file_put_contents($file, $template->render($data));
                 echo "File saved in $file\n";
             } else {

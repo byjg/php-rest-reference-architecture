@@ -16,7 +16,7 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
 use RestReferenceArchitecture\Model\Dummy;
@@ -70,7 +70,7 @@ class DummyRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $dummyRepo = Psr11::get(DummyRepository::class);
         $id = $request->param('id');
 
         $result = $dummyRepo->get($id);
@@ -156,7 +156,7 @@ class DummyRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $repo = Psr11::container()->get(DummyRepository::class);
+        $repo = Psr11::get(DummyRepository::class);
 
         $page = $request->get('page');
         $size = $request->get('size');
@@ -232,9 +232,9 @@ class DummyRest
         $payload = OpenApiContext::validateRequest($request);
 
         $model = new Dummy();
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
-        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $dummyRepo = Psr11::get(DummyRepository::class);
         $dummyRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
@@ -290,12 +290,12 @@ class DummyRest
 
         $payload = OpenApiContext::validateRequest($request);
 
-        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $dummyRepo = Psr11::get(DummyRepository::class);
         $model = $dummyRepo->get($payload['id']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');
         }
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
         $dummyRepo->save($model);
     }

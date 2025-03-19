@@ -12,6 +12,9 @@ use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
 use ByJG\JinjaPhp\Loader\FileSystemLoader;
+use ByJG\JwtWrapper\JwtHashHmacSecret;
+use ByJG\JwtWrapper\JwtKeyInterface;
+use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\Mail\Envelope;
 use ByJG\Mail\MailerFactory;
 use ByJG\Mail\Wrapper\FakeSenderWrapper;
@@ -22,8 +25,6 @@ use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\Route\OpenApiRouteList;
-use ByJG\Util\JwtKeySecret;
-use ByJG\Util\JwtWrapper;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RestReferenceArchitecture\Model\User;
@@ -49,16 +50,16 @@ return [
         ->withFactoryMethod('getInstance', [file_get_contents(__DIR__ . '/../public/docs/openapi.json')])
         ->toSingleton(),
 
-    JwtKeySecret::class => DI::bind(JwtKeySecret::class)
+    JwtKeyInterface::class => DI::bind(JwtHashHmacSecret::class)
         ->withConstructorArgs(['jwt_super_secret_key'])
         ->toSingleton(),
 
     JwtWrapper::class => DI::bind(JwtWrapper::class)
-        ->withConstructorArgs([Param::get('API_SERVER'), Param::get(JwtKeySecret::class)])
+        ->withConstructorArgs([Param::get('API_SERVER'), Param::get(JwtKeyInterface::class)])
         ->toSingleton(),
 
     MailWrapperInterface::class => function () {
-        $apiKey = Psr11::container()->get('EMAIL_CONNECTION');
+        $apiKey = Psr11::get('EMAIL_CONNECTION');
         MailerFactory::registerMailer(MailgunApiWrapper::class);
         MailerFactory::registerMailer(FakeSenderWrapper::class);
 
@@ -118,7 +119,7 @@ return [
         ->toSingleton(),
 
     'CORS_SERVER_LIST' => function () {
-        return preg_split('/,(?![^{}]*})/', Psr11::container()->get('CORS_SERVERS'));
+        return preg_split('/,(?![^{}]*})/', Psr11::get('CORS_SERVERS'));
     },
 
     JwtMiddleware::class => DI::bind(JwtMiddleware::class)
@@ -159,7 +160,7 @@ return [
         if (Psr11::environment()->getCurrentEnvironment() != "prod") {
             $prefix = "[" . Psr11::environment()->getCurrentEnvironment() . "] ";
         }
-        return new Envelope(Psr11::container()->get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
+        return new Envelope(Psr11::get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
     },
 
 ];

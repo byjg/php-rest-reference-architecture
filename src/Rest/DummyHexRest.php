@@ -16,7 +16,7 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
 use RestReferenceArchitecture\Model\DummyHex;
@@ -70,7 +70,7 @@ class DummyHexRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $id = $request->param('id');
 
         $result = $dummyHexRepo->get($id);
@@ -156,7 +156,7 @@ class DummyHexRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $repo = Psr11::container()->get(DummyHexRepository::class);
+        $repo = Psr11::get(DummyHexRepository::class);
 
         $page = $request->get('page');
         $size = $request->get('size');
@@ -232,9 +232,9 @@ class DummyHexRest
         $payload = OpenApiContext::validateRequest($request);
 
         $model = new DummyHex();
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
-        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $dummyHexRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
@@ -290,12 +290,12 @@ class DummyHexRest
 
         $payload = OpenApiContext::validateRequest($request);
 
-        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $model = $dummyHexRepo->get($payload['id']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');
         }
-        BinderObject::bind($payload, $model);
+        ObjectCopy::copy($payload, $model);
 
         $dummyHexRepo->save($model);
     }

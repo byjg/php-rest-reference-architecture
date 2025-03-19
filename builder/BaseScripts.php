@@ -14,7 +14,7 @@ use RestReferenceArchitecture\Psr11;
 
 class BaseScripts
 {
-    protected $workdir;
+    protected string|false $workdir;
     protected string $systemOs;
 
     public function __construct()
@@ -47,9 +47,9 @@ class BaseScripts
     /**
      * Execute the given command by displaying console output live to the user.
      *
-     * @param string|array $cmd :  command to be executed
-     * @return array   exit_status  :  exit status of the executed command
-     *                  output       :  console output of the executed command
+     * @param array|string $cmd :  command to be executed
+     * @return array|null exit_status  :  exit status of the executed command
+     *                    output       :  console output of the executed command
      * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
@@ -58,7 +58,7 @@ class BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    protected function liveExecuteCommand($cmd): ?array
+    protected function liveExecuteCommand(array|string $cmd): ?array
     {
         // while (@ ob_end_flush()); // end all output buffers if any
 
@@ -122,7 +122,7 @@ class BaseScripts
             foreach ($args[0] as $arg) {
                 $variableValue = str_replace(
                     $arg,
-                    Psr11::container()->get(substr($arg,1, -1)),
+                    Psr11::get(substr($arg,1, -1)),
                     $variableValue
                 );
             }

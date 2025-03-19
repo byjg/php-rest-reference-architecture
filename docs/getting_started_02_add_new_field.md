@@ -1,20 +1,20 @@
 # Getting Started - Adding a new field to the Table
 
-Now we have the table `example_crud` created in the [previous tutorial](getting_started_01_create_table.md), 
+Now we have the table `example_crud` created in the [previous tutorial](getting_started_01_create_table.md),
 let's modify it to add a new field `status`.
 
 ## Changing the table
 
 We need to add the proper field in the `up` script and remove it in the `down` script.
 
-`db/migrations/up/00003.sql`:
+`db/migrations/up/00003-add-field-status.sql`:
 
 ```sql
 alter table example_crud
     add status varchar(10) null;
 ```
 
-`db/migrations/down/00002.sql`:
+`db/migrations/down/00002-rollback-field-status.sql`:
 
 ```sql
 alter table example_crud
@@ -23,7 +23,7 @@ alter table example_crud
 
 ## Run the migration
 
-```bash
+```shell
 APP_ENV=dev composer run migrate -- update
 ```
 
@@ -40,6 +40,8 @@ Open the file: `src/Model/ExampleCrud.php` and add the field `status`:
     #[OA\Property(type: "string", format: "string", nullable: true)]
     protected ?string $status = null;
 
+    /**
+     * @return string|null
      */
     public function getStatus(): ?string
     {
@@ -60,17 +62,17 @@ Open the file: `src/Model/ExampleCrud.php` and add the field `status`:
 
 ## Adding the field status to the `Repository`
 
-As we are just adding a new field, and we already updated the Model to support this new field 
+As we are just adding a new field, and we already updated the Model to support this new field
 we don't need to change the `Repository` class.
 
 ## Adding the field status to the `Rest`
 
-We just need to  allow the rest receive the new field. If we don't do it the API will throw an error.
+We just need to allow the rest receive the new field. If we don't do it the API will throw an error.
 
 Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to method `postExampleCrud()`:
 
 ```php
-    #[OA\RequestBody(
+#[OA\RequestBody(
         description: "The object DummyHex to be created",
         required: true,
         content: new OA\JsonContent(
@@ -90,13 +92,12 @@ Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to 
 ## Adding the field status to the `Test`
 
 We only need to change our method `getSample()` to return the status.
-Open the file: `tests/Functional/Rest/ExampleCrudTest.php`
+Open the file: `tests/Rest/ExampleCrudTest.php`
 
 ```php
-    protected function getSampleData($array = false)
+protected function getSampleData($array = false)
     {
         $sample = [
-
             'name' => 'name',
             'birthdate' => '2023-01-01 00:00:00',
             'code' => 1,
@@ -107,7 +108,7 @@ Open the file: `tests/Functional/Rest/ExampleCrudTest.php`
 
 ## Update the OpenAPI
 
-```bash
+```shell
 composer run openapi
 ```
 
@@ -115,11 +116,10 @@ composer run openapi
 
 If everything is ok, the tests should pass:
 
-```bash
+```shell
 composer run test
 ```
 
 ## Continue the tutorial
 
 [Next: Creating a rest method](getting_started_03_create_rest_method.md)
-

@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Functional\Rest;
+namespace Test\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
-use ByJG\Serializer\BinderObject;
+use ByJG\Serializer\ObjectCopy;
 use {{ namespace }}\Util\FakeApiRequester;
 use {{ namespace }}\Model\{{ className }};
 use {{ namespace }}\Repository\BaseRepository;
@@ -31,7 +31,7 @@ class {{ className }}Test extends BaseApiTestCase
             return $sample;
         }
 
-        BinderObject::bind($sample, $model = new {{ className }}());
+        ObjectCopy::copy($sample, $model = new {{ className }}());
         return $model;
     }
 

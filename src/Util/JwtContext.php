@@ -2,17 +2,17 @@
 
 namespace RestReferenceArchitecture\Util;
 
-use ByJG\Authenticate\Model\UserModel;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\JwtWrapper\JwtWrapper;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\Middleware\JwtMiddleware;
-use ByJG\Util\JwtWrapper;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Model\User;
@@ -23,11 +23,11 @@ class JwtContext
     protected static ?HttpRequest $request;
 
     /**
-     * @param ?UserModel $user
+     * @param ?User $user
      * @return array
      * @throws Error401Exception
      */
-    public static function createUserMetadata(?UserModel $user): array
+    public static function createUserMetadata(?User $user): array
     {
         if (is_null($user)) {
             throw new Error401Exception('Username or password is invalid');
@@ -51,9 +51,9 @@ class JwtContext
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function createToken($properties = [])
+    public static function createToken(array $properties = [])
     {
-        $jwt = Psr11::container()->get(JwtWrapper::class);
+        $jwt = Psr11::get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 60 * 60 * 24 * 7); // 7 Dias
         return $jwt->generateToken($jwtData);
     }

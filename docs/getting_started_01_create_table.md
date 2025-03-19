@@ -1,13 +1,12 @@
 # Getting Started - Creating a Table
 
-After [create the project](getting_started.md) you can start to create your own tables. 
+After [creating the project](getting_started.md), you're ready to create your own tables.
 
-## Create the table
+## Create the Table
 
-You need to create a new file in the `migrations` folder. The file name must be in the format `0000X.sql` where `X` is a number. 
-The number is used to order the execution of the scripts.
+Create a new migration file in the `migrations` folder using the format `0000X-message.sql`, where `X` represents a sequential number that determines execution order.
 
-Create a file `db/migrations/up/00002.sql` with the following content:
+1. Create an "up" migration file `db/migrations/up/00002-create-table-example.sql`:
 
 ```sql
 create table example_crud
@@ -19,30 +18,30 @@ create table example_crud
 );
 ```
 
-To have consistency, we need to create the down script. The down script is used to rollback the changes. 
-Create a file `db/migrations/down/00001.sql` with the following content:
+2. Create a corresponding "down" migration file `db/migrations/down/00001-rollback-table-example.sql` for rollbacks:
 
 ```sql
 drop table example_crud;
 ```
 
-## Run the migration
+## Run the Migration
 
-```bash
+Apply your migrations with:
+
+```shell
 APP_ENV=dev composer run migrate -- update
 ```
 
-The result should be:
-
+Expected output:
 ```text
 > Builder\Scripts::migrate
 > Command: update
 Doing migrate, 2
 ```
 
-If you want to rollback the changes:
+To rollback changes:
 
-```bash
+```shell
 APP_ENV=dev composer run migrate -- update --up-to=1
 ```
 
@@ -54,79 +53,55 @@ The result should be:
 Doing migrate, 1
 ```
 
-## Generate the CRUD
+Remember to run the migrate update again to apply the changes.
 
-```bash
-APP_ENV=dev composer run migrate -- update                              # Make sure DB is update
-APP_ENV=dev composer run codegen -- --table example_crud --save all     # (can be rest, model, test, repo, config)
+
+## Generate CRUD Components with the Code Generator
+
+Generate all necessary files for your new table:
+
+```shell
+# Ensure DB is updated first
+APP_ENV=dev composer run migrate -- update
+
+# Generate files (options: rest, model, test, repo, config, or all)
+APP_ENV=dev composer run codegen -- --table example_crud --save all
 ```
 
-This will create the following files:
+This creates:
+- `./src/Rest/ExampleCrudRest.php`
+- `./src/Model/ExampleCrud.php`
+- `./src/Repository/ExampleCrudRepository.php`
+- `./tests/Functional/Rest/ExampleCrudTest.php`
 
-- ./src/Rest/ExampleCrudRest.php
-- ./src/Model/ExampleCrud.php
-- ./src/Repository/ExampleCrudRepository.php
-- ./tests/Functional/Rest/ExampleCrudTest.php
+You have a manual step to generate the configuration by running the command below and adding it to `config/config-dev.php` 
 
-To finalize the setup we need to generate the config. 
-Run the command bellow copy it contents and save it into the file `config/config-dev.php`
-
-```bash
+```shell
 APP_ENV=dev composer run codegen -- --table example_crud config
 ```
 
-## First test
+## Run the Tests
 
-The CodeGen is able to create the Unit Test for you. 
+The automatically generated test is located at `tests/Functional/Rest/ExampleCrudTest.php`.
 
-It is available in the file `tests/Functional/Rest/ExampleCrudTest.php`.
+Run it:
 
-And you can run by invoking the command:
-
-```bash
+```shell
 composer run test
 ```
 
-This first test will fail because we don't have the endpoint yet.
+Initial tests **_will fail_** because we need to:
 
-```text
-ERRORS!
-Tests: 36, Assertions: 104, Errors: 2, Failures: 6.
-Script ./vendor/bin/phpunit handling the test event returned with error code 2
-```
+1. Generate OpenAPI documentation to create the endpoints:
 
-Let's create them now.
-
-## Generate the endpoints from the OpenAPI Documentation
-
-The OpenAPI documentation is generated automatically based on the code.
-It is an important step because the documentation is used to create the endpoints and map them to the code. 
-
-If we don't generate the OpenAPI documentation, the new endpoints will not be available.
-
-```bash 
+```shell
 composer run openapi
 ```
 
-## Fixing the unit test
+2. Fix the test data by updating `tests/Rest/ExampleCrudTest.php`:
 
-Now, the endpoint errors passed, but the unit test still failing.
-
-```bash
-composer run test
-```
-
-```text
-PDOException: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect datetime value: 'birthdate' for column 'birthdate' at row 1
-
-ERRORS!
-Tests: 36, Assertions: 111, Errors: 1.
-Script ./vendor/bin/phpunit handling the test event returned with error code 2
-```
-
-That's because the data used to test is not correct.
-
-Let's open the file `tests/Functional/Rest/ExampleCrudTest.php` and change the data to:
+ 
+Locate:
 
 ```php
     protected function getSampleData($array = false)
@@ -140,26 +115,24 @@ Let's open the file `tests/Functional/Rest/ExampleCrudTest.php` and change the d
 ...
 ```
 
-Let's change the line:
-
-```text
-            'birthdate' => 'birthdate',
+And Change:
+```php
+'birthdate' => 'birthdate',
 ```
 
-to
+To:
 
-```text
-            'birthdate' => '2023-01-01 00:00:00',
+```php
+'birthdate' => '2023-01-01 00:00:00',
 ```
 
-and run the unit test again:
-
-```bash
+3. Run the tests again:
+```shell
 composer run test
 ```
 
-And voila! The test passed!
+Your tests should now pass successfully!
 
-## Continue the Tutorial
+## Next Steps
 
-You can continue this tutorial by following the next step: [Add a new field](getting_started_02_add_new_field.md)
+Continue with [Adding a New Field](getting_started_02_add_new_field.md) to enhance your implementation.

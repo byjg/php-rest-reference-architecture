@@ -1,6 +1,9 @@
 <?php
 
 namespace RestReferenceArchitecture\Model;
+
+use ByJG\MicroOrm\Attributes\FieldAttribute;
+use ByJG\MicroOrm\Attributes\TableAttribute;
 use OpenApi\Attributes as OA;
 
 /**
@@ -8,6 +11,7 @@ use OpenApi\Attributes as OA;
  * @package RestReferenceArchitecture\Model
  */
 #[OA\Schema(required: ["id", "field"], type: "object", xml: new OA\Xml(name: "Dummy"))]
+#[TableAttribute("dummy")]
 class Dummy
 {
 
@@ -15,29 +19,31 @@ class Dummy
      * @var int|null
      */
     #[OA\Property(type: "integer", format: "int32")]
-    protected ?int $id = null;
+    #[FieldAttribute(primaryKey: true, fieldName: "id")]
+    protected int|null $id = null;
 
     /**
      * @var string|null
      */
     #[OA\Property(type: "string", format: "string")]
-    protected ?string $field = null;
+    #[FieldAttribute(fieldName: "field")]
+    protected string|null $field = null;
 
 
 
     /**
      * @return int|null
      */
-    public function getId(): ?int
+    public function getId(): int|null
     {
         return $this->id;
     }
 
     /**
      * @param int|null $id
-     * @return Dummy
+     * @return $this
      */
-    public function setId(?int $id): Dummy
+    public function setId(int|null $id): static
     {
         $this->id = $id;
         return $this;
@@ -46,16 +52,16 @@ class Dummy
     /**
      * @return string|null
      */
-    public function getField(): ?string
+    public function getField(): string|null
     {
         return $this->field;
     }
 
     /**
      * @param string|null $field
-     * @return Dummy
+     * @return $this
      */
-    public function setField(?string $field): Dummy
+    public function setField(string|null $field): static
     {
         $this->field = $field;
         return $this;

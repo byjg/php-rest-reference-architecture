@@ -1,6 +1,11 @@
 <?php
 
 namespace RestReferenceArchitecture\Model;
+
+use ByJG\MicroOrm\Attributes\FieldAttribute;
+use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
+use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use OpenApi\Attributes as OA;
 
 /**
@@ -8,6 +13,7 @@ use OpenApi\Attributes as OA;
  * @package RestReferenceArchitecture\Model
  */
 #[OA\Schema(required: ["id", "field"], type: "object", xml: new OA\Xml(name: "DummyHex"))]
+#[TableMySqlUuidPKAttribute("dummyhex")]
 class DummyHex
 {
 
@@ -15,35 +21,38 @@ class DummyHex
      * @var string|null
      */
     #[OA\Property(type: "string", format: "string")]
-    protected ?string $id = null;
+    #[FieldUuidAttribute(primaryKey: true, fieldName: "id")]
+    protected string|HexUuidLiteral|null $id = null;
 
     /**
      * @var string|null
      */
     #[OA\Property(type: "string", format: "string", nullable: true)]
-    protected ?string $uuid = null;
+    #[FieldAttribute(fieldName: "uuid", syncWithDb: false)]
+    protected string|null $uuid = null;
 
     /**
      * @var string|null
      */
     #[OA\Property(type: "string", format: "string")]
-    protected ?string $field = null;
+    #[FieldAttribute(fieldName: "field")]
+    protected string|null $field = null;
 
 
 
     /**
-     * @return string|null
+     * @return string|HexUuidLiteral|null
      */
-    public function getId(): ?string
+    public function getId(): string|HexUuidLiteral|null
     {
         return $this->id;
     }
 
     /**
-     * @param string|null $id
-     * @return DummyHex
+     * @param string|HexUuidLiteral|null $id
+     * @return $this
      */
-    public function setId(?string $id): DummyHex
+    public function setId(string|HexUuidLiteral|null $id): static
     {
         $this->id = $id;
         return $this;
@@ -52,16 +61,16 @@ class DummyHex
     /**
      * @return string|null
      */
-    public function getUuid(): ?string
+    public function getUuid(): string|null
     {
         return $this->uuid;
     }
 
     /**
      * @param string|null $uuid
-     * @return DummyHex
+     * @return $this
      */
-    public function setUuid(?string $uuid): DummyHex
+    public function setUuid(string|null $uuid): static
     {
         $this->uuid = $uuid;
         return $this;
@@ -70,16 +79,16 @@ class DummyHex
     /**
      * @return string|null
      */
-    public function getField(): ?string
+    public function getField(): string|null
     {
         return $this->field;
     }
 
     /**
      * @param string|null $field
-     * @return DummyHex
+     * @return $this
      */
-    public function setField(?string $field): DummyHex
+    public function setField(string|null $field): static
     {
         $this->field = $field;
         return $this;
