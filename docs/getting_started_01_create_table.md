@@ -90,7 +90,7 @@ Run it:
 composer run test
 ```
 
-Initial tests will fail because we need to:
+Initial tests **_will fail_** because we need to:
 
 1. Generate OpenAPI documentation to create the endpoints:
 
@@ -98,7 +98,7 @@ Initial tests will fail because we need to:
 composer run openapi
 ```
 
-2. Fix the test data by updating `tests/Functional/Rest/ExampleCrudTest.php`:
+2. Fix the test data by updating `tests/Rest/ExampleCrudTest.php`:
 
  
 Locate:

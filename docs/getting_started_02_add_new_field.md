@@ -92,7 +92,7 @@ Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to 
 ## Adding the field status to the `Test`
 
 We only need to change our method `getSample()` to return the status.
-Open the file: `tests/Functional/Rest/ExampleCrudTest.php`
+Open the file: `tests/Rest/ExampleCrudTest.php`
 
 ```php
 protected function getSampleData($array = false)
