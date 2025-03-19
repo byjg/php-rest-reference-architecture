@@ -115,6 +115,8 @@ class PostCreateScript
                 );
             }
         }
+
+        shell_exec("composer update");
     }
 
     /**
