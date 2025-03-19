@@ -68,7 +68,6 @@ class PostCreateScript
             'config/config-prod.php',
             'config/config-test.php',
             'docker-compose-dev.yml',
-            'docker-compose-image.yml'
         ];
         $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
