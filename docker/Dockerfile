@@ -1,4 +1,4 @@
-FROM byjg/php:8.1-fpm-nginx
+FROM byjg/php:8.3-fpm-nginx-2025.03
 
 # Refer to the documentation to setup the environment variables
 # https://github.com/byjg/docker-php/blob/master/docs/environment.md
@@ -10,7 +10,7 @@ WORKDIR /srv
 
 # Setup Docker/Fpm
 
-COPY ./docker/fpm/php /etc/php81/conf.d
+COPY ./docker/fpm/php /etc/php83/conf.d
 COPY ./docker/nginx/conf.d /etc/nginx/http.d/
 
 # Setup DateFile

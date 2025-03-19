@@ -29,7 +29,7 @@ Required PHP extensions:
 
 ```bash
 mkdir ~/tutorial
-composer create-project byjg/rest-reference-architecture ~/tutorial 4.9.*
+composer create-project byjg/rest-reference-architecture ~/tutorial 5.0.*
 ```
 
 or the latest development version:
