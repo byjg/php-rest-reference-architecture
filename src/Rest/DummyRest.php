@@ -70,7 +70,7 @@ class DummyRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $dummyRepo = Psr11::get(DummyRepository::class);
         $id = $request->param('id');
 
         $result = $dummyRepo->get($id);
@@ -156,7 +156,7 @@ class DummyRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $repo = Psr11::container()->get(DummyRepository::class);
+        $repo = Psr11::get(DummyRepository::class);
 
         $page = $request->get('page');
         $size = $request->get('size');
@@ -234,7 +234,7 @@ class DummyRest
         $model = new Dummy();
         ObjectCopy::copy($payload, $model);
 
-        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $dummyRepo = Psr11::get(DummyRepository::class);
         $dummyRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
@@ -290,7 +290,7 @@ class DummyRest
 
         $payload = OpenApiContext::validateRequest($request);
 
-        $dummyRepo = Psr11::container()->get(DummyRepository::class);
+        $dummyRepo = Psr11::get(DummyRepository::class);
         $model = $dummyRepo->get($payload['id']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');

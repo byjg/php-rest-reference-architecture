@@ -31,8 +31,8 @@ class BaseApiTestCase extends ApiTestCase
     public function getPsr7Request(): Request
     {
         $uri = Uri::getInstanceFromString()
-            ->withScheme(Psr11::container()->get("API_SCHEMA"))
-            ->withHost(Psr11::container()->get("API_SERVER"));
+            ->withScheme(Psr11::get("API_SCHEMA"))
+            ->withHost(Psr11::get("API_SERVER"));
 
         return Request::getInstance($uri);
     }
@@ -44,7 +44,7 @@ class BaseApiTestCase extends ApiTestCase
                 throw new Exception("This test can only be executed in test environment");
             }
             Migration::registerDatabase(MySqlDatabase::class);
-            $migration = new Migration(new Uri(Psr11::container()->get('DBDRIVER_CONNECTION')), __DIR__ . "/../../../db");
+            $migration = new Migration(new Uri(Psr11::get('DBDRIVER_CONNECTION')), __DIR__ . "/../../../db");
             $migration->prepareEnvironment();
             $migration->reset();
             self::$databaseReset = true;

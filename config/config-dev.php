@@ -59,7 +59,7 @@ return [
         ->toSingleton(),
 
     MailWrapperInterface::class => function () {
-        $apiKey = Psr11::container()->get('EMAIL_CONNECTION');
+        $apiKey = Psr11::get('EMAIL_CONNECTION');
         MailerFactory::registerMailer(MailgunApiWrapper::class);
         MailerFactory::registerMailer(FakeSenderWrapper::class);
 
@@ -119,7 +119,7 @@ return [
         ->toSingleton(),
 
     'CORS_SERVER_LIST' => function () {
-        return preg_split('/,(?![^{}]*})/', Psr11::container()->get('CORS_SERVERS'));
+        return preg_split('/,(?![^{}]*})/', Psr11::get('CORS_SERVERS'));
     },
 
     JwtMiddleware::class => DI::bind(JwtMiddleware::class)
@@ -160,7 +160,7 @@ return [
         if (Psr11::environment()->getCurrentEnvironment() != "prod") {
             $prefix = "[" . Psr11::environment()->getCurrentEnvironment() . "] ";
         }
-        return new Envelope(Psr11::container()->get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
+        return new Envelope(Psr11::get('EMAIL_TRANSACTIONAL_FROM'), $to, $prefix . $subject, $body, true);
     },
 
 ];

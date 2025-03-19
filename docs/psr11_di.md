@@ -25,7 +25,7 @@ return [
 To use in your code, you just need to set the environment variable `APP_ENV` to the environment name (`dev` or `prod`) and call:
 
 ```php
-Psr11::container()->get(BaseCacheEngine::class);
+Psr11::get(BaseCacheEngine::class);
 ```
 
 The application will return the correct implementation based on the environment.

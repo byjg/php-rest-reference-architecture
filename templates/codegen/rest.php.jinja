@@ -70,7 +70,7 @@ class {{ className }}Rest
     {
         JwtContext::requireAuthenticated($request);
 
-        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         $id = $request->param('id');
 
         $result = ${{ varTableName }}Repo->get($id);
@@ -156,7 +156,7 @@ class {{ className }}Rest
     {
         JwtContext::requireAuthenticated($request);
 
-        $repo = Psr11::container()->get({{ className }}Repository::class);
+        $repo = Psr11::get({{ className }}Repository::class);
 
         $page = $request->get('page');
         $size = $request->get('size');
@@ -236,7 +236,7 @@ class {{ className }}Rest
         $model = new {{ className }}();
         ObjectCopy::copy($payload, $model);
 
-        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         ${{ varTableName }}Repo->save($model);
 
         $response->write([ "id" => $model->getId()]);
@@ -292,7 +292,7 @@ class {{ className }}Rest
 
         $payload = OpenApiContext::validateRequest($request);
 
-        ${{ varTableName }}Repo = Psr11::container()->get({{ className }}Repository::class);
+        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         $model = ${{ varTableName }}Repo->get($payload['{{ fields.0.field }}']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');

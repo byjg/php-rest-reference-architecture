@@ -53,7 +53,7 @@ class JwtContext
      */
     public static function createToken(array $properties = [])
     {
-        $jwt = Psr11::container()->get(JwtWrapper::class);
+        $jwt = Psr11::get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 60 * 60 * 24 * 7); // 7 Dias
         return $jwt->generateToken($jwtData);
     }

@@ -70,7 +70,7 @@ class DummyHexRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $id = $request->param('id');
 
         $result = $dummyHexRepo->get($id);
@@ -156,7 +156,7 @@ class DummyHexRest
     {
         JwtContext::requireAuthenticated($request);
 
-        $repo = Psr11::container()->get(DummyHexRepository::class);
+        $repo = Psr11::get(DummyHexRepository::class);
 
         $page = $request->get('page');
         $size = $request->get('size');
@@ -234,7 +234,7 @@ class DummyHexRest
         $model = new DummyHex();
         ObjectCopy::copy($payload, $model);
 
-        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $dummyHexRepo->save($model);
 
         $response->write([ "id" => $model->getId()]);
@@ -290,7 +290,7 @@ class DummyHexRest
 
         $payload = OpenApiContext::validateRequest($request);
 
-        $dummyHexRepo = Psr11::container()->get(DummyHexRepository::class);
+        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $model = $dummyHexRepo->get($payload['id']);
         if (empty($model)) {
             throw new Error404Exception('Id not found');

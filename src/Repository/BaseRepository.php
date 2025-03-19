@@ -133,7 +133,7 @@ abstract class BaseRepository
     public static function getClosureNewUUID(): \Closure
     {
         return function () {
-            return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+            return new Literal("X'" . Psr11::get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
         };
     }
 
@@ -149,7 +149,7 @@ abstract class BaseRepository
      */
     public static function getUuid()
     {
-        return Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT insert(insert(insert(insert(hex(uuid_to_bin(uuid())),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')");
+        return Psr11::get(DbDriverInterface::class)->getScalar("SELECT insert(insert(insert(insert(hex(uuid_to_bin(uuid())),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')");
     }
 
     /**

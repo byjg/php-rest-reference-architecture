@@ -40,7 +40,7 @@ The configuration is loaded by the [byjg/config](https://github.com/byjg/config)
 You just need to:
 
 ```php
-Psr11::container()->get('WEB_SERVER');
+Psr11::get('WEB_SERVER');
 ```
 
 ## Defining the available environments

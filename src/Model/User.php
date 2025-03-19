@@ -100,7 +100,7 @@ class User extends UserModel
     {
         parent::__construct($name, $email, $username, $password, $admin);
 
-        $this->withPasswordDefinition(Psr11::container()->get(PasswordDefinition::class));
+        $this->withPasswordDefinition(Psr11::get(PasswordDefinition::class));
     }
 
 

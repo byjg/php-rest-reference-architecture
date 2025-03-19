@@ -122,7 +122,7 @@ class BaseScripts
             foreach ($args[0] as $arg) {
                 $variableValue = str_replace(
                     $arg,
-                    Psr11::container()->get(substr($arg,1, -1)),
+                    Psr11::get(substr($arg,1, -1)),
                     $variableValue
                 );
             }

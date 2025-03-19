@@ -157,7 +157,7 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
     // Previous code for payload validation...
     
     // Update the record status
-    $exampleCrudRepo = Psr11::container()->get(ExampleCrudRepository::class);
+    $exampleCrudRepo = Psr11::get(ExampleCrudRepository::class);
     $model = $exampleCrudRepo->get($payload["id"]);
     
     if (!$model) {
@@ -238,7 +238,7 @@ public function testUpdateStatus()
     // $this->assertEquals('ok', $responseData['result']);
     
     // Verify the database was updated correctly
-    $repository = Psr11::container()->get(ExampleCrudRepository::class);
+    $repository = Psr11::get(ExampleCrudRepository::class);
     $updatedRecord = $repository->get($recordId);
     $this->assertEquals($newStatus, $updatedRecord->getStatus());
 }

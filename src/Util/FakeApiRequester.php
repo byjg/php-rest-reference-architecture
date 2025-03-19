@@ -51,10 +51,10 @@ class FakeApiRequester extends AbstractRequester
      */
     protected function handleRequest(RequestInterface $request): ResponseInterface
     {
-        $mock = new MockRequestHandler(Psr11::container()->get(LoggerInterface::class));
-        $mock->withMiddleware(Psr11::container()->get(JwtMiddleware::class));
+        $mock = new MockRequestHandler(Psr11::get(LoggerInterface::class));
+        $mock->withMiddleware(Psr11::get(JwtMiddleware::class));
         $mock->withRequestObject($request);
-        $mock->handle(Psr11::container()->get(OpenApiRouteList::class), false, false);
+        $mock->handle(Psr11::get(OpenApiRouteList::class), false, false);
 
         $httpClient = new MockClient($mock->getPsr7Response());
         return $httpClient->sendRequest($request);

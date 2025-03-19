@@ -30,7 +30,7 @@ class OpenApiContext
      */
     public static function validateRequest(HttpRequest $request, bool $allowNull = false)
     {
-        $schema = Psr11::container()->get(Schema::class);
+        $schema = Psr11::get(Schema::class);
 
         $path = $request->getRequestPath();
         $method = $request->server('REQUEST_METHOD');

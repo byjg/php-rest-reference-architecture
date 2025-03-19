@@ -223,7 +223,7 @@ class Scripts extends BaseScripts
         $save = in_array("--save", $arguments);
 
         /** @var DbDriverInterface $dbDriver */
-        $dbDriver = Psr11::container()->get(DbDriverInterface::class);
+        $dbDriver = Psr11::get(DbDriverInterface::class);
 
         $tableDefinition = $dbDriver->getIterator("EXPLAIN " . strtolower($table))->toArray();
         $tableIndexes = $dbDriver->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();

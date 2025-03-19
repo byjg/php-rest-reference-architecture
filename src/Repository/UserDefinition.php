@@ -18,7 +18,7 @@ class UserDefinition extends \ByJG\Authenticate\Definition\UserDefinition
         $this->markPropertyAsReadOnly("created");
         $this->markPropertyAsReadOnly("updated");
         $this->defineGenerateKeyClosure(function () {
-                    return new Literal("X'" . Psr11::container()->get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+                    return new Literal("X'" . Psr11::get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
                 }
         );
 

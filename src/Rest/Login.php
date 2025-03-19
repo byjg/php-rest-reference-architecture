@@ -57,7 +57,7 @@ class Login
     {
         $json = OpenApiContext::validateRequest($request);
 
-        $users = Psr11::container()->get(UsersDBDataset::class);
+        $users = Psr11::get(UsersDBDataset::class);
         $user = $users->isValidUser($json["username"], $json["password"]);
         $metadata = JwtContext::createUserMetadata($user);
 
@@ -107,7 +107,7 @@ class Login
             throw new Error401Exception("You only can refresh the token 5 minutes before expire");
         }
 
-        $users = Psr11::container()->get(UsersDBDataset::class);
+        $users = Psr11::get(UsersDBDataset::class);
         $user = $users->getById(new HexUuidLiteral(JwtContext::getUserId()));
 
         $metadata = JwtContext::createUserMetadata($user);
@@ -149,7 +149,7 @@ class Login
     {
         $json = OpenApiContext::validateRequest($request);
 
-        $users = Psr11::container()->get(UsersDBDataset::class);
+        $users = Psr11::get(UsersDBDataset::class);
         $user = $users->getByEmail($json["email"]);
 
         $token = BaseRepository::getUuid();
@@ -163,8 +163,8 @@ class Login
             $users->save($user);
 
             // Send email using MailWrapper
-            $mailWrapper = Psr11::container()->get(MailWrapperInterface::class);
-            $envelope = Psr11::container()->get('MAIL_ENVELOPE', [$json["email"], "RestReferenceArchitecture - Password Reset", "email_code.html", [
+            $mailWrapper = Psr11::get(MailWrapperInterface::class);
+            $envelope = Psr11::get('MAIL_ENVELOPE', [$json["email"], "RestReferenceArchitecture - Password Reset", "email_code.html", [
                 "code" => trim(chunk_split($code, 1, ' ')),
                 "expire" => 10
             ]]);
@@ -179,7 +179,7 @@ class Login
     {
         $json = OpenApiContext::validateRequest($request);
 
-        $users = Psr11::container()->get(UsersDBDataset::class);
+        $users = Psr11::get(UsersDBDataset::class);
         $user = $users->getByEmail($json["email"]);
 
         if (is_null($user)) {
