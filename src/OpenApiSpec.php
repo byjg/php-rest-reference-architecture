@@ -25,12 +25,15 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'error',
     properties: [
-        new OA\Property('error', properties: [
-            new OA\Property(property: 'type', description: 'A class de Exceção', type: 'string'),
-            new OA\Property(property: 'message', description: 'A mensagem de erro', type: 'string'),
-            new OA\Property(property: 'file', description: 'O arquivo que gerou o erro', type: 'string'),
-            new OA\Property(property: 'line', description: 'A linha do erro', type: 'integer'),
-        ])
+        new OA\Property(
+            'error',
+            properties: [
+                new OA\Property(property: 'type', description: 'A class de Exceção', type: 'string'),
+                new OA\Property(property: 'message', description: 'A mensagem de erro', type: 'string'),
+                new OA\Property(property: 'file', description: 'O arquivo que gerou o erro', type: 'string'),
+                new OA\Property(property: 'line', description: 'A linha do erro', type: 'integer'),
+            ]
+        )
     ],
     type: 'object'
 )]

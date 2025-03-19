@@ -2,11 +2,14 @@
 
 ## Requirements
 
-Docker engine, PHP and an IDE.
+- **Docker Engine**: For containerizing your application
+- **PHP 8.3+**: For local development
+- **IDE**: Any development environment of your choice
 
-You'll need PHP 8.1 or higher installed in your machine. Preferrable the same version as you want to work with your project. 
+> **Windows Users**: If you don't have PHP installed in WSL2, please follow the [Windows](windows.md) guide.
 
-Required PHP extensions:
+### Required PHP Extensions
+
 - ctype
 - curl
 - dom
@@ -27,19 +30,21 @@ Required PHP extensions:
 
 ## Installation
 
-```bash
+Choose one of the following installation methods:
+
+```shell script
+# Standard installation
 mkdir ~/tutorial
 composer create-project byjg/rest-reference-architecture ~/tutorial 5.0.*
-```
 
-or the latest development version:
-
-```bash
+# OR Latest development version
 mkdir ~/tutorial
 composer -sdev create-project byjg/rest-reference-architecture ~/tutorial master
 ```
 
-This process will ask some questions to setup your project. You can use the following below as a guide:
+### Setup Configuration
+
+The installation will prompt you for configuration details:
 
 ```text
 > Builder\PostCreateScript::run
@@ -48,43 +53,38 @@ This process will ask some questions to setup your project. You can use the foll
  Answer the questions below
 ========================================================
 
-Project Directory: /tmp/tutorial
-PHP Version [7.4]: 8.1
+Project Directory: ~/tutorial
+PHP Version [8.3]: 8.3
 Project namespace [MyRest]: Tutorial
 Composer name [me/myrest]: 
 MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: 
-Timezone [UTC]: 
-Press <ENTER> to continue
+Timezone [UTC]:
 ```
 
-Tip: The docker composer will create MySQL container named as `mysql-container` ([ref](https://github.com/byjg/php-rest-template/blob/master/docker-compose-dev.yml#L20)). 
-If you want to be able to access your MySQL container from your machine you need to add the following entry in your `/etc/hosts` file:
-
+**Tip**: To access the MySQL container locally, add this to your `/etc/hosts` file:
 ```
 127.0.0.1  mysql-container
 ```
 
-
 ## Running the Project
 
-```bash
+```shell
 cd ~/tutorial
 docker-compose -f docker-compose-dev.yml up -d
 ```
 
-## Creating the Database
+## Database Setup
 
-```bash
-# Important this will destroy ALL DB data and create a fresh new database based on the migration
+```shell
+# Create a fresh database (warning: destroys existing data)
 APP_ENV=dev composer run migrate -- reset --yes
 
-# *IF* your local PHP is not properly setup you can run this instead:
-# export CONTAINER_NAME=# it is the second part of the composer name. e.g. me/myrest, it should be "myrest"
+# Alternative if local PHP isn't configured:
+# export CONTAINER_NAME=myrest  # second part of your composer name
 # docker exec -it $CONTAINER_NAME composer run migrate -- reset --yes
 ```
 
-The result should be:
-
+Expected output:
 ```text
 > Builder\Scripts::migrate
 > Command: reset
@@ -92,32 +92,31 @@ Doing reset, 0
 Doing migrate, 1
 ```
 
-## Testing the Project
+## Verify Installation
 
-```bash
+```shell script
 curl http://localhost:8080/sample/ping
 ```
 
-The result:
-
+Expected response:
 ```json
 {"result":"pong"}
 ```
 
-## Running the Unit Tests
+## Run Tests
 
-```bash
-APP_ENV=dev composer run test    # Alternatively you can run `./vendor/bin/phpunit`
-
+```shell script
+APP_ENV=dev composer run test
 # OR: docker exec -it $CONTAINER_NAME composer run test
 ```
 
-## Accessing the Swagger Documentation
+## Documentation
 
-```bash
+Access the Swagger documentation:
+```shell script
 open http://localhost:8080/docs
 ```
 
-## Continue the Tutorial
+## Next Steps
 
-You can continue this tutorial by following the next step: [creating a new table and crud](getting_started_01_create_table.md).
+Continue with [creating a new table and CRUD operations](getting_started_01_create_table.md).

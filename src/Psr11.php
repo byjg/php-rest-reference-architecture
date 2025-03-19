@@ -8,7 +8,6 @@ use ByJG\Config\Definition;
 use ByJG\Config\Environment;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
-use ByJG\Config\Exception\InvalidDateException;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class Psr11
@@ -18,11 +17,10 @@ class Psr11
 
     /**
      * @param string|null $env
-     * @return Container
+     * @return Container|null
      * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws InvalidArgumentException
-     * @throws InvalidDateException
      */
     public static function container(?string $env = null): ?Container
     {
@@ -53,7 +51,12 @@ class Psr11
                 ->addEnvironment($test)
                 ->addEnvironment($staging)
                 ->addEnvironment($prod)
-            ;
+                ->withOSEnvironment(
+                    [
+                    'TAG_VERSION',
+                    'TAG_COMMIT',
+                    ]
+                );
         }
 
         return self::$definition;

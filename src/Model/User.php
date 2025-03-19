@@ -2,12 +2,17 @@
 
 namespace RestReferenceArchitecture\Model;
 
+use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Model\UserModel;
 use ByJG\Authenticate\Model\UserPropertiesModel;
+use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use Exception;
 use InvalidArgumentException;
 use OpenApi\Attributes as OA;
+use RestReferenceArchitecture\Psr11;
 
+#[TableAttribute("users")]
 #[OA\Schema(required: ["email"], type: "object", xml: new OA\Xml(name: "User"))]
 class User extends UserModel
 {
@@ -89,10 +94,13 @@ class User extends UserModel
      * @param string $username
      * @param string $password
      * @param string $admin
+     * @throws Exception
      */
     public function __construct(string $name = "", string $email = "", string $username = "", string $password = "", string $admin = "no")
     {
         parent::__construct($name, $email, $username, $password, $admin);
+
+        $this->withPasswordDefinition(Psr11::container()->get(PasswordDefinition::class));
     }
 
 
@@ -173,9 +181,11 @@ class User extends UserModel
      */
     public function setPassword(?string $password): void
     {
-        // Password len equals to 40 means that the password is already encrypted with sha1
-        if (!empty($password) && strlen($password) != 40 && !empty($this->passwordDefinition) && !$this->passwordDefinition->matchPassword($password)) {
-            throw new InvalidArgumentException("Password does not match the password definition");
+        if (!empty($this->passwordDefinition) && !empty($password) && strlen($password) != 40) {
+            $result = $this->passwordDefinition->matchPassword($password);
+            if ($result != PasswordDefinition::SUCCESS) {
+                throw new InvalidArgumentException("Password does not match the password definition [{$result}]");
+            }
         }
         $this->password = $password;
     }

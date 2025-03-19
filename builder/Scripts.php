@@ -11,6 +11,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
 use ByJG\DbMigration\Exception\InvalidMigrationFile;
 use ByJG\DbMigration\Migration;
+use ByJG\JinjaPhp\Exception\TemplateParseException;
 use ByJG\JinjaPhp\Loader\FileSystemLoader;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
@@ -39,7 +40,7 @@ class Scripts extends BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function migrate(Event $event)
+    public static function migrate(Event $event): void
     {
         $migrate = new Scripts();
         $migrate->runMigrate($event->getArguments());
@@ -53,7 +54,7 @@ class Scripts extends BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function genOpenApiDocs(Event $event)
+    public static function genOpenApiDocs(Event $event): void
     {
         $build = new Scripts();
         $build->runGenOpenApiDocs($event->getArguments());
@@ -62,14 +63,16 @@ class Scripts extends BaseScripts
     /**
      * @param Event $event
      * @return void
+     * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws TemplateParseException
      */
-    public static function codeGenerator(Event $event)
+    public static function codeGenerator(Event $event): void
     {
         $build = new Scripts();
         $build->runCodeGenerator($event->getArguments());
@@ -86,6 +89,7 @@ class Scripts extends BaseScripts
      * @throws ReflectionException
      * @throws ConfigException
      * @throws InvalidDateException
+     * @throws Exception
      */
     public function runMigrate($arguments): void
     {
@@ -179,12 +183,14 @@ class Scripts extends BaseScripts
     /**
      * @param array $arguments
      * @return void
+     * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
      * @throws InvalidArgumentException
+     * @throws InvalidDateException
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws TemplateParseException
      * @throws Exception
      */
     public function runCodeGenerator(array $arguments): void

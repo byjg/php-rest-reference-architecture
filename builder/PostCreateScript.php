@@ -6,16 +6,17 @@ use ByJG\AnyDataset\Db\Factory;
 use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\Util\Uri;
 use Composer\Script\Event;
+use Exception;
 use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 class PostCreateScript
 {
-    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone)
+    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone): void
     {
         // ------------------------------------------------
-        // Defining function to interatively walking through the directories
+        // Defining function to interactively walking through the directories
         $directory = new RecursiveDirectoryIterator($workdir);
         $filter = new RecursiveCallbackFilterIterator($directory, function ($current/*, $key, $iterator*/) {
             // Skip hidden files and directories.
@@ -88,12 +89,12 @@ class PostCreateScript
         $objects = new RecursiveIteratorIterator($filter);
         foreach ($objects as $name => $object) {
             $contents = file_get_contents($name);
-            if (strpos($contents, 'RestReferenceArchitecture') !== false) {
+            if (str_contains($contents, 'RestReferenceArchitecture')) {
                 echo "$name\n";
 
                 // Replace inside Quotes
                 $contents = preg_replace(
-                    "/([\'\"])RestReferenceArchitecture(.*?[\'\"])/",
+                    "/(['\"])RestReferenceArchitecture(.*?['\"])/",
                     '$1' . str_replace('\\', '\\\\\\\\', $namespace) . '$2',
                     $contents
                 );
@@ -117,6 +118,11 @@ class PostCreateScript
         }
     }
 
+    /**
+     * @param Event $event
+     * @return void
+     * @throws Exception
+     */
     public static function run(Event $event)
     {
         $workdir = realpath(__DIR__ . '/..');
@@ -129,19 +135,19 @@ class PostCreateScript
             if (in_array($arg, $validPHPVersions)) {
                 return $arg;
             }
-            throw new \Exception('Only the PHP versions ' . implode(', ', $validPHPVersions) . ' are supported');
+            throw new Exception('Only the PHP versions ' . implode(', ', $validPHPVersions) . ' are supported');
         };
 
         $validateNamespace = function ($arg) {
             if (empty($arg) || !preg_match('/^[A-Z][a-zA-Z0-9]*$/', $arg)) {
-                throw new \Exception('Namespace must be one word in CamelCase');
+                throw new Exception('Namespace must be one word in CamelCase');
             }
             return $arg;
         };
 
         $validateComposer = function ($arg) {
             if (empty($arg) || !preg_match('/^[a-z0-9-]+\/[a-z0-9-]+$/', $arg)) {
-                throw new \Exception('Invalid Composer name');
+                throw new Exception('Invalid Composer name');
             }
             return $arg;
         };
@@ -149,7 +155,7 @@ class PostCreateScript
         $validateURI = function ($arg) {
             $uri = new Uri($arg);
             if (empty($uri->getScheme())) {
-                throw new \Exception('Invalid URI');
+                throw new Exception('Invalid URI');
             }
             Factory::getRegisteredDrivers($uri->getScheme());
             return $arg;
@@ -157,7 +163,7 @@ class PostCreateScript
 
         $validateTimeZone = function ($arg) {
             if (empty($arg) || !in_array($arg, timezone_identifiers_list())) {
-                throw new \Exception('Invalid Timezone');
+                throw new Exception('Invalid Timezone');
             }
             return $arg;
         };
