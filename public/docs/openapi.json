@@ -962,17 +962,8 @@
                 }
             },
             "error": {
-                "required": [
-                    "error"
-                ],
                 "properties": {
                     "error": {
-                        "required": [
-                            "type",
-                            "message",
-                            "file",
-                            "line"
-                        ],
                         "properties": {
                             "type": {
                                 "description": "A class de Exceção",
@@ -1008,5 +999,27 @@
                 "in": "header"
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Dummyhex",
+            "description": "Dummyhex"
+        },
+        {
+            "name": "Dummy",
+            "description": "Dummy"
+        },
+        {
+            "name": "Login",
+            "description": "Login"
+        },
+        {
+            "name": "zz_sample",
+            "description": "zz_sample"
+        },
+        {
+            "name": "zz_sampleprotected",
+            "description": "zz_sampleprotected"
+        }
+    ]
 }
