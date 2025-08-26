@@ -2,7 +2,7 @@
 -- Migration: Create table clientes
 -- Description: Creates a table for client management
 -- Author: Felipe Correa
--- Date: 2024-12-25
+-- Date: 2025-08-26
 CREATE TABLE clientes
 (
     id            INT AUTO_INCREMENT NOT NULL PRIMARY KEY COMMENT 'Identificador único do cliente',

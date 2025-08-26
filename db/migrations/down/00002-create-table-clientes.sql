@@ -2,5 +2,5 @@
 -- Migration: Rollback create table clientes
 -- Description: Removes the clientes table
 -- Author: Felipe Correa
--- Date: 2024-12-25
+-- Date: 2025-08-26
 DROP TABLE IF EXISTS clientes;
