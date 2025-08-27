@@ -24,9 +24,10 @@ class ClientesTest extends BaseApiTestCase
         $sample = [
 
             'nome' => 'nome',
-            'email' => 'email',
+            'email' => 'email@teste.com',
             'telefone' => 'telefone',
-            'cpf' => 'cpf',
+            'cpf' => '1234567890',
+            'status' => 'ativo',
             'dataCadastro' => '2025-08-26 00:00:00',
         ];
 

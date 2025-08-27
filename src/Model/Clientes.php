@@ -60,7 +60,16 @@ class Clientes
     #[FieldAttribute(fieldName: "data_cadastro")]
     protected string|null $dataCadastro = null;
 
-
+    /**
+     * @var string|null
+     */
+    #[OA\Property(
+        description: "Status do cliente no sistema",
+        type: "string",
+        default: "ativo",
+        enum: ["ativo", "inativo", "pendente", "bloqueado"])]
+    #[FieldAttribute(fieldName: "status")]
+    protected ?string $status = null;
 
     /**
      * @return int|null
@@ -170,5 +179,22 @@ class Clientes
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string|null $status
+     * @return $this
+     */
+    public function setStatus(?string $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
 
 }

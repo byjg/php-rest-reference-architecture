@@ -203,6 +203,16 @@
                                         "type": "string",
                                         "format": "date-time",
                                         "nullable": true
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "default": "ativo",
+                                        "enum": [
+                                            "ativo",
+                                            "inativo",
+                                            "pendente",
+                                            "bloqueado"
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -1140,6 +1150,17 @@
                         "type": "string",
                         "format": "date-time",
                         "nullable": true
+                    },
+                    "status": {
+                        "description": "Status do cliente no sistema",
+                        "type": "string",
+                        "default": "ativo",
+                        "enum": [
+                            "ativo",
+                            "inativo",
+                            "pendente",
+                            "bloqueado"
+                        ]
                     }
                 },
                 "type": "object",

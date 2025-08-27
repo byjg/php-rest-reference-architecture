@@ -209,7 +209,8 @@ class ClientesRest
                 new OA\Property(property: "email", type: "string", format: "string"),
                 new OA\Property(property: "telefone", type: "string", format: "string", nullable: true),
                 new OA\Property(property: "cpf", type: "string", format: "string", nullable: true),
-                new OA\Property(property: "dataCadastro", type: "string", format: "date-time", nullable: true)
+                new OA\Property(property: "dataCadastro", type: "string", format: "date-time", nullable: true),
+                new OA\Property(property: "status", type: "string", default: "ativo", enum: ["ativo", "inativo", "pendente", "bloqueado"])
             ]
         )
     )]
