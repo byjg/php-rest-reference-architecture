@@ -32,7 +32,7 @@ use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyHexRepository;
 use RestReferenceArchitecture\Repository\DummyRepository;
 use RestReferenceArchitecture\Repository\UserDefinition as UserDefinitionAlias;
-use RestReferenceArchitecture\Repository\ClienteRepository;
+use RestReferenceArchitecture\Repository\ClientesRepository;
 
 return [
 
@@ -148,7 +148,7 @@ return [
 //        ->withMethodCall("withDetailedErrorHandler", [])
         ->toSingleton(),
 
-    ClienteRepository::class => DI::bind(ClienteRepository::class)
+    ClientesRepository::class => DI::bind(ClientesRepository::class)
         ->withInjectedConstructor()
         ->toSingleton(),
 

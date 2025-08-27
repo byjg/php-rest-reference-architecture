@@ -65,32 +65,6 @@ class ClientesRepository extends BaseRepository
     }
 
     /**
-     * @param mixed $email
-     * @return null|Clientes[]
-     */
-    public function getByEmail($email)
-    {
-        $query = Query::getInstance()
-            ->table('clientes')
-            ->where('clientes.email = :value', ['value' => $email]);
-        $result = $this->repository->getByQuery($query);
-        return $result;
-    }
-
-    /**
-     * @param mixed $cpf
-     * @return null|Clientes[]
-     */
-    public function getByCpf($cpf)
-    {
-        $query = Query::getInstance()
-            ->table('clientes')
-            ->where('clientes.cpf = :value', ['value' => $cpf]);
-        $result = $this->repository->getByQuery($query);
-        return $result;
-    }
-
-    /**
      * @param mixed $dataCadastro
      * @return null|Clientes[]
      */
