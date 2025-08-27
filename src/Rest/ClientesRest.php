@@ -317,8 +317,8 @@ class ClientesRest
         content: new OA\JsonContent(
             required: ["id", "status"],
             properties: [
-                new OA\Property(property: "id", type: "integer", format: "int32", description: "Cliente ID"),
-                new OA\Property(property: "status", type: "string", enum: ["ativo", "inativo", "pendente", "bloqueado"], description: "New status value")
+                new OA\Property(property: "id", description: "Cliente ID", type: "integer", format: "int32"),
+                new OA\Property(property: "status", description: "New status value", type: "string", enum: ["ativo", "inativo", "pendente", "bloqueado"])
             ]
         )
     )]
@@ -326,9 +326,10 @@ class ClientesRest
         response: 200,
         description: "Status updated successfully",
         content: new OA\JsonContent(
-            required: ["result"],
+            required: ["result", "message"],
             properties: [
-                new OA\Property(property: "result", type: "string", description: "Operation result")
+                new OA\Property(property: "result", description: "Operation result", type: "string"),
+                new OA\Property(property: "message", description: "Success message", type: "string")
             ]
         )
     )]
@@ -343,7 +344,7 @@ class ClientesRest
     public function putClienteStatus(HttpResponse $response, HttpRequest $request): void
     {
         // 1. Autenticação
-        JwtContext::requireAuthenticated($request);
+        JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         // 2. Validação de entrada
         $payload = OpenApiContext::validateRequest($request);
@@ -372,7 +373,7 @@ class ClientesRest
     /**
      * Find and validate cliente exists
      */
-    private function findAndValidateCliente(int $id): void
+    private function findAndValidateCliente(int $id): Clientes
     {
         $clienteRepo = Psr11::get(ClientesRepository::class);
         $model = $clienteRepo->get($id);

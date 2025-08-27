@@ -304,11 +304,16 @@
                             "application/json": {
                                 "schema": {
                                     "required": [
-                                        "result"
+                                        "result",
+                                        "message"
                                     ],
                                     "properties": {
                                         "result": {
                                             "description": "Operation result",
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "description": "Success message",
                                             "type": "string"
                                         }
                                     },

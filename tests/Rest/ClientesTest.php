@@ -24,11 +24,10 @@ class ClientesTest extends BaseApiTestCase
     protected function getSampleData($array = false)
     {
         $sample = [
-
-            'nome' => 'nome',
-            'email' => 'email@teste.com',
-            'telefone' => 'telefone',
-            'cpf' => '1234567890',
+            'nome' => 'João Silva ' . uniqid(),
+            'email' => 'joao.silva.' . uniqid() . '@email.com',
+            'telefone' => '(11) 9' . rand(1000, 9999) . '-' . rand(1000, 9999),
+            'cpf' => rand(100, 999) . '.' . rand(100, 999) . '.' . rand(100, 999) . '-' . rand(10, 99),
             'status' => 'ativo',
             'dataCadastro' => '2025-08-26 00:00:00',
         ];
@@ -65,7 +64,7 @@ class ClientesTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/clientes/1")
+            ->withPath("/clientes")
             ->assertResponseCode(401);
         $this->assertRequest($request);
     }
@@ -249,24 +248,37 @@ class ClientesTest extends BaseApiTestCase
 
     public function testPutStatusUnauthorized()
     {
-        $this->assertRequest(
-            (new FakeApiRequester())
-                ->withMethod('PUT')
-                ->withPath("/clientes/status")
-                ->withRequestBody(json_encode(['id' => 1, 'status' => 'ativo']))
-                ->assertResponseCode(401)
-        );
+        $this->expectException(Error401Exception::class);
+        $this->expectExceptionMessage('Absent authorization token');
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/clientes/status")
+            ->withRequestBody(json_encode(['id' => 1, 'status' => 'ativo']))
+            ->assertResponseCode(401);
+        $this->assertRequest($request);
     }
 
     public function testPutStatusInsufficientPrivileges()
     {
-        $this->assertRequest(
-            Credentials::requestLogin(Credentials::getUser())
-                ->withMethod('PUT')
-                ->withPath("/clientes/status")
-                ->withRequestBody(json_encode(['id' => 1, 'status' => 'ativo']))
-                ->assertResponseCode(403)
-        );
+        $this->expectException(Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/clientes/status")
+            ->withRequestBody(json_encode(['id' => 1, 'status' => 'ativo']))
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+            ->assertResponseCode(403);
+        $this->assertRequest($request);
     }
 
 }
