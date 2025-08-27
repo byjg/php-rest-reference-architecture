@@ -258,6 +258,79 @@
                 ]
             }
         },
+        "/clientes/status": {
+            "put": {
+                "tags": [
+                    "Clientes"
+                ],
+                "description": "Atualizar status do cliente (ativar/desativar/bloquear)",
+                "operationId": "PUT::/clientes/status::RestReferenceArchitecture\\Rest\\ClientesRest::putClienteStatus",
+                "requestBody": {
+                    "description": "The status update request",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "description": "Cliente ID",
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "status": {
+                                        "description": "New status value",
+                                        "type": "string",
+                                        "enum": [
+                                            "ativo",
+                                            "inativo",
+                                            "pendente",
+                                            "bloqueado"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "result"
+                                    ],
+                                    "properties": {
+                                        "result": {
+                                            "description": "Operation result",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid status value"
+                    },
+                    "404": {
+                        "description": "Cliente not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
         "/dummyhex/{id}": {
             "get": {
                 "tags": [

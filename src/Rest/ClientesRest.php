@@ -171,7 +171,7 @@ class ClientesRest
 
 
     /**
-     * Create a new Clientes 
+     * Create a new Clientes
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -202,7 +202,7 @@ class ClientesRest
         description: "The object Clientes to be created",
         required: true,
         content: new OA\JsonContent(
-            required: [ "nome", "email" ],
+            required: ["nome", "email"],
             properties: [
 
                 new OA\Property(property: "nome", type: "string", format: "string"),
@@ -218,7 +218,7 @@ class ClientesRest
         response: 200,
         description: "The object rto be created",
         content: new OA\JsonContent(
-            required: [ "id" ],
+            required: ["id"],
             properties: [
 
                 new OA\Property(property: "id", type: "integer", format: "int32")
@@ -235,19 +235,19 @@ class ClientesRest
         JwtContext::requireRole($request, User::ROLE_ADMIN);
 
         $payload = OpenApiContext::validateRequest($request);
-        
+
         $model = new Clientes();
         ObjectCopy::copy($payload, $model);
 
         $clientesRepo = Psr11::get(ClientesRepository::class);
         $clientesRepo->save($model);
 
-        $response->write([ "id" => $model->getId()]);
+        $response->write(["id" => $model->getId()]);
     }
 
 
     /**
-     * Update an existing Clientes 
+     * Update an existing Clientes
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -303,6 +303,112 @@ class ClientesRest
         ObjectCopy::copy($payload, $model);
 
         $clientesRepo->save($model);
+    }
+
+    #[OA\Put(
+        path: "/clientes/status",
+        description: "Atualizar status do cliente (ativar/desativar/bloquear)",
+        security: [["jwt-token" => []]],
+        tags: ["Clientes"]
+    )]
+    #[OA\RequestBody(
+        description: "The status update request",
+        required: true,
+        content: new OA\JsonContent(
+            required: ["id", "status"],
+            properties: [
+                new OA\Property(property: "id", type: "integer", format: "int32", description: "Cliente ID"),
+                new OA\Property(property: "status", type: "string", enum: ["ativo", "inativo", "pendente", "bloqueado"], description: "New status value")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Status updated successfully",
+        content: new OA\JsonContent(
+            required: ["result"],
+            properties: [
+                new OA\Property(property: "result", type: "string", description: "Operation result")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: "Invalid status value"
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Cliente not found"
+    )]
+    public function putClienteStatus(HttpResponse $response, HttpRequest $request): void
+    {
+        // 1. Autenticação
+        JwtContext::requireAuthenticated($request);
+
+        // 2. Validação de entrada
+        $payload = OpenApiContext::validateRequest($request);
+        $this->validateStatusValue($payload['status']);
+
+        // 3. Lógica de negócio
+        $model = $this->findAndValidateCliente($payload['id']);
+        $this->updateClienteStatus($model, $payload['status']);
+
+        // 4. Resposta padronizada
+        $this->sendSuccessResponse($response, $payload['status']);
+    }
+
+    /**
+     * Validate status value against business rules
+     */
+    private function validateStatusValue(string $status): void
+    {
+        $validStatuses = ['ativo', 'inativo', 'pendente', 'bloqueado'];
+
+        if (!in_array($status, $validStatuses)) {
+            throw new Error400Exception('Status inválido. Deve ser um dos: ' . implode(', ', $validStatuses));
+        }
+    }
+
+    /**
+     * Find and validate cliente exists
+     */
+    private function findAndValidateCliente(int $id): void
+    {
+        $clienteRepo = Psr11::get(ClientesRepository::class);
+        $model = $clienteRepo->get($id);
+
+        if (empty($model)) {
+            throw new Error404Exception('Cliente não encontrado');
+        }
+
+        return $model;
+    }
+
+    /**
+     * Update cliente status with business logic
+     */
+    private function updateClienteStatus(Clientes $model, string $status): void
+    {
+        // Regras de negócio específicas
+        if ($status === 'bloqueado' && $model->getStatus() === 'ativo') {
+            // Log da ação de bloqueio
+            // Notificar cliente sobre bloqueio
+        }
+
+        $model->setStatus($status);
+        $clienteRepo = Psr11::get(ClientesRepository::class);
+        $clienteRepo->save($model);
+    }
+
+    /**
+     * Send standardized success response
+     */
+    private function sendSuccessResponse(HttpResponse $response, string $status): void
+    {
+        $response->write([
+            "result" => "ok",
+            "message" => "Status atualizado com sucesso para: " . $status
+        ]);
     }
 
 }

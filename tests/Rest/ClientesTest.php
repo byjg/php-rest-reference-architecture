@@ -5,6 +5,8 @@ namespace Test\Rest;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\ObjectCopy;
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Repository\ClientesRepository;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 use RestReferenceArchitecture\Model\Clientes;
 use RestReferenceArchitecture\Repository\BaseRepository;
@@ -40,7 +42,6 @@ class ClientesTest extends BaseApiTestCase
     }
 
 
-
     public function testGetUnauthorized()
     {
         $this->expectException(Error401Exception::class);
@@ -51,8 +52,7 @@ class ClientesTest extends BaseApiTestCase
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/clientes/1")
-            ->assertResponseCode(401)
-        ;
+            ->assertResponseCode(401);
         $this->assertRequest($request);
     }
 
@@ -66,8 +66,7 @@ class ClientesTest extends BaseApiTestCase
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/clientes/1")
-            ->assertResponseCode(401)
-        ;
+            ->assertResponseCode(401);
         $this->assertRequest($request);
     }
 
@@ -82,8 +81,7 @@ class ClientesTest extends BaseApiTestCase
             ->withMethod('POST')
             ->withPath("/clientes")
             ->withRequestBody(json_encode($this->getSampleData(true)))
-            ->assertResponseCode(401)
-        ;
+            ->assertResponseCode(401);
         $this->assertRequest($request);
     }
 
@@ -98,8 +96,7 @@ class ClientesTest extends BaseApiTestCase
             ->withMethod('PUT')
             ->withPath("/clientes")
             ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
-            ->assertResponseCode(401)
-        ;
+            ->assertResponseCode(401);
         $this->assertRequest($request);
     }
 
@@ -119,8 +116,7 @@ class ClientesTest extends BaseApiTestCase
             ->assertResponseCode(403)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ])
-        ;
+            ]);
         $this->assertRequest($request);
     }
 
@@ -140,8 +136,7 @@ class ClientesTest extends BaseApiTestCase
             ->assertResponseCode(403)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ])
-        ;
+            ]);
         $this->assertRequest($request);
     }
 
@@ -158,8 +153,7 @@ class ClientesTest extends BaseApiTestCase
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ])
-        ;
+            ]);
         $body = $this->assertRequest($request);
         $bodyAr = json_decode($body->getBody()->getContents(), true);
 
@@ -171,8 +165,7 @@ class ClientesTest extends BaseApiTestCase
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ])
-        ;
+            ]);
         $body = $this->assertRequest($request);
 
         $request = new FakeApiRequester();
@@ -184,8 +177,7 @@ class ClientesTest extends BaseApiTestCase
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ])
-        ;
+            ]);
         $this->assertRequest($request);
     }
 
@@ -201,8 +193,80 @@ class ClientesTest extends BaseApiTestCase
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
-            ])
-        ;
+            ]);
         $this->assertRequest($request);
     }
+
+    /**
+     * Test updating cliente status
+     */
+    public function testPutStatusSuccess()
+    {
+        // Authenticate to get a valid token
+        $authResult = json_decode(
+            $this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))
+                ->getBody()
+                ->getContents(),
+            true
+        );
+
+        // Prepare test data
+        $recordId = 1;
+        $newStatus = 'ativo';
+
+        // Create mock API request
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/clientes/status")
+            ->withRequestBody(json_encode([
+                'id' => $recordId,
+                'status' => $newStatus
+            ]))
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $authResult['token'],
+                "Content-Type" => "application/json"
+            ])
+            ->assertResponseCode(200);
+
+        // Execute the request and get response
+        $response = $this->assertRequest($request);
+        $responseData = json_decode($response->getBody()->getContents(), true);
+
+        // There is no necessary to Assert expected response format and data
+        // because the assertRequest will do it for you.
+        // $this->assertIsArray($responseData);
+        // $this->assertArrayHasKey('result', $responseData);
+        // $this->assertEquals('ok', $responseData['result']);
+
+        // Verify the database was updated correctly
+        $repository = Psr11::get(ClientesRepository::class);
+        $updatedRecord = $repository->get($recordId);
+        $this->assertEquals($newStatus, $updatedRecord->getStatus());
+    }
+
+
+    public function testPutStatusUnauthorized()
+    {
+        $this->assertRequest(
+            (new FakeApiRequester())
+                ->withMethod('PUT')
+                ->withPath("/clientes/status")
+                ->withRequestBody(json_encode(['id' => 1, 'status' => 'ativo']))
+                ->assertResponseCode(401)
+        );
+    }
+
+    public function testPutStatusInsufficientPrivileges()
+    {
+        $this->assertRequest(
+            Credentials::requestLogin(Credentials::getUser())
+                ->withMethod('PUT')
+                ->withPath("/clientes/status")
+                ->withRequestBody(json_encode(['id' => 1, 'status' => 'ativo']))
+                ->assertResponseCode(403)
+        );
+    }
+
 }
