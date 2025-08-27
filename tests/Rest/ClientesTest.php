@@ -27,7 +27,7 @@ class ClientesTest extends BaseApiTestCase
             'email' => 'email',
             'telefone' => 'telefone',
             'cpf' => 'cpf',
-            'dataCadastro' => 'dataCadastro',
+            'dataCadastro' => '2025-08-26 00:00:00',
         ];
 
         if ($array) {
