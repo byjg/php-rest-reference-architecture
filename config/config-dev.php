@@ -32,6 +32,7 @@ use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyHexRepository;
 use RestReferenceArchitecture\Repository\DummyRepository;
 use RestReferenceArchitecture\Repository\UserDefinition as UserDefinitionAlias;
+use RestReferenceArchitecture\Repository\ClienteRepository;
 
 return [
 
@@ -145,6 +146,10 @@ return [
         ->withMethodCall("withMiddleware", [Param::get(JwtMiddleware::class)])
         ->withMethodCall("withMiddleware", [Param::get(CorsMiddleware::class)])
 //        ->withMethodCall("withDetailedErrorHandler", [])
+        ->toSingleton(),
+
+    ClienteRepository::class => DI::bind(ClienteRepository::class)
+        ->withInjectedConstructor()
         ->toSingleton(),
 
     // ----------------------------------------------------------------------------
