@@ -21,6 +21,7 @@ class BaseApiTestCase extends ApiTestCase
     protected function setUp(): void
     {
         $this->setSchema(Schema::getInstance(file_get_contents($this->filePath)));
+        $this->resetDb();
     }
 
     protected function tearDown(): void
@@ -44,7 +45,7 @@ class BaseApiTestCase extends ApiTestCase
                 throw new Exception("This test can only be executed in test environment");
             }
             Migration::registerDatabase(MySqlDatabase::class);
-            $migration = new Migration(new Uri(Psr11::get('DBDRIVER_CONNECTION')), __DIR__ . "/../../../db");
+            $migration = new Migration(new Uri(Psr11::get('DBDRIVER_CONNECTION')), __DIR__ . "/../../db");
             $migration->prepareEnvironment();
             $migration->reset();
             self::$databaseReset = true;

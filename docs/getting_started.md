@@ -54,7 +54,7 @@ The installation will prompt you for configuration details:
 ========================================================
 
 Project Directory: ~/tutorial
-PHP Version [8.3]: 8.3
+PHP Version [8.4]: 8.4
 Project namespace [MyRest]: Tutorial
 Composer name [me/myrest]: 
 MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: 

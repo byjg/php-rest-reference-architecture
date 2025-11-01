@@ -2,7 +2,7 @@
 
 namespace Builder;
 
-use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -222,11 +222,11 @@ class Scripts extends BaseScripts
         }
         $save = in_array("--save", $arguments);
 
-        /** @var DbDriverInterface $dbDriver */
-        $dbDriver = Psr11::get(DbDriverInterface::class);
+        /** @var DatabaseExecutor $executor */
+        $executor = Psr11::get(DatabaseExecutor::class);
 
-        $tableDefinition = $dbDriver->getIterator("EXPLAIN " . strtolower($table))->toArray();
-        $tableIndexes = $dbDriver->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
+        $tableDefinition = $executor->getIterator("EXPLAIN " . strtolower($table))->toArray();
+        $tableIndexes = $executor->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
         $autoIncrement = false;
 
         // Convert DB Types to PHP Types

@@ -2,7 +2,8 @@
 
 namespace RestReferenceArchitecture\Repository;
 
-use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmModelInvalidException;
 use ByJG\MicroOrm\Repository;
 use ReflectionException;
@@ -13,13 +14,14 @@ class DummyHexRepository extends BaseRepository
     /**
      * DummyHexRepository constructor.
      *
-     * @param DbDriverInterface $dbDriver
+     * @param DatabaseExecutor $executor
      * @throws OrmModelInvalidException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
-    public function __construct(DbDriverInterface $dbDriver)
+    public function __construct(DatabaseExecutor $executor)
     {
-        $this->repository = new Repository($dbDriver, DummyHex::class);
+        $this->repository = new Repository($executor, DummyHex::class);
     }
 
 

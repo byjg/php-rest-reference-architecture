@@ -1,5 +1,6 @@
 <?php
 
+use ByJG\AnyDataset\Db\DatabaseExecutor;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
 use ByJG\ApiTools\Base\Schema;
@@ -68,6 +69,10 @@ return [
 
     DbDriverInterface::class => DI::bind(Factory::class)
         ->withFactoryMethod("getDbRelationalInstance", [Param::get('DBDRIVER_CONNECTION')])
+        ->toSingleton(),
+
+    DatabaseExecutor::class => DI::bind(DatabaseExecutor::class)
+        ->withInjectedConstructor()
         ->toSingleton(),
 
     DummyRepository::class => DI::bind(DummyRepository::class)

@@ -2,7 +2,10 @@
 
 namespace RestReferenceArchitecture\Repository;
 
+use ByJG\AnyDataset\Core\Exception\DatabaseException;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
 use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\AnyDataset\Db\Exception\DbDriverNotConnected;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -10,14 +13,19 @@ use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\MicroOrm\Exception\RepositoryReadOnlyException;
+use ByJG\MicroOrm\Exception\UpdateConstraintException;
 use ByJG\MicroOrm\FieldMapping;
+use ByJG\MicroOrm\Interface\UpdateConstraintInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\MicroOrm\Literal\Literal;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
-use ByJG\MicroOrm\UpdateConstraint;
 use ByJG\Serializer\Exception\InvalidArgumentException;
+use ByJG\XmlUtil\Exception\FileException;
+use ByJG\XmlUtil\Exception\XmlUtilException;
+use Closure;
 use ReflectionException;
 use RestReferenceArchitecture\Psr11;
 
@@ -32,7 +40,6 @@ abstract class BaseRepository
      * @param $itemId
      * @return mixed
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws InvalidArgumentException
      */
     public function get($itemId)
     {
@@ -49,9 +56,14 @@ abstract class BaseRepository
         return $this->repository->getMapper();
     }
 
-    public function getDbDriver()
+    public function getExecutor()
     {
-        return $this->repository->getDbDriver();
+        return $this->repository->getExecutor();
+    }
+
+    public function getExecutorWrite()
+    {
+        return $this->repository->getExecutorWrite();
     }
 
     public function getByQuery($query)
@@ -61,13 +73,16 @@ abstract class BaseRepository
     }
 
     /**
-     * @param int|null $page
+     * @param int $page
      * @param int $size
-     * @param string|array|null $orderBy
-     * @param string|array|null $filter
+     * @param null $orderBy
+     * @param null $filter
      * @return array
-     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
-     * @throws InvalidArgumentException
+     * @throws DatabaseException
+     * @throws DbDriverNotConnected
+     * @throws FileException
+     * @throws XmlUtilException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function list($page = 0, $size = 20, $orderBy = null, $filter = null)
     {
@@ -85,9 +100,9 @@ abstract class BaseRepository
     {
         $query = $this->listQuery($tableName, $fields, $page, $size, $orderBy, $filter);
 
-        $object = $query->build($this->repository->getDbDriver());
+        $sqlStatement = $query->build($this->repository->getExecutor()->getDriver());
 
-        $iterator = $this->repository->getDbDriver()->getIterator($object->getSql(), $object->getParameters());
+        $iterator = $this->repository->getExecutor()->getIterator($sqlStatement);
         return $iterator->toArray();
     }
 
@@ -130,7 +145,7 @@ abstract class BaseRepository
         return new $class();
     }
 
-    public static function getClosureNewUUID(): \Closure
+    public static function getClosureNewUUID(): Closure
     {
         return function () {
             return new Literal("X'" . Psr11::get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
@@ -149,7 +164,7 @@ abstract class BaseRepository
      */
     public static function getUuid()
     {
-        return Psr11::get(DbDriverInterface::class)->getScalar("SELECT insert(insert(insert(insert(hex(uuid_to_bin(uuid())),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')");
+        return Psr11::get(DatabaseExecutor::class)->getScalar("SELECT upper(uuid())");
     }
 
     /**
@@ -196,13 +211,15 @@ abstract class BaseRepository
 
     /**
      * @param  $model
+     * @param UpdateConstraintInterface|array|null $updateConstraint
      * @return mixed
-     * @throws InvalidArgumentException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
+     * @throws RepositoryReadOnlyException
+     * @throws UpdateConstraintException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      */
-    public function save($model, ?UpdateConstraint $updateConstraint = null)
+    public function save($model, UpdateConstraintInterface|array|null $updateConstraint = null): mixed
     {
         $model = $this->repository->save($model, $updateConstraint);
 

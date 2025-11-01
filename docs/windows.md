@@ -19,7 +19,7 @@ cd C:\Users\MyUser\Projects
 3. Launch a containerized PHP environment with the following command:
 
 ```textmate
-docker run -it --rm -v %cd%:/root/tutorial -w /root/tutorial byjg/php:8.3-cli bash
+docker run -it --rm -v %cd%:/root/tutorial -w /root/tutorial byjg/php:8.4-cli bash
 ```
 
 4. Once inside the container shell, you can run all PHP commands normally as if you had PHP installed locally. 
