@@ -10,6 +10,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
@@ -19,12 +20,12 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
+use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\Dummy;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyRepository;
-use RestReferenceArchitecture\Util\JwtContext;
-use RestReferenceArchitecture\Util\OpenApiContext;
 
 class DummyRest
 {
@@ -66,10 +67,9 @@ class DummyRest
         description: "The object Dummy",
         content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
     )]
+    #[RequireAuthenticated]
     public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
         $dummyRepo = Psr11::get(DummyRepository::class);
         $id = $request->param('id');
 
@@ -152,10 +152,9 @@ class DummyRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireAuthenticated]
     public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
         $repo = Psr11::get(DummyRepository::class);
 
         $page = $request->get('page');
@@ -225,11 +224,11 @@ class DummyRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
+        $payload = ValidateRequest::getPayload();
 
         $model = new Dummy();
         ObjectCopy::copy($payload, $model);
@@ -284,11 +283,11 @@ class DummyRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
+        $payload = ValidateRequest::getPayload();
 
         $dummyRepo = Psr11::get(DummyRepository::class);
         $model = $dummyRepo->get($payload['id']);

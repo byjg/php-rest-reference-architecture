@@ -5,12 +5,14 @@ namespace RestReferenceArchitecture\Rest;
 use ByJG\Authenticate\UsersDBDataset;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
 use OpenApi\Attributes as OA;
+use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\BaseRepository;
@@ -53,9 +55,11 @@ class Login
             ]
         )
     )]
+    #[ValidateRequest]
     public function post(HttpResponse $response, HttpRequest $request)
     {
-        $json = OpenApiContext::validateRequest($request);
+        // Get the validated payload - returns array for JSON content-type
+        $json = ValidateRequest::getPayload();
 
         $users = Psr11::get(UsersDBDataset::class);
         $user = $users->isValidUser($json["username"], $json["password"]);
@@ -97,10 +101,9 @@ class Login
         description: "Não autorizado",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireAuthenticated]
     public function refreshToken(HttpResponse $response, HttpRequest $request)
     {
-        JwtContext::requireAuthenticated($request);
-
         $diff = ($request->param("jwt.exp") - time()) / 60;
 
         if ($diff > 5) {
@@ -145,9 +148,10 @@ class Login
             ]
         )
     )]
+    #[ValidateRequest]
     public function postResetRequest(HttpResponse $response, HttpRequest $request)
     {
-        $json = OpenApiContext::validateRequest($request);
+        $json = ValidateRequest::getPayload();
 
         $users = Psr11::get(UsersDBDataset::class);
         $user = $users->getByEmail($json["email"]);
@@ -186,7 +190,7 @@ class Login
             throw new Error422Exception("Invalid data");
         }
 
-        if ($user->get("resettoken") != $json["token"]) {
+        if ($user->get("resettoken") !== ($json["token"] ?? null)) {
             throw new Error422Exception("Invalid data");
         }
 

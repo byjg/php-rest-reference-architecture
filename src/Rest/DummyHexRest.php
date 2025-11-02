@@ -10,6 +10,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
@@ -19,12 +20,12 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
+use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\DummyHex;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyHexRepository;
-use RestReferenceArchitecture\Util\JwtContext;
-use RestReferenceArchitecture\Util\OpenApiContext;
 
 class DummyHexRest
 {
@@ -66,10 +67,9 @@ class DummyHexRest
         description: "The object DummyHex",
         content: new OA\JsonContent(ref: "#/components/schemas/DummyHex")
     )]
+    #[RequireAuthenticated]
     public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
         $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $id = $request->param('id');
 
@@ -152,10 +152,9 @@ class DummyHexRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireAuthenticated]
     public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
         $repo = Psr11::get(DummyHexRepository::class);
 
         $page = $request->get('page');
@@ -225,11 +224,11 @@ class DummyHexRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function postDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
+        $payload = ValidateRequest::getPayload();
 
         $model = new DummyHex();
         ObjectCopy::copy($payload, $model);
@@ -284,11 +283,11 @@ class DummyHexRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function putDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
+        $payload = ValidateRequest::getPayload();
 
         $dummyHexRepo = Psr11::get(DummyHexRepository::class);
         $model = $dummyHexRepo->get($payload['id']);

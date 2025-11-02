@@ -10,6 +10,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
@@ -19,12 +20,12 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
+use {{ namespace }}\Attributes\RequireRole;
+use {{ namespace }}\Attributes\ValidateRequest;
 use {{ namespace }}\Model\{{ className }};
 use {{ namespace }}\Psr11;
 use {{ namespace }}\Repository\{{ className }}Repository;
 use {{ namespace }}\Model\User;
-use {{ namespace }}\Util\JwtContext;
-use {{ namespace }}\Util\OpenApiContext;
 
 class {{ className }}Rest
 {
@@ -66,10 +67,9 @@ class {{ className }}Rest
         description: "The object {{ className }}",
         content: new OA\JsonContent(ref: "#/components/schemas/{{ className }}")
     )]
+    #[RequireAuthenticated]
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
         ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         $id = $request->param('id');
 
@@ -152,10 +152,9 @@ class {{ className }}Rest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireAuthenticated]
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
         $repo = Psr11::get({{ className }}Repository::class);
 
         $page = $request->get('page');
@@ -227,12 +226,12 @@ class {{ className }}Rest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
+        $payload = ValidateRequest::getPayload();
 
-        $payload = OpenApiContext::validateRequest($request);
-        
         $model = new {{ className }}();
         ObjectCopy::copy($payload, $model);
 
@@ -286,11 +285,11 @@ class {{ className }}Rest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
+        $payload = ValidateRequest::getPayload();
 
         ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
         $model = ${{ varTableName }}Repo->get($payload['{{ fields.0.field }}']);

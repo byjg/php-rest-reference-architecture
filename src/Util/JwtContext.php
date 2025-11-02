@@ -10,9 +10,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\RestServer\Exception\Error401Exception;
-use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\Middleware\JwtMiddleware;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Model\User;
@@ -59,37 +57,9 @@ class JwtContext
         return $jwt->generateToken($jwtData);
     }
 
-    /**
-     * @param HttpRequest $request
-     * @return void
-     * @throws Error401Exception
-     */
-    public static function requireAuthenticated(HttpRequest $request): void
-    {
-        self::$request = $request;
-        if ($request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS) !== JwtMiddleware::JWT_SUCCESS) {
-            throw new Error401Exception($request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE));
-        }
-    }
-
     public static function parseJwt(HttpRequest $request): void
     {
         self::$request = $request;
-    }
-
-    /**
-     * @param HttpRequest $request
-     * @param string $role
-     * @return void
-     * @throws Error401Exception
-     * @throws Error403Exception
-     */
-    public static function requireRole(HttpRequest $request, string $role): void
-    {
-        self::requireAuthenticated($request);
-        if (JwtContext::getRole() !== $role) {
-            throw new Error403Exception('Insufficient privileges');
-        }
     }
 
     protected static function getRequestParam(string $value): ?string

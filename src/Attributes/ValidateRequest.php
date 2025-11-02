@@ -1,0 +1,67 @@
+<?php
+
+namespace RestReferenceArchitecture\Attributes;
+
+use Attribute;
+use ByJG\Config\Exception\ConfigException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\RestServer\Attributes\BeforeRouteInterface;
+use ByJG\RestServer\Exception\Error400Exception;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use ByJG\XmlUtil\Exception\FileException;
+use ByJG\XmlUtil\Exception\XmlUtilException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
+use RestReferenceArchitecture\Util\OpenApiContext;
+
+#[Attribute(Attribute::TARGET_METHOD)]
+class ValidateRequest implements BeforeRouteInterface
+{
+    protected static mixed $payload = null;
+
+    protected bool $allowNull;
+
+    public function __construct(bool $allowNull = false)
+    {
+        $this->allowNull = $allowNull;
+    }
+
+    /**
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws XmlUtilException
+     * @throws FileException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function processBefore(HttpResponse $response, HttpRequest $request): void
+    {
+        // OpenApiContext::validateRequest now returns the proper format based on content-type
+        // - XML: returns XmlDocument
+        // - JSON/Other: returns array
+        self::$payload = OpenApiContext::validateRequest($request, $this->allowNull);
+    }
+
+    /**
+     * Helper method to retrieve the validated payload
+     * Returns XmlDocument for XML, or array for JSON/other content types
+     *
+     * @return mixed
+     */
+    public static function getPayload(): mixed
+    {
+        return self::$payload;
+    }
+}
