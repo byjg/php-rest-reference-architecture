@@ -33,6 +33,8 @@ use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\DummyHexRepository;
 use RestReferenceArchitecture\Repository\DummyRepository;
 use RestReferenceArchitecture\Repository\UserDefinition as UserDefinitionAlias;
+use RestReferenceArchitecture\Service\DummyHexService;
+use RestReferenceArchitecture\Service\DummyService;
 
 return [
 
@@ -80,6 +82,14 @@ return [
         ->toSingleton(),
 
     DummyHexRepository::class => DI::bind(DummyHexRepository::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
+
+    DummyService::class => DI::bind(DummyService::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
+
+    DummyHexService::class => DI::bind(DummyHexService::class)
         ->withInjectedConstructor()
         ->toSingleton(),
 

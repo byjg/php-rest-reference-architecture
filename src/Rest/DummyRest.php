@@ -14,18 +14,15 @@ use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
-use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
-use RestReferenceArchitecture\Model\Dummy;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
-use RestReferenceArchitecture\Repository\DummyRepository;
+use RestReferenceArchitecture\Service\DummyService;
 
 class DummyRest
 {
@@ -70,16 +67,9 @@ class DummyRest
     #[RequireAuthenticated]
     public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyRepo = Psr11::get(DummyRepository::class);
-        $id = $request->param('id');
-
-        $result = $dummyRepo->get($id);
-        if (empty($result)) {
-            throw new Error404Exception('Id not found');
-        }
-        $response->write(
-            $result
-        );
+        $dummyService = Psr11::get(DummyService::class);
+        $result = $dummyService->getOrFail($request->param('id'));
+        $response->write($result);
     }
 
     /**
@@ -155,17 +145,9 @@ class DummyRest
     #[RequireAuthenticated]
     public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $repo = Psr11::get(DummyRepository::class);
-
-        $page = $request->get('page');
-        $size = $request->get('size');
-        // $orderBy = $request->get('orderBy');
-        // $filter = $request->get('filter');
-
-        $result = $repo->list($page, $size);
-        $response->write(
-            $result
-        );
+        $dummyService = Psr11::get(DummyService::class);
+        $result = $dummyService->list($request->get('page'), $request->get('size'));
+        $response->write($result);
     }
 
 
@@ -228,15 +210,9 @@ class DummyRest
     #[ValidateRequest]
     public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $payload = ValidateRequest::getPayload();
-
-        $model = new Dummy();
-        ObjectCopy::copy($payload, $model);
-
-        $dummyRepo = Psr11::get(DummyRepository::class);
-        $dummyRepo->save($model);
-
-        $response->write([ "id" => $model->getId()]);
+        $dummyService = Psr11::get(DummyService::class);
+        $model = $dummyService->create(ValidateRequest::getPayload());
+        $response->write(["id" => $model->getId()]);
     }
 
 
@@ -287,16 +263,8 @@ class DummyRest
     #[ValidateRequest]
     public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $payload = ValidateRequest::getPayload();
-
-        $dummyRepo = Psr11::get(DummyRepository::class);
-        $model = $dummyRepo->get($payload['id']);
-        if (empty($model)) {
-            throw new Error404Exception('Id not found');
-        }
-        ObjectCopy::copy($payload, $model);
-
-        $dummyRepo->save($model);
+        $dummyService = Psr11::get(DummyService::class);
+        $dummyService->update(ValidateRequest::getPayload());
     }
 
 }

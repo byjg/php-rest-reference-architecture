@@ -17,15 +17,13 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
-use RestReferenceArchitecture\Model\DummyHex;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Psr11;
-use RestReferenceArchitecture\Repository\DummyHexRepository;
+use RestReferenceArchitecture\Service\DummyHexService;
 
 class DummyHexRest
 {
@@ -70,16 +68,9 @@ class DummyHexRest
     #[RequireAuthenticated]
     public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
-        $id = $request->param('id');
-
-        $result = $dummyHexRepo->get($id);
-        if (empty($result)) {
-            throw new Error404Exception('Id not found');
-        }
-        $response->write(
-            $result
-        );
+        $dummyHexService = Psr11::get(DummyHexService::class);
+        $result = $dummyHexService->getOrFail($request->param('id'));
+        $response->write($result);
     }
 
     /**
@@ -155,17 +146,9 @@ class DummyHexRest
     #[RequireAuthenticated]
     public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $repo = Psr11::get(DummyHexRepository::class);
-
-        $page = $request->get('page');
-        $size = $request->get('size');
-        // $orderBy = $request->get('orderBy');
-        // $filter = $request->get('filter');
-
-        $result = $repo->list($page, $size);
-        $response->write(
-            $result
-        );
+        $dummyHexService = Psr11::get(DummyHexService::class);
+        $result = $dummyHexService->list($request->get('page'), $request->get('size'));
+        $response->write($result);
     }
 
 
@@ -228,15 +211,9 @@ class DummyHexRest
     #[ValidateRequest]
     public function postDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $payload = ValidateRequest::getPayload();
-
-        $model = new DummyHex();
-        ObjectCopy::copy($payload, $model);
-
-        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
-        $dummyHexRepo->save($model);
-
-        $response->write([ "id" => $model->getId()]);
+        $dummyHexService = Psr11::get(DummyHexService::class);
+        $model = $dummyHexService->create(ValidateRequest::getPayload());
+        $response->write(["id" => $model->getId()]);
     }
 
 
@@ -287,16 +264,8 @@ class DummyHexRest
     #[ValidateRequest]
     public function putDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $payload = ValidateRequest::getPayload();
-
-        $dummyHexRepo = Psr11::get(DummyHexRepository::class);
-        $model = $dummyHexRepo->get($payload['id']);
-        if (empty($model)) {
-            throw new Error404Exception('Id not found');
-        }
-        ObjectCopy::copy($payload, $model);
-
-        $dummyHexRepo->save($model);
+        $dummyHexService = Psr11::get(DummyHexService::class);
+        $dummyHexService->update(ValidateRequest::getPayload());
     }
 
 }
