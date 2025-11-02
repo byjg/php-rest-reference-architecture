@@ -1,12 +1,14 @@
-# Login with JWT
+---
+sidebar_position: 5
+---
 
-This project comes with a management user, login and JWT out of the box.
+# Login Integration with JWT
 
-For most of the use cases you don't need to change the application. Just the dependency injection configuration.
+This project includes user management, login, and JWT authentication out of the box.
 
-## Configure the Login
+For most use cases, you only need to configure the dependency injection settings. No code changes are required.
 
-Here the main guidelines:
+## User Table Structure
 
 The database table created by the project is `users` with the following structure:
 
@@ -24,67 +26,177 @@ CREATE TABLE `users` (
 );
 ```
 
-and the RestReferenceArchitecture/Model/User.php has the mapping for this table.
+The `RestReferenceArchitecture\Model\User` class provides the model mapping for this table.
 
-If you have the same fields but named differently, you can change the mapping in the `config/config_dev.php` file:
+## Customize Field Mapping
+
+If your database uses different field names, you can customize the mapping in `config/dev/02-security.php`:
 
 ```php
-    UserDefinition::class => DI::bind(UserDefinition::class)
-        ->withConstructorArgs(
+<?php
+
+use RestReferenceArchitecture\Model\User;
+use ByJG\Authenticate\Definition\UserDefinition;
+use ByJG\Config\DependencyInjection as DI;
+
+return [
+    UserDefinition::class => DI::bind(UserDefinitionAlias::class)
+        ->withConstructorArgs([
+            'users',                         // Table name
+            User::class,                     // User model class
+            UserDefinition::LOGIN_IS_EMAIL,  // Login type
             [
-                'users',
-                User::class,
-                UserDefinition::LOGIN_IS_EMAIL,
-                [
-                    // Field name in the User class => Field name in the database
-                    'userid'   => 'userid',
-                    'name'     => 'name',
-                    'email'    => 'email',
-                    'username' => 'username',
-                    'password' => 'password',
-                    'created'  => 'created',
-                    'admin'    => 'admin'
-                ]
+                // Model property => Database column
+                'userid'   => 'userid',
+                'name'     => 'name',
+                'email'    => 'email',
+                'username' => 'username',
+                'password' => 'password',
+                'created'  => 'created',
+                'admin'    => 'admin'
             ]
-        )
-    );
+        ])
+        ->toSingleton(),
+];
 ```
 
-You can modify completely this structure by referring the documentation of the project [byjg/authuser](https://github.com/byjg/authuser).
+For complete customization options, refer to the [byjg/authuser](https://github.com/byjg/authuser) documentation.
 
-## Configure Password Rule Enforcement
+## Password Policy Configuration
 
-You can configure how the password will be saved by changing here:
+Configure password requirements in `config/dev/02-security.php`:
 
 ```php
+<?php
+
+use ByJG\Authenticate\Definition\PasswordDefinition;
+use ByJG\Config\DependencyInjection as DI;
+
+return [
     PasswordDefinition::class => DI::bind(PasswordDefinition::class)
         ->withConstructorArgs([[
-            PasswordDefinition::MINIMUM_CHARS => 12,
-            PasswordDefinition::REQUIRE_UPPERCASE => 1,  // Number of uppercase characters
-            PasswordDefinition::REQUIRE_LOWERCASE => 1,  // Number of lowercase characters
-            PasswordDefinition::REQUIRE_SYMBOLS => 1,    // Number of symbols
-            PasswordDefinition::REQUIRE_NUMBERS => 1,    // Number of numbers
-            PasswordDefinition::ALLOW_WHITESPACE => 0,   // Allow whitespace
-            PasswordDefinition::ALLOW_SEQUENTIAL => 0,   // Allow sequential characters
-            PasswordDefinition::ALLOW_REPEATED => 0      // Allow repeated characters
+            PasswordDefinition::MINIMUM_CHARS => 12,      // Minimum password length
+            PasswordDefinition::REQUIRE_UPPERCASE => 1,   // Number of uppercase letters
+            PasswordDefinition::REQUIRE_LOWERCASE => 1,   // Number of lowercase letters
+            PasswordDefinition::REQUIRE_SYMBOLS => 1,     // Number of special characters
+            PasswordDefinition::REQUIRE_NUMBERS => 1,     // Number of digits
+            PasswordDefinition::ALLOW_WHITESPACE => 0,    // Allow spaces (0=no, 1=yes)
+            PasswordDefinition::ALLOW_SEQUENTIAL => 0,    // Allow sequences like "abc" or "123"
+            PasswordDefinition::ALLOW_REPEATED => 0       // Allow repeated characters like "aaa"
         ]])
         ->toSingleton(),
+];
 ```
 
-## Configure the JWT
+## JWT Configuration
 
-There is an endpoint to generate the JWT token. The endpoint is `/login` and the method is `POST`.
+### Available Endpoints
 
-You can test it using the endpoint `/sampleprotected/ping` with the method `GET` passing the header `Authorization: Bearer <token>`.
+The project provides the following JWT-related endpoints:
 
-Also, there is an endpoint to refresh the token. The endpoint is `/refresh` and the method is `POST`.
+- **`POST /login`** - Generate a JWT token
+- **`POST /refresh`** - Refresh an existing token
+- **`GET /sampleprotected/ping`** - Example protected endpoint (requires authentication)
 
-To configure the key you can change here:
+### Configure JWT Secret
+
+:::warning Security
+Never commit your JWT secret to version control. Each environment should have a unique secret.
+:::
+
+The JWT secret is configured in each environment's `credentials.env` file:
+
+**`config/dev/credentials.env`**:
+```env
+JWT_SECRET=jwt_super_secret_key
+```
+
+**`config/prod/credentials.env`**:
+```env
+JWT_SECRET=your_production_secret_here_minimum_64_chars_recommended
+```
+
+The secret is automatically loaded in `config/dev/02-security.php`:
 
 ```php
-    JwtKeyInterface::class => DI::bind(\ByJG\JwtWrapper\JwtHashHmacSecret::class)
-        ->withConstructorArgs(['supersecretkeyyoushouldnotcommittogithub'])
+<?php
+
+use ByJG\JwtWrapper\JwtKeyInterface;
+use ByJG\JwtWrapper\JwtHashHmacSecret;
+use ByJG\Config\DependencyInjection as DI;
+use ByJG\Config\Param;
+
+return [
+    JwtKeyInterface::class => DI::bind(JwtHashHmacSecret::class)
+        ->withConstructorArgs([Param::get('JWT_SECRET')])
         ->toSingleton(),
+];
 ```
 
-More information on the [byjg/jwt-wrapper](https://github.com/byjg/jwt-wrapper)
+### Testing Authentication
+
+1. **Get a token:**
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin@example.com","password":"!P4ssw0rdstr!"}'
+```
+
+2. **Use the token:**
+```bash
+curl -X GET http://localhost:8080/sampleprotected/ping \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
+## Using JWT in Your Code
+
+### Protect Endpoints with Attributes
+
+```php
+<?php
+
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Model\User;
+
+class MyProtectedRest
+{
+    // Require any authenticated user
+    #[RequireAuthenticated]
+    public function getProtectedData(HttpResponse $response, HttpRequest $request)
+    {
+        $response->write(['message' => 'You are authenticated!']);
+    }
+
+    // Require specific role
+    #[RequireRole(User::ROLE_ADMIN)]
+    public function getAdminData(HttpResponse $response, HttpRequest $request)
+    {
+        $response->write(['message' => 'You are an admin!']);
+    }
+}
+```
+
+### Access JWT Data
+
+```php
+<?php
+
+use RestReferenceArchitecture\Util\JwtContext;
+
+// Get the decoded JWT data
+$jwtData = JwtContext::getCurrentJwtData($request);
+
+// Access user information
+$userId = $jwtData['userid'];
+$userName = $jwtData['name'];
+$userRole = $jwtData['role'];  // "admin" or "user"
+```
+
+For more information, refer to the [byjg/jwt-wrapper](https://github.com/byjg/jwt-wrapper) documentation.
+
+---
+
+**[← Previous: Dependency Injection](psr11_di.md)** | **[Next: Database Migration →](migration.md)**

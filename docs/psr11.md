@@ -1,14 +1,27 @@
-# Psr11 Container
+---
+sidebar_position: 3
+---
 
-The project uses the [PSR11](https://www.php-fig.org/psr/psr-11/) container to manage the dependencies.
+# PSR-11 Container
 
-The configuration per environment is defined in the `config/config-<env>.php` file or `config/config-<env>.env` file or a configuration for all environment in the `config/.env` file.
+The project uses the [PSR-11](https://www.php-fig.org/psr/psr-11/) container to manage dependencies.
 
-We are required to set the environment variable `APP_ENV` to the environment name.
+## Configuration Structure
 
-Examples:
+The configuration is organized by environment in the `config/{environment}/` folders. Each environment can have:
 
-**config/config-dev.env**
+- **credentials.env** - Environment variables (database connections, API keys, JWT secrets, etc.)
+- **Numbered PHP files** - Dependency injection bindings organized by layer:
+  - `01-infrastructure.php` - Database, Cache, Logging
+  - `02-security.php` - JWT, Authentication, CORS
+  - `03-api.php` - OpenAPI routes, Middleware
+  - `04-repositories.php` - Repository bindings
+  - `05-services.php` - Service bindings
+  - `06-external.php` - External services (Email, etc.)
+
+You must set the `APP_ENV` environment variable to specify which environment to use.
+
+### Example: credentials.env
 
 ```env
 WEB_SERVER=localhost
@@ -16,20 +29,28 @@ DASH_SERVER=localhost
 WEB_SCHEMA=http
 API_SERVER=localhost
 API_SCHEMA=http
-DBDRIVER_CONNECTION=mysql://root:mysqlp455w0rd@mysql-container/restserver_dev
+DBDRIVER_CONNECTION=mysql://root:mysqlp455w0rd@mysql-container/mydb
+EMAIL_CONNECTION=smtp://username:password@mail.example.com
+JWT_SECRET=your_secret_key_here
+CORS_SERVERS=.*
 ```
 
-**config/config-dev.env**
+### Example: 01-infrastructure.php
 
 ```php
 <?php
+
+use ByJG\Cache\Psr16\BaseCacheEngine;
+use ByJG\Cache\Psr16\NoCacheEngine;
+use ByJG\Config\DependencyInjection as DI;
+use ByJG\Config\Param;
+
 return [
-    'WEB_SERVER' => 'localhost',
-    'DASH_SERVER' => 'localhost',
-    'WEB_SCHEMA' => 'http',
-    'API_SERVER' => 'localhost',
-    'API_SCHEMA' => 'http',
-    'DBDRIVER_CONNECTION' => 'mysql://root:mysqlp455w0rd@mysql-container/restserver_dev'
+    BaseCacheEngine::class => DI::bind(NoCacheEngine::class)->toSingleton(),
+
+    DbDriverInterface::class => DI::bind(Factory::class)
+        ->withFactoryMethod("getDbRelationalInstance", [Param::get('DBDRIVER_CONNECTION')])
+        ->toSingleton(),
 ];
 ```
 
@@ -43,40 +64,61 @@ You just need to:
 Psr11::get('WEB_SERVER');
 ```
 
-## Defining the available environments
+## Environment Hierarchy
 
 The available environments are defined in the class `RestReferenceArchitecture\Psr11` in the method `environment()`.
 
-The project has 4 environments:
+The project has 4 environments with the following inheritance hierarchy:
 
-```text
-- dev
--  |- test
--  |- staging
--       |- prod
+```mermaid
+graph TD
+    dev[dev - Development]
+    test[test - Testing]
+    staging[staging - Staging]
+    prod[prod - Production]
+
+    dev --> test
+    dev --> staging
+    staging --> prod
+
+    style dev fill:#90EE90
+    style test fill:#87CEEB
+    style staging fill:#FFD700
+    style prod fill:#FF6347
 ```
 
-It means that the environment `dev` is the parent of `test` and `staging` and `staging` is the parent of `prod`. A configuration of the bottom environment will override the configuration of the parent environment.
+**Inheritance Rules:**
+- **test** inherits from **dev**
+- **staging** inherits from **dev** (with caching enabled)
+- **prod** inherits from **staging** and **dev** (with caching enabled)
 
-You can change the environments in the `RestReferenceArchitecture\Psr11` class as your needs.
+Child environments override parent configurations. For example:
+- `config/dev/credentials.env` defines base database connection
+- `config/prod/credentials.env` overrides with production database connection
+- `config/prod/01-infrastructure.php` overrides to use FileSystemCache instead of NoCache
+
+You can modify the environment hierarchy in `src/Psr11.php`:
 
 ```php
-    public static function environment()
-    {
-        $dev = new Environment('dev');
-        $test = new Environment('test', [$dev]);
-        $staging = new Environment('staging', [$dev], new FileSystemCacheEngine());
-        $prod = new Environment('prod', [$staging, $dev], new FileSystemCacheEngine());
+public static function environment()
+{
+    $dev = new Environment('dev');
+    $test = new Environment('test', [$dev]);
+    $staging = new Environment('staging', [$dev], new FileSystemCacheEngine());
+    $prod = new Environment('prod', [$staging, $dev], new FileSystemCacheEngine());
 
-        if (is_null(self::$definition)) {
-            self::$definition = (new Definition())
-                ->addEnvironment($dev)
-                ->addEnvironment($test)
-                ->addEnvironment($staging)
-                ->addEnvironment($prod)
-            ;
-        }
-
-        return self::$definition;
+    if (is_null(self::$definition)) {
+        self::$definition = (new Definition())
+            ->addEnvironment($dev)
+            ->addEnvironment($test)
+            ->addEnvironment($staging)
+            ->addEnvironment($prod);
     }
+
+    return self::$definition;
+}
 ```
+
+---
+
+**[← Back to Index](../README.md)** | **[Next: Dependency Injection →](psr11_di.md)**

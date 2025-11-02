@@ -1,6 +1,10 @@
+---
+sidebar_position: 1
+---
+
 # Rest Methods API integrated with OpenAPI
 
-There is two ways to create a Rest Method API:
+There are two ways to create a REST Method API:
 
 - using an existing OpenAPI specification in JSON format
 - documenting your application and generating the OpenAPI specification from your code
@@ -109,7 +113,11 @@ APP_ENV=dev composer run openapi
 
 The OpenAPI specification will be generated in the folder `public/docs`.
 
-We use the package zircote/swagger-php to generate the OpenAPI specification. 
-Please refer to the documentation of this package at [https://zircote.github.io/swagger-php/]()  to learn more about the PHPDOC annotations.
+We use the package zircote/swagger-php to generate the OpenAPI specification.
+Please refer to the documentation of this package at [https://zircote.github.io/swagger-php/](https://zircote.github.io/swagger-php/) to learn more about the PHPDOC annotations.
 
-We use the package byjg/restserver to handle the requests. Please refer to the documentation of this package at [https://github.com/byjg/restserver/tree/bump#2-processing-the-request-and-response](https://github.com/byjg/restserver/tree/bump#2-processing-the-request-and-response)
+We use the package byjg/restserver to handle the requests. Please refer to the documentation of this package at [https://github.com/byjg/restserver](https://github.com/byjg/restserver)
+
+---
+
+**[← Back to Index](../README.md)** | **[Next: Functional Unit Tests →](functional_test.md)**

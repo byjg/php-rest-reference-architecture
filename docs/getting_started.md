@@ -1,3 +1,7 @@
+---
+sidebar_position: 10
+---
+
 # Getting Started
 
 ## Requirements
@@ -120,3 +124,7 @@ open http://localhost:8080/docs
 ## Next Steps
 
 Continue with [creating a new table and CRUD operations](getting_started_01_create_table.md).
+
+---
+
+**[← Previous: Service Layer](services.md)** | **[Next: Add a New Table →](getting_started_01_create_table.md)**

@@ -1,12 +1,16 @@
-# RestAPI Functional Test
+---
+sidebar_position: 2
+---
 
-## Running the tests
+# Functional Unit Tests
 
-The project has some tests implemented. You can run the tests from the VSCode interface or from the command line.
+## Running the Tests
 
-```php
-# Create an empty database for test
-APP_TEST=test composer run migrate reset yes
+The project includes functional tests. You can run them from your IDE or command line.
+
+```bash
+# Create an empty database for testing
+APP_ENV=test composer run migrate -- reset --yes
 
 # Set optional values
 # export TEST_ADMIN_USER=admin@example.com
@@ -15,10 +19,10 @@ APP_TEST=test composer run migrate reset yes
 # export TEST_REGULAR_PASSWORD='!P4ssw0rdstr!'
 
 # Run the tests
-APP_TEST=test composer run test
+APP_ENV=test composer run test
 ```
 
-## Creating your tests
+## Creating Your Tests
 
 We can test the RestAPI as follows:
 
@@ -65,7 +69,7 @@ There is no necessary have a webserver running to test the RestAPI. The `BaseApi
 
 However, as it is a functional test you need to have the database and other resources accessed by the endpoint running.
 
-## Send body data to the test
+## Sending Body Data to Tests
 
 We can send body data to the test as follows:
 
@@ -85,7 +89,7 @@ public function testPing()
 }
 ```
 
-## Send query parameters to the test
+## Sending Query Parameters to Tests
 
 ```php
 public function testPing()
@@ -103,7 +107,7 @@ public function testPing()
 }
 ```
 
-## Expect a specific status code
+## Expecting a Specific Status Code
 
 ```php
 public function testPing()
@@ -119,7 +123,7 @@ public function testPing()
 }
 ```
 
-## Expect a specific response body
+## Expecting a Specific Response Body
 
 ```php
 public function testPing()
@@ -136,3 +140,7 @@ public function testPing()
     $this->assertRequest($request);
 }
 ```
+
+---
+
+**[← Previous: Rest Methods API](rest.md)** | **[Next: PSR-11 Container →](psr11.md)**

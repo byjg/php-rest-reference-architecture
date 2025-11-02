@@ -1,6 +1,8 @@
-I'll help you fix and improve this text. Let me analyze the Markdown document first.
+---
+sidebar_position: 13
+---
 
-# Getting Started - Creating a REST Method
+# Add a New REST Method
 
 In this tutorial, we'll create a new REST method to update the status of the `example_crud` table.
 
@@ -95,81 +97,111 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 
 ## Protecting the Endpoint
 
-If you've set the `security` property in your attributes, you need to validate the token:
+If you've set the `security` property in your OpenAPI attributes, protect the endpoint using attributes:
 
 ```php
-public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
+<?php
+
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Model\User;
+
+// Option a: Require admin role
+#[RequireRole(User::ROLE_ADMIN)]
+public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request)
 {
-    // Secure the endpoint 
-    // Use one of the following methods:
-    
-    // a. Require a user with admin role
-    JwtContext::requireRole($request, "admin");
-    
-    // b. OR require any authenticated user
-    JwtContext::requireAuthenticated($request);
-    
-    // c. OR do nothing to make the endpoint public
+    // Your code here
+}
+
+// Option b: Require any authenticated user
+#[RequireAuthenticated]
+public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request)
+{
+    // Your code here
+}
+
+// Option c: Public endpoint (no attribute)
+public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request)
+{
+    // Your code here
 }
 ```
 
-Both methods return the token content. If the token is invalid or missing, an `Error401Exception` will be thrown. If the user lacks the required role, an `Error403Exception` will be thrown.
+:::tip Attribute-Based Security
+Using attributes is cleaner and more declarative than manual JWT validation. The attributes automatically:
+- Validate JWT tokens
+- Check user roles
+- Throw appropriate exceptions (401 for invalid token, 403 for insufficient permissions)
+:::
 
-The default token content structure is:
+### Access JWT Data
+
+If you need to access the current user's data:
 
 ```php
-$data = [
-    "userid" => "123",
-    "name" => "John Doe",
-    "role" => "admin" // or "user"
-]
+<?php
+
+use RestReferenceArchitecture\Util\JwtContext;
+
+$jwtData = JwtContext::getCurrentJwtData($request);
+$userId = $jwtData['userid'];
+$userRole = $jwtData['role'];  // "admin" or "user"
 ```
 
 ## Validating Input
 
-Next, validate that the incoming request matches the OpenAPI specifications:
+Use the `#[ValidateRequest]` attribute to automatically validate the incoming request against your OpenAPI specification:
 
 ```php
-public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
+<?php
+
+#[RequireAuthenticated]
+#[ValidateRequest]
+public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request)
 {
-...
-    // The line below will validate again the OpenAPI attributes
-    // If the request doesn't match, an exception `Error400Exception` will be thrown
-    // If the request matches, the payload will be returned
-    $payload = OpenApiContext::validateRequest($request);
+    // Get the validated payload
+    $payload = ValidateRequest::getPayload();
+
+    // The payload is already validated against your OpenAPI spec
+    // If validation fails, an Error400Exception is thrown automatically
 }
 ```
 
-## Updating Status in the Repository
+## Updating Status Using the Service Layer
 
-After validating the payload, we can update the record status using the repository pattern:
+After validating the payload, use the service layer to update the record:
 
 ```php
+<?php
+
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Service\ExampleCrudService;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\ValidateRequest;
+
 /**
  * Update the status of an Example CRUD record
- * 
- * @param HttpResponse $response 
- * @param HttpRequest $request 
- * @return void
  */
-public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request) 
+#[RequireAuthenticated]
+#[ValidateRequest]
+public function putExampleCrudStatus(HttpResponse $response, HttpRequest $request)
 {
-    // Previous code for payload validation...
-    
-    // Update the record status
-    $exampleCrudRepo = Psr11::get(ExampleCrudRepository::class);
-    $model = $exampleCrudRepo->get($payload["id"]);
-    
-    if (!$model) {
-        throw new NotFoundException("Record not found");
-    }
-    
-    $model->setStatus($payload["status"]);
-    $exampleCrudRepo->save($model);
-    
-    // Return response...
+    $payload = ValidateRequest::getPayload();
+
+    // Use service layer for business logic
+    $service = Psr11::get(ExampleCrudService::class);
+    $model = $service->getOrFail($payload['id']);
+    $model->setStatus($payload['status']);
+    $service->save($model);
+
+    $response->write(['result' => 'ok']);
 }
 ```
+
+:::tip Service Layer
+Always use the Service Layer instead of directly accessing repositories. Services handle business logic and make your code more maintainable.
+:::
 
 ## Returning the Response
 
@@ -187,64 +219,84 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 }
 ```
 
-## Unit Testing
+## Functional Testing
 
-To ensure our endpoint works correctly and continues to function as expected, we'll create a functional test. This test simulates calling the endpoint and validates both the response format and the business logic.
+Create a functional test to ensure your endpoint works correctly and continues to function as expected.
 
 Create or update the test file `tests/Functional/Rest/ExampleCrudTest.php`:
 
 ```php
-/**
- * @covers \YourNamespace\Controller\ExampleCrudController
- */
-public function testUpdateStatus()
-{
-    // Authenticate to get a valid token (if required)
-    $authResult = json_decode(
-        $this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))
-            ->getBody()
-            ->getContents(), 
-        true
-    );
-    
-    // Prepare test data
-    $recordId = 1;
-    $newStatus = 'new status';
+<?php
 
-    // Create mock API request
-    $request = new FakeApiRequester();
-    $request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('PUT')
-        ->withPath("/example/crud/status")
-        ->withRequestBody(json_encode([
-            'id' => $recordId,
-            'status' => $newStatus
-        ]))
-        ->withRequestHeader([
-            "Authorization" => "Bearer " . $authResult['token'],
-            "Content-Type" => "application/json"
-        ])
-        ->assertResponseCode(200);
-    
-    // Execute the request and get response
-    $response = $this->assertRequest($request);
-    $responseData = json_decode($response->getBody()->getContents(), true);
-    
-    // There is no necessary to Assert expected response format and data
-    // because the assertRequest will do it for you.
-    // $this->assertIsArray($responseData);
-    // $this->assertArrayHasKey('result', $responseData);
-    // $this->assertEquals('ok', $responseData['result']);
-    
-    // Verify the database was updated correctly
-    $repository = Psr11::get(ExampleCrudRepository::class);
-    $updatedRecord = $repository->get($recordId);
-    $this->assertEquals($newStatus, $updatedRecord->getStatus());
+namespace Test\Functional\Rest;
+
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Service\ExampleCrudService;
+use RestReferenceArchitecture\Util\FakeApiRequester;
+use Test\Rest\BaseApiTestCase;
+use Test\Rest\Credentials;
+
+class ExampleCrudTest extends BaseApiTestCase
+{
+    public function testUpdateStatus()
+    {
+        // Authenticate to get a valid token (if endpoint requires auth)
+        $authResult = json_decode(
+            $this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))
+                ->getBody()
+                ->getContents(),
+            true
+        );
+
+        // Prepare test data
+        $recordId = 1;
+        $newStatus = 'active';
+
+        // Create mock API request
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/example/crud/status")
+            ->withBody([
+                'id' => $recordId,
+                'status' => $newStatus
+            ])
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $authResult['token']
+            ])
+            ->assertResponseCode(200);
+
+        // Execute the request
+        // assertRequest automatically validates response against OpenAPI spec
+        $this->assertRequest($request);
+
+        // Verify the database was updated correctly
+        $service = Psr11::get(ExampleCrudService::class);
+        $updatedRecord = $service->get($recordId);
+        $this->assertEquals($newStatus, $updatedRecord->getStatus());
+    }
 }
 ```
 
-This test performs the following validations:
-1. Ensures the endpoint returns a 200 status code
-2. Verifies the response has the expected JSON structure
-3. Confirms the database record was actually updated with the new status
+:::tip Automatic Validation
+The `assertRequest()` method automatically validates:
+- Response status code matches OpenAPI specification
+- Response body structure matches OpenAPI schema
+- No need for manual assertions on response format!
+:::
+
+## Run the Tests
+
+Update the OpenAPI specification and run the tests:
+
+```bash
+composer run openapi
+composer run test
+```
+
+All tests should pass successfully!
+
+---
+
+**[← Previous: Add a New Field](getting_started_02_add_new_field.md)** | **[Next: Windows Guide →](windows.md)**

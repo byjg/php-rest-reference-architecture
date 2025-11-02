@@ -1,52 +1,110 @@
+---
+sidebar_position: 7
+---
+
 # Database ORM
 
-To query the database you can use the ORM. The ORM uses the [byjg/micro-orm](https://github.com/byjg/micro-orm)
+The project uses [byjg/micro-orm](https://github.com/byjg/micro-orm) for database operations.
 
-You can start by creating a class inheriting from `BaseRepository` and defining the table name and the primary key.
+## Creating a Repository
+
+Start by creating a class that extends `BaseRepository` and defines the table name and primary key:
 
 ```php
+<?php
+
+namespace RestReferenceArchitecture\Repository;
+
+use ByJG\MicroOrm\Mapper;
+use ByJG\MicroOrm\Repository;
+use ByJG\AnyDataset\Db\DbDriverInterface;
+use RestReferenceArchitecture\Model\YourModel;
+
+class YourRepository extends BaseRepository
+{
     public function __construct(DbDriverInterface $dbDriver)
     {
         $mapper = new Mapper(
-            Your_Model_Class::class,
-            'table_name',
-            'primary_key_field'
+            YourModel::class,    // Model class
+            'table_name',        // Table name
+            'id'                 // Primary key field
         );
 
         $this->repository = new Repository($dbDriver, $mapper);
     }
+}
 ```
 
-Then you can use the `Repository` class to query the database.
+## Basic CRUD Operations
+
+The repository provides basic CRUD methods:
 
 ```php
-// Get a single row from DB based on your PK and return a model
-$repository->get($id)
+<?php
 
-// Get all records from DB and create them as a list of models
-$repository->getAll()
+// Get a single record by primary key
+$model = $repository->get($id);
 
-// Delete a row
-$repository->delete($model)
+// Get all records
+$models = $repository->getAll();
 
-// Insert a new row or update an existing row in the database
-$repository->save($model)
+// Save (insert or update)
+$repository->save($model);
+
+// Delete a record
+$repository->delete($model);
 ```
 
-You also can create custom queries:
+## Custom Queries
+
+Create custom query methods in your repository:
 
 ```php
-    public function getByName($value)
-    {
-        $query = Query::getInstance()
-            ->table('table_name')
-            ->where('table_name.name = :name', ['name' => $value]);
+<?php
 
-        $result = $this->repository->getByQuery($query);
-        if (is_null($result)) {
-            return null;
-        }
+use ByJG\MicroOrm\Query;
 
-        return $result;
-    }
+public function getByName(string $name): ?YourModel
+{
+    $query = Query::getInstance()
+        ->table('table_name')
+        ->where('table_name.name = :name', ['name' => $name]);
+
+    return $this->repository->getByQuery($query);
+}
+
+public function getActiveRecords(): array
+{
+    $query = Query::getInstance()
+        ->table('table_name')
+        ->where('status = :status', ['status' => 'active'])
+        ->orderBy(['created_at' => 'DESC']);
+
+    return $this->repository->getByQuery($query, Mapper::RESULT_ARRAY);
+}
 ```
+
+## Using Services
+
+:::tip Best Practice
+Instead of using repositories directly in your REST controllers, use the **Service Layer**. Services handle business logic and can orchestrate multiple repositories.
+:::
+
+Example using a service:
+
+```php
+<?php
+
+use RestReferenceArchitecture\Psr11;
+use RestReferenceArchitecture\Service\YourService;
+
+// In your REST controller
+$service = Psr11::get(YourService::class);
+$model = $service->getOrFail($id);
+```
+
+See the [Service Layer](services.md) documentation for more details.
+
+---
+
+**[← Previous: Database Migration](migration.md)** | **[Next: Code Generator →](code_generator.md)**

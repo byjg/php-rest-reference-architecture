@@ -67,6 +67,8 @@ This project install the follow components (click on the link for more details):
 - [Login Integration with JWT](docs/login.md)
 - [Database Migration](docs/migration.md)
 - [Database ORM](docs/orm.md)
+- [Code Generator](docs/code_generator.md)
+- [Service Layer](docs/services.md)
 
 ## Getting Started
 
@@ -76,6 +78,8 @@ Here some examples of how to use the template:
 - [Add a new Table](docs/getting_started_01_create_table.md)
 - [Add a new Field](docs/getting_started_02_add_new_field.md)
 - [Add a new Rest Method](docs/getting_started_03_create_rest_method.md)
+
+> **Windows Users**: If you're running on Windows without PHP installed, see the [Windows guide](docs/windows.md).
 
 ----
 [Open source ByJG](http://opensource.byjg.com)

@@ -1,31 +1,61 @@
+---
+sidebar_position: 6
+---
+
 # Database Migration
 
-## Create a new Database
+## Create a New Database
 
 You can create a fresh new database using the command:
 
 ```bash
-APP_ENV=dev composer migrate -- reset --yes
+APP_ENV=dev composer run migrate -- reset --yes
 ```
 
-```tip
+:::warning
 Use this command carefully. It will drop all tables and create a new database.
-```
+:::
 
 ## Update the Database
 
-It is possible to update the database using the command:
+You can update the database using the command:
 
 ```bash
-APP_ENV=dev composer migrate -- update --up-to=x
+APP_ENV=dev composer run migrate -- update --up-to=x
 ```
 
-This command will update the database using the migrations files inside the `migrations` folder. It will apply only the migrations that are not applied yet up to the migration number `x`. If you want to apply all migrations just remove the `--up-to=x` parameter.
+This command updates the database using migration files in the `db/migrations` folder. It applies only unapplied migrations up to migration number `x`. To apply all pending migrations, omit the `--up-to=x` parameter.
 
-## Create a new Migration version
+## Create a New Migration Version
 
-Just create a new file inside the folder `db/migrations/up` with the name `DDDDD.sql`. The DDDDD is the number of the migration. The number must be unique and incremental.
+Create a new file in the `db/migrations/up` folder with the format `00XXX-description.sql`, where `XXX` is a sequential number:
 
-If you want to be able to revert the migration, you must create a file inside the folder `db/migrations/down` with the name `DDDDD.sql`. The DDDDD is the number of the migration to go back. The number must be unique and incremental.
+**Example:** `db/migrations/up/00003-add-users-table.sql`
 
-You can get more information about the migration process in the [byjg/migration](https://github.com/byjg/migration)
+```sql
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL
+);
+```
+
+### Rollback Support
+
+To support rollbacks, create a corresponding file in `db/migrations/down`:
+
+**Example:** `db/migrations/down/00002-rollback-users-table.sql`
+
+```sql
+DROP TABLE users;
+```
+
+:::tip
+Migration numbers must be unique and sequential. The "down" migration number corresponds to the version you'll have after the rollback.
+:::
+
+For more information about the migration process, refer to [byjg/migration](https://github.com/byjg/migration).
+
+---
+
+**[← Previous: Login Integration with JWT](login.md)** | **[Next: Database ORM →](orm.md)**

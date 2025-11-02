@@ -1,4 +1,8 @@
-# Getting Started - Creating a Table
+---
+sidebar_position: 11
+---
+
+# Add a New Table
 
 After [creating the project](getting_started.md), you're ready to create your own tables.
 
@@ -69,16 +73,19 @@ APP_ENV=dev composer run codegen -- --table example_crud --save all
 ```
 
 This creates:
-- `./src/Rest/ExampleCrudRest.php`
-- `./src/Model/ExampleCrud.php`
-- `./src/Repository/ExampleCrudRepository.php`
-- `./tests/Functional/Rest/ExampleCrudTest.php`
+- `./src/Model/ExampleCrud.php` - Model class
+- `./src/Repository/ExampleCrudRepository.php` - Repository class
+- `./src/Service/ExampleCrudService.php` - Service class
+- `./src/Rest/ExampleCrudRest.php` - REST controller
+- `./tests/Functional/Rest/ExampleCrudTest.php` - Functional tests
 
-You have a manual step to generate the configuration by running the command below and adding it to `config/config-dev.php` 
+:::tip Automatic Configuration
+The repository and service are automatically registered in:
+- `config/dev/04-repositories.php`
+- `config/dev/05-services.php`
 
-```shell
-APP_ENV=dev composer run codegen -- --table example_crud config
-```
+No manual configuration needed!
+:::
 
 ## Run the Tests
 
@@ -136,3 +143,7 @@ Your tests should now pass successfully!
 ## Next Steps
 
 Continue with [Adding a New Field](getting_started_02_add_new_field.md) to enhance your implementation.
+
+---
+
+**[← Previous: Getting Started](getting_started.md)** | **[Next: Add a New Field →](getting_started_02_add_new_field.md)**
