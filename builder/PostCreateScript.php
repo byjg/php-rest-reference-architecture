@@ -63,24 +63,29 @@ class PostCreateScript
         // ------------------------------------------------
         // Adjusting config files
         $files = [
-            'config/config-dev.php',
-            'config/config-staging.php' ,
-            'config/config-prod.php',
-            'config/config-test.php',
+            'config/dev/credentials.env',
+            'config/test/credentials.env',
+            'config/staging/credentials.env',
+            'config/prod/credentials.env',
             'docker-compose-dev.yml',
         ];
         $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
-            $contents = str_replace( 'jwt_super_secret_key', JwtWrapper::generateSecret(64), $contents);
+
+            // Common replacements for all files
             $contents = str_replace('mysql://root:mysqlp455w0rd@mysql-container/mydb', "$mysqlConnection", $contents);
             $contents = str_replace('mysql-container', $uri->getHost(), $contents);
             $contents = str_replace('mysqlp455w0rd', $uri->getPassword(), $contents);
             $contents = str_replace('resttest', $composerParts[1], $contents);
-            file_put_contents(
-                "$workdir/$file",
-                $contents
-            );
+
+            // JWT_SECRET only for .env files - each gets unique secret
+            if (str_ends_with($file, '.env')) {
+                $jwtSecret = JwtWrapper::generateSecret(64);
+                $contents = preg_replace('/JWT_SECRET=.*/', "JWT_SECRET=$jwtSecret", $contents);
+            }
+
+            file_put_contents("$workdir/$file", $contents);
         }
 
         // ------------------------------------------------

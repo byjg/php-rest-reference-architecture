@@ -209,7 +209,7 @@ class Scripts extends BaseScripts
 
         // Check Arguments
         $foundArguments = [];
-        $validArguments = ['model', 'repo', 'config' , 'rest', 'test', 'all', "--save", "--debug"];
+        $validArguments = ['model', 'repo', 'repository', 'service', 'rest', 'test', 'all', "--save", "--debug"];
         foreach ($arguments as $argument) {
             if (!in_array($argument, $validArguments)) {
                 throw new Exception("Invalid argument: $argument\nValids are: " . implode(", ", $validArguments) . "\n");
@@ -357,13 +357,39 @@ class Scripts extends BaseScripts
             }
         }
 
-        if (in_array('all', $arguments) || in_array('repo', $arguments)) {
+        if (in_array('all', $arguments) || in_array('repo', $arguments) || in_array('repository', $arguments)) {
             echo "Processing Repository for table $table...\n";
             $template = $loader->getTemplate('repository.php');
             if ($save) {
                 $file = __DIR__ . '/../src/Repository/' . $data['className'] . 'Repository.php';
                 file_put_contents($file, $template->render($data));
                 echo "File saved in $file\n";
+
+                // Add to config if not exists
+                $this->addToConfig(
+                    __DIR__ . '/../config/dev/04-repositories.php',
+                    $data['className'] . 'Repository',
+                    $data['namespace']
+                );
+            } else {
+                print_r($template->render($data));
+            }
+        }
+
+        if (in_array('all', $arguments) || in_array('service', $arguments)) {
+            echo "Processing Service for table $table...\n";
+            $template = $loader->getTemplate('service.php');
+            if ($save) {
+                $file = __DIR__ . '/../src/Service/' . $data['className'] . 'Service.php';
+                file_put_contents($file, $template->render($data));
+                echo "File saved in $file\n";
+
+                // Add to config if not exists
+                $this->addToConfig(
+                    __DIR__ . '/../config/dev/05-services.php',
+                    $data['className'] . 'Service',
+                    $data['namespace']
+                );
             } else {
                 print_r($template->render($data));
             }
@@ -392,11 +418,65 @@ class Scripts extends BaseScripts
                 print_r($template->render($data));
             }
         }
+    }
 
-        if (in_array('all', $arguments) || in_array('config', $arguments)) {
-            echo "Processing Config for table $table...\n";
-            $template = $loader->getTemplate('config.php');
-            print_r($template->render($data));
+    /**
+     * Add DI binding to config file if it doesn't exist
+     *
+     * @param string $configFile Path to the config file
+     * @param string $className Class name (without namespace, e.g., 'DummyRepository')
+     * @param string $namespace Namespace (e.g., 'RestReferenceArchitecture')
+     * @return void
+     */
+    protected function addToConfig(string $configFile, string $className, string $namespace): void
+    {
+        $contents = file_get_contents($configFile);
+        $modified = false;
+
+        // Determine the type (Repository or Service) based on class name
+        $type = str_ends_with($className, 'Repository') ? 'Repository' : 'Service';
+        $fullClassName = "$namespace\\{$type}\\$className";
+        $useStatement = "use $fullClassName;";
+
+        // Check if use statement already exists
+        if (!str_contains($contents, $useStatement)) {
+            // Find the last use statement and add after it
+            $lines = explode("\n", $contents);
+            $lastUseLine = 0;
+
+            foreach ($lines as $index => $line) {
+                if (preg_match('/^use\s+.*?;/', trim($line))) {
+                    $lastUseLine = $index;
+                }
+            }
+
+            // Insert the new use statement after the last use statement
+            array_splice($lines, $lastUseLine + 1, 0, $useStatement);
+            $contents = implode("\n", $lines);
+            $modified = true;
+            echo "Added use statement for $className to " . basename($configFile) . "\n";
+        }
+
+        // Check if DI binding already exists
+        if (!str_contains($contents, "$className::class")) {
+            // Create the DI binding
+            $binding = "\n    $className::class => DI::bind($className::class)\n" .
+                       "        ->withInjectedConstructor()\n" .
+                       "        ->toSingleton(),\n";
+
+            // Find the position before the closing ];
+            $pos = strrpos($contents, '];');
+            if ($pos !== false) {
+                $contents = substr_replace($contents, $binding, $pos, 0);
+                $modified = true;
+                echo "Added DI binding for $className to " . basename($configFile) . "\n";
+            }
+        }
+
+        if ($modified) {
+            file_put_contents($configFile, $contents);
+        } else {
+            echo "$className already exists in " . basename($configFile) . "\n";
         }
     }
 }
