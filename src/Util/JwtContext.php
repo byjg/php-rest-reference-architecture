@@ -26,6 +26,7 @@ class JwtContext
      * @param ?User $user
      * @return array
      * @throws Error401Exception
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      */
     public static function createUserMetadata(?User $user): array
     {
@@ -51,7 +52,7 @@ class JwtContext
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function createToken(array $properties = [])
+    public static function createToken(array $properties = []): mixed
     {
         $jwt = Psr11::get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 60 * 60 * 24 * 7); // 7 Dias
@@ -82,7 +83,6 @@ class JwtContext
      * @return void
      * @throws Error401Exception
      * @throws Error403Exception
-     * @throws InvalidArgumentException
      */
     public static function requireRole(HttpRequest $request, string $role): void
     {
