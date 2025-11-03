@@ -21,9 +21,8 @@ use ReflectionException;
 use {{ namespace }}\Attributes\RequireAuthenticated;
 use {{ namespace }}\Attributes\RequireRole;
 use {{ namespace }}\Attributes\ValidateRequest;
+use {{ namespace }}\Model\{{ className }};
 use {{ namespace }}\Model\User;
-use {{ namespace }}\Psr11;
-use {{ namespace }}\Service\{{ className }}Service;
 
 class {{ className }}Rest
 {
@@ -68,9 +67,13 @@ class {{ className }}Rest
     #[RequireAuthenticated]
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
-        $result = ${{ varTableName }}Service->getOrFail($request->param('id'));
-        $response->write($result);
+        $model = {{ className }}::get($request->param('id'));
+
+        if (is_null($model)) {
+            throw new Error404Exception("{{ className }} not found");
+        }
+
+        $response->write($model);
     }
 
     /**
@@ -146,14 +149,14 @@ class {{ className }}Rest
     #[RequireAuthenticated]
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
-        $result = ${{ varTableName }}Service->list($request->get('page'), $request->get('size'));
-        $response->write($result);
+        // Get all records with pagination (default is page 0, limit 50)
+        $models = {{ className }}::all($request->get('page') ?? 0, $request->get('size') ?? 50);
+        $response->write($models);
     }
 
 
     /**
-     * Create a new {{ className }} 
+     * Create a new {{ className }}
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -194,7 +197,7 @@ class {{ className }}Rest
     )]
     #[OA\Response(
         response: 200,
-        description: "The object rto be created",
+        description: "The object to be created",
         content: new OA\JsonContent(
             required: [ "{{ primaryKeys | join('", "') }}" ],
             properties: [
@@ -213,14 +216,18 @@ class {{ className }}Rest
     #[ValidateRequest]
     public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
-        $model = ${{ varTableName }}Service->create(ValidateRequest::getPayload());
+        $payload = ValidateRequest::getPayload();
+
+        // Create new ActiveRecord instance with payload
+        $model = {{ className }}::new($payload);
+        $model->save();
+
         $response->write(["id" => $model->getId()]);
     }
 
 
     /**
-     * Update an existing {{ className }} 
+     * Update an existing {{ className }}
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -266,8 +273,17 @@ class {{ className }}Rest
     #[ValidateRequest]
     public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
-        ${{ varTableName }}Service->update(ValidateRequest::getPayload());
+        $payload = ValidateRequest::getPayload();
+
+        $model = {{ className }}::get($payload['id'] ?? null);
+
+        if (is_null($model)) {
+            throw new Error404Exception("{{ className }} not found");
+        }
+
+        // Update model with payload using fill() method
+        $model->fill($payload);
+        $model->save();
     }
 
 }

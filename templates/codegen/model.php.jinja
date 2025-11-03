@@ -7,7 +7,8 @@ use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
-use OpenApi\Attributes as OA;
+{% if activerecord %}use ByJG\MicroOrm\Trait\ActiveRecord;
+{% endif %}use OpenApi\Attributes as OA;
 
 /**
  * Class {{ className }}
@@ -17,6 +18,9 @@ use OpenApi\Attributes as OA;
 #[Table{% if autoIncrement == "no" %}MySqlUuidPK{% endif %}Attribute("{{ tableName }}")]
 class {{ className }}
 {
+{% if activerecord %}    // Add the ActiveRecord trait to enable Active Record pattern
+    use ActiveRecord;
+{% endif %}
 {% for field in fields %}
     /**
      * @var {{ field.php_type }}|null

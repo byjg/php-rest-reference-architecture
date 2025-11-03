@@ -181,6 +181,41 @@ class Scripts extends BaseScripts
     }
 
     /**
+     * Get code generator usage help text
+     *
+     * @return string
+     */
+    protected function getCodeGeneratorHelp(): string
+    {
+        return "Usage:\n" .
+            "  composer codegen -- --table=<table_name> <arguments> [options]\n\n" .
+            "Required:\n" .
+            "  --table=<name>        Database table name\n\n" .
+            "Arguments (at least one required):\n" .
+            "  all                   Generate all components for the selected pattern\n" .
+            "  model                 Generate Model\n" .
+            "  repo|repository       Generate Repository (Repository pattern only)\n" .
+            "  service               Generate Service (Repository pattern only)\n" .
+            "  rest                  Generate REST controller\n" .
+            "  test                  Generate Test\n\n" .
+            "Options:\n" .
+            "  --activerecord        Use ActiveRecord pattern instead of Repository pattern\n" .
+            "  --env=<environment>   Environment (dev, test, prod)\n" .
+            "  --save                Save generated files to disk\n" .
+            "  --debug               Show debug information\n\n" .
+            "Examples:\n" .
+            "  # Repository pattern (default) - generates Model, Repository, Service, Rest, Test\n" .
+            "  composer codegen -- --table=users all --save\n\n" .
+            "  # ActiveRecord pattern - generates Model (with ActiveRecord trait), Rest, Test\n" .
+            "  composer codegen -- --table=users all --activerecord --save\n\n" .
+            "  # Generate only specific components\n" .
+            "  composer codegen -- --table=users model rest --save\n" .
+            "  composer codegen -- --table=users model --activerecord --save\n\n" .
+            "  # Preview without saving\n" .
+            "  composer codegen -- --table=users all --activerecord\n";
+    }
+
+    /**
      * @param array $arguments
      * @return void
      * @throws ConfigException
@@ -195,35 +230,55 @@ class Scripts extends BaseScripts
      */
     public function runCodeGenerator(array $arguments): void
     {
-        // Get Table Name
+        // Get Table Name - support both --table=value and --table value formats
         $table = null;
-        if (in_array("--table", $arguments)) {
-            $index = array_search("--table", $arguments);
-            $table = $arguments[$index + 1] ?? null;
-            unset($arguments[$index + 1]);
-            unset($arguments[$index]);
+        foreach ($arguments as $index => $arg) {
+            if (str_starts_with($arg, "--table=")) {
+                $table = substr($arg, 8); // Extract value after --table=
+                unset($arguments[$index]);
+                break;
+            } elseif ($arg === "--table") {
+                $table = $arguments[$index + 1] ?? null;
+                unset($arguments[$index + 1]);
+                unset($arguments[$index]);
+                break;
+            }
         }
+        // Reindex array after unsetting elements
+        $arguments = array_values($arguments);
+
         if (empty($table)) {
-            throw new Exception("Table name is required (--table=table_name)");
+            throw new Exception("Table name is required.\n\n" . $this->getCodeGeneratorHelp());
         }
+
+        // Extract --env parameter
+        $argumentList = $this->extractArguments($arguments, false);
+        $env = $argumentList['--env'] ?? null;
+
+        // Extract --activerecord flag
+        $isActiveRecord = in_array("--activerecord", $arguments);
 
         // Check Arguments
         $foundArguments = [];
-        $validArguments = ['model', 'repo', 'repository', 'service', 'rest', 'test', 'all', "--save", "--debug"];
+        $validArguments = ['model', 'repo', 'repository', 'service', 'rest', 'test', 'all', "--save", "--debug", "--env", "--activerecord", "--table"];
         foreach ($arguments as $argument) {
+            // Skip --env=value and --table=value formats
+            if (str_starts_with($argument, "--env=") || str_starts_with($argument, "--table=")) {
+                continue;
+            }
             if (!in_array($argument, $validArguments)) {
-                throw new Exception("Invalid argument: $argument\nValids are: " . implode(", ", $validArguments) . "\n");
+                throw new Exception("Invalid argument: $argument\n\n" . $this->getCodeGeneratorHelp());
             } else {
                 $foundArguments[] = $argument;
             }
         }
         if (empty($foundArguments)) {
-            throw new Exception("At least one argument is required (" . implode(", ", $validArguments) . ")");
+            throw new Exception("At least one argument is required.\n\n" . $this->getCodeGeneratorHelp());
         }
         $save = in_array("--save", $arguments);
 
         /** @var DatabaseExecutor $executor */
-        $executor = Psr11::get(DatabaseExecutor::class);
+        $executor = Psr11::container($env)->get(DatabaseExecutor::class);
 
         $tableDefinition = $executor->getIterator("EXPLAIN " . strtolower($table))->toArray();
         $tableIndexes = $executor->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
@@ -335,6 +390,7 @@ class Scripts extends BaseScripts
             'nullableFields' => $nullableFields,
             'nonNullableFields' => $nonNullableFields,
             'indexes' => $tableIndexes,
+            'activerecord' => $isActiveRecord,
         ];
 
         if (in_array("--debug", $arguments)) {
@@ -346,7 +402,8 @@ class Scripts extends BaseScripts
         $loader = new FileSystemLoader(__DIR__ . '/../templates/codegen');
 
         if (in_array('all', $arguments) || in_array('model', $arguments)) {
-            echo "Processing Model for table $table...\n";
+            $modelType = $isActiveRecord ? "ActiveRecord Model" : "Model";
+            echo "Processing $modelType for table $table...\n";
             $template = $loader->getTemplate('model.php');
             if ($save) {
                 $file = __DIR__ . '/../src/Model/' . $data['className'] . '.php';
@@ -357,7 +414,8 @@ class Scripts extends BaseScripts
             }
         }
 
-        if (in_array('all', $arguments) || in_array('repo', $arguments) || in_array('repository', $arguments)) {
+        // Repository - only for Repository pattern (skip for ActiveRecord)
+        if (!$isActiveRecord && (in_array('all', $arguments) || in_array('repo', $arguments) || in_array('repository', $arguments))) {
             echo "Processing Repository for table $table...\n";
             $template = $loader->getTemplate('repository.php');
             if ($save) {
@@ -376,7 +434,8 @@ class Scripts extends BaseScripts
             }
         }
 
-        if (in_array('all', $arguments) || in_array('service', $arguments)) {
+        // Service - only for Repository pattern (skip for ActiveRecord)
+        if (!$isActiveRecord && (in_array('all', $arguments) || in_array('service', $arguments))) {
             echo "Processing Service for table $table...\n";
             $template = $loader->getTemplate('service.php');
             if ($save) {
@@ -396,8 +455,10 @@ class Scripts extends BaseScripts
         }
 
         if (in_array('all', $arguments) || in_array('rest', $arguments)) {
-            echo "Processing Rest for table $table...\n";
-            $template = $loader->getTemplate('rest.php');
+            $restType = $isActiveRecord ? "ActiveRecord Rest" : "Rest";
+            $templateName = $isActiveRecord ? 'restactiverecord.php' : 'rest.php';
+            echo "Processing $restType for table $table...\n";
+            $template = $loader->getTemplate($templateName);
             if ($save) {
                 $file = __DIR__ . '/../src/Rest/' . $data['className'] . 'Rest.php';
                 file_put_contents($file, $template->render($data));
