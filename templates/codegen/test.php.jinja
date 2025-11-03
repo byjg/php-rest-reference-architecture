@@ -22,7 +22,7 @@ class {{ className }}Test extends BaseApiTestCase
     {
         $sample = [
 {% for field in fields -%}
-{% if field.key != 'PRI' && field.extra != 'VIRTUAL GENERATED' -%}            '{{ field.property }}' => {% if field.php_type == 'int' %}1{% endif %}{% if field.php_type == 'string' %}'{{ field.property }}'{% endif %}{% if field.php_type == 'float' %}1.1{% endif %}{% if field.php_type == 'bool' %}true{% endif %},{% endif %}
+{% if field.key != 'PRI' && field.extra != 'VIRTUAL GENERATED' && field.property != 'createdAt' && field.property != 'updatedAt' && field.property != 'deletedAt' -%}            '{{ field.property }}' => {% if field.php_type == 'int' %}1{% endif %}{% if field.php_type == 'string' %}'{{ field.property }}'{% endif %}{% if field.php_type == 'float' %}1.1{% endif %}{% if field.php_type == 'bool' %}true{% endif %},{% endif %}
 {% endfor %}
         ];
 

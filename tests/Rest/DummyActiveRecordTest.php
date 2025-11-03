@@ -24,8 +24,6 @@ class DummyActiveRecordTest extends BaseApiTestCase
 
             'name' => 'name',
             'value' => 'value',
-            'createdAt' => 'createdAt',
-            'updatedAt' => 'updatedAt',
         ];
 
         if ($array) {
