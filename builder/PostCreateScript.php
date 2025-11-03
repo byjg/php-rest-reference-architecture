@@ -52,8 +52,8 @@ class PostCreateScript
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
             $contents = str_replace('ENV TZ=UTC', "ENV TZ=$timezone", $contents);
-            $contents = str_replace('php:8.3-fpm', "php:$phpVersion-fpm", $contents);
-            $contents = str_replace('php83', "php$phpVersionMSimple", $contents);
+            $contents = str_replace('php:8.4-fpm', "php:$phpVersion-fpm", $contents);
+            $contents = str_replace('php84', "php$phpVersionMSimple", $contents);
             file_put_contents(
                 "$workdir/$file",
                 $contents
@@ -141,7 +141,7 @@ class PostCreateScript
         $currentPhpVersion = PHP_MAJOR_VERSION . "." .PHP_MINOR_VERSION;
 
         $validatePHPVersion = function ($arg) {
-            $validPHPVersions = ['8.1', '8.2', '8.3'];
+            $validPHPVersions = ['8.1', '8.2', '8.3', '8.4'];
             if (in_array($arg, $validPHPVersions)) {
                 return $arg;
             }

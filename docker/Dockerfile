@@ -10,7 +10,7 @@ WORKDIR /srv
 
 # Setup Docker/Fpm
 
-COPY ./docker/fpm/php /etc/php83/conf.d
+COPY ./docker/fpm/php /etc/php84/conf.d
 COPY ./docker/nginx/conf.d /etc/nginx/http.d/
 
 # Setup DateFile
