@@ -10,6 +10,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
@@ -18,7 +19,6 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use {{ namespace }}\Attributes\RequireAuthenticated;
 use {{ namespace }}\Attributes\RequireRole;
 use {{ namespace }}\Attributes\ValidateRequest;
 use {{ namespace }}\Model\User;
@@ -76,8 +76,8 @@ class {{ className }}Rest
     /**
      * List {{ className }}
      *
-     * @param mixed $response
-     * @param mixed $request
+     * @param HttpResponse $response
+     * @param HttpRequest $request
      * @return void
      * @throws ConfigException
      * @throws ConfigNotFoundException

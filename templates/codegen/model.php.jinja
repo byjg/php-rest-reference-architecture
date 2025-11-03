@@ -9,6 +9,10 @@ use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 {% if activerecord %}use ByJG\MicroOrm\Trait\ActiveRecord;
 {% endif %}use OpenApi\Attributes as OA;
+{% if hasCreatedAt %}use {{ namespace }}\Trait\OaCreatedAt;
+{% endif %}{% if hasUpdatedAt %}use {{ namespace }}\Trait\OaUpdatedAt;
+{% endif %}{% if hasDeletedAt %}use {{ namespace }}\Trait\OaDeletedAt;
+{% endif %}
 
 /**
  * Class {{ className }}
@@ -20,17 +24,22 @@ class {{ className }}
 {
 {% if activerecord %}    // Add the ActiveRecord trait to enable Active Record pattern
     use ActiveRecord;
+
+{% endif %}{% if hasCreatedAt or hasUpdatedAt or hasDeletedAt %}    // Add timestamp traits for automatic timestamp handling
+{% if hasCreatedAt %}    use OaCreatedAt;
+{% endif %}{% if hasUpdatedAt %}    use OaUpdatedAt;
+{% endif %}{% if hasDeletedAt %}    use OaDeletedAt;
 {% endif %}
-{% for field in fields %}
+{% endif %}{% for field in fields %}{% if field.field != 'created_at' and field.field != 'updated_at' and field.field != 'deleted_at' %}
     /**
      * @var {{ field.php_type }}|null
      */
     #[OA\Property(type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %})]
     #[Field{% if 'binary' in field.type %}Uuid{% endif %}Attribute({% if field.key == "PRI" %}primaryKey: true, {% endif %}fieldName: "{{ field.field }}"{% if 'VIRTUAL' in field.extra %}, syncWithDb: false{% endif %})]
     protected {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }} = null;
-{% endfor %}
+{% endif %}{% endfor %}
 
-{% for field in fields %}
+{% for field in fields %}{% if field.field != 'created_at' and field.field != 'updated_at' and field.field != 'deleted_at' %}
     /**
      * @return {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null
      */
@@ -48,6 +57,6 @@ class {{ className }}
         $this->{{ field.property }} = ${{ field.property }};
         return $this;
     }
-{% endfor %}
+{% endif %}{% endfor %}
 
 }

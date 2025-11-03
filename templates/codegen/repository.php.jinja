@@ -2,12 +2,13 @@
 
 namespace {{ namespace }}\Repository;
 
-use {{ namespace }}\Psr11;
-use ByJG\MicroOrm\Exception\OrmModelInvalidException;
-use ReflectionException;
 use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
+use ByJG\MicroOrm\Exception\OrmModelInvalidException;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
+use ReflectionException;
+use {{ namespace }}\Psr11;
 use {{ namespace }}\Model\{{ className }};
 
 class {{ className }}Repository extends BaseRepository
@@ -18,6 +19,7 @@ class {{ className }}Repository extends BaseRepository
      * @param DatabaseExecutor $executor
      * @throws OrmModelInvalidException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function __construct(DatabaseExecutor $executor)
     {
@@ -34,7 +36,7 @@ class {{ className }}Repository extends BaseRepository
         $query = Query::getInstance()
             ->table('{{ tableName }}')
             ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.camelColumnName }}]);
-        return $this->repository->getByQuery($query);;
+        return $this->repository->getByQuery($query);
     }
 {% endif %}
 {% endfor %}

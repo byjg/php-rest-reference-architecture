@@ -9,11 +9,13 @@ use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Trait\OaCreatedAt;
 use RestReferenceArchitecture\Trait\OaUpdatedAt;
 
+
 /**
- * DummyActiveRecord Model using ActiveRecord pattern
+ * Class DummyActiveRecord
+ * @package RestReferenceArchitecture\Model
  */
-#[OA\Schema(schema: "DummyActiveRecord", required: ["name"])]
-#[TableAttribute(tableName: "dummy_active_record")]
+#[OA\Schema(required: ["id", "name"], type: "object", xml: new OA\Xml(name: "DummyActiveRecord"))]
+#[TableAttribute("dummy_active_record")]
 class DummyActiveRecord
 {
     // Add the ActiveRecord trait to enable Active Record pattern
@@ -23,42 +25,43 @@ class DummyActiveRecord
     use OaCreatedAt;
     use OaUpdatedAt;
 
+
     /**
      * @var int|null
      */
     #[OA\Property(type: "integer", format: "int32")]
-    #[FieldAttribute(primaryKey: true)]
-    protected ?int $id = null;
+    #[FieldAttribute(primaryKey: true, fieldName: "id")]
+    protected int|null $id = null;
 
     /**
      * @var string|null
      */
     #[OA\Property(type: "string", format: "string")]
-    #[FieldAttribute]
-    protected ?string $name = null;
+    #[FieldAttribute(fieldName: "name")]
+    protected string|null $name = null;
 
     /**
      * @var string|null
      */
     #[OA\Property(type: "string", format: "string", nullable: true)]
-    #[FieldAttribute]
-    protected ?string $value = null;
+    #[FieldAttribute(fieldName: "value")]
+    protected string|null $value = null;
 
-    // Note: created_at is provided by the CreatedAt trait
+
 
     /**
      * @return int|null
      */
-    public function getId(): ?int
+    public function getId(): int|null
     {
         return $this->id;
     }
 
     /**
      * @param int|null $id
-     * @return DummyActiveRecord
+     * @return $this
      */
-    public function setId(?int $id): DummyActiveRecord
+    public function setId(int|null $id): static
     {
         $this->id = $id;
         return $this;
@@ -67,16 +70,16 @@ class DummyActiveRecord
     /**
      * @return string|null
      */
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }
 
     /**
      * @param string|null $name
-     * @return DummyActiveRecord
+     * @return $this
      */
-    public function setName(?string $name): DummyActiveRecord
+    public function setName(string|null $name): static
     {
         $this->name = $name;
         return $this;
@@ -85,18 +88,20 @@ class DummyActiveRecord
     /**
      * @return string|null
      */
-    public function getValue(): ?string
+    public function getValue(): string|null
     {
         return $this->value;
     }
 
     /**
      * @param string|null $value
-     * @return DummyActiveRecord
+     * @return $this
      */
-    public function setValue(?string $value): DummyActiveRecord
+    public function setValue(string|null $value): static
     {
         $this->value = $value;
         return $this;
     }
+
+
 }

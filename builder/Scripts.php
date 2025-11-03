@@ -373,6 +373,22 @@ class Scripts extends BaseScripts
             }, $field['column_name']);
         }
 
+        // Detect timestamp fields for trait usage
+        $hasCreatedAt = false;
+        $hasUpdatedAt = false;
+        $hasDeletedAt = false;
+        foreach ($tableDefinition as $field) {
+            if ($field['field'] == 'created_at') {
+                $hasCreatedAt = true;
+            }
+            if ($field['field'] == 'updated_at') {
+                $hasUpdatedAt = true;
+            }
+            if ($field['field'] == 'deleted_at') {
+                $hasDeletedAt = true;
+            }
+        }
+
         $data = [
             'namespace' => 'RestReferenceArchitecture',
             'autoIncrement' => $autoIncrement ? 'yes' : 'no',
@@ -391,6 +407,9 @@ class Scripts extends BaseScripts
             'nonNullableFields' => $nonNullableFields,
             'indexes' => $tableIndexes,
             'activerecord' => $isActiveRecord,
+            'hasCreatedAt' => $hasCreatedAt,
+            'hasUpdatedAt' => $hasUpdatedAt,
+            'hasDeletedAt' => $hasDeletedAt,
         ];
 
         if (in_array("--debug", $arguments)) {

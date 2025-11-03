@@ -10,6 +10,7 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
@@ -18,7 +19,6 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use {{ namespace }}\Attributes\RequireAuthenticated;
 use {{ namespace }}\Attributes\RequireRole;
 use {{ namespace }}\Attributes\ValidateRequest;
 use {{ namespace }}\Model\{{ className }};
@@ -31,17 +31,7 @@ class {{ className }}Rest
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
-     * @throws ConfigException
-     * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
-     * @throws Error401Exception
      * @throws Error404Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws KeyNotFoundException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws ReflectionException
      */
     #[OA\Get(
         path: "/{{ restPath }}/{id}",
@@ -82,16 +72,6 @@ class {{ className }}Rest
      * @param mixed $response
      * @param mixed $request
      * @return void
-     * @throws ConfigException
-     * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
-     * @throws Error401Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws KeyNotFoundException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws ReflectionException
      */
     #[OA\Get(
         path: "/{{ restPath }}",
@@ -161,20 +141,6 @@ class {{ className }}Rest
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @return void
-     * @throws ConfigException
-     * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
-     * @throws Error400Exception
-     * @throws Error401Exception
-     * @throws Error403Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws KeyNotFoundException
-     * @throws OrmBeforeInvalidException
-     * @throws OrmInvalidFieldsException
-     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws ReflectionException
      */
     #[OA\Post(
         path: "/{{ restPath }}",
@@ -189,7 +155,7 @@ class {{ className }}Rest
         content: new OA\JsonContent(
             {% if nonNullableFields | count > 0 %}required: [ "{{ nonNullableFields | join('", "')}}" ],{% endif %}
             properties: [
-{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' -%}
+{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' && field.property != 'createdAt' && field.property != 'updatedAt' && field.property != 'deletedAt' -%}
                 new OA\Property(property: "{{ field.property }}", type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %}){% if loop.last == false %}, {% endif %}
 {% endif %}{% endfor %}
             ]
@@ -218,7 +184,7 @@ class {{ className }}Rest
     {
         $payload = ValidateRequest::getPayload();
 
-        // Create new ActiveRecord instance with payload
+        // Create a new ActiveRecord instance with payload
         $model = {{ className }}::new($payload);
         $model->save();
 

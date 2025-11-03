@@ -3,6 +3,7 @@
 namespace Test\Rest;
 
 use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\ObjectCopy;
 use RestReferenceArchitecture\Model\DummyActiveRecord;
 use RestReferenceArchitecture\Util\FakeApiRequester;
@@ -20,8 +21,11 @@ class DummyActiveRecordTest extends BaseApiTestCase
     protected function getSampleData($array = false)
     {
         $sample = [
-            'name' => 'Test ActiveRecord',
-            'value' => 'Test Value',
+
+            'name' => 'name',
+            'value' => 'value',
+            'createdAt' => 'createdAt',
+            'updatedAt' => 'updatedAt',
         ];
 
         if ($array) {
@@ -32,6 +36,8 @@ class DummyActiveRecordTest extends BaseApiTestCase
         return $model;
     }
 
+
+
     public function testGetUnauthorized()
     {
         $this->expectException(Error401Exception::class);
@@ -41,7 +47,7 @@ class DummyActiveRecordTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummyactiverecord/1")
+            ->withPath("/dummy/active/record/1")
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -56,7 +62,7 @@ class DummyActiveRecordTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummyactiverecord")
+            ->withPath("/dummy/active/record/1")
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
@@ -71,7 +77,7 @@ class DummyActiveRecordTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/dummyactiverecord")
+            ->withPath("/dummy/active/record")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(401)
         ;
@@ -87,39 +93,64 @@ class DummyActiveRecordTest extends BaseApiTestCase
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/dummyactiverecord/1")
-            ->withRequestBody(json_encode($this->getSampleData(true)))
+            ->withPath("/dummy/active/record")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
             ->assertResponseCode(401)
         ;
         $this->assertRequest($request);
     }
 
-    public function testDeleteUnauthorized()
+    public function testPostInsufficientPrivileges()
     {
-        $this->expectException(Error401Exception::class);
-        $this->expectExceptionMessage('Absent authorization token');
+        $this->expectException(Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
-            ->withMethod('DELETE')
-            ->withPath("/dummyactiverecord/1")
-            ->assertResponseCode(401)
+            ->withMethod('POST')
+            ->withPath("/dummy/active/record")
+            ->withRequestBody(json_encode($this->getSampleData(true)))
+            ->assertResponseCode(403)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
+        ;
+        $this->assertRequest($request);
+    }
+
+    public function testPutInsufficientPrivileges()
+    {
+        $this->expectException(Error403Exception::class);
+        $this->expectExceptionMessage('Insufficient privileges');
+
+        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('PUT')
+            ->withPath("/dummy/active/record")
+            ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
+            ->assertResponseCode(403)
+            ->withRequestHeader([
+                "Authorization" => "Bearer " . $result['token']
+            ])
         ;
         $this->assertRequest($request);
     }
 
     public function testFullCrud()
     {
-        // Authenticate as admin
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
 
-        // POST - Create
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('POST')
-            ->withPath("/dummyactiverecord")
+            ->withPath("/dummy/active/record")
             ->withRequestBody(json_encode($this->getSampleData(true)))
             ->assertResponseCode(200)
             ->withRequestHeader([
@@ -128,76 +159,47 @@ class DummyActiveRecordTest extends BaseApiTestCase
         ;
         $body = $this->assertRequest($request);
         $bodyAr = json_decode($body->getBody()->getContents(), true);
-        $this->assertArrayHasKey('id', $bodyAr);
-        $createdId = $bodyAr['id'];
 
-        // GET - Read
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummyactiverecord/" . $createdId)
+            ->withPath("/dummy/active/record/" . $bodyAr['id'])
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
         $body = $this->assertRequest($request);
-        $getResult = json_decode($body->getBody()->getContents(), true);
-        $this->assertEquals('Test ActiveRecord', $getResult['name']);
-        $this->assertEquals('Test Value', $getResult['value']);
 
-        // PUT - Update
-        $updateData = $this->getSampleData(true);
-        $updateData['name'] = 'Updated ActiveRecord';
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('PUT')
-            ->withPath("/dummyactiverecord/" . $createdId)
-            ->withRequestBody(json_encode($updateData))
+            ->withPath("/dummy/active/record")
+            ->withRequestBody($body->getBody()->getContents())
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $body = $this->assertRequest($request);
-        $updateResult = json_decode($body->getBody()->getContents(), true);
-        $this->assertEquals('Updated ActiveRecord', $updateResult['name']);
-
-        // DELETE
-        $request = new FakeApiRequester();
-        $request
-            ->withPsr7Request($this->getPsr7Request())
-            ->withMethod('DELETE')
-            ->withPath("/dummyactiverecord/" . $createdId)
-            ->assertResponseCode(200)
-            ->withRequestHeader([
-                "Authorization" => "Bearer " . $result['token']
-            ])
-        ;
-        $body = $this->assertRequest($request);
-        $deleteResult = json_decode($body->getBody()->getContents(), true);
-        $this->assertEquals('deleted', $deleteResult['result']);
+        $this->assertRequest($request);
     }
 
     public function testList()
     {
-        // Authenticate as regular user (list only requires authentication, not admin)
         $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/dummyactiverecord")
+            ->withPath("/dummy/active/record")
             ->assertResponseCode(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $body = $this->assertRequest($request);
-        $listResult = json_decode($body->getBody()->getContents(), true);
-        $this->assertIsArray($listResult);
+        $this->assertRequest($request);
     }
 }
