@@ -58,7 +58,7 @@ The configuration is loaded by the [byjg/config](https://github.com/byjg/config)
 
 ## Get the configuration
 
-You just need to:
+Use the `Psr11::get()` method:
 
 ```php
 Psr11::get('WEB_SERVER');
@@ -68,7 +68,7 @@ Psr11::get('WEB_SERVER');
 
 The available environments are defined in the class `RestReferenceArchitecture\Psr11` in the method `environment()`.
 
-The project has 4 environments with the following inheritance hierarchy:
+The project has four environments with the following inheritance hierarchy:
 
 ```mermaid
 graph TD

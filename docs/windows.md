@@ -4,7 +4,7 @@ sidebar_position: 14
 
 # Running on Windows Without PHP
 
-This project is primarily designed for Linux environments, but can be easily run on Windows using Docker.
+This project is primarily designed for Linux environments but can be easily run on Windows using Docker.
 
 ## Prerequisites
 

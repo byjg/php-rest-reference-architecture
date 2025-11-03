@@ -122,6 +122,23 @@ class PostCreateScript
         }
 
         // ------------------------------------------------
+        // Remove Documentation job from build-app-image.yml workflow
+        $workflowFile = "$workdir/.github/workflows/build-app-image.yml";
+        if (file_exists($workflowFile)) {
+            $contents = file_get_contents($workflowFile);
+
+            // Remove the Documentation job section (from "  Documentation:" to the end of file)
+            $contents = preg_replace(
+                '/\n\n  Documentation:\n.*$/s',
+                '',
+                $contents
+            );
+
+            file_put_contents($workflowFile, $contents);
+            echo "Removed Documentation job from .github/workflows/build-app-image.yml\n";
+        }
+
+        // ------------------------------------------------
         // Remove example files if not installing examples
         if (!$installExamples) {
             echo "Removing example files...\n";

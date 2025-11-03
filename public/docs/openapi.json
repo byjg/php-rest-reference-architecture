@@ -188,16 +188,6 @@
                                         "type": "string",
                                         "format": "string",
                                         "nullable": true
-                                    },
-                                    "createdAt": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "updatedAt": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
                                     }
                                 },
                                 "type": "object"

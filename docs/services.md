@@ -164,7 +164,7 @@ Services dramatically simplify REST controllers:
 
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
-    // Lots of business logic in controller
+    // Lots of business logic in the controller
     $repository = Psr11::get(DummyRepository::class);
     $model = $repository->get($request->param('id'));
 
@@ -204,7 +204,7 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 
 ### Pattern 1: Basic CRUD Service
 
-For simple entities, just extend BaseService:
+For simple entities, extend BaseService:
 
 ```php
 <?php
@@ -298,7 +298,7 @@ class UserService extends BaseService
         // Create default profile
         $this->profileRepository->createDefaultProfile($user->getId());
 
-        // Send welcome email
+        // Send a welcome email
         $this->notificationService->sendWelcomeEmail($user);
 
         return $user;
@@ -374,9 +374,11 @@ Generate a service using the code generator:
 ```bash
 # Generate service only
 APP_ENV=dev composer run codegen -- --table products service --save
+# OR: composer run codegen -- --env=dev --table products service --save
 
 # Generate service + repository + model
 APP_ENV=dev composer run codegen -- --table products all --save
+# OR: composer run codegen -- --env=dev --table products all --save
 ```
 
 The service will automatically:

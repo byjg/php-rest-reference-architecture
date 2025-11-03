@@ -29,6 +29,8 @@ alter table example_crud
 
 ```shell
 APP_ENV=dev composer run migrate -- update
+# OR
+composer run migrate -- --env=dev update
 ```
 
 
@@ -74,7 +76,7 @@ Similarly, no changes needed in the `Service` class. The `BaseService` methods a
 
 ## Updating the REST Controller
 
-We just need to allow the rest receive the new field. If we don't do it the API will throw an error.
+We just need to allow the rest to receive the new field. If we don't do it, the API will throw an error.
 
 Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to method `postExampleCrud()`:
 
@@ -124,7 +126,7 @@ composer run openapi
 If everything is ok, the tests should pass:
 
 ```shell
-composer run test
+APP_ENV=test composer run test
 ```
 
 ## Next Steps

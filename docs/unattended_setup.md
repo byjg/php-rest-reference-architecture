@@ -1,3 +1,7 @@
+---
+sidebar_position: 15
+---
+
 # Unattended Setup Mode
 
 The PostCreateScript supports unattended (non-interactive) setup via a JSON configuration file.
@@ -28,7 +32,7 @@ Create `setup.json` in the directory where you want to create projects:
 }
 ```
 
-### Step 2: Run composer create-project
+### Step 2: Run `composer create-project`
 
 ```bash
 # Run in the same directory where setup.json exists
@@ -66,7 +70,7 @@ If a field is not provided in `setup.json`, the default value will be used. You 
 
 ## Docker Warning in Unattended Mode
 
-If Docker is not installed, the warning will be displayed but the setup will continue automatically without waiting for user input.
+If Docker is not installed, the warning will be displayed, but the setup will continue automatically without waiting for user input.
 
 ## Example: CI/CD Pipeline
 
@@ -87,7 +91,7 @@ EOF
 # Run unattended setup
 composer create-project byjg/rest-reference-architecture production-app ^6.0
 
-# setup.json is automatically deleted after reading
+# The setup.json file remains for reuse across multiple projects
 ```
 
 ## Interactive Mode
@@ -96,4 +100,5 @@ If `setup.json` does not exist, the setup runs in interactive mode (default beha
 
 ## Security Note
 
-The `setup.json` file is listed in `.gitignore` to prevent accidentally committing it to version control. Make sure to keep it outside of your project directories or add it to your global gitignore if it contains sensitive information.
+The `setup.json` file is listed in `.gitignore` to prevent accidentally committing it to version control. 
+If it contains sensitive information, consider adding it to your global gitignore as well.

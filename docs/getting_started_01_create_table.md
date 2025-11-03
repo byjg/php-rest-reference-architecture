@@ -34,6 +34,8 @@ Apply your migrations with:
 
 ```shell
 APP_ENV=dev composer run migrate -- update
+# OR
+composer run migrate -- --env=dev update
 ```
 
 Expected output:
@@ -47,6 +49,8 @@ To rollback changes:
 
 ```shell
 APP_ENV=dev composer run migrate -- update --up-to=1
+# OR
+composer run migrate -- --env=dev update --up-to=1
 ```
 
 The result should be:
@@ -57,7 +61,7 @@ The result should be:
 Doing migrate, 1
 ```
 
-Remember to run the migrate update again to apply the changes.
+Remember to run the migrating update again to apply the changes.
 
 
 ## Generate CRUD Components with the Code Generator
@@ -67,9 +71,11 @@ Generate all necessary files for your new table:
 ```shell
 # Ensure DB is updated first
 APP_ENV=dev composer run migrate -- update
+# OR: composer run migrate -- --env=dev update
 
 # Generate files (options: rest, model, test, repo, config, or all)
 APP_ENV=dev composer run codegen -- --table example_crud --save all
+# OR: composer run codegen -- --env=dev --table example_crud --save all
 ```
 
 This creates:
@@ -85,6 +91,18 @@ The repository and service are automatically registered in:
 - `config/dev/05-services.php`
 
 No manual configuration needed!
+:::
+
+:::tip ActiveRecord Pattern
+To generate ActiveRecord pattern instead of Repository pattern:
+
+```shell
+APP_ENV=dev composer run codegen -- --table example_crud --save activerecord
+# OR: composer run codegen -- --env=dev --table example_crud --save activerecord
+```
+
+This generates a simpler architecture with the model containing data access methods.
+See [Code Generator Documentation](code_generator.md) for details.
 :::
 
 ## Run the Tests

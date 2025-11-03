@@ -20,7 +20,7 @@ We'll cover the following topics:
 First, we'll add OpenAPI attributes to our REST method using 
 the [zircote/swagger-php](https://zircote.github.io/swagger-php/guide/) library.
 
-While the OpenAPI specification offers numerous attributes, we must define at least these three essential sets:
+The OpenAPI specification offers many attributes. At minimum, define these three essential sets:
 
 ### 1. Method Attribute
 
@@ -189,7 +189,7 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 {
     $payload = ValidateRequest::getPayload();
 
-    // Use service layer for business logic
+    // Use the service layer for business logic
     $service = Psr11::get(ExampleCrudService::class);
     $model = $service->getOrFail($payload['id']);
     $model->setStatus($payload['status']);
@@ -240,7 +240,7 @@ class ExampleCrudTest extends BaseApiTestCase
 {
     public function testUpdateStatus()
     {
-        // Authenticate to get a valid token (if endpoint requires auth)
+        // Authenticate to get a valid token (if the endpoint requires auth)
         $authResult = json_decode(
             $this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))
                 ->getBody()
@@ -292,7 +292,7 @@ Update the OpenAPI specification and run the tests:
 
 ```bash
 composer run openapi
-composer run test
+APP_ENV=test composer run test
 ```
 
 All tests should pass successfully!

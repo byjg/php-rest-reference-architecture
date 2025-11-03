@@ -65,9 +65,9 @@ The `BaseApiTestCase` is a class that extends the `ByJG\ApiTools\Base\SwaggerTes
 
 The `testPing` method will test the `/sample/ping` endpoint. The `assertRequest` method will test the endpoint and will throw an exception if the endpoint does not match the OpenAPI specification for the status code `200`.
 
-There is no necessary have a webserver running to test the RestAPI. The `BaseApiTestCase` will create the request and will pass to the `FakeApiRequester` object. The `FakeApiRequester` will call the endpoint as a PHP method and will try to match the result with the OpenAPI specification.
+There is no necessary to have a webserver running to test the RestAPI. The `BaseApiTestCase` will create the request and will pass to the `FakeApiRequester` object. The `FakeApiRequester` will call the endpoint as a PHP method and will try to match the result with the OpenAPI specification.
 
-However, as it is a functional test you need to have the database and other resources accessed by the endpoint running.
+However, as it is a functional test, you need to have the database and other resources accessed by the endpoint running.
 
 ## Sending Body Data to Tests
 

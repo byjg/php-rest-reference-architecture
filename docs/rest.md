@@ -12,9 +12,9 @@ There are two ways to create a REST Method API:
 ## Using existing OpenAPI specification
 
 If you already have an OpenAPI specification in JSON format, you can use it to create your Rest Method API.
-Just put a file named `openapi.json` in the folder `public/docs`.
+Place the file `openapi.json` in the `public/docs` folder.
 
-There are one requirement in your specification. You need for each method to define a `operarionId` property as follows:
+There is one requirement in your specification. You need for each method to define a `operationId` property as follows:
 
 ```json
     "paths": {
@@ -32,7 +32,7 @@ The `operationId` is composed by the following parts:
 - Namespace of the class (required)
 - Method of the class (required)
 
-With definition above every request to `POST /login` will be handled by the method `mymethod` of the class `RestReferenceArchitecture\Rest\Login`.
+With the definition above every request to `POST /login` will be handled by the method `mymethod` of the class `RestReferenceArchitecture\Rest\Login`.
 
 The only requirement is that the method must receive two parameters:
 
@@ -66,7 +66,7 @@ use OpenApi\Attributes as OA;
 class Login
 
     /**
-     * Do login
+     * Do log in
      */
     #[OA\Post(
         path: "/login",
@@ -105,7 +105,7 @@ class Login
 }
 ```
 
-After documenting you code, you can generate the OpenAPI specification with the following command:
+After documenting your code, you can generate the OpenAPI specification with the following command:
 
 ```bash
 APP_ENV=dev composer run openapi

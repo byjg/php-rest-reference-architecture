@@ -134,3 +134,13 @@ jobs:
             echo Docker Image: $tag
           done
           echo Push Image: ${{ github.event_name != 'pull_request' || github.event.inputs.push == 'true' }}
+
+  Documentation:
+    if: github.ref == 'refs/heads/master'
+    needs: build_backend_app
+    uses: byjg/byjg.github.io/.github/workflows/add-doc.yaml@master
+    with:
+      folder: php
+      project: ${{ github.event.repository.name }}
+    secrets:
+      DOC_TOKEN: ${{ secrets.DOC_TOKEN }}

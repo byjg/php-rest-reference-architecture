@@ -55,7 +55,7 @@ You can specify the environment in two ways:
 
 ### Options
 
-- `--activerecord` - Use ActiveRecord pattern instead of Repository pattern
+- `--activerecord` - Use ActiveRecord pattern instead of a Repository pattern
 - `--save` - Save generated files to disk (otherwise prints to console)
 - `--debug` - Show debug information
 
@@ -167,7 +167,7 @@ Repository Pattern:
 ActiveRecord Pattern:
 - `modelactiverecord.php.jinja` - Model class with ActiveRecord trait template
 - `restactiverecord.php.jinja` - REST controller for ActiveRecord template
-- Uses the same `test.php.jinja` template as Repository pattern
+- Uses the same `test.php.jinja` template as a Repository pattern
 
 **Template variables available:**
 - `className` - PascalCase class name (e.g., `UserProfile`)
