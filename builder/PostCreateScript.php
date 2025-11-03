@@ -212,23 +212,34 @@ class PostCreateScript
 
     /**
      * Load configuration from JSON file if exists
-     * Looks in the parent directory (where user ran composer create-project)
+     * Checks multiple locations in priority order
      *
      * @param string $workdir
      * @return array|null
      */
     protected static function loadConfigFromJson(string $workdir): ?array
     {
-        // Look in parent directory where user ran the command
-        $configFile = dirname($workdir) . '/setup.json';
+        $locations = [
+            // 1. Environment variable (highest priority)
+            getenv('SETUP_JSON'),
 
-        if (file_exists($configFile)) {
-            $json = file_get_contents($configFile);
-            $config = json_decode($json, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                return $config;
+            // 2. Parent directory (where user ran composer create-project)
+            dirname($workdir) . '/setup.json',
+
+            // 3. User's home directory
+            (getenv('HOME') ?: getenv('USERPROFILE')) . '/.rest-reference-architecture/setup.json',
+        ];
+
+        foreach ($locations as $configFile) {
+            if (!empty($configFile) && file_exists($configFile)) {
+                $json = file_get_contents($configFile);
+                $config = json_decode($json, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $config;
+                }
             }
         }
+
         return null;
     }
 
@@ -239,7 +250,7 @@ class PostCreateScript
      */
     public static function run(Event $event)
     {
-        $workdir = realpath(__DIR__ . '/..');
+        $workdir = getcwd();
         $stdIo = $event->getIO();
 
         // Check for unattended mode via JSON config

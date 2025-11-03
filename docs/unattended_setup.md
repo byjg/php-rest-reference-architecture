@@ -8,40 +8,117 @@ The PostCreateScript supports unattended (non-interactive) setup via a JSON conf
 
 ## How It Works
 
-1. Create a `setup.json` file in your **current directory** (where you'll run the command)
+1. Place a `setup.json` file in one of the supported locations (see below)
 2. Run `composer create-project`
 3. The setup script will detect the file and run in unattended mode
-4. The `setup.json` file remains in your directory for reuse
+4. The `setup.json` file remains for reuse across multiple projects
 
-## Usage
+## Configuration File Locations
 
-### Step 1: Create setup.json in your current directory
+The script searches for `setup.json` in the following locations (in priority order):
 
-Create `setup.json` in the directory where you want to create projects:
+### 1. Environment Variable (Highest Priority)
 
-```json
+Use the `SETUP_JSON` environment variable to specify a custom location:
+
+```bash
+SETUP_JSON=/path/to/custom-setup.json composer -sdev create-project byjg/rest-reference-architecture my-project ^6.0
+```
+
+**Use cases:**
+- Custom configuration locations
+- CI/CD pipelines with specific configs
+- Temporary overrides for specific projects
+
+### 2. Parent Directory
+
+The script looks in the directory where you run the `composer create-project` command:
+
+```bash
+/home/user/projects/setup.json          # ← Config file here
+/home/user/projects/my-project/         # ← New project created here
+```
+
+**Use cases:**
+- Project-specific configurations
+- Quick one-off setups
+- When you want config alongside projects
+
+### 3. User Home Directory (Recommended for Personal Defaults)
+
+The script checks your home directory:
+
+**Linux/Mac:**
+```bash
+~/.rest-reference-architecture/setup.json
+```
+
+**Windows:**
+```
+C:\Users\YourName\.rest-reference-architecture\setup.json
+```
+
+**Use cases:**
+- Personal default configurations
+- Settings you want to reuse for all projects
+- Keep your workspace clean
+
+## Setup Examples
+
+### Example 1: Personal Defaults in Home Directory
+
+Create your personal defaults once:
+
+```bash
+# Linux/Mac
+mkdir -p ~/.rest-reference-architecture
+cat > ~/.rest-reference-architecture/setup.json << 'EOF'
 {
   "git_user_name": "John Doe",
   "git_user_email": "john.doe@example.com",
-  "php_version": "8.4",
-  "namespace": "MyApp",
-  "composer_name": "mycompany/myapp",
-  "mysql_connection": "mysql://root:password@mysql-container/mydb",
-  "timezone": "America/New_York",
   "install_examples": false
 }
+EOF
+
+# Now create projects anywhere - they'll use your defaults
+cd ~/projects
+composer -sdev create-project byjg/rest-reference-architecture project1 ^6.0
+composer -sdev create-project byjg/rest-reference-architecture project2 ^6.0
 ```
 
-### Step 2: Run `composer create-project`
+### Example 2: Parent Directory (Quick Setup)
 
 ```bash
-# Run in the same directory where setup.json exists
+# Create config in your projects directory
+cd ~/projects
+cat > setup.json << 'EOF'
+{
+  "namespace": "MyApp",
+  "composer_name": "mycompany/myapp",
+  "install_examples": false
+}
+EOF
+
+# Create project in the same directory
 composer -sdev create-project byjg/rest-reference-architecture my-project ^6.0
 ```
 
-The setup will run automatically using your configuration.
+### Example 3: Environment Variable (CI/CD)
 
-**Note:** The `setup.json` file will remain in your directory, so you can reuse it for creating multiple projects with the same configuration.
+```bash
+# Store config anywhere
+cat > /etc/ci-configs/rest-setup.json << 'EOF'
+{
+  "git_user_name": "CI Bot",
+  "git_user_email": "ci@company.com",
+  "namespace": "AutoDeployApp",
+  "install_examples": false
+}
+EOF
+
+# Use it with environment variable
+SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/rest-reference-architecture production-app ^6.0
+```
 
 ## Configuration Options
 
@@ -68,31 +145,19 @@ If a field is not provided in `setup.json`, the default value will be used. You 
 }
 ```
 
+## Priority Order
+
+When multiple `setup.json` files exist, the script uses the **first one found**:
+
+1. ✅ `SETUP_JSON` environment variable → **Highest priority**
+2. ✅ Parent directory `../setup.json`
+3. ✅ Home directory `~/.rest-reference-architecture/setup.json`
+
+**Example:** If you have both a home directory config and use `SETUP_JSON`, the environment variable wins.
+
 ## Docker Warning in Unattended Mode
 
 If Docker is not installed, the warning will be displayed, but the setup will continue automatically without waiting for user input.
-
-## Example: CI/CD Pipeline
-
-```bash
-# Create setup configuration
-cat > setup.json << 'EOF'
-{
-  "git_user_name": "CI Bot",
-  "git_user_email": "ci@company.com",
-  "namespace": "AutoDeployApp",
-  "composer_name": "company/auto-deploy",
-  "mysql_connection": "mysql://root:secret@db-server/production",
-  "timezone": "UTC",
-  "install_examples": false
-}
-EOF
-
-# Run unattended setup
-composer -sdev create-project byjg/rest-reference-architecture production-app ^6.0
-
-# The setup.json file remains for reuse across multiple projects
-```
 
 ## Interactive Mode
 
