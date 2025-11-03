@@ -2,9 +2,9 @@ name: Test Unattended Setup
 
 on:
   push:
-    branches: [ 6.0, master ]
+    branches: [ master ]
   pull_request:
-    branches: [ 6.0, master ]
+    branches: [ master ]
   workflow_dispatch:
 
 env:
@@ -61,7 +61,7 @@ jobs:
 
       - name: Create project using unattended setup
         run: |
-          composer create-project --no-interaction byjg/rest-reference-architecture:dev-${{ github.ref_name }} test-project
+          composer -sdev create-project --no-interaction byjg/rest-reference-architecture test-project dev-${{ github.ref_name }}
 
       - name: Verify setup.json was used
         run: |
@@ -130,12 +130,12 @@ jobs:
       - name: Run database migrations
         working-directory: test-project
         run: |
-          APP_ENV=test composer migrate -- update
+          composer migrate -- --env=test update
 
       - name: Run tests
         working-directory: test-project
         run: |
-          APP_ENV=test composer test
+          composer test -- --env=test
 
       - name: Verify changes were made
         working-directory: test-project
@@ -163,8 +163,11 @@ jobs:
       - name: Test invalid configuration (should fail)
         if: always()
         run: |
+          # Rename valid setup.json temporarily
+          mv setup.json setup.json.backup
+
           # Create invalid setup.json
-          cat > setup-invalid.json << 'EOF'
+          cat > setup.json << 'EOF'
           {
             "php_version": "7.4",
             "namespace": "TestApp"
@@ -173,9 +176,12 @@ jobs:
 
           # This should fail
           set +e
-          composer create-project --no-interaction byjg/rest-reference-architecture:dev-${{ github.ref_name }} test-invalid 2>&1 | tee output.log
+          composer -sdev create-project --no-interaction byjg/rest-reference-architecture test-invalid dev-${{ github.ref_name }} 2>&1 | tee output.log
           EXIT_CODE=$?
           set -e
+
+          # Restore original setup.json
+          mv setup.json.backup setup.json
 
           if [ $EXIT_CODE -ne 0 ]; then
             if grep -q "Invalid php_version" output.log; then
