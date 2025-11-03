@@ -13,7 +13,7 @@ use RecursiveIteratorIterator;
 
 class PostCreateScript
 {
-    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone): void
+    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples): void
     {
         // ------------------------------------------------
         // Defining function to interactively walking through the directories
@@ -121,6 +121,62 @@ class PostCreateScript
             }
         }
 
+        // ------------------------------------------------
+        // Remove example files if not installing examples
+        if (!$installExamples) {
+            echo "Removing example files...\n";
+
+            // Example files to remove
+            $exampleFiles = [
+                // Dummy files
+                'src/Model/Dummy.php',
+                'src/Repository/DummyRepository.php',
+                'src/Service/DummyService.php',
+                'src/Rest/DummyRest.php',
+                'tests/Rest/DummyTest.php',
+                // DummyHex files
+                'src/Model/DummyHex.php',
+                'src/Repository/DummyHexRepository.php',
+                'src/Service/DummyHexService.php',
+                'src/Rest/DummyHexRest.php',
+                'tests/Rest/DummyHexTest.php',
+                // DummyActiveRecord files
+                'src/Model/DummyActiveRecord.php',
+                'src/Rest/DummyActiveRecordRest.php',
+                'tests/Rest/DummyActiveRecordTest.php',
+                // Sample files
+                'src/Rest/Sample.php',
+                'src/Rest/SampleProtected.php',
+                'tests/Rest/SampleTest.php',
+                'tests/Rest/SampleProtectedTest.php',
+            ];
+
+            foreach ($exampleFiles as $file) {
+                $fullPath = "$workdir/$file";
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                    echo "  Removed: $file\n";
+                }
+            }
+
+            // Clean up config files
+            $configFile = "$workdir/config/dev/04-repositories.php";
+            if (file_exists($configFile)) {
+                $contents = "<?php\n\nuse ByJG\Config\DependencyInjection as DI;\n\nreturn [\n\n    // Repository Bindings\n\n];\n";
+                file_put_contents($configFile, $contents);
+                echo "  Cleaned: config/dev/04-repositories.php\n";
+            }
+
+            $configFile = "$workdir/config/dev/05-services.php";
+            if (file_exists($configFile)) {
+                $contents = "<?php\n\nuse ByJG\Config\DependencyInjection as DI;\n\nreturn [\n\n    // Service Bindings\n\n];\n";
+                file_put_contents($configFile, $contents);
+                echo "  Cleaned: config/dev/05-services.php\n";
+            }
+
+            echo "Example files removed successfully.\n";
+        }
+
         shell_exec("composer update");
         shell_exec("git init");
         shell_exec("git branch -m main");
@@ -178,6 +234,14 @@ class PostCreateScript
             return $arg;
         };
 
+        $validateYesNo = function ($arg) {
+            $arg = strtolower(trim($arg));
+            if (!in_array($arg, ['yes', 'no', 'y', 'n'])) {
+                throw new Exception('Please answer Yes or No (y/n)');
+            }
+            return in_array($arg, ['yes', 'y']);
+        };
+
         $maxRetries = 5;
 
         $stdIo->write("========================================================");
@@ -191,9 +255,10 @@ class PostCreateScript
         $composerName = $stdIo->askAndValidate('Composer name [me/myrest]: ', $validateComposer, $maxRetries, 'me/myrest');
         $mysqlConnection = $stdIo->askAndValidate('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', $validateURI, $maxRetries, 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
         $timezone = $stdIo->askAndValidate('Timezone [UTC]: ', $validateTimeZone, $maxRetries, 'UTC');
+        $installExamples = $stdIo->askAndValidate('Install Examples [Yes]: ', $validateYesNo, $maxRetries, 'Yes');
         $stdIo->ask('Press <ENTER> to continue');
 
         $script = new PostCreateScript();
-        $script->execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone);
+        $script->execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples);
     }
 }
