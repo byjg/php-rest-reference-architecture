@@ -36,7 +36,7 @@ Create `setup.json` in the directory where you want to create projects:
 
 ```bash
 # Run in the same directory where setup.json exists
-composer create-project byjg/rest-reference-architecture my-project ^6.0
+composer -sdev create-project byjg/rest-reference-architecture my-project ^6.0
 ```
 
 The setup will run automatically using your configuration.
@@ -89,7 +89,7 @@ cat > setup.json << 'EOF'
 EOF
 
 # Run unattended setup
-composer create-project byjg/rest-reference-architecture production-app ^6.0
+composer -sdev create-project byjg/rest-reference-architecture production-app ^6.0
 
 # The setup.json file remains for reuse across multiple projects
 ```

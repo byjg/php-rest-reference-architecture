@@ -25,7 +25,7 @@ Stop wasting time configuring infrastructure. This template provides everything 
 
 ```bash
 # Create your project
-composer create-project byjg/rest-reference-architecture my-api ^6.0
+composer -sdev create-project byjg/rest-reference-architecture my-api ^6.0
 
 # Start containers
 cd my-api
