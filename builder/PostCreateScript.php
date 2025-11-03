@@ -181,12 +181,14 @@ class PostCreateScript
         // Configure git and initialize repository
         shell_exec("composer update");
 
-        // Set git user config before init
-        shell_exec('git config --global user.name ' . escapeshellarg($gitUserName));
-        shell_exec('git config --global user.email ' . escapeshellarg($gitUserEmail));
-
+        // Initialize git repository first
         shell_exec("git init");
         shell_exec("git branch -m main");
+
+        // Set git user config locally for this repository
+        shell_exec('git config user.name ' . escapeshellarg($gitUserName));
+        shell_exec('git config user.email ' . escapeshellarg($gitUserEmail));
+
         shell_exec("git add .");
         shell_exec("git commit -m 'Initial commit'");
     }
@@ -320,12 +322,12 @@ class PostCreateScript
         $userName = $stdIo->askAndValidate("Git user name [$defaultGitName]: ", $validateNonEmpty, $maxRetries, $defaultGitName);
         $userEmail = $stdIo->askAndValidate("Git user email [$defaultGitEmail]: ", $validateEmail, $maxRetries, $defaultGitEmail);
 
-        // Show info if values will be updated
+        // Show info about git configuration
         if ($userName !== $gitUserName && !empty($gitUserName)) {
-            $stdIo->write("<info>Git user.name will be updated to: $userName</info>");
+            $stdIo->write("<info>Git user.name for this project will be set to: $userName</info>");
         }
         if ($userEmail !== $gitUserEmail && !empty($gitUserEmail)) {
-            $stdIo->write("<info>Git user.email will be updated to: $userEmail</info>");
+            $stdIo->write("<info>Git user.email for this project will be set to: $userEmail</info>");
         }
 
         $phpVersion = $stdIo->askAndValidate("PHP Version [$currentPhpVersion]: ", $validatePHPVersion, $maxRetries, $currentPhpVersion);
