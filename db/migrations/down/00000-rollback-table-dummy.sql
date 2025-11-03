@@ -2,3 +2,4 @@
 -- Just for demo
 DROP TABLE dummy;
 DROP TABLE dummyhex;
+DROP TABLE dummy_active_record
