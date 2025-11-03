@@ -13,7 +13,7 @@ use RecursiveIteratorIterator;
 
 class PostCreateScript
 {
-    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples): void
+    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples, $gitUserName, $gitUserEmail): void
     {
         // ------------------------------------------------
         // Defining function to interactively walking through the directories
@@ -177,7 +177,14 @@ class PostCreateScript
             echo "Example files removed successfully.\n";
         }
 
+        // ------------------------------------------------
+        // Configure git and initialize repository
         shell_exec("composer update");
+
+        // Set git user config before init
+        shell_exec('git config --global user.name ' . escapeshellarg($gitUserName));
+        shell_exec('git config --global user.email ' . escapeshellarg($gitUserEmail));
+
         shell_exec("git init");
         shell_exec("git branch -m main");
         shell_exec("git add .");
@@ -193,6 +200,43 @@ class PostCreateScript
     {
         $workdir = realpath(__DIR__ . '/..');
         $stdIo = $event->getIO();
+
+        // Check if PHP is installed
+        $phpCheck = shell_exec('php --version 2>&1');
+        if (empty($phpCheck) || !str_contains($phpCheck, 'PHP')) {
+            throw new Exception('PHP is not installed or not available in PATH. Please install PHP before proceeding.');
+        }
+
+        // Check if git is installed
+        $gitCheck = shell_exec('git --version 2>&1');
+        if (empty($gitCheck) || !str_contains($gitCheck, 'git version')) {
+            throw new Exception('Git is not installed or not available in PATH. Please install Git before proceeding.');
+        }
+
+        // Check if docker is installed (warning only)
+        $dockerCheck = shell_exec('docker --version 2>&1');
+        $dockerInstalled = !empty($dockerCheck) && str_contains($dockerCheck, 'Docker version');
+
+        if (!$dockerInstalled) {
+            $stdIo->write("");
+            $stdIo->write("<warning>========================================================</warning>");
+            $stdIo->write("<warning> WARNING: Docker is not installed</warning>");
+            $stdIo->write("<warning>========================================================</warning>");
+            $stdIo->write("<warning>Docker was not found on your system.</warning>");
+            $stdIo->write("<warning>You will need Docker to run the containerized environment.</warning>");
+            $stdIo->write("<warning></warning>");
+            $stdIo->write("<warning>You can:</warning>");
+            $stdIo->write("<warning>  - Press Ctrl+C to abort and install Docker first</warning>");
+            $stdIo->write("<warning>  - Continue without Docker (you'll need to set it up later)</warning>");
+            $stdIo->write("<warning>========================================================</warning>");
+            $stdIo->write("");
+            $stdIo->ask('Press <ENTER> to continue or Ctrl+C to abort');
+            $stdIo->write("");
+        }
+
+        // Get current git user configuration
+        $gitUserName = trim(shell_exec('git config --global user.name 2>/dev/null') ?? '');
+        $gitUserEmail = trim(shell_exec('git config --global user.email 2>/dev/null') ?? '');
 
         $currentPhpVersion = PHP_MAJOR_VERSION . "." .PHP_MINOR_VERSION;
 
@@ -242,6 +286,24 @@ class PostCreateScript
             return in_array($arg, ['yes', 'y']);
         };
 
+        $validateNonEmpty = function ($arg) {
+            if (empty(trim($arg))) {
+                throw new Exception('This field cannot be empty');
+            }
+            return trim($arg);
+        };
+
+        $validateEmail = function ($arg) {
+            $email = trim($arg);
+            if (empty($email)) {
+                throw new Exception('Email cannot be empty');
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception('Invalid email format');
+            }
+            return $email;
+        };
+
         $maxRetries = 5;
 
         $stdIo->write("========================================================");
@@ -250,6 +312,22 @@ class PostCreateScript
         $stdIo->write("========================================================");
         $stdIo->write("");
         $stdIo->write("Project Directory: " . $workdir);
+
+        // Git configuration
+        $defaultGitName = !empty($gitUserName) ? $gitUserName : 'Your Name';
+        $defaultGitEmail = !empty($gitUserEmail) ? $gitUserEmail : 'your.email@example.com';
+
+        $userName = $stdIo->askAndValidate("Git user name [$defaultGitName]: ", $validateNonEmpty, $maxRetries, $defaultGitName);
+        $userEmail = $stdIo->askAndValidate("Git user email [$defaultGitEmail]: ", $validateEmail, $maxRetries, $defaultGitEmail);
+
+        // Show info if values will be updated
+        if ($userName !== $gitUserName && !empty($gitUserName)) {
+            $stdIo->write("<info>Git user.name will be updated to: $userName</info>");
+        }
+        if ($userEmail !== $gitUserEmail && !empty($gitUserEmail)) {
+            $stdIo->write("<info>Git user.email will be updated to: $userEmail</info>");
+        }
+
         $phpVersion = $stdIo->askAndValidate("PHP Version [$currentPhpVersion]: ", $validatePHPVersion, $maxRetries, $currentPhpVersion);
         $namespace = $stdIo->askAndValidate('Project namespace [MyRest]: ', $validateNamespace, $maxRetries, 'MyRest');
         $composerName = $stdIo->askAndValidate('Composer name [me/myrest]: ', $validateComposer, $maxRetries, 'me/myrest');
@@ -259,6 +337,6 @@ class PostCreateScript
         $stdIo->ask('Press <ENTER> to continue');
 
         $script = new PostCreateScript();
-        $script->execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples);
+        $script->execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples, $userName, $userEmail);
     }
 }

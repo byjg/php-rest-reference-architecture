@@ -39,7 +39,7 @@ Choose one of the following installation methods:
 ```shell script
 # Standard installation
 mkdir ~/tutorial
-composer create-project byjg/rest-reference-architecture ~/tutorial ^5.0
+composer create-project byjg/rest-reference-architecture ~/tutorial ^6.0
 
 # OR Latest development version
 mkdir ~/tutorial
@@ -60,10 +60,27 @@ The installation will prompt you for configuration details:
 Project Directory: ~/tutorial
 PHP Version [8.4]: 8.4
 Project namespace [MyRest]: Tutorial
-Composer name [me/myrest]: 
-MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: 
+Composer name [me/myrest]:
+MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]:
 Timezone [UTC]:
+Install Examples [Yes]: Yes
+Press <ENTER> to continue
 ```
+
+#### Configuration Options
+
+- **PHP Version**: The PHP version for your Docker container (8.1, 8.2, 8.3, 8.4)
+- **Project namespace**: Your application's root namespace (must be CamelCase, e.g., `MyApp`, `Tutorial`)
+- **Composer name**: Package name in `vendor/package` format (e.g., `me/myrest`)
+- **MySQL connection DEV**: Database connection string for development environment
+- **Timezone**: Server timezone (e.g., `UTC`, `America/New_York`, `Europe/London`)
+- **Install Examples**: Whether to include example code (Dummy, Sample classes)
+  - **Yes** (default): Includes example implementations to help you learn
+    - `DummyActiveRecord` - ActiveRecord pattern example
+    - `Dummy` - Repository pattern example
+    - `DummyHex` - Hexadecimal ID example
+    - `Sample` and `SampleProtected` - Basic REST endpoints
+  - **No**: Clean project with only the base `users` table and authentication
 
 **Tip**: To access the MySQL container locally, add this to your `/etc/hosts` file:
 ```
@@ -98,6 +115,8 @@ Doing migrate, 1
 
 ## Verify Installation
 
+### If You Installed Examples
+
 ```shell script
 curl http://localhost:8080/sample/ping
 ```
@@ -107,12 +126,21 @@ Expected response:
 {"result":"pong"}
 ```
 
+### If You Skipped Examples
+
+The project is ready! You can start by:
+- Creating your first table following the [getting started tutorial](getting_started_01_create_table.md)
+- Accessing the API documentation at http://localhost:8080/docs
+- The `users` table and authentication endpoints are already available
+
 ## Run Tests
 
 ```shell script
 APP_ENV=dev composer run test
 # OR: docker exec -it $CONTAINER_NAME composer run test
 ```
+
+**Note**: If you chose not to install examples, the project will only include authentication tests. Example tests (Dummy, Sample) will not be present.
 
 ## Documentation
 
