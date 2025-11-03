@@ -46,5 +46,22 @@ create table users_property
    constraint fk_custom_user foreign key (userid) references users (userid)
 ) ENGINE=InnoDB;
 
-insert into users_property (name, value, userid) values 
+insert into users_property (name, value, userid) values
   ('picture', 'https://www.gravatar.com/avatar/9f4d313491a7df705b7071c228fc79cd', 0x5f6e7fe7bd1b11ed8ca90242ac120002);
+
+-- Example table using ActiveRecord pattern
+create table dummy_active_record
+(
+    id int auto_increment not null,
+    name varchar(50) not null,
+    value varchar(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    constraint pk_dummy_active_record primary key (id)
+) ENGINE=InnoDB;
+
+-- Sample data
+insert into dummy_active_record (name, value) VALUES
+  ('Sample 1', 'Value 1'),
+  ('Sample 2', 'Value 2');

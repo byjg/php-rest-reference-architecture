@@ -7,6 +7,7 @@ use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
+use ByJG\MicroOrm\ORM;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -24,6 +25,12 @@ return [
     DatabaseExecutor::class => DI::bind(DatabaseExecutor::class)
         ->withInjectedConstructor()
         ->toSingleton(),
+
+    // ORM Initialization - Required for ActiveRecord pattern
+    // This sets the default database driver for all ActiveRecord models
+    "ORMInitialization" => DI::bind(ORM::class)
+        ->withFactoryMethod("defaultDbDriver", [Param::get(DatabaseExecutor::class)])
+        ->toEagerSingleton(),
 
     // Logging Configuration
     LoggerInterface::class => DI::bind(NullLogger::class)

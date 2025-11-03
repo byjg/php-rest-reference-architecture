@@ -13,6 +13,238 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/dummyactiverecord/{id}": {
+            "get": {
+                "tags": [
+                    "DummyActiveRecord"
+                ],
+                "summary": "Get a DummyActiveRecord by ID",
+                "description": "Get a DummyActiveRecord by ID",
+                "operationId": "GET::/dummyactiverecord/{id}::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::getDummyActiveRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The DummyActiveRecord object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DummyActiveRecord"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "DummyActiveRecord"
+                ],
+                "summary": "Update an existing DummyActiveRecord",
+                "description": "Update an existing DummyActiveRecord",
+                "operationId": "PUT::/dummyactiverecord/{id}::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::putDummyActiveRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "The DummyActiveRecord object to be updated",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "value": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The updated DummyActiveRecord object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DummyActiveRecord"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "DummyActiveRecord"
+                ],
+                "summary": "Delete a DummyActiveRecord",
+                "description": "Delete a DummyActiveRecord",
+                "operationId": "DELETE::/dummyactiverecord/{id}::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::deleteDummyActiveRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Confirmation of deletion",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "result"
+                                    ],
+                                    "properties": {
+                                        "result": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/dummyactiverecord": {
+            "get": {
+                "tags": [
+                    "DummyActiveRecord"
+                ],
+                "summary": "List all DummyActiveRecord records",
+                "description": "List all DummyActiveRecord records",
+                "operationId": "GET::/dummyactiverecord::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::getAllDummyActiveRecord",
+                "responses": {
+                    "200": {
+                        "description": "List of DummyActiveRecord objects",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DummyActiveRecord"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "DummyActiveRecord"
+                ],
+                "summary": "Create a new DummyActiveRecord",
+                "description": "Create a new DummyActiveRecord",
+                "operationId": "POST::/dummyactiverecord::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::postDummyActiveRecord",
+                "requestBody": {
+                    "description": "The DummyActiveRecord object to be created",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "value": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The ID of the created object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "format": "int32"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
         "/dummyhex/{id}": {
             "get": {
                 "tags": [
@@ -892,6 +1124,38 @@
                     "name": "Dummy"
                 }
             },
+            "DummyActiveRecord": {
+                "description": "DummyActiveRecord Model using ActiveRecord pattern",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "name": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "value": {
+                        "type": "string",
+                        "format": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "DummyHex": {
                 "description": "Class DummyHex",
                 "required": [
@@ -1001,6 +1265,10 @@
         }
     },
     "tags": [
+        {
+            "name": "DummyActiveRecord",
+            "description": "DummyActiveRecord"
+        },
         {
             "name": "Dummyhex",
             "description": "Dummyhex"
