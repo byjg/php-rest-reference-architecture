@@ -194,6 +194,28 @@ class PostCreateScript
     }
 
     /**
+     * Load configuration from JSON file if exists
+     * Looks in the parent directory (where user ran composer create-project)
+     *
+     * @param string $workdir
+     * @return array|null
+     */
+    protected static function loadConfigFromJson(string $workdir): ?array
+    {
+        // Look in parent directory where user ran the command
+        $configFile = dirname($workdir) . '/setup.json';
+
+        if (file_exists($configFile)) {
+            $json = file_get_contents($configFile);
+            $config = json_decode($json, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $config;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param Event $event
      * @return void
      * @throws Exception
@@ -202,6 +224,10 @@ class PostCreateScript
     {
         $workdir = realpath(__DIR__ . '/..');
         $stdIo = $event->getIO();
+
+        // Check for unattended mode via JSON config
+        $config = self::loadConfigFromJson($workdir);
+        $unattended = $config !== null;
 
         // Check if PHP is installed
         $phpCheck = shell_exec('php --version 2>&1');
@@ -227,13 +253,19 @@ class PostCreateScript
             $stdIo->write("<warning>Docker was not found on your system.</warning>");
             $stdIo->write("<warning>You will need Docker to run the containerized environment.</warning>");
             $stdIo->write("<warning></warning>");
-            $stdIo->write("<warning>You can:</warning>");
-            $stdIo->write("<warning>  - Press Ctrl+C to abort and install Docker first</warning>");
-            $stdIo->write("<warning>  - Continue without Docker (you'll need to set it up later)</warning>");
-            $stdIo->write("<warning>========================================================</warning>");
-            $stdIo->write("");
-            $stdIo->ask('Press <ENTER> to continue or Ctrl+C to abort');
-            $stdIo->write("");
+            if (!$unattended) {
+                $stdIo->write("<warning>You can:</warning>");
+                $stdIo->write("<warning>  - Press Ctrl+C to abort and install Docker first</warning>");
+                $stdIo->write("<warning>  - Continue without Docker (you'll need to set it up later)</warning>");
+                $stdIo->write("<warning>========================================================</warning>");
+                $stdIo->write("");
+                $stdIo->ask('Press <ENTER> to continue or Ctrl+C to abort');
+                $stdIo->write("");
+            } else {
+                $stdIo->write("<warning>Continuing in unattended mode...</warning>");
+                $stdIo->write("<warning>========================================================</warning>");
+                $stdIo->write("");
+            }
         }
 
         // Get current git user configuration
@@ -308,35 +340,126 @@ class PostCreateScript
 
         $maxRetries = 5;
 
-        $stdIo->write("========================================================");
-        $stdIo->write(" Setup Project");
-        $stdIo->write(" Answer the questions below");
-        $stdIo->write("========================================================");
-        $stdIo->write("");
-        $stdIo->write("Project Directory: " . $workdir);
+        if ($unattended) {
+            // Unattended mode - use config from JSON
+            $stdIo->write("========================================================");
+            $stdIo->write(" Setup Project - UNATTENDED MODE");
+            $stdIo->write("========================================================");
+            $stdIo->write("");
+            $stdIo->write("Project Directory: " . $workdir);
 
-        // Git configuration
-        $defaultGitName = !empty($gitUserName) ? $gitUserName : 'Your Name';
-        $defaultGitEmail = !empty($gitUserEmail) ? $gitUserEmail : 'your.email@example.com';
+            // Get values with defaults
+            $userName = $config['git_user_name'] ?? $gitUserName ?: 'Your Name';
+            $userEmail = $config['git_user_email'] ?? $gitUserEmail ?: 'your.email@example.com';
+            $phpVersion = $config['php_version'] ?? $currentPhpVersion;
+            $namespace = $config['namespace'] ?? 'MyRest';
+            $composerName = $config['composer_name'] ?? 'me/myrest';
+            $mysqlConnection = $config['mysql_connection'] ?? 'mysql://root:mysqlp455w0rd@mysql-container/mydb';
+            $timezone = $config['timezone'] ?? 'UTC';
+            $installExamples = $config['install_examples'] ?? true;
 
-        $userName = $stdIo->askAndValidate("Git user name [$defaultGitName]: ", $validateNonEmpty, $maxRetries, $defaultGitName);
-        $userEmail = $stdIo->askAndValidate("Git user email [$defaultGitEmail]: ", $validateEmail, $maxRetries, $defaultGitEmail);
+            // Validate provided values (only if they were explicitly provided in JSON)
+            if (isset($config['git_user_name'])) {
+                try {
+                    $userName = $validateNonEmpty($userName);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid git_user_name in setup.json: " . $e->getMessage());
+                }
+            }
 
-        // Show info about git configuration
-        if ($userName !== $gitUserName && !empty($gitUserName)) {
-            $stdIo->write("<info>Git user.name for this project will be set to: $userName</info>");
+            if (isset($config['git_user_email'])) {
+                try {
+                    $userEmail = $validateEmail($userEmail);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid git_user_email in setup.json: " . $e->getMessage());
+                }
+            }
+
+            if (isset($config['php_version'])) {
+                try {
+                    $phpVersion = $validatePHPVersion($phpVersion);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid php_version in setup.json: " . $e->getMessage());
+                }
+            }
+
+            if (isset($config['namespace'])) {
+                try {
+                    $namespace = $validateNamespace($namespace);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid namespace in setup.json: " . $e->getMessage());
+                }
+            }
+
+            if (isset($config['composer_name'])) {
+                try {
+                    $composerName = $validateComposer($composerName);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid composer_name in setup.json: " . $e->getMessage());
+                }
+            }
+
+            if (isset($config['mysql_connection'])) {
+                try {
+                    $mysqlConnection = $validateURI($mysqlConnection);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid mysql_connection in setup.json: " . $e->getMessage());
+                }
+            }
+
+            if (isset($config['timezone'])) {
+                try {
+                    $timezone = $validateTimeZone($timezone);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid timezone in setup.json: " . $e->getMessage());
+                }
+            }
+
+            if (isset($config['install_examples']) && !is_bool($config['install_examples'])) {
+                throw new Exception("Invalid install_examples in setup.json: must be true or false (boolean)");
+            }
+
+            $stdIo->write("Git user name: $userName");
+            $stdIo->write("Git user email: $userEmail");
+            $stdIo->write("PHP Version: $phpVersion");
+            $stdIo->write("Namespace: $namespace");
+            $stdIo->write("Composer name: $composerName");
+            $stdIo->write("MySQL connection: $mysqlConnection");
+            $stdIo->write("Timezone: $timezone");
+            $stdIo->write("Install Examples: " . ($installExamples ? 'Yes' : 'No'));
+            $stdIo->write("");
+        } else {
+            // Interactive mode
+            $stdIo->write("========================================================");
+            $stdIo->write(" Setup Project");
+            $stdIo->write(" Answer the questions below");
+            $stdIo->write("========================================================");
+            $stdIo->write("");
+            $stdIo->write("Project Directory: " . $workdir);
+
+            // Git configuration
+            $defaultGitName = !empty($gitUserName) ? $gitUserName : 'Your Name';
+            $defaultGitEmail = !empty($gitUserEmail) ? $gitUserEmail : 'your.email@example.com';
+
+            $userName = $stdIo->askAndValidate("Git user name [$defaultGitName]: ", $validateNonEmpty, $maxRetries, $defaultGitName);
+            $userEmail = $stdIo->askAndValidate("Git user email [$defaultGitEmail]: ", $validateEmail, $maxRetries, $defaultGitEmail);
+
+            // Show info about git configuration
+            if ($userName !== $gitUserName && !empty($gitUserName)) {
+                $stdIo->write("<info>Git user.name for this project will be set to: $userName</info>");
+            }
+            if ($userEmail !== $gitUserEmail && !empty($gitUserEmail)) {
+                $stdIo->write("<info>Git user.email for this project will be set to: $userEmail</info>");
+            }
+
+            $phpVersion = $stdIo->askAndValidate("PHP Version [$currentPhpVersion]: ", $validatePHPVersion, $maxRetries, $currentPhpVersion);
+            $namespace = $stdIo->askAndValidate('Project namespace [MyRest]: ', $validateNamespace, $maxRetries, 'MyRest');
+            $composerName = $stdIo->askAndValidate('Composer name [me/myrest]: ', $validateComposer, $maxRetries, 'me/myrest');
+            $mysqlConnection = $stdIo->askAndValidate('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', $validateURI, $maxRetries, 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
+            $timezone = $stdIo->askAndValidate('Timezone [UTC]: ', $validateTimeZone, $maxRetries, 'UTC');
+            $installExamples = $stdIo->askAndValidate('Install Examples [Yes]: ', $validateYesNo, $maxRetries, 'Yes');
+            $stdIo->ask('Press <ENTER> to continue');
         }
-        if ($userEmail !== $gitUserEmail && !empty($gitUserEmail)) {
-            $stdIo->write("<info>Git user.email for this project will be set to: $userEmail</info>");
-        }
-
-        $phpVersion = $stdIo->askAndValidate("PHP Version [$currentPhpVersion]: ", $validatePHPVersion, $maxRetries, $currentPhpVersion);
-        $namespace = $stdIo->askAndValidate('Project namespace [MyRest]: ', $validateNamespace, $maxRetries, 'MyRest');
-        $composerName = $stdIo->askAndValidate('Composer name [me/myrest]: ', $validateComposer, $maxRetries, 'me/myrest');
-        $mysqlConnection = $stdIo->askAndValidate('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', $validateURI, $maxRetries, 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
-        $timezone = $stdIo->askAndValidate('Timezone [UTC]: ', $validateTimeZone, $maxRetries, 'UTC');
-        $installExamples = $stdIo->askAndValidate('Install Examples [Yes]: ', $validateYesNo, $maxRetries, 'Yes');
-        $stdIo->ask('Press <ENTER> to continue');
 
         $script = new PostCreateScript();
         $script->execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples, $userName, $userEmail);

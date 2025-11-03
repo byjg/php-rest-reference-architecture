@@ -1,0 +1,10 @@
+{
+  "git_user_name": "Your Name",
+  "git_user_email": "your.email@example.com",
+  "php_version": "8.4",
+  "namespace": "MyRest",
+  "composer_name": "me/myrest",
+  "mysql_connection": "mysql://root:mysqlp455w0rd@mysql-container/mydb",
+  "timezone": "UTC",
+  "install_examples": true
+}
