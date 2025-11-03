@@ -37,6 +37,15 @@ jobs:
           php-version: '8.4'
           extensions: mbstring, xml, ctype, json, mysql, pdo, pdo_mysql
 
+      - name: Get sanitized branch name
+        id: branch
+        run: |
+          # Replace / with - in branch name for composer version
+          BRANCH_NAME="${{ github.ref_name }}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/\//-/g')
+          echo "name=$SANITIZED_BRANCH" >> $GITHUB_OUTPUT
+          echo "Branch: $BRANCH_NAME -> dev-$SANITIZED_BRANCH"
+
       - name: Verify prerequisites
         run: |
           php --version
@@ -61,7 +70,7 @@ jobs:
 
       - name: Create project using unattended setup
         run: |
-          composer -sdev create-project --no-interaction byjg/rest-reference-architecture test-project dev-${{ github.ref_name }}
+          composer -sdev create-project --no-interaction byjg/rest-reference-architecture test-project dev-${{ steps.branch.outputs.name }}
 
       - name: Verify setup.json was used
         run: |
@@ -176,7 +185,7 @@ jobs:
 
           # This should fail
           set +e
-          composer -sdev create-project --no-interaction byjg/rest-reference-architecture test-invalid dev-${{ github.ref_name }} 2>&1 | tee output.log
+          composer -sdev create-project --no-interaction byjg/rest-reference-architecture test-invalid dev-${{ steps.branch.outputs.name }} 2>&1 | tee output.log
           EXIT_CODE=$?
           set -e
 
