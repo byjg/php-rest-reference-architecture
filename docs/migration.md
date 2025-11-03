@@ -7,14 +7,19 @@ sidebar_position: 6
 ## Usage
 
 ```bash
+APP_ENV=<environment> composer migrate -- <command> [options]
 composer migrate -- --env=<environment> <command> [options]
 ```
 
 If you run `composer migrate` with no parameters or invalid parameters, the command will display usage information and available commands.
 
-### Required
+### Environment
 
-- `--env=<environment>` - Environment (dev, test, prod)
+You can specify the environment in two ways:
+- Set the `APP_ENV` environment variable
+- Use the `--env=<environment>` parameter (overrides `APP_ENV`)
+
+**Note:** At least one method must be used to specify the environment (dev, test, prod).
 
 ### Available Commands
 
@@ -30,6 +35,10 @@ If you run `composer migrate` with no parameters or invalid parameters, the comm
 You can create a fresh new database using the command:
 
 ```bash
+# Using APP_ENV
+APP_ENV=dev composer migrate -- reset --yes
+
+# Using --env parameter
 composer migrate -- --env=dev reset --yes
 ```
 
@@ -42,6 +51,10 @@ Use this command carefully. It will drop all tables and create a new database.
 You can update the database using the command:
 
 ```bash
+# Using APP_ENV
+APP_ENV=dev composer migrate -- update --up-to=x
+
+# Using --env parameter
 composer migrate -- --env=dev update --up-to=x
 ```
 
@@ -50,7 +63,7 @@ This command updates the database using migration files in the `db/migrations` f
 Apply all pending migrations:
 
 ```bash
-composer migrate -- --env=dev update
+APP_ENV=dev composer migrate -- update
 ```
 
 ## Create a New Migration Version

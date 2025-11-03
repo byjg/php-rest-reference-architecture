@@ -26,13 +26,21 @@ The code generator supports two architectural patterns:
 ## Usage
 
 ```bash
+APP_ENV=<environment> composer codegen -- --table=<table_name> <arguments> [options]
 composer codegen -- --env=<environment> --table=<table_name> <arguments> [options]
 ```
 
 ### Required
 
 - `--table=<name>` - Database table name
-- `--env=<environment>` - Environment (dev, test, prod)
+
+### Environment
+
+You can specify the environment in two ways:
+- Set the `APP_ENV` environment variable
+- Use the `--env=<environment>` parameter (overrides `APP_ENV`)
+
+**Note:** At least one method must be used to specify the environment (dev, test, prod).
 
 ### Arguments (at least one required)
 
@@ -58,6 +66,10 @@ composer codegen -- --env=<environment> --table=<table_name> <arguments> [option
 Generate all components for the 'users' table using the Repository pattern:
 
 ```bash
+# Using APP_ENV
+APP_ENV=dev composer codegen -- --table=users all --save
+
+# Using --env parameter
 composer codegen -- --env=dev --table=users all --save
 ```
 
@@ -72,7 +84,7 @@ This creates:
 Generate only specific components:
 
 ```bash
-composer codegen -- --env=dev --table=products model rest --save
+APP_ENV=dev composer codegen -- --table=products model rest --save
 ```
 
 ### ActiveRecord Pattern
@@ -80,6 +92,10 @@ composer codegen -- --env=dev --table=products model rest --save
 Generate all components for the 'users' table using the ActiveRecord pattern:
 
 ```bash
+# Using APP_ENV
+APP_ENV=test composer codegen -- --table=users all --activerecord --save
+
+# Using --env parameter
 composer codegen -- --env=test --table=users all --activerecord --save
 ```
 
@@ -91,7 +107,7 @@ This creates:
 Generate only the model:
 
 ```bash
-composer codegen -- --env=test --table=products model --activerecord --save
+APP_ENV=test composer codegen -- --table=products model --activerecord --save
 ```
 
 ### Preview Without Saving
@@ -99,7 +115,7 @@ composer codegen -- --env=test --table=products model --activerecord --save
 Preview the generated REST controller without saving to disk:
 
 ```bash
-composer codegen -- --env=dev --table=orders rest
+APP_ENV=dev composer codegen -- --table=orders rest
 composer codegen -- --env=dev --table=orders all --activerecord
 ```
 

@@ -86,9 +86,9 @@ class Scripts extends BaseScripts
     protected function getMigrateHelp(): string
     {
         return "Usage:\n" .
+            "  APP_ENV=<environment> composer migrate -- <command> [options]\n" .
             "  composer migrate -- --env=<environment> <command> [options]\n\n" .
-            "Required:\n" .
-            "  --env=<environment>   Environment (dev, test, prod)\n\n" .
+            $this->getEnvironmentHelpText() .
             "Available Commands:\n" .
             "  reset                 Drop all tables and recreate the database\n" .
             "  update                Apply pending migrations\n" .
@@ -98,13 +98,11 @@ class Scripts extends BaseScripts
             "  --up-to=<version>     Apply migrations up to specified version\n" .
             "  --force               Force migration even if already applied\n\n" .
             "Examples:\n" .
-            "  # Create a fresh database (WARNING: drops all tables)\n" .
-            "  composer migrate -- --env=dev reset --yes\n\n" .
-            "  # Apply all pending migrations\n" .
-            "  composer migrate -- --env=dev update\n\n" .
-            "  # Apply migrations up to version 5\n" .
-            "  composer migrate -- --env=dev update --up-to=5\n\n" .
-            "  # Show current database version\n" .
+            "  # Using APP_ENV environment variable\n" .
+            "  APP_ENV=dev composer migrate -- reset --yes\n" .
+            "  APP_ENV=dev composer migrate -- update\n\n" .
+            "  # Using --env parameter (overrides APP_ENV)\n" .
+            "  composer migrate -- --env=dev update --up-to=5\n" .
             "  composer migrate -- --env=test version\n";
     }
 
@@ -125,19 +123,18 @@ class Scripts extends BaseScripts
     {
         $argumentList = $this->extractArguments($arguments);
 
-        // Check if --env is provided
-        if (empty($argumentList["--env"])) {
-            throw new Exception("Environment is required.\n\n" . $this->getMigrateHelp());
-        }
+        // Get and validate environment
+        $env = $this->getEnvironment($argumentList, $this->getMigrateHelp());
 
         // Check if command is provided
         if (isset($argumentList["command"])) {
             echo "> Command: " . $argumentList["command"] . "\n";
+            echo "> Environment: " . $env . "\n";
         } else {
             throw new Exception("Command not found.\n\n" . $this->getMigrateHelp());
         }
 
-        $dbConnection = Psr11::container($argumentList["--env"])->get('DBDRIVER_CONNECTION');
+        $dbConnection = Psr11::container($env)->get('DBDRIVER_CONNECTION');
 
         Migration::registerDatabase(MySqlDatabase::class);
 
@@ -175,6 +172,37 @@ class Scripts extends BaseScripts
     }
 
     /**
+     * Get common environment help text
+     *
+     * @return string
+     */
+    protected function getEnvironmentHelpText(): string
+    {
+        return "Environment:\n" .
+            "  --env=<environment>   Environment (dev, test, prod) - overrides APP_ENV\n" .
+            "  APP_ENV               Environment variable (used if --env not specified)\n\n";
+    }
+
+    /**
+     * Extract and validate environment from arguments or APP_ENV
+     *
+     * @param array $argumentList Extracted arguments array
+     * @param string $helpText Help text to display on error
+     * @return string The validated environment
+     * @throws Exception
+     */
+    protected function getEnvironment(array $argumentList, string $helpText): string
+    {
+        $env = $argumentList['--env'] ?? getenv('APP_ENV') ?? null;
+
+        if (empty($env)) {
+            throw new Exception("Environment is required. Set APP_ENV or use --env parameter.\n\n" . $helpText);
+        }
+
+        return $env;
+    }
+
+    /**
      * @param array $arguments
      * @param bool $hasCmd
      * @return array
@@ -188,15 +216,19 @@ class Scripts extends BaseScripts
             '--env' => null
         ];
 
-        $start = 0;
-        if ($hasCmd) {
-            $ret['command'] = $arguments[0] ?? null;
-            $start = 1;
-        }
-
-        for ($i=$start; $i < count($arguments); $i++) {
-            $args = explode("=", $arguments[$i]);
-            $ret[$args[0]] = $args[1] ?? true;
+        $commandFound = false;
+        foreach ($arguments as $argument) {
+            // Check if it's an option (starts with --)
+            if (str_starts_with($argument, '--')) {
+                $args = explode("=", $argument, 2);
+                $ret[$args[0]] = $args[1] ?? true;
+            } else {
+                // It's the command (if we're expecting one and haven't found it yet)
+                if ($hasCmd && !$commandFound) {
+                    $ret['command'] = $argument;
+                    $commandFound = true;
+                }
+            }
         }
 
         return $ret;
@@ -230,9 +262,11 @@ class Scripts extends BaseScripts
     protected function getCodeGeneratorHelp(): string
     {
         return "Usage:\n" .
-            "  composer codegen -- --table=<table_name> <arguments> [options]\n\n" .
+            "  APP_ENV=<environment> composer codegen -- --table=<table_name> <arguments> [options]\n" .
+            "  composer codegen -- --env=<environment> --table=<table_name> <arguments> [options]\n\n" .
             "Required:\n" .
             "  --table=<name>        Database table name\n\n" .
+            $this->getEnvironmentHelpText() .
             "Arguments (at least one required):\n" .
             "  all                   Generate all components for the selected pattern\n" .
             "  model                 Generate Model\n" .
@@ -242,19 +276,17 @@ class Scripts extends BaseScripts
             "  test                  Generate Test\n\n" .
             "Options:\n" .
             "  --activerecord        Use ActiveRecord pattern instead of Repository pattern\n" .
-            "  --env=<environment>   Environment (dev, test, prod)\n" .
             "  --save                Save generated files to disk\n" .
             "  --debug               Show debug information\n\n" .
             "Examples:\n" .
-            "  # Repository pattern (default) - generates Model, Repository, Service, Rest, Test\n" .
-            "  composer codegen -- --table=users all --save\n\n" .
-            "  # ActiveRecord pattern - generates Model (with ActiveRecord trait), Rest, Test\n" .
-            "  composer codegen -- --table=users all --activerecord --save\n\n" .
+            "  # Repository pattern (default) - using APP_ENV\n" .
+            "  APP_ENV=dev composer codegen -- --table=users all --save\n\n" .
+            "  # ActiveRecord pattern - using --env parameter\n" .
+            "  composer codegen -- --env=dev --table=users all --activerecord --save\n\n" .
             "  # Generate only specific components\n" .
-            "  composer codegen -- --table=users model rest --save\n" .
-            "  composer codegen -- --table=users model --activerecord --save\n\n" .
+            "  APP_ENV=dev composer codegen -- --table=users model rest --save\n\n" .
             "  # Preview without saving\n" .
-            "  composer codegen -- --table=users all --activerecord\n";
+            "  composer codegen -- --env=dev --table=users all --activerecord\n";
     }
 
     /**
@@ -293,9 +325,11 @@ class Scripts extends BaseScripts
             throw new Exception("Table name is required.\n\n" . $this->getCodeGeneratorHelp());
         }
 
-        // Extract --env parameter
+        // Extract arguments and validate environment
         $argumentList = $this->extractArguments($arguments, false);
-        $env = $argumentList['--env'] ?? null;
+        $env = $this->getEnvironment($argumentList, $this->getCodeGeneratorHelp());
+
+        echo "Environment: $env\n";
 
         // Extract --activerecord flag
         $isActiveRecord = in_array("--activerecord", $arguments);
