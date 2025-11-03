@@ -8,8 +8,9 @@ The code generator creates PHP classes based on your database tables, dramatical
 
 ## What It Generates
 
-The code generator can create:
+The code generator supports two architectural patterns:
 
+### Repository Pattern (Default)
 - **Model** - PHP class with properties matching table columns
 - **Repository** - Data access layer with ORM integration
 - **Service** - Business logic layer extending BaseService
@@ -17,37 +18,47 @@ The code generator can create:
 - **Functional Tests** - Test suite for the CRUD API
 - **Config** - Automatic DI bindings (added automatically with `--save`)
 
-## How to Use
+### ActiveRecord Pattern (with `--activerecord`)
+- **Model** - PHP class with properties and ActiveRecord trait for direct database operations
+- **REST API** - Complete CRUD endpoints (GET, POST, PUT)
+- **Functional Tests** - Test suite for the CRUD API
+
+## Usage
 
 ```bash
-APP_ENV=dev composer run codegen -- --table <table_name> <class_type> [--save] [--debug]
+composer codegen -- --env=<environment> --table=<table_name> <arguments> [options]
 ```
 
-### Parameters
+### Required
 
-- `--table <table_name>` - **(Required)** Database table name
-- `<class_type>` - **(Required)** What to generate (see options below)
-- `--save` - **(Optional)** Save files to disk (otherwise prints to console)
-- `--debug` - **(Optional)** Print table structure for debugging
+- `--table=<name>` - Database table name
+- `--env=<environment>` - Environment (dev, test, prod)
 
-### Class Types
+### Arguments (at least one required)
 
-| Type | Generates | Saved Location |
-|------|-----------|----------------|
-| `model` | Model class | `src/Model/` |
-| `repo` or `repository` | Repository class | `src/Repository/` |
-| `service` | Service class | `src/Service/` |
-| `rest` | REST controller | `src/Rest/` |
-| `test` | Functional tests | `tests/Functional/Rest/` |
-| `all` | All of the above | Multiple locations |
+| Argument               | Description              | Repository Pattern | ActiveRecord Pattern        |
+|------------------------|--------------------------|--------------------|-----------------------------|
+| `all`                  | Generate all components  | ✓ All components   | ✓ Model, Rest, Test         |
+| `model`                | Generate Model           | ✓                  | ✓ (with ActiveRecord trait) |
+| `repo` or `repository` | Generate Repository      | ✓                  | ✗ Not applicable            |
+| `service`              | Generate Service         | ✓                  | ✗ Not applicable            |
+| `rest`                 | Generate REST controller | ✓                  | ✓                           |
+| `test`                 | Generate Test            | ✓                  | ✓                           |
+
+### Options
+
+- `--activerecord` - Use ActiveRecord pattern instead of Repository pattern
+- `--save` - Save generated files to disk (otherwise prints to console)
+- `--debug` - Show debug information
 
 ## Examples
 
-### Generate All Files
+### Repository Pattern (Default)
+
+Generate all components for the 'users' table using the Repository pattern:
 
 ```bash
-# Generate everything for the 'users' table
-APP_ENV=dev composer run codegen -- --table users all --save
+composer codegen -- --env=dev --table=users all --save
 ```
 
 This creates:
@@ -58,28 +69,50 @@ This creates:
 - `tests/Functional/Rest/UsersTest.php`
 - Automatically adds DI bindings to `config/dev/04-repositories.php` and `config/dev/05-services.php`
 
-### Generate Only Model and Repository
+Generate only specific components:
 
 ```bash
-APP_ENV=dev composer run codegen -- --table products model --save
-APP_ENV=dev composer run codegen -- --table products repository --save
+composer codegen -- --env=dev --table=products model rest --save
+```
+
+### ActiveRecord Pattern
+
+Generate all components for the 'users' table using the ActiveRecord pattern:
+
+```bash
+composer codegen -- --env=test --table=users all --activerecord --save
+```
+
+This creates:
+- `src/Model/Users.php` (with ActiveRecord trait)
+- `src/Rest/UsersRest.php`
+- `tests/Functional/Rest/UsersTest.php`
+
+Generate only the model:
+
+```bash
+composer codegen -- --env=test --table=products model --activerecord --save
 ```
 
 ### Preview Without Saving
 
+Preview the generated REST controller without saving to disk:
+
 ```bash
-# Preview the generated REST controller
-APP_ENV=dev composer run codegen -- --table orders rest
+composer codegen -- --env=dev --table=orders rest
+composer codegen -- --env=dev --table=orders all --activerecord
 ```
 
 ## Automatic Configuration
 
-:::tip Automatic DI Bindings
-When using `--save`, repository and service bindings are automatically added to the configuration files:
+:::tip Automatic DI Bindings (Repository Pattern Only)
+When using `--save` with the **Repository pattern**, repository and service bindings are automatically added to the configuration files:
 - Repositories → `config/dev/04-repositories.php`
 - Services → `config/dev/05-services.php`
 
 No manual configuration needed!
+
+**Note:** ActiveRecord pattern does not require DI bindings since models use the ActiveRecord trait for direct database access.
 :::
 
 Example output:
@@ -107,11 +140,18 @@ After generating REST controllers, remember to:
 You can modify existing templates or create your own. Templates are located in `templates/codegen/` and use the [Jinja template engine for PHP](https://github.com/byjg/jinja_php).
 
 **Available templates:**
+
+Repository Pattern:
 - `model.php.jinja` - Model class template
 - `repository.php.jinja` - Repository class template
 - `service.php.jinja` - Service class template
 - `rest.php.jinja` - REST controller template
 - `test.php.jinja` - Test class template
+
+ActiveRecord Pattern:
+- `modelactiverecord.php.jinja` - Model class with ActiveRecord trait template
+- `restactiverecord.php.jinja` - REST controller for ActiveRecord template
+- Uses the same `test.php.jinja` template as Repository pattern
 
 **Template variables available:**
 - `className` - PascalCase class name (e.g., `UserProfile`)

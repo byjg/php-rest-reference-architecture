@@ -79,6 +79,36 @@ class Scripts extends BaseScripts
     }
 
     /**
+     * Get migrate usage help text
+     *
+     * @return string
+     */
+    protected function getMigrateHelp(): string
+    {
+        return "Usage:\n" .
+            "  composer migrate -- --env=<environment> <command> [options]\n\n" .
+            "Required:\n" .
+            "  --env=<environment>   Environment (dev, test, prod)\n\n" .
+            "Available Commands:\n" .
+            "  reset                 Drop all tables and recreate the database\n" .
+            "  update                Apply pending migrations\n" .
+            "  version               Show current database version\n\n" .
+            "Options:\n" .
+            "  --yes                 Confirm reset operation (required for reset)\n" .
+            "  --up-to=<version>     Apply migrations up to specified version\n" .
+            "  --force               Force migration even if already applied\n\n" .
+            "Examples:\n" .
+            "  # Create a fresh database (WARNING: drops all tables)\n" .
+            "  composer migrate -- --env=dev reset --yes\n\n" .
+            "  # Apply all pending migrations\n" .
+            "  composer migrate -- --env=dev update\n\n" .
+            "  # Apply migrations up to version 5\n" .
+            "  composer migrate -- --env=dev update --up-to=5\n\n" .
+            "  # Show current database version\n" .
+            "  composer migrate -- --env=test version\n";
+    }
+
+    /**
      * @param $arguments
      * @return void
      * @throws ConfigNotFoundException
@@ -94,10 +124,17 @@ class Scripts extends BaseScripts
     public function runMigrate($arguments): void
     {
         $argumentList = $this->extractArguments($arguments);
+
+        // Check if --env is provided
+        if (empty($argumentList["--env"])) {
+            throw new Exception("Environment is required.\n\n" . $this->getMigrateHelp());
+        }
+
+        // Check if command is provided
         if (isset($argumentList["command"])) {
             echo "> Command: " . $argumentList["command"] . "\n";
         } else {
-            throw new Exception("Command not found. Use: reset, update, version");
+            throw new Exception("Command not found.\n\n" . $this->getMigrateHelp());
         }
 
         $dbConnection = Psr11::container($argumentList["--env"])->get('DBDRIVER_CONNECTION');
@@ -128,6 +165,11 @@ class Scripts extends BaseScripts
                 echo "$key: $value\n";
             }
         };
+
+        // Validate command exists
+        if (!isset($exec[$argumentList['command']])) {
+            throw new Exception("Invalid command: " . $argumentList['command'] . "\n\n" . $this->getMigrateHelp());
+        }
 
         $exec[$argumentList['command']]();
     }

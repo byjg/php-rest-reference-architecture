@@ -4,12 +4,33 @@ sidebar_position: 6
 
 # Database Migration
 
+## Usage
+
+```bash
+composer migrate -- --env=<environment> <command> [options]
+```
+
+If you run `composer migrate` with no parameters or invalid parameters, the command will display usage information and available commands.
+
+### Required
+
+- `--env=<environment>` - Environment (dev, test, prod)
+
+### Available Commands
+
+| Command   | Description                               |
+|-----------|-------------------------------------------|
+| `reset`   | Drop all tables and recreate the database |
+| `update`  | Apply pending migrations                  |
+| `version` | Show current database version             |
+| `install` | Install migration tracking table          |
+
 ## Create a New Database
 
 You can create a fresh new database using the command:
 
 ```bash
-APP_ENV=dev composer run migrate -- reset --yes
+composer migrate -- --env=dev reset --yes
 ```
 
 :::warning
@@ -21,10 +42,16 @@ Use this command carefully. It will drop all tables and create a new database.
 You can update the database using the command:
 
 ```bash
-APP_ENV=dev composer run migrate -- update --up-to=x
+composer migrate -- --env=dev update --up-to=x
 ```
 
 This command updates the database using migration files in the `db/migrations` folder. It applies only unapplied migrations up to migration number `x`. To apply all pending migrations, omit the `--up-to=x` parameter.
+
+Apply all pending migrations:
+
+```bash
+composer migrate -- --env=dev update
+```
 
 ## Create a New Migration Version
 
