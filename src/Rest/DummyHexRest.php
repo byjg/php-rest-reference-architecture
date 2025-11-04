@@ -2,6 +2,7 @@
 
 namespace RestReferenceArchitecture\Rest;
 
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -22,7 +23,6 @@ use ReflectionException;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Service\DummyHexService;
 
 class DummyHexRest
@@ -68,7 +68,7 @@ class DummyHexRest
     #[RequireAuthenticated]
     public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyHexService = Psr11::get(DummyHexService::class);
+        $dummyHexService = Config::get(DummyHexService::class);
         $result = $dummyHexService->getOrFail($request->param('id'));
         $response->write($result);
     }
@@ -146,7 +146,7 @@ class DummyHexRest
     #[RequireAuthenticated]
     public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyHexService = Psr11::get(DummyHexService::class);
+        $dummyHexService = Config::get(DummyHexService::class);
         $result = $dummyHexService->list($request->get('page'), $request->get('size'));
         $response->write($result);
     }
@@ -211,7 +211,7 @@ class DummyHexRest
     #[ValidateRequest]
     public function postDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyHexService = Psr11::get(DummyHexService::class);
+        $dummyHexService = Config::get(DummyHexService::class);
         $model = $dummyHexService->create(ValidateRequest::getPayload());
         $response->write(["id" => $model->getId()]);
     }
@@ -264,7 +264,7 @@ class DummyHexRest
     #[ValidateRequest]
     public function putDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyHexService = Psr11::get(DummyHexService::class);
+        $dummyHexService = Config::get(DummyHexService::class);
         $dummyHexService->update(ValidateRequest::getPayload());
     }
 

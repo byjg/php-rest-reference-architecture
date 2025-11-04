@@ -165,7 +165,7 @@ Services dramatically simplify REST controllers:
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
     // Lots of business logic in the controller
-    $repository = Psr11::get(DummyRepository::class);
+    $repository = Config::get(DummyRepository::class);
     $model = $repository->get($request->param('id'));
 
     if (is_null($model)) {
@@ -188,7 +188,7 @@ use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 #[RequireAuthenticated]
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
-    $service = Psr11::get(DummyService::class);
+    $service = Config::get(DummyService::class);
     $result = $service->getOrFail($request->param('id'));
     $response->write($result);
 }
@@ -324,7 +324,7 @@ class PaymentService extends BaseService
             $payment = $this->create($paymentData);
 
             // Update order status
-            $orderService = Psr11::get(OrderService::class);
+            $orderService = Config::get(OrderService::class);
             $orderService->markAsPaid($orderId);
 
             $dbDriver->commit();

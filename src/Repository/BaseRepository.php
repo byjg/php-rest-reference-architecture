@@ -6,6 +6,7 @@ use ByJG\AnyDataset\Core\Exception\DatabaseException;
 use ByJG\AnyDataset\Db\DatabaseExecutor;
 use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Exception\DbDriverNotConnected;
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -27,7 +28,6 @@ use ByJG\XmlUtil\Exception\FileException;
 use ByJG\XmlUtil\Exception\XmlUtilException;
 use Closure;
 use ReflectionException;
-use RestReferenceArchitecture\Psr11;
 
 abstract class BaseRepository
 {
@@ -148,7 +148,7 @@ abstract class BaseRepository
     public static function getClosureNewUUID(): Closure
     {
         return function () {
-            return new Literal("X'" . Psr11::get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
+            return new Literal("X'" . Config::get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
         };
     }
 
@@ -164,7 +164,7 @@ abstract class BaseRepository
      */
     public static function getUuid()
     {
-        return Psr11::get(DatabaseExecutor::class)->getScalar("SELECT upper(uuid())");
+        return Config::get(DatabaseExecutor::class)->getScalar("SELECT upper(uuid())");
     }
 
     /**

@@ -4,13 +4,13 @@ use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Definition\UserDefinition;
 use ByJG\Authenticate\Definition\UserPropertiesDefinition;
 use ByJG\Authenticate\UsersDBDataset;
+use ByJG\Config\Config;
 use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
 use ByJG\JwtWrapper\JwtHashHmacSecret;
 use ByJG\JwtWrapper\JwtKeyInterface;
 use ByJG\JwtWrapper\JwtWrapper;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\UserDefinition as UserDefinitionAlias;
 
 return [
@@ -68,7 +68,7 @@ return [
 
     // CORS Configuration
     'CORS_SERVER_LIST' => function () {
-        return preg_split('/,(?![^{}]*})/', Psr11::get('CORS_SERVERS'));
+        return preg_split('/,(?![^{}]*})/', Config::get('CORS_SERVERS'));
     },
 
 ];

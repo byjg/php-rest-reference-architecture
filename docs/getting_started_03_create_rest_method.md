@@ -175,7 +175,7 @@ After validating the payload, use the service layer to update the record:
 ```php
 <?php
 
-use RestReferenceArchitecture\Psr11;
+use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
 use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
@@ -190,7 +190,7 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
     $payload = ValidateRequest::getPayload();
 
     // Use the service layer for business logic
-    $service = Psr11::get(ExampleCrudService::class);
+    $service = Config::get(ExampleCrudService::class);
     $model = $service->getOrFail($payload['id']);
     $model->setStatus($payload['status']);
     $service->save($model);
@@ -230,7 +230,7 @@ Create or update the test file `tests/Functional/Rest/ExampleCrudTest.php`:
 
 namespace Test\Functional\Rest;
 
-use RestReferenceArchitecture\Psr11;
+use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 use Test\Rest\BaseApiTestCase;
@@ -272,7 +272,7 @@ class ExampleCrudTest extends BaseApiTestCase
         $this->assertRequest($request);
 
         // Verify the database was updated correctly
-        $service = Psr11::get(ExampleCrudService::class);
+        $service = Config::get(ExampleCrudService::class);
         $updatedRecord = $service->get($recordId);
         $this->assertEquals($newStatus, $updatedRecord->getStatus());
     }

@@ -2,6 +2,7 @@
 
 namespace RestReferenceArchitecture\Rest;
 
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -21,7 +22,6 @@ use ReflectionException;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Service\DummyService;
 
 class DummyRest
@@ -67,7 +67,7 @@ class DummyRest
     #[RequireAuthenticated]
     public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Psr11::get(DummyService::class);
+        $dummyService = Config::get(DummyService::class);
         $result = $dummyService->getOrFail($request->param('id'));
         $response->write($result);
     }
@@ -145,7 +145,7 @@ class DummyRest
     #[RequireAuthenticated]
     public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Psr11::get(DummyService::class);
+        $dummyService = Config::get(DummyService::class);
         $result = $dummyService->list($request->get('page'), $request->get('size'));
         $response->write($result);
     }
@@ -210,7 +210,7 @@ class DummyRest
     #[ValidateRequest]
     public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Psr11::get(DummyService::class);
+        $dummyService = Config::get(DummyService::class);
         $model = $dummyService->create(ValidateRequest::getPayload());
         $response->write(["id" => $model->getId()]);
     }
@@ -263,7 +263,7 @@ class DummyRest
     #[ValidateRequest]
     public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Psr11::get(DummyService::class);
+        $dummyService = Config::get(DummyService::class);
         $dummyService->update(ValidateRequest::getPayload());
     }
 

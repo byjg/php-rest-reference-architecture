@@ -2,6 +2,7 @@
 
 namespace RestReferenceArchitecture\Util;
 
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -14,7 +15,6 @@ use ByJG\RestServer\HttpRequest;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
 
 class JwtContext
 {
@@ -52,7 +52,7 @@ class JwtContext
      */
     public static function createToken(array $properties = []): mixed
     {
-        $jwt = Psr11::get(JwtWrapper::class);
+        $jwt = Config::get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 60 * 60 * 24 * 7); // 7 Dias
         return $jwt->generateToken($jwtData);
     }

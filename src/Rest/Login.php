@@ -3,6 +3,7 @@
 namespace RestReferenceArchitecture\Rest;
 
 use ByJG\Authenticate\UsersDBDataset;
+use ByJG\Config\Config;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\RestServer\Attributes\RequireAuthenticated;
@@ -14,7 +15,6 @@ use ByJG\RestServer\SerializationRuleEnum;
 use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Repository\BaseRepository;
 use RestReferenceArchitecture\Util\JwtContext;
 use RestReferenceArchitecture\Util\OpenApiContext;
@@ -61,7 +61,7 @@ class Login
         // Get the validated payload - returns array for JSON content-type
         $json = ValidateRequest::getPayload();
 
-        $users = Psr11::get(UsersDBDataset::class);
+        $users = Config::get(UsersDBDataset::class);
         $user = $users->isValidUser($json["username"], $json["password"]);
         $metadata = JwtContext::createUserMetadata($user);
 
@@ -110,7 +110,7 @@ class Login
             throw new Error401Exception("You only can refresh the token 5 minutes before expire");
         }
 
-        $users = Psr11::get(UsersDBDataset::class);
+        $users = Config::get(UsersDBDataset::class);
         $user = $users->getById(new HexUuidLiteral(JwtContext::getUserId()));
 
         $metadata = JwtContext::createUserMetadata($user);
@@ -153,7 +153,7 @@ class Login
     {
         $json = ValidateRequest::getPayload();
 
-        $users = Psr11::get(UsersDBDataset::class);
+        $users = Config::get(UsersDBDataset::class);
         $user = $users->getByEmail($json["email"]);
 
         $token = BaseRepository::getUuid();
@@ -167,8 +167,8 @@ class Login
             $users->save($user);
 
             // Send email using MailWrapper
-            $mailWrapper = Psr11::get(MailWrapperInterface::class);
-            $envelope = Psr11::get('MAIL_ENVELOPE', [$json["email"], "RestReferenceArchitecture - Password Reset", "email_code.html", [
+            $mailWrapper = Config::get(MailWrapperInterface::class);
+            $envelope = Config::get('MAIL_ENVELOPE', [$json["email"], "RestReferenceArchitecture - Password Reset", "email_code.html", [
                 "code" => trim(chunk_split($code, 1, ' ')),
                 "expire" => 10
             ]]);
@@ -183,7 +183,7 @@ class Login
     {
         $json = OpenApiContext::validateRequest($request);
 
-        $users = Psr11::get(UsersDBDataset::class);
+        $users = Config::get(UsersDBDataset::class);
         $user = $users->getByEmail($json["email"]);
 
         if (is_null($user)) {

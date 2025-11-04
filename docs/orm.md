@@ -95,11 +95,11 @@ Example using a service:
 ```php
 <?php
 
-use RestReferenceArchitecture\Psr11;
+use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\YourService;
 
 // In your REST controller
-$service = Psr11::get(YourService::class);
+$service = Config::get(YourService::class);
 $model = $service->getOrFail($id);
 ```
 

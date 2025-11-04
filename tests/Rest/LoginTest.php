@@ -3,10 +3,10 @@
 namespace Test\Rest;
 
 use ByJG\Authenticate\UsersDBDataset;
+use ByJG\Config\Config;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
 /**
@@ -41,7 +41,7 @@ class LoginTest extends BaseApiTestCase
         $email = Credentials::getRegularUser()["username"];
 
         // Clear the reset token
-        $userRepo = Psr11::get(UsersDBDataset::class);
+        $userRepo = Config::get(UsersDBDataset::class);
         $user = $userRepo->getByEmail($email);
         $user->set(User::PROP_RESETTOKEN, null);
         $user->set(User::PROP_RESETTOKENEXPIRE, null);
@@ -69,7 +69,7 @@ class LoginTest extends BaseApiTestCase
         $this->assertRequest($request);
 
         // Check if the reset token was created
-        $userRepo = Psr11::get(UsersDBDataset::class);
+        $userRepo = Config::get(UsersDBDataset::class);
         $user = $userRepo->getByEmail($email);
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
@@ -83,7 +83,7 @@ class LoginTest extends BaseApiTestCase
         $email = Credentials::getRegularUser()["username"];
 
         // Clear the reset token
-        $userRepo = Psr11::get(UsersDBDataset::class);
+        $userRepo = Config::get(UsersDBDataset::class);
         $user = $userRepo->getByEmail($email);
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
@@ -110,7 +110,7 @@ class LoginTest extends BaseApiTestCase
         $email = Credentials::getRegularUser()["username"];
 
         // Clear the reset token
-        $userRepo = Psr11::get(UsersDBDataset::class);
+        $userRepo = Config::get(UsersDBDataset::class);
         $user = $userRepo->getByEmail($email);
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
@@ -144,7 +144,7 @@ class LoginTest extends BaseApiTestCase
         $password = Credentials::getRegularUser()["password"];
 
         // Clear the reset token
-        $userRepo = Psr11::get(UsersDBDataset::class);
+        $userRepo = Config::get(UsersDBDataset::class);
         $user = $userRepo->getByEmail($email);
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));

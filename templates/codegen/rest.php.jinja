@@ -2,6 +2,7 @@
 
 namespace {{ namespace }}\Rest;
 
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -22,7 +23,6 @@ use ReflectionException;
 use {{ namespace }}\Attributes\RequireRole;
 use {{ namespace }}\Attributes\ValidateRequest;
 use {{ namespace }}\Model\User;
-use {{ namespace }}\Psr11;
 use {{ namespace }}\Service\{{ className }}Service;
 
 class {{ className }}Rest
@@ -68,7 +68,7 @@ class {{ className }}Rest
     #[RequireAuthenticated]
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
         $result = ${{ varTableName }}Service->getOrFail($request->param('id'));
         $response->write($result);
     }
@@ -146,7 +146,7 @@ class {{ className }}Rest
     #[RequireAuthenticated]
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
         $result = ${{ varTableName }}Service->list($request->get('page'), $request->get('size'));
         $response->write($result);
     }
@@ -213,7 +213,7 @@ class {{ className }}Rest
     #[ValidateRequest]
     public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
         $model = ${{ varTableName }}Service->create(ValidateRequest::getPayload());
         $response->write(["id" => $model->getId()]);
     }
@@ -266,7 +266,7 @@ class {{ className }}Rest
     #[ValidateRequest]
     public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        ${{ varTableName }}Service = Psr11::get({{ className }}Service::class);
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
         ${{ varTableName }}Service->update(ValidateRequest::getPayload());
     }
 

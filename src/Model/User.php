@@ -5,12 +5,12 @@ namespace RestReferenceArchitecture\Model;
 use ByJG\Authenticate\Definition\PasswordDefinition;
 use ByJG\Authenticate\Model\UserModel;
 use ByJG\Authenticate\Model\UserPropertiesModel;
+use ByJG\Config\Config;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use Exception;
 use InvalidArgumentException;
 use OpenApi\Attributes as OA;
-use RestReferenceArchitecture\Psr11;
 
 #[TableAttribute("users")]
 #[OA\Schema(required: ["email"], type: "object", xml: new OA\Xml(name: "User"))]
@@ -100,7 +100,7 @@ class User extends UserModel
     {
         parent::__construct($name, $email, $username, $password, $admin);
 
-        $this->withPasswordDefinition(Psr11::get(PasswordDefinition::class));
+        $this->withPasswordDefinition(Config::get(PasswordDefinition::class));
     }
 
 

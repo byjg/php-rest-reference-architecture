@@ -3,6 +3,7 @@
 namespace Builder;
 
 use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -19,7 +20,6 @@ use Exception;
 use OpenApi\Generator;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use RestReferenceArchitecture\Psr11;
 
 class Scripts extends BaseScripts
 {
@@ -134,7 +134,11 @@ class Scripts extends BaseScripts
             throw new Exception("Command not found.\n\n" . $this->getMigrateHelp());
         }
 
-        $dbConnection = Psr11::container($env)->get('DBDRIVER_CONNECTION');
+        // This will instantiate the Definition with the environment in the correct place.
+        putenv("APP_ENV=$env");
+        require_once __DIR__ . "/../bootstrap.php";
+
+        $dbConnection = Config::get('DBDRIVER_CONNECTION');
 
         Migration::registerDatabase(MySqlDatabase::class);
 
@@ -331,6 +335,10 @@ class Scripts extends BaseScripts
 
         echo "Environment: $env\n";
 
+        // This will instantiate the Definition with the environment in the correct place.
+        putenv("APP_ENV=$env");
+        require_once __DIR__ . "/../bootstrap.php";
+
         // Extract --activerecord flag
         $isActiveRecord = in_array("--activerecord", $arguments);
 
@@ -354,7 +362,7 @@ class Scripts extends BaseScripts
         $save = in_array("--save", $arguments);
 
         /** @var DatabaseExecutor $executor */
-        $executor = Psr11::container($env)->get(DatabaseExecutor::class);
+        $executor = Config::get(DatabaseExecutor::class);
 
         $tableDefinition = $executor->getIterator("EXPLAIN " . strtolower($table))->toArray();
         $tableIndexes = $executor->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();

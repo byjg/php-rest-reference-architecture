@@ -58,15 +58,15 @@ The configuration is loaded by the [byjg/config](https://github.com/byjg/config)
 
 ## Get the configuration
 
-Use the `Psr11::get()` method:
+Use the `Config::get()` method:
 
 ```php
-Psr11::get('WEB_SERVER');
+Config::get('WEB_SERVER');
 ```
 
 ## Environment Hierarchy
 
-The available environments are defined in the class `RestReferenceArchitecture\Psr11` in the method `environment()`.
+The available environments are defined in the `bootstrap.php` file.
 
 The project has four environments with the following inheritance hierarchy:
 
@@ -97,26 +97,28 @@ Child environments override parent configurations. For example:
 - `config/prod/credentials.env` overrides with production database connection
 - `config/prod/01-infrastructure.php` overrides to use FileSystemCache instead of NoCache
 
-You can modify the environment hierarchy in `src/Psr11.php`:
+You can modify the environment hierarchy in `bootstrap.php`:
 
 ```php
-public static function environment()
-{
-    $dev = new Environment('dev');
-    $test = new Environment('test', [$dev]);
-    $staging = new Environment('staging', [$dev], new FileSystemCacheEngine());
-    $prod = new Environment('prod', [$staging, $dev], new FileSystemCacheEngine());
+// Define environments with inheritance and caching using fluent API
+$dev = Environment::create('dev');
+$test = Environment::create('test')->inheritFrom($dev);
+$staging = Environment::create('staging')->inheritFrom($dev)->withCache(new FileSystemCacheEngine());
+$prod = Environment::create('prod')->inheritFrom($staging, $dev)->withCache(new FileSystemCacheEngine());
 
-    if (is_null(self::$definition)) {
-        self::$definition = (new Definition())
-            ->addEnvironment($dev)
-            ->addEnvironment($test)
-            ->addEnvironment($staging)
-            ->addEnvironment($prod);
-    }
+// Create definition with all environments
+$definition = (new Definition())
+    ->addEnvironment($dev)
+    ->addEnvironment($test)
+    ->addEnvironment($staging)
+    ->addEnvironment($prod)
+    ->withOSEnvironment([
+        'TAG_VERSION',
+        'TAG_COMMIT',
+    ]);
 
-    return self::$definition;
-}
+// Initialize Config with the definition
+Config::initialize($definition);
 ```
 
 ---

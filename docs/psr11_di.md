@@ -51,11 +51,11 @@ return [
 ```php
 <?php
 
-use RestReferenceArchitecture\Psr11;
+use ByJG\Config\Config;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 
 // Get the cache instance (implementation depends on APP_ENV)
-$cache = Psr11::get(BaseCacheEngine::class);
+$cache = Config::get(BaseCacheEngine::class);
 
 // Use it the same way regardless of environment
 $cache->set('key', 'value', 3600);

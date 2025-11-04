@@ -3,6 +3,7 @@
 namespace RestReferenceArchitecture\Util;
 
 use ByJG\ApiTools\Base\Schema;
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -18,7 +19,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use RestReferenceArchitecture\Psr11;
 
 class OpenApiContext
 {
@@ -40,7 +40,7 @@ class OpenApiContext
      */
     public static function validateRequest(HttpRequest $request, bool $allowNull = false)
     {
-        $schema = Psr11::get(Schema::class);
+        $schema = Config::get(Schema::class);
 
         $path = $request->getRequestPath();
         $method = $request->server('REQUEST_METHOD');
