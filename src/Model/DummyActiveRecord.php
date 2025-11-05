@@ -4,6 +4,7 @@ namespace RestReferenceArchitecture\Model;
 
 use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
+use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Trait\ActiveRecord;
 use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Trait\OaCreatedAt;
@@ -103,5 +104,18 @@ class DummyActiveRecord
         return $this;
     }
 
+
+
+    /**
+     * @param mixed $name
+     * @return null|DummyActiveRecord[]
+     */
+    public static function getByName($name): ?array
+    {
+        $query = Query::getInstance()
+            ->table(self::$repository->getMapper()->getTable(), 'alias')
+            ->where('alias.name = :value', ['value' => $name]);
+        return self::query($query);
+    }
 
 }
