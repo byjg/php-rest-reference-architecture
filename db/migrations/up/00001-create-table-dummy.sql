@@ -35,6 +35,8 @@ create table dummy_active_record
     constraint pk_dummy_active_record primary key (id)
 ) ENGINE=InnoDB;
 
+create index ix_name on dummy_active_record(name);
+
 -- Sample data
 insert into dummy_active_record (name, value) VALUES
   ('Sample 1', 'Value 1'),

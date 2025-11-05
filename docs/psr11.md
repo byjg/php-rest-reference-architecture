@@ -66,7 +66,7 @@ Config::get('WEB_SERVER');
 
 ## Environment Hierarchy
 
-The available environments are defined in the `bootstrap.php` file.
+The available environments are defined in the `config/ConfigBootstrap.php` file.
 
 The project has four environments with the following inheritance hierarchy:
 
@@ -97,29 +97,40 @@ Child environments override parent configurations. For example:
 - `config/prod/credentials.env` overrides with production database connection
 - `config/prod/01-infrastructure.php` overrides to use FileSystemCache instead of NoCache
 
-You can modify the environment hierarchy in `bootstrap.php`:
+You can modify the environment hierarchy in `config/ConfigBootstrap.php`:
 
 ```php
-// Define environments with inheritance and caching using fluent API
-$dev = Environment::create('dev');
-$test = Environment::create('test')->inheritFrom($dev);
-$staging = Environment::create('staging')->inheritFrom($dev)->withCache(new FileSystemCacheEngine());
-$prod = Environment::create('prod')->inheritFrom($staging, $dev)->withCache(new FileSystemCacheEngine());
+<?php
 
-// Create definition with all environments
-$definition = (new Definition())
-    ->addEnvironment($dev)
-    ->addEnvironment($test)
-    ->addEnvironment($staging)
-    ->addEnvironment($prod)
-    ->withOSEnvironment([
-        'TAG_VERSION',
-        'TAG_COMMIT',
-    ]);
+use ByJG\Cache\Psr16\FileSystemCacheEngine;
+use ByJG\Config\ConfigInitializeInterface;
+use ByJG\Config\Definition;
+use ByJG\Config\Environment;
 
-// Initialize Config with the definition
-Config::initialize($definition);
+return new class implements ConfigInitializeInterface {
+    public function loadDefinition(?string $env = null): Definition
+    {
+        // Define environments with inheritance and caching using fluent API
+        $dev = Environment::create('dev');
+        $test = Environment::create('test')->inheritFrom($dev);
+        $staging = Environment::create('staging')->inheritFrom($dev)->withCache(new FileSystemCacheEngine());
+        $prod = Environment::create('prod')->inheritFrom($staging, $dev)->withCache(new FileSystemCacheEngine());
+
+        // Create definition with all environments
+        return (new Definition())
+            ->addEnvironment($dev)
+            ->addEnvironment($test)
+            ->addEnvironment($staging)
+            ->addEnvironment($prod)
+            ->withOSEnvironment([
+                'TAG_VERSION',
+                'TAG_COMMIT',
+            ]);
+    }
+};
 ```
+
+The Config is automatically initialized when first accessed, thanks to byjg/config's auto-initialization feature.
 
 ---
 

@@ -136,7 +136,7 @@ class Scripts extends BaseScripts
 
         // This will instantiate the Definition with the environment in the correct place.
         putenv("APP_ENV=$env");
-        require_once __DIR__ . "/../bootstrap.php";
+        Config::reset();
 
         $dbConnection = Config::get('DBDRIVER_CONNECTION');
 
@@ -337,7 +337,7 @@ class Scripts extends BaseScripts
 
         // This will instantiate the Definition with the environment in the correct place.
         putenv("APP_ENV=$env");
-        require_once __DIR__ . "/../bootstrap.php";
+        Config::reset();
 
         // Extract --activerecord flag
         $isActiveRecord = in_array("--activerecord", $arguments);

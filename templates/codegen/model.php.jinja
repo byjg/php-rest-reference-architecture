@@ -7,7 +7,8 @@ use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
-{% if activerecord %}use ByJG\MicroOrm\Trait\ActiveRecord;
+{% if activerecord %}use ByJG\MicroOrm\Query;
+use ByJG\MicroOrm\Trait\ActiveRecord;
 {% endif %}use OpenApi\Attributes as OA;
 {% if hasCreatedAt %}use {{ namespace }}\Trait\OaCreatedAt;
 {% endif %}{% if hasUpdatedAt %}use {{ namespace }}\Trait\OaUpdatedAt;
@@ -58,5 +59,18 @@ class {{ className }}
         return $this;
     }
 {% endif %}{% endfor %}
+{% if activerecord %}{% for index in indexes %}{% if index.key_name != 'PRIMARY' %}
 
+    /**
+     * @param mixed ${{ index.camelColumnName }}
+     * @return null|{{ className }}[]
+     */
+    public static function getBy{{ index.camelColumnName | capitalize }}(${{ index.camelColumnName }}): ?array
+    {
+        $query = Query::getInstance()
+            ->table(self::$repository->getMapper()->getTable(), 'alias')
+            ->where('alias.{{ index.column_name }} = :value', ['value' => ${{ index.camelColumnName }}]);
+        return self::query($query);
+    }
+{% endif %}{% endfor %}{% endif %}
 }
