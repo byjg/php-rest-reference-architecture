@@ -296,7 +296,3 @@ APP_ENV=test composer run test
 ```
 
 All tests should pass successfully!
-
----
-
-**[← Previous: Add a New Field](getting_started_02_add_new_field.md)** | **[Next: Windows Guide →](windows.md)**

@@ -95,7 +95,3 @@ Migration numbers must be unique and sequential. The "down" migration number cor
 :::
 
 For more information about the migration process, refer to [byjg/migration](https://github.com/byjg/migration).
-
----
-
-**[← Previous: Login Integration with JWT](login.md)** | **[Next: Database ORM →](orm.md)**

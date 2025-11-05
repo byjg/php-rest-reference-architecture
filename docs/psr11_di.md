@@ -123,7 +123,3 @@ Dependencies are organized by layer in numbered files:
 - `06-external.php` - Email, SMS, external APIs
 
 This organization makes it easy to find and modify related configurations.
-
----
-
-**[← Previous: PSR-11 Container](psr11.md)** | **[Next: Login Integration with JWT →](login.md)**

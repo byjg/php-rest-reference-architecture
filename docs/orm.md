@@ -104,7 +104,3 @@ $model = $service->getOrFail($id);
 ```
 
 See the [Service Layer](services.md) documentation for more details.
-
----
-
-**[← Previous: Database Migration](migration.md)** | **[Next: Code Generator →](code_generator.md)**

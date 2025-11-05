@@ -117,7 +117,3 @@ We use the package zircote/swagger-php to generate the OpenAPI specification.
 Please refer to the documentation of this package at [https://zircote.github.io/swagger-php/](https://zircote.github.io/swagger-php/) to learn more about the PHPDOC annotations.
 
 We use the package byjg/restserver to handle the requests. Please refer to the documentation of this package at [https://github.com/byjg/restserver](https://github.com/byjg/restserver)
-
----
-
-**[← Back to Index](../README.md)** | **[Next: Functional Unit Tests →](functional_test.md)**

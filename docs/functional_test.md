@@ -140,7 +140,3 @@ public function testPing()
     $this->assertRequest($request);
 }
 ```
-
----
-
-**[← Previous: Rest Methods API](rest.md)** | **[Next: PSR-11 Container →](psr11.md)**

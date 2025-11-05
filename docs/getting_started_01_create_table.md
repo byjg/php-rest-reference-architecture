@@ -161,7 +161,3 @@ Your tests should now pass successfully!
 ## Next Steps
 
 Continue with [Adding a New Field](getting_started_02_add_new_field.md) to enhance your implementation.
-
----
-
-**[← Previous: Getting Started](getting_started.md)** | **[Next: Add a New Field →](getting_started_02_add_new_field.md)**

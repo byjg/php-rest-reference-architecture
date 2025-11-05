@@ -196,7 +196,3 @@ $userRole = $jwtData['role'];  // "admin" or "user"
 ```
 
 For more information, refer to the [byjg/jwt-wrapper](https://github.com/byjg/jwt-wrapper) documentation.
-
----
-
-**[← Previous: Dependency Injection](psr11_di.md)** | **[Next: Database Migration →](migration.md)**

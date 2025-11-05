@@ -404,7 +404,3 @@ The service will automatically:
 - ❌ Don't make services depend on each other in circular ways
 - ❌ Don't duplicate repository methods in services without adding value
 :::
-
----
-
-**[← Previous: Code Generator](code_generator.md)** | **[Next: Getting Started →](getting_started.md)**

@@ -34,7 +34,3 @@ The docker commands you'll run outside.
 is mapped to your current directory on Windows.
 
 Once inside the container, follow the regular [Getting Started](getting_started.md) guide.
-
----
-
-**[← Previous: Add a New Rest Method](getting_started_03_create_rest_method.md)** | **[Back to Index](../README.md)**

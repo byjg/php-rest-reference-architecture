@@ -177,7 +177,3 @@ ActiveRecord Pattern:
 - `primaryKeys` - Array of primary key fields
 - `nullableFields` - Array of nullable fields
 - `nonNullableFields` - Array of non-nullable, non-PK fields
-
----
-
-**[← Previous: Database ORM](orm.md)** | **[Next: Service Layer →](services.md)**

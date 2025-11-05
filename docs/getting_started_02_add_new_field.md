@@ -132,7 +132,3 @@ APP_ENV=test composer run test
 ## Next Steps
 
 [Next: Creating a REST method](getting_started_03_create_rest_method.md)
-
----
-
-**[← Previous: Add a New Table](getting_started_01_create_table.md)** | **[Next: Add a New Rest Method →](getting_started_03_create_rest_method.md)**

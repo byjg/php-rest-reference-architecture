@@ -131,7 +131,3 @@ return new class implements ConfigInitializeInterface {
 ```
 
 The Config is automatically initialized when first accessed, thanks to byjg/config's auto-initialization feature.
-
----
-
-**[← Back to Index](../README.md)** | **[Next: Dependency Injection →](psr11_di.md)**
