@@ -635,6 +635,5 @@ public function manageUsers(...) { }
 ## Related Documentation
 
 - [JWT Authentication Advanced Guide](jwt-advanced.md)
-- [REST API Development](rest.md)
-- [OpenAPI Integration](openapi.md)
+- [REST API Development & OpenAPI Integration](rest.md)
 - [Testing Guide](testing-guide.md)
