@@ -15,6 +15,7 @@ use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
+use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
@@ -75,8 +76,8 @@ class DummyRest
     /**
      * List Dummy
      *
-     * @param mixed $response
-     * @param mixed $request
+     * @param HttpResponse $response
+     * @param HttpRequest $request
      * @return void
      * @throws ConfigException
      * @throws ConfigNotFoundException
@@ -152,7 +153,7 @@ class DummyRest
 
 
     /**
-     * Create a new Dummy
+     * Create a new Dummy 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -217,7 +218,7 @@ class DummyRest
 
 
     /**
-     * Update an existing Dummy
+     * Update an existing Dummy 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request

@@ -64,6 +64,7 @@ class DummyActiveRecord
      */
     public function setId(int|null $id): static
     {
+        
         $this->id = $id;
         return $this;
     }
@@ -82,6 +83,7 @@ class DummyActiveRecord
      */
     public function setName(string|null $name): static
     {
+        
         $this->name = $name;
         return $this;
     }
@@ -100,6 +102,7 @@ class DummyActiveRecord
      */
     public function setValue(string|null $value): static
     {
+        
         $this->value = $value;
         return $this;
     }

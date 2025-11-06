@@ -45,11 +45,11 @@ class DummyHexRest
      * @throws ReflectionException
      */
     #[OA\Get(
-        path: "/dummyhex/{id}",
+        path: "/dummy/hex/{id}",
         security: [
             ["jwt-token" => []]
         ],
-        tags: ["Dummyhex"],
+        tags: ["Dummy"],
     )]
     #[OA\Parameter(
         name: "id",
@@ -76,8 +76,8 @@ class DummyHexRest
     /**
      * List DummyHex
      *
-     * @param mixed $response
-     * @param mixed $request
+     * @param HttpResponse $response
+     * @param HttpRequest $request
      * @return void
      * @throws ConfigException
      * @throws ConfigNotFoundException
@@ -91,11 +91,11 @@ class DummyHexRest
      * @throws ReflectionException
      */
     #[OA\Get(
-        path: "/dummyhex",
+        path: "/dummy/hex",
         security: [
             ["jwt-token" => []]
         ],
-        tags: ["Dummyhex"]
+        tags: ["Dummy"]
     )]
     #[OA\Parameter(
         name: "page",
@@ -153,7 +153,7 @@ class DummyHexRest
 
 
     /**
-     * Create a new DummyHex
+     * Create a new DummyHex 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -174,11 +174,11 @@ class DummyHexRest
      * @throws ReflectionException
      */
     #[OA\Post(
-        path: "/dummyhex",
+        path: "/dummy/hex",
         security: [
             ["jwt-token" => []]
         ],
-        tags: ["Dummyhex"]
+        tags: ["Dummy"]
     )]
     #[OA\RequestBody(
         description: "The object DummyHex to be created",
@@ -218,7 +218,7 @@ class DummyHexRest
 
 
     /**
-     * Update an existing DummyHex
+     * Update an existing DummyHex 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -240,11 +240,11 @@ class DummyHexRest
      * @throws ReflectionException
      */
     #[OA\Put(
-        path: "/dummyhex",
+        path: "/dummy/hex",
         security: [
             ["jwt-token" => []]
         ],
-        tags: ["Dummyhex"]
+        tags: ["Dummy"]
     )]
     #[OA\RequestBody(
         description: "The object DummyHex to be updated",

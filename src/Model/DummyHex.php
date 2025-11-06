@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
  * @package RestReferenceArchitecture\Model
  */
 #[OA\Schema(required: ["id", "field"], type: "object", xml: new OA\Xml(name: "DummyHex"))]
-#[TableMySqlUuidPKAttribute("dummyhex")]
+#[TableMySqlUuidPKAttribute("dummy_hex")]
 class DummyHex
 {
 

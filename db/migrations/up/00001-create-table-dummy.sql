@@ -12,15 +12,15 @@ insert into dummy (field) values ('fld value');
 insert into dummy (field) values ('Test 1');
 insert into dummy (field) values ('Test 2');
 
-create table dummyhex (
+create table dummy_hex (
     id binary(16) DEFAULT (uuid_to_bin(uuid())) PRIMARY KEY NOT NULL,
     `uuid` varchar(36) GENERATED ALWAYS AS (insert(insert(insert(insert(hex(`id`),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')) VIRTUAL,
     field varchar(10) not null
 );
 
-insert into dummyhex (field) values ('fld value');
-insert into dummyhex (id, field) values (X'11111111222233334444555555555555', 'Test 1');
-insert into dummyhex (field) values ('Test 2');
+insert into dummy_hex (field) values ('fld value');
+insert into dummy_hex (id, field) values (X'11111111222233334444555555555555', 'Test 1');
+insert into dummy_hex (field) values ('Test 2');
 
 
 -- Example table using ActiveRecord pattern

@@ -233,13 +233,13 @@
                 ]
             }
         },
-        "/dummyhex/{id}": {
+        "/dummy/hex/{id}": {
             "get": {
                 "tags": [
-                    "Dummyhex"
+                    "Dummy"
                 ],
                 "summary": "Get the DummyHex by id",
-                "operationId": "GET::/dummyhex/{id}::RestReferenceArchitecture\\Rest\\DummyHexRest::getDummyHex",
+                "operationId": "GET::/dummy/hex/{id}::RestReferenceArchitecture\\Rest\\DummyHexRest::getDummyHex",
                 "parameters": [
                     {
                         "name": "id",
@@ -270,13 +270,13 @@
                 ]
             }
         },
-        "/dummyhex": {
+        "/dummy/hex": {
             "get": {
                 "tags": [
-                    "Dummyhex"
+                    "Dummy"
                 ],
                 "summary": "List DummyHex",
-                "operationId": "GET::/dummyhex::RestReferenceArchitecture\\Rest\\DummyHexRest::listDummyHex",
+                "operationId": "GET::/dummy/hex::RestReferenceArchitecture\\Rest\\DummyHexRest::listDummyHex",
                 "parameters": [
                     {
                         "name": "page",
@@ -348,10 +348,10 @@
             },
             "put": {
                 "tags": [
-                    "Dummyhex"
+                    "Dummy"
                 ],
                 "summary": "Update an existing DummyHex",
-                "operationId": "PUT::/dummyhex::RestReferenceArchitecture\\Rest\\DummyHexRest::putDummyHex",
+                "operationId": "PUT::/dummy/hex::RestReferenceArchitecture\\Rest\\DummyHexRest::putDummyHex",
                 "requestBody": {
                     "description": "The object DummyHex to be updated",
                     "required": true,
@@ -386,10 +386,10 @@
             },
             "post": {
                 "tags": [
-                    "Dummyhex"
+                    "Dummy"
                 ],
                 "summary": "Create a new DummyHex",
-                "operationId": "POST::/dummyhex::RestReferenceArchitecture\\Rest\\DummyHexRest::postDummyHex",
+                "operationId": "POST::/dummy/hex::RestReferenceArchitecture\\Rest\\DummyHexRest::postDummyHex",
                 "requestBody": {
                     "description": "The object DummyHex to be created",
                     "required": true,
@@ -1260,10 +1260,6 @@
         {
             "name": "Dummy",
             "description": "Dummy"
-        },
-        {
-            "name": "Dummyhex",
-            "description": "Dummyhex"
         },
         {
             "name": "Login",
