@@ -198,6 +198,9 @@ class PostCreateScript
         // Configure git and initialize repository
         shell_exec("composer update");
 
+        // Generate OpenAPI documentation
+        shell_exec("composer run openapi");
+
         // Initialize git repository first
         shell_exec("git init");
         shell_exec("git branch -m main");
