@@ -6,8 +6,8 @@ use RestReferenceArchitecture\Repository\DummyHexRepository;
 
 class DummyHexService extends BaseService
 {
-    public function __construct(DummyHexRepository $repository)
+    public function __construct(DummyHexRepository $baseRepository)
     {
-        parent::__construct($repository);
+        parent::__construct($baseRepository);
     }
 }

@@ -6,8 +6,8 @@ use {{ namespace }}\Repository\{{ className }}Repository;
 
 class {{ className }}Service extends BaseService
 {
-    public function __construct({{ className }}Repository $repository)
+    public function __construct({{ className }}Repository $baseRepository)
     {
-        parent::__construct($repository);
+        parent::__construct($baseRepository);
     }
 }

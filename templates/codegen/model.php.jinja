@@ -7,6 +7,7 @@ use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\MicroOrm\Literal\Literal;
 {% if activerecord %}use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Trait\ActiveRecord;
 {% endif %}use OpenApi\Attributes as OA;
@@ -50,11 +51,14 @@ class {{ className }}
     }
 
     /**
-     * @param {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }}
+     * @param {{ field.php_type }}{% if 'binary' in field.type %}|Literal{% endif %}|null ${{ field.property }}
      * @return $this
      */
-    public function set{{ field.property | capitalize }}({{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }}): static
+    public function set{{ field.property | capitalize }}({{ field.php_type }}{% if 'binary' in field.type %}|Literal{% endif %}|null ${{ field.property }}): static
     {
+        {% if 'binary' in field.type %}if (${{ field.property }} instanceof Literal) {
+            ${{ field.property }} = new HexUuidLiteral(${{ field.property }});
+        }{% endif %}
         $this->{{ field.property }} = ${{ field.property }};
         return $this;
     }

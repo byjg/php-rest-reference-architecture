@@ -24,11 +24,14 @@ class ValidateRequest implements BeforeRouteInterface
 {
     protected static mixed $payload = null;
 
-    protected bool $allowNull;
+    protected bool $preserveNullValues;
 
-    public function __construct(bool $allowNull = false)
+    /**
+     * @param bool $preserveNullValues If false, null values are removed from payload (default: false)
+     */
+    public function __construct(bool $preserveNullValues = false)
     {
-        $this->allowNull = $allowNull;
+        $this->preserveNullValues = $preserveNullValues;
     }
 
     /**
@@ -48,10 +51,10 @@ class ValidateRequest implements BeforeRouteInterface
      */
     public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
-        // OpenApiContext::validateRequest now returns the proper format based on content-type
+        // OpenApiContext::validateRequest returns proper format based on content-type:
         // - XML: returns XmlDocument
-        // - JSON/Other: returns array
-        self::$payload = OpenApiContext::validateRequest($request, $this->allowNull);
+        // - JSON/Other: returns array (with null values removed unless preserveNullValues=true)
+        self::$payload = OpenApiContext::validateRequest($request, $this->preserveNullValues);
     }
 
     /**

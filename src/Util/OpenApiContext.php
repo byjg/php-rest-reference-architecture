@@ -23,9 +23,11 @@ use ReflectionException;
 class OpenApiContext
 {
     /**
+     * Validates request against OpenAPI schema and returns parsed payload
+     *
      * @param HttpRequest $request
-     * @param bool $allowNull
-     * @return array|bool|XmlDocument|mixed|string
+     * @param bool $preserveNullValues If false, null values are removed from the payload (default: false)
+     * @return array|XmlDocument Returns XmlDocument for XML content, array for JSON/form data
      * @throws ConfigException
      * @throws ConfigNotFoundException
      * @throws DependencyInjectionException
@@ -38,7 +40,7 @@ class OpenApiContext
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public static function validateRequest(HttpRequest $request, bool $allowNull = false)
+    public static function validateRequest(HttpRequest $request, bool $preserveNullValues = false)
     {
         $schema = Config::get(Schema::class);
 
@@ -46,7 +48,25 @@ class OpenApiContext
         $method = $request->server('REQUEST_METHOD');
         $contentType = strtolower($request->getHeader('Content-Type') ?? '');
 
-        // Validate the request body (payload)
+        // Handle XML content separately - it's processed differently
+        if (str_contains($contentType, 'xml')) {
+            $xmlDoc = new XmlDocument($request->payload());
+
+            try {
+                $schema->getPathDefinition($path, $method);
+                $bodyRequestDef = $schema->getRequestParameters($path, $method);
+
+                // TODO: Implement XML validation against OpenAPI schema
+                // This may require custom validation logic
+
+            } catch (Exception $ex) {
+                throw new Error400Exception(explode("\n", $ex->getMessage())[0]);
+            }
+
+            return $xmlDoc;
+        }
+
+        // Handle JSON and other content types
         if (str_contains($contentType, 'multipart/')) {
             $requestBody = $request->post();
             $files = $request->uploadedFiles()->getKeys();
@@ -61,24 +81,17 @@ class OpenApiContext
             // Returns a SwaggerRequestBody instance
             $bodyRequestDef = $schema->getRequestParameters($path, $method);
             $bodyRequestDef->match($requestBody);
-
         } catch (Exception $ex) {
             throw new Error400Exception(explode("\n", $ex->getMessage())[0]);
         }
 
         $requestBody = empty($requestBody) ? [] : $requestBody;
 
-        if (!$allowNull) {
+        // Apply null value handling for JSON/form data
+        if (!$preserveNullValues) {
             $requestBody = Serialize::from($requestBody)->withDoNotParseNullValues()->toArray();
         }
 
-        // Convert payload according to content-type
-        if (str_contains($contentType, 'xml')) {
-            // Return XmlDocument for XML content
-            return new XmlDocument($request->payload());
-        } else {
-            // For JSON and other content types, return the array
-            return $requestBody;
-        }
+        return $requestBody;
     }
 }

@@ -4,29 +4,29 @@ namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Core\Exception\DatabaseException;
 use ByJG\AnyDataset\Db\DatabaseExecutor;
-use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Exception\DbDriverNotConnected;
 use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
-use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
-use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\Config\Exception\RunTimeException;
 use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\MicroOrm\Exception\RepositoryReadOnlyException;
 use ByJG\MicroOrm\Exception\UpdateConstraintException;
-use ByJG\MicroOrm\FieldMapping;
+use ByJG\MicroOrm\Interface\QueryBuilderInterface;
 use ByJG\MicroOrm\Interface\UpdateConstraintInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\MicroOrm\Literal\Literal;
+use ByJG\MicroOrm\Literal\LiteralInterface;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
 use ByJG\Serializer\Exception\InvalidArgumentException;
 use ByJG\XmlUtil\Exception\FileException;
 use ByJG\XmlUtil\Exception\XmlUtilException;
-use Closure;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 
 abstract class BaseRepository
@@ -37,13 +37,19 @@ abstract class BaseRepository
     protected Repository $repository;
 
     /**
-     * @param $itemId
+     * @param array|string|int|LiteralInterface $itemId
      * @return mixed
+     * @throws DatabaseException
+     * @throws DbDriverNotConnected
+     * @throws FileException
+     * @throws OrmInvalidFieldsException
+     * @throws XmlUtilException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function get($itemId)
+    public function get(array|string|int|LiteralInterface $itemId): mixed
     {
-        return $this->repository->get(HexUuidLiteral::create($itemId));
+        return $this->repository->get($itemId);
     }
 
     public function getRepository(): Repository
@@ -51,22 +57,32 @@ abstract class BaseRepository
         return $this->repository;
     }
 
-    public function getMapper()
+    public function getMapper(): Mapper
     {
         return $this->repository->getMapper();
     }
 
-    public function getExecutor()
+    public function getExecutor(): DatabaseExecutor
     {
         return $this->repository->getExecutor();
     }
 
-    public function getExecutorWrite()
+    /**
+     * @throws RepositoryReadOnlyException
+     */
+    public function getExecutorWrite(): DatabaseExecutor
     {
         return $this->repository->getExecutorWrite();
     }
 
-    public function getByQuery($query)
+    /**
+     * @throws XmlUtilException
+     * @throws DatabaseException
+     * @throws DbDriverNotConnected
+     * @throws FileException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getByQuery(QueryBuilderInterface $query): array
     {
         $query->table($this->repository->getMapper()->getTable());
         return $this->repository->getByQuery($query);
@@ -75,16 +91,18 @@ abstract class BaseRepository
     /**
      * @param int $page
      * @param int $size
-     * @param null $orderBy
-     * @param null $filter
+     * @param string|array|null $orderBy
+     * @param array|null $filter
      * @return array
      * @throws DatabaseException
      * @throws DbDriverNotConnected
      * @throws FileException
+     * @throws InvalidArgumentException
      * @throws XmlUtilException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function list($page = 0, $size = 20, $orderBy = null, $filter = null)
+    public function list(int $page = 0, int $size = 20, string|array|null $orderBy = null, ?array $filter = null): array
     {
         $query = $this->listQuery(page: $page, size: $size, orderBy: $orderBy, filter: $filter);
 
@@ -93,10 +111,22 @@ abstract class BaseRepository
     }
 
     /**
-     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @param string $tableName
+     * @param array $fields
+     * @param int $page
+     * @param int $size
+     * @param string|array|null $orderBy
+     * @param array|null $filter
+     * @return array
+     * @throws DatabaseException
+     * @throws DbDriverNotConnected
+     * @throws FileException
      * @throws InvalidArgumentException
+     * @throws XmlUtilException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function listGeneric($tableName, $fields = [], $page = 0, $size = 20, $orderBy = null, $filter = null)
+    public function listGeneric(string $tableName, array $fields = [], int $page = 0, int $size = 20, string|array|null $orderBy = null, ?array $filter = null): array
     {
         $query = $this->listQuery($tableName, $fields, $page, $size, $orderBy, $filter);
 
@@ -106,7 +136,11 @@ abstract class BaseRepository
         return $iterator->toArray();
     }
 
-    public function listQuery($tableName = null, $fields = [], $page = 0, $size = 20, $orderBy = null, $filter = null): Query
+    /**
+     * @throws InvalidArgumentException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     */
+    public function listQuery(?string $tableName = null, array $fields = [], int $page = 0, int $size = 20, string|array|null $orderBy = null, ?array $filter = null): Query
     {
         if (empty($page)) {
             $page = 0;
@@ -145,81 +179,39 @@ abstract class BaseRepository
         return new $class();
     }
 
-    public static function getClosureNewUUID(): Closure
-    {
-        return function () {
-            return new Literal("X'" . Config::get(DbDriverInterface::class)->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
-        };
-    }
-
     /**
-     * @return mixed
+     * @return string|null
      * @throws ConfigException
-     * @throws ConfigNotFoundException
+     * @throws ContainerExceptionInterface
      * @throws DependencyInjectionException
-     * @throws InvalidDateException
      * @throws KeyNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws ReflectionException
+     * @throws RunTimeException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public static function getUuid()
+    public static function getUuid(): string|null
     {
-        return Config::get(DatabaseExecutor::class)->getScalar("SELECT upper(uuid())");
+        return HexUuidLiteral::getFormattedUuid(Config::get(DatabaseExecutor::class)->getScalar("SELECT upper(uuid())"));
     }
 
     /**
-     * @param Mapper|null $mapper
-     * @param string $binPropertyName
-     * @param string $uuidStrPropertyName
-     * @return FieldMapping
-     */
-    protected function setClosureFixBinaryUUID(?Mapper $mapper, $binPropertyName = 'id', $uuidStrPropertyName = 'uuid')
-    {
-        $fieldMapping = FieldMapping::create($binPropertyName)
-            ->withUpdateFunction(
-                function ($value, $instance) {
-                    if (empty($value)) {
-                        return null;
-                    }
-                    if (!($value instanceof Literal)) {
-                        $value = new HexUuidLiteral($value);
-                    }
-                    return $value;
-                }
-            )
-            ->withSelectFunction(
-                function ($value, $instance) use ($binPropertyName, $uuidStrPropertyName) {
-                    if (!empty($uuidStrPropertyName)) {
-                        $fieldValue = $instance->{'get' . $uuidStrPropertyName}();
-                    } else {
-                        $itemValue = $instance->{'get' . $binPropertyName}();
-                        $fieldValue = HexUuidLiteral::getFormattedUuid($itemValue, false, $itemValue);
-                    }
-                    if (is_null($fieldValue)) {
-                        return null;
-                    }
-                    return $fieldValue;
-                }
-            );
-
-        if (!empty($mapper)) {
-            $mapper->addFieldMapping($fieldMapping);
-        }
-
-        return $fieldMapping;
-    }
-
-    /**
-     * @param  $model
+     * @param mixed $model
      * @param UpdateConstraintInterface|array|null $updateConstraint
      * @return mixed
+     * @throws DatabaseException
+     * @throws DbDriverNotConnected
+     * @throws FileException
      * @throws OrmBeforeInvalidException
      * @throws OrmInvalidFieldsException
      * @throws RepositoryReadOnlyException
      * @throws UpdateConstraintException
+     * @throws XmlUtilException
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function save($model, UpdateConstraintInterface|array|null $updateConstraint = null): mixed
+    public function save(mixed $model, UpdateConstraintInterface|array|null $updateConstraint = null): mixed
     {
         $model = $this->repository->save($model, $updateConstraint);
 
@@ -230,5 +222,19 @@ abstract class BaseRepository
         }
 
         return $model;
+    }
+
+    /**
+     * @param array|string|int|LiteralInterface $pkId
+     * @return bool
+     * @throws DatabaseException
+     * @throws DbDriverNotConnected
+     * @throws OrmInvalidFieldsException
+     * @throws RepositoryReadOnlyException
+     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     */
+    public function delete(array|string|int|LiteralInterface $pkId): bool
+    {
+        return $this->repository->delete($pkId);
     }
 }

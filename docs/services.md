@@ -120,14 +120,14 @@ class ProductService extends BaseService
     // Add custom business logic methods here
     public function getActiveProducts(): array
     {
-        return $this->repository->getActiveProducts();
+        return $this->baseRepository->getActiveProducts();
     }
 
     public function markAsDiscontinued(int $productId): void
     {
         $product = $this->getOrFail($productId);
         $product->setStatus('discontinued');
-        $this->repository->save($product);
+        $this->baseRepository->save($product);
     }
 }
 ```

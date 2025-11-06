@@ -6,7 +6,9 @@ use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\MicroOrm\Literal\Literal;
 use OpenApi\Attributes as OA;
+
 
 /**
  * Class DummyHex
@@ -49,11 +51,14 @@ class DummyHex
     }
 
     /**
-     * @param string|HexUuidLiteral|null $id
+     * @param string|Literal|null $id
      * @return $this
      */
-    public function setId(string|HexUuidLiteral|null $id): static
+    public function setId(string|Literal|null $id): static
     {
+        if ($id instanceof Literal) {
+            $id = new HexUuidLiteral($id);
+        }
         $this->id = $id;
         return $this;
     }
@@ -72,6 +77,7 @@ class DummyHex
      */
     public function setUuid(string|null $uuid): static
     {
+        
         $this->uuid = $uuid;
         return $this;
     }
@@ -90,6 +96,7 @@ class DummyHex
      */
     public function setField(string|null $field): static
     {
+        
         $this->field = $field;
         return $this;
     }

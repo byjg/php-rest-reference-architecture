@@ -176,7 +176,19 @@ Implements PSR standards:
 - **[Service Layer](docs/services.md)** - Business logic organization
 - **[Testing](docs/functional_test.md)** - Test your APIs
 
-### Advanced
+### Advanced Topics
+- **[Attributes System](docs/attributes.md)** - ValidateRequest, RequireRole, and custom attributes
+- **[Advanced Repository Patterns](docs/repository-advanced.md)** - Complex queries, UUID handling, transactions
+- **[Service Patterns](docs/service-patterns.md)** - Business logic, validation, service composition
+- **[Traits Reference](docs/traits.md)** - Timestamp management (CreatedAt, UpdatedAt, DeletedAt)
+- **[Error Handling](docs/error-handling.md)** - Exception types, validation errors, best practices
+- **[Complete Testing Guide](docs/testing-guide.md)** - FakeApiRequester, integration tests, unit tests
+- **[JWT Authentication Advanced](docs/jwt-advanced.md)** - Custom claims, token refresh, security
+- **[Template Customization](docs/templates.md)** - Customize code generator templates
+- **[Configuration Deep Dive](docs/configuration-advanced.md)** - Environment inheritance, credentials management
+- **[Architecture Decisions](docs/architecture-decisions.md)** - Repository vs ActiveRecord, when to use what
+
+### Infrastructure
 - **[PSR-11 Container](docs/psr11.md)** - Dependency injection container
 - **[Dependency Injection](docs/psr11_di.md)** - DI patterns and usage
 - **[Unattended Setup](docs/unattended_setup.md)** - Automated installation for CI/CD

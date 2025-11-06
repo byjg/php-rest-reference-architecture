@@ -6,8 +6,8 @@ use RestReferenceArchitecture\Repository\DummyRepository;
 
 class DummyService extends BaseService
 {
-    public function __construct(DummyRepository $repository)
+    public function __construct(DummyRepository $baseRepository)
     {
-        parent::__construct($repository);
+        parent::__construct($baseRepository);
     }
 }
