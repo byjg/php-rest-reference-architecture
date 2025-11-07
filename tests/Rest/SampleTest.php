@@ -22,6 +22,6 @@ class SampleTest extends BaseApiTestCase
             ->withMethod('GET')
             ->withPath("/sample/ping")
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 }

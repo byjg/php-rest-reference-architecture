@@ -17,12 +17,12 @@ class LoginTest extends BaseApiTestCase
 
     public function testLoginOk()
     {
-        $this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()));
+        $this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()));
     }
 
     public function testLoginOk2()
     {
-        $this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()));
+        $this->sendRequest(Credentials::requestLogin(Credentials::getRegularUser()));
     }
 
     public function testLoginFail()
@@ -30,7 +30,7 @@ class LoginTest extends BaseApiTestCase
         $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage('Username or password is invalid');
 
-        $this->assertRequest(Credentials::requestLogin([
+        $this->sendRequest(Credentials::requestLogin([
             'username' => 'invalid',
             'password' => 'invalid'
         ]));
@@ -64,9 +64,9 @@ class LoginTest extends BaseApiTestCase
             ->withMethod('POST')
             ->withPath("/login/resetrequest")
             ->withRequestBody(json_encode(["email" => $email]))
-            ->assertResponseCode(200)
+            ->expectStatus(200)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
 
         // Check if the reset token was created
         $userRepo = Config::get(UsersDBDataset::class);
@@ -100,9 +100,9 @@ class LoginTest extends BaseApiTestCase
             ->withMethod('POST')
             ->withPath("/login/confirmcode")
             ->withRequestBody(json_encode((["email" => $email, "code" => "123456", "token" => $user->get(User::PROP_RESETTOKEN)])))
-            ->assertResponseCode(422)
+            ->expectStatus(422)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testConfirmCodeOk()
@@ -125,9 +125,9 @@ class LoginTest extends BaseApiTestCase
             ->withMethod('POST')
             ->withPath("/login/confirmcode")
             ->withRequestBody(json_encode((["email" => $email, "code" => $user->get(User::PROP_RESETCODE), "token" => $user->get(User::PROP_RESETTOKEN)])))
-            ->assertResponseCode(200)
+            ->expectStatus(200)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
 
         // Check if the reset token was created
         $user = $userRepo->getByEmail($email);
@@ -163,9 +163,9 @@ class LoginTest extends BaseApiTestCase
                 "token" => $user->get(User::PROP_RESETTOKEN),
                 "password" => "new$password"
             ]))
-            ->assertResponseCode(200)
+            ->expectStatus(200)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
 
         // Check if the reset token was created
         $user = $userRepo->getByEmail($email);

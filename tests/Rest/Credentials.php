@@ -38,7 +38,7 @@ class Credentials
             ->withPsr7Request($psr7Request)
             ->withMethod('POST')
             ->withPath("/login")
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestBody($cred)
         ;
         return $request;

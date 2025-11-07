@@ -3,17 +3,20 @@
 
 namespace Test\Rest;
 
-use ByJG\ApiTools\ApiTestCase;
 use ByJG\ApiTools\Base\Schema;
+use ByJG\ApiTools\OpenApiValidation;
 use ByJG\Config\Config;
 use ByJG\DbMigration\Database\MySqlDatabase;
 use ByJG\DbMigration\Migration;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Psr7\Request;
 use Exception;
+use PHPUnit\Framework\TestCase;
 
-class BaseApiTestCase extends ApiTestCase
+class BaseApiTestCase extends TestCase
 {
+    use OpenApiValidation;
+
     protected static bool $databaseReset = false;
 
     protected string $filePath = __DIR__ . '/../../public/docs/openapi.json';
