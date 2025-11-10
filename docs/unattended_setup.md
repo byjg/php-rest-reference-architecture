@@ -122,16 +122,23 @@ SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/re
 
 ## Configuration Options
 
-| Field              | Type    | Default                                           | Description                                  |
-|--------------------|---------|---------------------------------------------------|----------------------------------------------|
-| `git_user_name`    | string  | Global git config or "Your Name"                  | Git user name for the project                |
-| `git_user_email`   | string  | Global git config or "your.email@example.com"     | Git user email for the project               |
-| `php_version`      | string  | Current PHP version                               | PHP version (8.1, 8.2, 8.3, 8.4)             |
-| `namespace`        | string  | "MyRest"                                          | Project namespace (CamelCase)                |
-| `composer_name`    | string  | "me/myrest"                                       | Composer package name (vendor/package)       |
-| `mysql_connection` | string  | "mysql://root:mysqlp455w0rd@mysql-container/mydb" | MySQL connection string                      |
-| `timezone`         | string  | "UTC"                                             | Server timezone                              |
-| `install_examples` | boolean | true                                              | Include example code (Dummy, Sample classes) |
+| Field              | Type    | Default                                           | Description                                     |
+|--------------------|---------|---------------------------------------------------|-------------------------------------------------|
+| `git_user_name`    | string  | Global git config or "Your Name"                  | Git user name for the project                   |
+| `git_user_email`   | string  | Global git config or "your.email@example.com"     | Git user email for the project                  |
+| `php_version`      | string  | Current PHP version                               | PHP version (8.1, 8.2, 8.3, 8.4)                |
+| `namespace`        | string  | "MyRest"                                          | Project namespace (CamelCase)                   |
+| `composer_name`    | string  | "me/myrest"                                       | Composer package name (vendor/package)          |
+| `db_schema`        | string  | `mysql`                                           | One of: `mysql`, `postgres`, `sqlsrv`, `sqlite` |
+| `db_host`          | string  | `mysql-container`                                 | Database host/container (ignored for SQLite)    |
+| `db_user`          | string  | `root`                                            | Database username                               |
+| `db_password`      | string  | `mysqlp455w0rd`                                   | Database password                               |
+| `db_name_dev`      | string  | `localdev`                                        | Development database/schema name                |
+| `db_name_test`     | string  | `localtest`                                       | Test database/schema name                       |
+| `timezone`         | string  | "UTC"                                             | Server timezone                                 |
+| `install_examples` | boolean | true                                              | Include example code (Dummy, Sample classes)    |
+
+> **Legacy compatibility:** The older `mysql_connection` field is still accepted. When present, it will be parsed and used to populate the new database fields automatically, but it is recommended to migrate to the explicit settings above for clarity and to support other drivers.
 
 ## All Fields Are Optional
 

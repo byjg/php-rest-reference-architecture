@@ -13,8 +13,11 @@ use RecursiveIteratorIterator;
 
 class PostCreateScript
 {
-    public function execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples, $gitUserName, $gitUserEmail): void
+    public function execute($workdir, $namespace, $composerName, $phpVersion, array $dbConfig, $timezone, $installExamples, $gitUserName, $gitUserEmail): void
     {
+        $devConnection = self::buildConnectionString($dbConfig, $dbConfig['dev_database']);
+        $testConnection = self::buildConnectionString($dbConfig, $dbConfig['test_database']);
+
         // ------------------------------------------------
         // Defining function to interactively walking through the directories
         $directory = new RecursiveDirectoryIterator($workdir);
@@ -69,20 +72,53 @@ class PostCreateScript
             'config/prod/credentials.env',
             'docker-compose-dev.yml',
         ];
-        $uri = new Uri($mysqlConnection);
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
 
             // Common replacements for all files
-            $contents = str_replace('mysql://root:mysqlp455w0rd@mysql-container/mydb', "$mysqlConnection", $contents);
-            $contents = str_replace('mysql-container', $uri->getHost(), $contents);
-            $contents = str_replace('mysqlp455w0rd', $uri->getPassword(), $contents);
+            $contents = str_replace(
+                [
+                    'mysql://root:mysqlp455w0rd@mysql-container/mydb',
+                    'mysql://root:mysqlp455w0rd@mysql-container/localdev',
+                ],
+                $devConnection,
+                $contents
+            );
+            $contents = str_replace(
+                'mysql://root:mysqlp455w0rd@mysql-container/localtest',
+                $testConnection,
+                $contents
+            );
+
+            if (!empty($dbConfig['host'])) {
+                $contents = str_replace('mysql-container', $dbConfig['host'], $contents);
+            }
+
+            if (!empty($dbConfig['password'])) {
+                $contents = str_replace('mysqlp455w0rd', $dbConfig['password'], $contents);
+            }
             $contents = str_replace('resttest', $composerParts[1], $contents);
+
+            if ($file === 'docker-compose-dev.yml' && !empty($dbConfig['password'])) {
+                $contents = preg_replace(
+                    '/(MYSQL_ROOT_PASSWORD:\s*)([^\s]+)/',
+                    '$1' . $dbConfig['password'],
+                    $contents
+                );
+            }
 
             // JWT_SECRET only for .env files - each gets unique secret
             if (str_ends_with($file, '.env')) {
                 $jwtSecret = JwtWrapper::generateSecret(64);
                 $contents = preg_replace('/JWT_SECRET=.*/', "JWT_SECRET=$jwtSecret", $contents);
+
+                if (str_contains($file, 'config/dev/')) {
+                    $contents = self::replaceEnvValue($contents, 'DBDRIVER_CONNECTION', $devConnection);
+                }
+
+                if (str_contains($file, 'config/test/')) {
+                    $contents = self::replaceEnvValue($contents, 'DBDRIVER_CONNECTION', $testConnection);
+                }
             }
 
             file_put_contents("$workdir/$file", $contents);
@@ -246,6 +282,43 @@ class PostCreateScript
         return null;
     }
 
+    protected static function buildConnectionString(array $dbConfig, string $database): string
+    {
+        $schema = strtolower($dbConfig['schema'] ?? 'mysql');
+        $host = $dbConfig['host'] ?? '';
+        $user = $dbConfig['user'] ?? '';
+        $password = $dbConfig['password'] ?? '';
+        $database = ltrim($database, '/');
+
+        if ($schema === 'sqlite') {
+            $path = $database ?: 'database.sqlite';
+            return (string) new Uri('sqlite:///' . $path);
+        }
+
+        $hostPart = $host !== '' ? $host : 'localhost';
+        $uri = new Uri();
+        $uri = $uri->withScheme($schema);
+        $uri = $uri->withHost($hostPart);
+        if ($user !== '') {
+            $uri = $uri->withUserInfo($user, $password !== '' ? $password : null);
+        }
+        $path = '/' . $database;
+        $uri = $uri->withPath($path);
+
+        return (string) $uri;
+    }
+
+    protected static function replaceEnvValue(string $contents, string $key, string $value): string
+    {
+        $pattern = sprintf('/^%s=.*$/m', preg_quote($key, '/'));
+        if (preg_match($pattern, $contents)) {
+            return preg_replace($pattern, sprintf('%s=%s', $key, $value), $contents);
+        }
+
+        $newline = str_ends_with($contents, PHP_EOL) ? '' : PHP_EOL;
+        return $contents . $newline . sprintf('%s=%s', $key, $value) . PHP_EOL;
+    }
+
     /**
      * @param Event $event
      * @return void
@@ -304,6 +377,15 @@ class PostCreateScript
         $gitUserEmail = trim(shell_exec('git config --global user.email 2>/dev/null') ?? '');
 
         $currentPhpVersion = PHP_MAJOR_VERSION . "." .PHP_MINOR_VERSION;
+        $defaultDbConfig = [
+            'schema' => 'mysql',
+            'host' => 'mysql-container',
+            'user' => 'root',
+            'password' => 'mysqlp455w0rd',
+            'dev_database' => 'localdev',
+            'test_database' => 'localtest',
+        ];
+        $dbConfig = $defaultDbConfig;
 
         $validatePHPVersion = function ($arg) {
             $validPHPVersions = ['8.1', '8.2', '8.3', '8.4'];
@@ -327,13 +409,36 @@ class PostCreateScript
             return $arg;
         };
 
-        $validateURI = function ($arg) {
-            $uri = new Uri($arg);
-            if (empty($uri->getScheme())) {
-                throw new Exception('Invalid URI');
+        $validateDbSchema = function ($arg) {
+            $value = strtolower(trim($arg));
+            if ($value === 'sqlsvr') {
+                $value = 'sqlsrv';
             }
-            Factory::getRegisteredDrivers($uri->getScheme());
-            return $arg;
+            $validSchemas = ['mysql', 'sqlite', 'postgres', 'sqlsrv'];
+            if (!in_array($value, $validSchemas, true)) {
+                throw new Exception('Database schema must be one of: ' . implode(', ', $validSchemas));
+            }
+            Factory::getRegisteredDrivers($value);
+            return $value;
+        };
+
+        $validateDbName = function ($arg) {
+            $value = trim($arg);
+            if ($value === '') {
+                throw new Exception('Database name cannot be empty');
+            }
+            if (!preg_match('/^[A-Za-z0-9._\\/-]+$/', $value)) {
+                throw new Exception('Database name may contain letters, numbers, ".", "-", "_" or "/"');
+            }
+            return $value;
+        };
+
+        $validateDbHost = function ($arg) {
+            $value = trim($arg);
+            if ($value === '') {
+                throw new Exception('Database host cannot be empty');
+            }
+            return $value;
         };
 
         $validateTimeZone = function ($arg) {
@@ -385,9 +490,33 @@ class PostCreateScript
             $phpVersion = $config['php_version'] ?? $currentPhpVersion;
             $namespace = $config['namespace'] ?? 'MyRest';
             $composerName = $config['composer_name'] ?? 'me/myrest';
-            $mysqlConnection = $config['mysql_connection'] ?? 'mysql://root:mysqlp455w0rd@mysql-container/mydb';
             $timezone = $config['timezone'] ?? 'UTC';
             $installExamples = $config['install_examples'] ?? true;
+
+            if (isset($config['mysql_connection'])) {
+                try {
+                    $legacyConnection = new Uri($config['mysql_connection']);
+                    if ($legacyConnection->getScheme()) {
+                        $dbConfig['schema'] = strtolower($legacyConnection->getScheme());
+                    }
+                    if ($legacyConnection->getHost()) {
+                        $dbConfig['host'] = $legacyConnection->getHost();
+                    }
+                    if ($legacyConnection->getUsername()) {
+                        $dbConfig['user'] = $legacyConnection->getUsername();
+                    }
+                    if ($legacyConnection->getPassword()) {
+                        $dbConfig['password'] = $legacyConnection->getPassword();
+                    }
+                    $legacyDb = ltrim($legacyConnection->getPath(), '/');
+                    if (!empty($legacyDb)) {
+                        $dbConfig['dev_database'] = $legacyDb;
+                        $dbConfig['test_database'] = $legacyDb;
+                    }
+                } catch (Exception $e) {
+                    throw new Exception("Invalid mysql_connection in setup.json: " . $e->getMessage());
+                }
+            }
 
             // Validate provided values (only if they were explicitly provided in JSON)
             if (isset($config['git_user_name'])) {
@@ -430,14 +559,6 @@ class PostCreateScript
                 }
             }
 
-            if (isset($config['mysql_connection'])) {
-                try {
-                    $mysqlConnection = $validateURI($mysqlConnection);
-                } catch (Exception $e) {
-                    throw new Exception("Invalid mysql_connection in setup.json: " . $e->getMessage());
-                }
-            }
-
             if (isset($config['timezone'])) {
                 try {
                     $timezone = $validateTimeZone($timezone);
@@ -450,12 +571,78 @@ class PostCreateScript
                 throw new Exception("Invalid install_examples in setup.json: must be true or false (boolean)");
             }
 
+            if (isset($config['db_schema'])) {
+                try {
+                    $dbConfig['schema'] = $validateDbSchema($config['db_schema']);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid db_schema in setup.json: " . $e->getMessage());
+                }
+            } else {
+                $dbConfig['schema'] = $validateDbSchema($dbConfig['schema']);
+            }
+
+            if ($dbConfig['schema'] === 'sqlite') {
+                $dbConfig['host'] = '';
+            } elseif (isset($config['db_host'])) {
+                try {
+                    $dbConfig['host'] = $validateDbHost($config['db_host']);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid db_host in setup.json: " . $e->getMessage());
+                }
+            } else {
+                $dbConfig['host'] = $validateDbHost($dbConfig['host']);
+            }
+
+            if (isset($config['db_user'])) {
+                try {
+                    $dbConfig['user'] = $validateNonEmpty($config['db_user']);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid db_user in setup.json: " . $e->getMessage());
+                }
+            } else {
+                $dbConfig['user'] = $validateNonEmpty($dbConfig['user']);
+            }
+
+            if (isset($config['db_password'])) {
+                try {
+                    $dbConfig['password'] = $validateNonEmpty($config['db_password']);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid db_password in setup.json: " . $e->getMessage());
+                }
+            } else {
+                $dbConfig['password'] = $validateNonEmpty($dbConfig['password']);
+            }
+
+            if (isset($config['db_name_dev'])) {
+                try {
+                    $dbConfig['dev_database'] = $validateDbName($config['db_name_dev']);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid db_name_dev in setup.json: " . $e->getMessage());
+                }
+            } else {
+                $dbConfig['dev_database'] = $validateDbName($dbConfig['dev_database']);
+            }
+
+            if (isset($config['db_name_test'])) {
+                try {
+                    $dbConfig['test_database'] = $validateDbName($config['db_name_test']);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid db_name_test in setup.json: " . $e->getMessage());
+                }
+            } else {
+                $dbConfig['test_database'] = $validateDbName($dbConfig['test_database']);
+            }
+
             $stdIo->write("Git user name: $userName");
             $stdIo->write("Git user email: $userEmail");
             $stdIo->write("PHP Version: $phpVersion");
             $stdIo->write("Namespace: $namespace");
             $stdIo->write("Composer name: $composerName");
-            $stdIo->write("MySQL connection: $mysqlConnection");
+            $stdIo->write("Database schema: " . $dbConfig['schema']);
+            $stdIo->write("Database host: " . ($dbConfig['schema'] === 'sqlite' ? '(not used)' : $dbConfig['host']));
+            $stdIo->write("Database user: " . $dbConfig['user']);
+            $stdIo->write("Dev database: " . $dbConfig['dev_database']);
+            $stdIo->write("Test database: " . $dbConfig['test_database']);
             $stdIo->write("Timezone: $timezone");
             $stdIo->write("Install Examples: " . ($installExamples ? 'Yes' : 'No'));
             $stdIo->write("");
@@ -486,13 +673,62 @@ class PostCreateScript
             $phpVersion = $stdIo->askAndValidate("PHP Version [$currentPhpVersion]: ", $validatePHPVersion, $maxRetries, $currentPhpVersion);
             $namespace = $stdIo->askAndValidate('Project namespace [MyRest]: ', $validateNamespace, $maxRetries, 'MyRest');
             $composerName = $stdIo->askAndValidate('Composer name [me/myrest]: ', $validateComposer, $maxRetries, 'me/myrest');
-            $mysqlConnection = $stdIo->askAndValidate('MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]: ', $validateURI, $maxRetries, 'mysql://root:mysqlp455w0rd@mysql-container/mydb');
+            $dbSchema = $stdIo->askAndValidate(
+                'Database schema [mysql]: ',
+                $validateDbSchema,
+                $maxRetries,
+                $defaultDbConfig['schema']
+            );
+            if ($dbSchema === 'sqlite') {
+                $dbHost = '';
+                $stdIo->write("<info>SQLite selected - host will be ignored.</info>");
+            } else {
+                $dbHost = $stdIo->askAndValidate(
+                    "Database host [{$defaultDbConfig['host']}]: ",
+                    $validateDbHost,
+                    $maxRetries,
+                    $defaultDbConfig['host']
+                );
+            }
+            $dbUser = $stdIo->askAndValidate(
+                "Database user [{$defaultDbConfig['user']}]: ",
+                $validateNonEmpty,
+                $maxRetries,
+                $defaultDbConfig['user']
+            );
+            $dbPassword = $stdIo->askAndValidate(
+                "Database password [{$defaultDbConfig['password']}]: ",
+                $validateNonEmpty,
+                $maxRetries,
+                $defaultDbConfig['password']
+            );
+            $devDatabase = $stdIo->askAndValidate(
+                "Dev database name [{$defaultDbConfig['dev_database']}]: ",
+                $validateDbName,
+                $maxRetries,
+                $defaultDbConfig['dev_database']
+            );
+            $testDatabase = $stdIo->askAndValidate(
+                "Test database name [{$defaultDbConfig['test_database']}]: ",
+                $validateDbName,
+                $maxRetries,
+                $defaultDbConfig['test_database']
+            );
             $timezone = $stdIo->askAndValidate('Timezone [UTC]: ', $validateTimeZone, $maxRetries, 'UTC');
             $installExamples = $stdIo->askAndValidate('Install Examples [Yes]: ', $validateYesNo, $maxRetries, 'Yes');
             $stdIo->ask('Press <ENTER> to continue');
+
+            $dbConfig = [
+                'schema' => $dbSchema,
+                'host' => $dbHost,
+                'user' => $dbUser,
+                'password' => $dbPassword,
+                'dev_database' => $devDatabase,
+                'test_database' => $testDatabase,
+            ];
         }
 
         $script = new PostCreateScript();
-        $script->execute($workdir, $namespace, $composerName, $phpVersion, $mysqlConnection, $timezone, $installExamples, $userName, $userEmail);
+        $script->execute($workdir, $namespace, $composerName, $phpVersion, $dbConfig, $timezone, $installExamples, $userName, $userEmail);
     }
 }

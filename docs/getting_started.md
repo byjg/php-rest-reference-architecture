@@ -61,7 +61,12 @@ Project Directory: ~/tutorial
 PHP Version [8.4]: 8.4
 Project namespace [MyRest]: Tutorial
 Composer name [me/myrest]:
-MySQL connection DEV [mysql://root:mysqlp455w0rd@mysql-container/mydb]:
+Database schema [mysql]:
+Database host [mysql-container]:
+Database user [root]:
+Database password [mysqlp455w0rd]:
+Dev database name [localdev]:
+Test database name [localtest]:
 Timezone [UTC]:
 Install Examples [Yes]: Yes
 Press <ENTER> to continue
@@ -72,7 +77,11 @@ Press <ENTER> to continue
 - **PHP Version**: The PHP version for your Docker container (8.1, 8.2, 8.3, 8.4)
 - **Project namespace**: Your application's root namespace (must be CamelCase, e.g., `MyApp`, `Tutorial`)
 - **Composer name**: Package name in `vendor/package` format (e.g., `me/myrest`)
-- **MySQL connection DEV**: Database connection string for development environment
+- **Database schema**: Supported drivers: `mysql`, `postgres`, `sqlsrv`, or `sqlite`
+- **Database host**: Hostname or container name for the DB server (ignored for SQLite)
+- **Database user**: Username that will be injected in your `.env` files
+- **Database password**: Password that will be injected in your `.env` files
+- **Dev/Test database name**: Logical databases used for the dev and test environments (for SQLite, this is the file path)
 - **Timezone**: Server timezone (e.g., `UTC`, `America/New_York`, `Europe/London`)
 - **Install Examples**: Whether to include example code (Dummy, Sample classes)
   - **Yes** (default): Includes example implementations to help you learn

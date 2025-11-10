@@ -344,8 +344,8 @@ return [
 /**
  * Database Configuration
  *
- * DBDRIVER_CONNECTION: MySQL connection string
- * Format: mysql://user:pass@host/database
+ * DBDRIVER_CONNECTION: Database connection string
+ * Format: <schema>://user:pass@host/database
  * Example: mysql://root:password@localhost/myapp
  */
 return [
