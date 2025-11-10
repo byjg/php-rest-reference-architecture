@@ -26,14 +26,22 @@ Start an interactive PHP shell with your project loaded:
 composer terminal
 ```
 
-This gives you immediate access to test your code:
+This gives you immediate access to test your code with preloaded helpers:
 
 ```php title="Interactive Session Example"
+# Use preloaded database executor
+php> qq("SELECT * FROM sample LIMIT 3")
+array(3) { ... }
+
+# Access your models and services
 php> use RestReferenceArchitecture\Model\Sample;
 php> $sample = new Sample();
 php> $sample->setName("Test");
 php> $sample->getName()
 'Test'
+
+# Use helper functions
+php> dump($sample)
 ```
 
 ### Run a PHP Method
@@ -53,12 +61,21 @@ The interactive terminal provides a REPL (Read-Eval-Print Loop) environment with
 ### Starting the Terminal
 
 ```bash
-# Using composer shortcut
+# Using composer shortcut (recommended - includes preload and environment)
 composer terminal
 
 # Or directly
 ./vendor/bin/scriptify terminal
+
+# With custom environment
+APP_ENV=prod composer terminal
 ```
+
+The `composer terminal` command automatically:
+- Loads your project's autoloader
+- Sets up the environment from `APP_ENV` variable
+- Preloads helper functions from `templates/scriptify/scriptify.php`
+- Initializes a database executor instance (`$executor`)
 
 ### Features
 
@@ -68,6 +85,43 @@ composer terminal
 - **Multi-line Support**: Automatically detects incomplete statements
 - **Error Handling**: Parse errors don't crash the session
 - **Auto-return**: Expression results are automatically displayed
+
+### Preloaded Helpers
+
+The terminal comes with helper functions and variables automatically loaded from `templates/scriptify/scriptify.php`:
+
+#### Available Variables
+
+- **`$executor`** - Pre-configured `DatabaseExecutor` instance for running queries
+
+#### Available Functions
+
+- **`dump($var)`** - Pretty-print variables with `var_dump()`
+- **`qq(string $sql, array $params = [])`** - Quick query execution and display results
+- **`uuid_to_bin($uuid)`** - Convert UUID to binary format
+
+#### Helper Examples
+
+```php title="Using Preloaded Helpers"
+# Execute a quick SQL query
+php> qq("SELECT * FROM dummy WHERE id = :id", ["id" => 1])
+array(1) {
+  [0]=>
+  array(2) {
+    ["id"]=> string(1) "1"
+    ["name"]=> string(4) "Test"
+  }
+}
+
+# Use the database executor directly
+php> $result = $executor->getScalar("SELECT COUNT(*) FROM dummy")
+php> dump($result)
+int(10)
+
+# Execute a raw query
+php> $iterator = $executor->getIterator("SELECT * FROM dummy LIMIT 5")
+php> foreach ($iterator as $row) { dump($row); }
+```
 
 ### Common Use Cases
 
@@ -99,6 +153,45 @@ php* }
 php> calculateDiscount(100, 15)
 85
 ```
+
+### Customizing the Preload File
+
+You can customize the preload file at `templates/scriptify/scriptify.php` to add your own helper functions and imports.
+
+```php title="templates/scriptify/scriptify.php"
+<?php
+
+use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\Config\Config;
+use RestReferenceArchitecture\Service\YourService;
+
+// Pre-initialize common instances
+$executor = Config::get(DatabaseExecutor::class);
+$myService = Config::get(YourService::class);
+
+// Add custom helper functions
+function dump($var) {
+    var_dump($var);
+}
+
+function qq(string $sql, array $params = []) {
+    var_dump(Config::get(DatabaseExecutor::class)->getIterator($sql, $params)->toArray());
+}
+
+function dd($var) {
+    dump($var);
+    die();
+}
+
+// Add project-specific helpers
+function getUser(int $id) {
+    return Config::get(UserRepository::class)->get($id);
+}
+```
+
+:::tip Restart Required
+After modifying the preload file, restart your terminal session for changes to take effect.
+:::
 
 ### Environment Variables
 
@@ -288,6 +381,43 @@ Or load from a service:
 ```bash
 scriptify terminal myservice
 ```
+
+## Configuration
+
+### Composer Terminal Command
+
+The project is pre-configured with a `composer terminal` command in `composer.json`:
+
+```json title="composer.json"
+{
+  "scripts": {
+    "terminal": "./vendor/bin/scriptify terminal --preload ./templates/scriptify/scriptify.php --env APP_ENV=$APP_ENV"
+  }
+}
+```
+
+This configuration:
+- **`--preload`**: Loads helper functions from `templates/scriptify/scriptify.php`
+- **`--env APP_ENV=$APP_ENV`**: Passes the current APP_ENV to the terminal
+
+You can customize this command to add additional options:
+
+```json
+"terminal": "./vendor/bin/scriptify terminal --preload ./templates/scriptify/scriptify.php --env APP_ENV=$APP_ENV --env DEBUG=true"
+```
+
+### Preload File Location
+
+The preload file is located at:
+```
+templates/scriptify/scriptify.php
+```
+
+This file is executed before the terminal starts, allowing you to:
+- Import commonly used namespaces
+- Initialize frequently used instances (like `$executor`)
+- Define helper functions (like `dump()` and `qq()`)
+- Set up project-specific shortcuts
 
 ## Requirements
 
