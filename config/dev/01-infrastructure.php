@@ -6,6 +6,7 @@ use ByJG\AnyDataset\Db\Factory;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\DependencyInjection as DI;
+use ByJG\Config\LazyParam;
 use ByJG\Config\Param;
 use ByJG\MicroOrm\ORM;
 use Psr\Log\LoggerInterface;
@@ -29,7 +30,7 @@ return [
     // ORM Initialization - Required for ActiveRecord pattern
     // This sets the default database driver for all ActiveRecord models
     "ORMInitialization" => DI::bind(ORM::class)
-        ->withFactoryMethod("defaultDbDriver", [Param::get(DatabaseExecutor::class)])
+        ->withFactoryMethod("defaultDbDriver", [LazyParam::get(DatabaseExecutor::class)])
         ->toEagerSingleton(),
 
     // Logging Configuration
