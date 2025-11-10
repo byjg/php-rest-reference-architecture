@@ -75,9 +75,8 @@ composer terminal
 
 ```php title="Testing Services Interactively"
 php> use RestReferenceArchitecture\Service\SampleService;
-php> use ByJG\Config\DependencyInjection;
-php> $di = DependencyInjection::getInstance();
-php> $service = $di->get(SampleService::class);
+php> use ByJG\Config\Config;
+php> $service = Config::get(SampleService::class);
 php> $service->someMethod("test");
 ```
 
@@ -85,10 +84,9 @@ php> $service->someMethod("test");
 
 ```php title="Query Testing"
 php> use RestReferenceArchitecture\Repository\SampleRepository;
-php> use ByJG\Config\DependencyInjection;
-php> $di = DependencyInjection::getInstance();
-php> $repo = $di->get(SampleRepository::class);
-php> $results = $repo->getAll();
+php> use ByJG\Config\Config;
+php> $repo = Config::get(SampleRepository::class);
+php> $results = $repo->list();
 php> print_r($results);
 ```
 
