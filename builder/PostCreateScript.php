@@ -181,6 +181,9 @@ class PostCreateScript
 
             // Example files to remove
             $exampleFiles = [
+                // Db Files
+                'db/migrations/up/00001-create-table-dummy.sql',
+                'db/migrations/up/00000-rollback-table-dummy.sql',
                 // Dummy files
                 'src/Model/Dummy.php',
                 'src/Repository/DummyRepository.php',
