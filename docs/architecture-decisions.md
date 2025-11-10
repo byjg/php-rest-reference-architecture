@@ -1,3 +1,7 @@
+---
+sidebar_position: 170
+---
+
 # Architecture Decision Guide
 
 Guide to choosing between architectural patterns and understanding when to use each approach.

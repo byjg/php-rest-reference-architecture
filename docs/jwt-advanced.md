@@ -1,3 +1,7 @@
+---
+sidebar_position: 250
+---
+
 # JWT Authentication - Advanced Guide
 
 Complete guide to JWT (JSON Web Token) authentication including token generation, validation, refresh tokens, and custom claims.
@@ -26,12 +30,12 @@ The reference architecture uses JWT tokens for stateless authentication. Tokens 
 
 ### Key Components
 
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| `JwtContext` | Token creation and parsing | `src/Util/JwtContext.php` |
-| `Login` REST | Login and token endpoints | `src/Rest/Login.php` |
-| `RequireAuthenticated` | Endpoint authentication | ByJG\RestServer\Attributes |
-| `RequireRole` | Role-based authorization | `src/Attributes/RequireRole.php` |
+| Component              | Purpose                    | Location                         |
+|------------------------|----------------------------|----------------------------------|
+| `JwtContext`           | Token creation and parsing | `src/Util/JwtContext.php`        |
+| `Login` REST           | Login and token endpoints  | `src/Rest/Login.php`             |
+| `RequireAuthenticated` | Endpoint authentication    | ByJG\RestServer\Attributes       |
+| `RequireRole`          | Role-based authorization   | `src/Attributes/RequireRole.php` |
 
 ## JwtContext Utility
 

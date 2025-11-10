@@ -1,3 +1,7 @@
+---
+sidebar_position: 110
+---
+
 # Service Layer Patterns
 
 The Service layer acts as an orchestration layer between REST controllers and repositories, providing business logic, validation, and transaction management.

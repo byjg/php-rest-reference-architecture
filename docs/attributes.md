@@ -1,3 +1,7 @@
+---
+sidebar_position: 130
+---
+
 # Attributes System
 
 Attributes (also known as PHP 8 Attributes or Annotations) provide a powerful way to add metadata and behavior to your REST API methods. This reference architecture includes two custom attributes that integrate with the ByJG RestServer framework.

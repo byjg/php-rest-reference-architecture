@@ -1,3 +1,7 @@
+---
+sidebar_position: 140
+---
+
 # Traits Reference
 
 Traits provide reusable functionality for your models, particularly for automatic timestamp management and soft deletes.
@@ -24,11 +28,11 @@ The reference architecture provides three timestamp traits that combine:
 
 ### Available Traits
 
-| Trait | Purpose | Field Name | Auto-Updated |
-|-------|---------|------------|--------------|
-| `OaCreatedAt` | Track record creation time | `created_at` | On INSERT |
-| `OaUpdatedAt` | Track record modification time | `updated_at` | On INSERT/UPDATE |
-| `OaDeletedAt` | Soft delete support | `deleted_at` | Manual |
+| Trait          | Purpose                        | Field Name   | Auto-Updated     |
+|----------------|--------------------------------|--------------|------------------|
+| `OaCreatedAt`  | Track record creation time     | `created_at` | On INSERT        |
+| `OaUpdatedAt`  | Track record modification time | `updated_at` | On INSERT/UPDATE |
+| `OaDeletedAt`  | Soft delete support            | `deleted_at` | Manual           |
 
 ## OaCreatedAt Trait
 

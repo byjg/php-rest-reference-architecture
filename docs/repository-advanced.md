@@ -1,3 +1,7 @@
+---
+sidebar_position: 120
+---
+
 # Advanced Repository Patterns
 
 This guide covers advanced features of the Repository layer, including complex queries, UUID handling, transactions, and custom query methods.

@@ -1,11 +1,11 @@
 # PHP REST Reference Architecture
 
-[![Build Status](https://github.com/byjg/php-rest-template/actions/workflows/build-app-image.yml/badge.svg?branch=master)](https://github.com/byjg/php-rest-template/actions/workflows/build-app-image.yml)
+[![Build Status](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml/badge.svg?branch=6.0)](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
-[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-rest-template/)
-[![GitHub license](https://img.shields.io/github/license/byjg/php-rest-template.svg)](https://opensource.byjg.com/opensource/licensing.html)
-[![GitHub release](https://img.shields.io/github/release/byjg/php-rest-template.svg)](https://github.com/byjg/php-rest-template/releases/)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/php-rest-template/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/php-rest-template/?branch=master)
+[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-rest-reference-architecture)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-rest-reference-architecture.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub release](https://img.shields.io/github/release/byjg/php-rest-reference-architecture.svg)](https://github.com/byjg/php-rest-reference-architecture/releases)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/php-rest-reference-architecture/badges/quality-score.png?b=6.0)](https://scrutinizer-ci.com/g/byjg/php-rest-reference-architecture/?branch=6.0)
 
 **Production-ready PHP REST API boilerplate** that lets you focus on building your business logic, not the infrastructure.
 
@@ -176,38 +176,38 @@ Implements PSR standards:
 ## Documentation
 
 ### Getting Started
-1. **[Installation & Setup](docs/getting_started.md)** - Get up and running in minutes
-2. **[Create Your First Table](docs/getting_started_01_create_table.md)** - Database setup and migrations
-3. **[Add Fields](docs/getting_started_02_add_new_field.md)** - Modify existing tables
-4. **[Create REST Endpoints](docs/getting_started_03_create_rest_method.md)** - Build your API
+1. **[Installation & Setup](docs/getting_started.md)** – Install the template, configure environments, and review prerequisites.
+2. **[Create Your First Table](docs/getting_started_01_create_table.md)** – Define your first migration and schema.
+3. **[Add Fields](docs/getting_started_02_add_new_field.md)** – Safely evolve existing tables.
+4. **[Create REST Endpoints](docs/getting_started_03_create_rest_method.md)** – Generate REST handlers from your tables.
 
-### Core Features
-- **[Code Generator](docs/code_generator.md)** - Automate CRUD creation
-- **[REST API](docs/rest.md)** - Build REST endpoints with OpenAPI
-- **[Authentication](docs/login.md)** - JWT and authorization
-- **[Database Migration](docs/migration.md)** - Version control your schema
-- **[ORM](docs/orm.md)** - Data access layer
-- **[Service Layer](docs/services.md)** - Business logic organization
-- **[Testing](docs/functional_test.md)** - Test your APIs
+### Build Your API
+- **[Code Generator](docs/code_generator.md)** – Automate models, repositories, services, controllers, and tests.
+- **[REST API](docs/rest.md)** – Implement endpoints that stay in sync with OpenAPI contracts.
+- **[Authentication](docs/login.md)** – Configure JWT login flows and RBAC enforcement.
+- **[Database Migration](docs/migration.md)** – Version and run schema migrations in every environment.
+- **[ORM](docs/orm.md)** – Use MicroORM for repository and ActiveRecord patterns.
+- **[Service Layer](docs/services.md)** – Organize business logic and transaction boundaries.
+- **[Service Patterns](docs/service-patterns.md)** – Adopt advanced orchestration, validation, and DTO patterns.
+- **[Repository Patterns](docs/repository-advanced.md)** – Implement complex queries, UUID handling, and filtering helpers.
+- **[Attributes System](docs/attributes.md)** – Apply RequireRole, ValidateRequest, and custom attributes to controllers.
+- **[Traits Reference](docs/traits.md)** – Reuse timestamp and soft-delete helpers inside models.
+- **[Template Customization](docs/templates.md)** – Tailor the generator templates to match your coding standards.
 
-### Advanced Topics
-- **[Attributes System](docs/attributes.md)** - ValidateRequest, RequireRole, and custom attributes
-- **[Advanced Repository Patterns](docs/repository-advanced.md)** - Complex queries, UUID handling, transactions
-- **[Service Patterns](docs/service-patterns.md)** - Business logic, validation, service composition
-- **[Traits Reference](docs/traits.md)** - Timestamp management (CreatedAt, UpdatedAt, DeletedAt)
-- **[Error Handling](docs/error-handling.md)** - Exception types, validation errors, best practices
-- **[Complete Testing Guide](docs/testing-guide.md)** - FakeApiRequester, integration tests, unit tests
-- **[JWT Authentication Advanced](docs/jwt-advanced.md)** - Custom claims, token refresh, security
-- **[Template Customization](docs/templates.md)** - Customize code generator templates
-- **[Configuration Deep Dive](docs/configuration-advanced.md)** - Environment inheritance, credentials management
-- **[Architecture Decisions](docs/architecture-decisions.md)** - Repository vs ActiveRecord, when to use what
+### Architecture & Operations
+- **[Configuration Deep Dive](docs/configuration-advanced.md)** – Layer configurations, secrets, and environment overrides.
+- **[Architecture Decisions](docs/architecture-decisions.md)** – Decide when to use Repository or ActiveRecord implementations.
+- **[PSR-11 Container](docs/psr11.md)** – Understand the default container bindings that power `src/`.
+- **[Dependency Injection](docs/psr11_di.md)** – Wire repositories, services, and factories through the container.
+- **[Scriptify](docs/scriptify.md)** – Use the REPL, CLI runner, and service manager utilities.
+- **[Unattended Setup](docs/unattended_setup.md)** – Automate installs for CI/CD pipelines.
+- **[Windows Setup](docs/windows.md)** – Follow the WSL/Windows specific checklist.
 
-### Infrastructure
-- **[PSR-11 Container](docs/psr11.md)** - Dependency injection container
-- **[Dependency Injection](docs/psr11_di.md)** - DI patterns and usage
-- **[Scriptify](docs/scriptify.md)** - Interactive terminal, CLI script runner, and service management
-- **[Unattended Setup](docs/unattended_setup.md)** - Automated installation for CI/CD
-- **[Windows Setup](docs/windows.md)** - Windows-specific instructions
+### Testing & Quality
+- **[Complete Testing Guide](docs/testing-guide.md)** – Unit, integration, and contract testing reference.
+- **[Functional Tests](docs/functional_test.md)** – Use `FakeApiRequester` and fixtures for end-to-end coverage.
+- **[JWT Authentication Advanced](docs/jwt-advanced.md)** – Extend tokens with custom claims and refresh logic.
+- **[Error Handling](docs/error-handling.md)** – Map exceptions to HTTP responses and logging patterns.
 
 ## Real-World Example
 
@@ -251,8 +251,8 @@ You just created a complete CRUD API with:
 ## Support & Community
 
 - 📖 **[Full Documentation](docs/getting_started.md)**
-- 🐛 **[Report Issues](https://github.com/byjg/php-rest-template/issues)**
-- 💡 **[Request Features](https://github.com/byjg/php-rest-template/issues)**
+- 🐛 **[Report Issues](https://github.com/byjg/php-rest-reference-architecture/issues)**
+- 💡 **[Request Features](https://github.com/byjg/php-rest-reference-architecture/issues)**
 - 🌐 **[ByJG Open Source](http://opensource.byjg.com)**
 
 ## Not a Framework
@@ -266,6 +266,23 @@ This is a **template**, not a framework. You own the code:
 ## License
 
 This project is open source. See [LICENSE](https://opensource.byjg.com/opensource/licensing.html) for details.
+
+## Dependencies
+
+```mermaid
+graph TD
+  byjg/rest-reference-architecture --> byjg/config
+  byjg/rest-reference-architecture --> byjg/anydataset-db
+  byjg/rest-reference-architecture --> byjg/micro-orm
+  byjg/rest-reference-architecture --> byjg/authuser
+  byjg/rest-reference-architecture --> byjg/mailwrapper
+  byjg/rest-reference-architecture --> byjg/restserver
+  byjg/rest-reference-architecture --> byjg/swagger-test
+  byjg/rest-reference-architecture --> byjg/migration
+  byjg/rest-reference-architecture --> byjg/scriptify
+  byjg/rest-reference-architecture --> byjg/shortid
+  byjg/rest-reference-architecture --> byjg/jinja-php
+```
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 70
 ---
 
 # Login Integration with JWT
@@ -152,12 +152,14 @@ curl -X GET http://localhost:8080/sampleprotected/ping \
 
 ### Protect Endpoints with Attributes
 
+The authentication gate is provided by `ByJG\RestServer\Attributes\RequireAuthenticated`, so you do not need to build a custom attribute—just import it alongside your project-specific ones.
+
 ```php
 <?php
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
@@ -186,13 +188,14 @@ class MyProtectedRest
 
 use RestReferenceArchitecture\Util\JwtContext;
 
-// Get the decoded JWT data
-$jwtData = JwtContext::getCurrentJwtData($request);
-
-// Access user information
-$userId = $jwtData['userid'];
-$userName = $jwtData['name'];
-$userRole = $jwtData['role'];  // "admin" or "user"
+// Access user information captured by JwtContext::parseJwt()
+$userId = JwtContext::getUserId();
+$userName = JwtContext::getName();
+$userRole = JwtContext::getRole();  // "admin" or "user"
 ```
+
+:::tip Need the raw payload?
+If you want the entire decoded token, call `HttpRequest::param('jwt.data')` inside your controller. The helper methods above already read from the same source while keeping your code cleaner.
+:::
 
 For more information, refer to the [byjg/jwt-wrapper](https://github.com/byjg/jwt-wrapper) documentation.

@@ -1,3 +1,7 @@
+---
+sidebar_position: 230
+---
+
 # Complete Testing Guide
 
 This guide covers all aspects of testing your REST API, from unit tests to integration tests, using FakeApiRequester for in-process API testing.
@@ -29,11 +33,11 @@ The reference architecture provides a complete testing framework that allows you
 
 ### Key Components
 
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| `FakeApiRequester` | In-process API testing | `src/Util/FakeApiRequester.php` |
-| `BaseApiTestCase` | Base class for API tests | `tests/Rest/BaseApiTestCase.php` |
-| `Credentials` | Test user credentials | `tests/Rest/Credentials.php` |
+| Component          | Purpose                  | Location                         |
+|--------------------|--------------------------|----------------------------------|
+| `FakeApiRequester` | In-process API testing   | `src/Util/FakeApiRequester.php`  |
+| `BaseApiTestCase`  | Base class for API tests | `tests/Rest/BaseApiTestCase.php` |
+| `Credentials`      | Test user credentials    | `tests/Rest/Credentials.php`     |
 
 ## Test Structure
 
@@ -41,33 +45,33 @@ The reference architecture provides a complete testing framework that allows you
 
 ```
 tests/
-├── Rest/
-│   ├── BaseApiTestCase.php    # Base test case
-│   ├── Credentials.php         # Test credentials helper
-│   ├── DummyTest.php          # Example API test
-│   ├── LoginTest.php          # Authentication tests
-│   └── ...
-└── Unit/
-    ├── Service/
-    │   └── DummyServiceTest.php
-    └── Repository/
-        └── DummyRepositoryTest.php
+└── Rest/
+    ├── BaseApiTestCase.php     # Base test case with schema + DB reset
+    ├── Credentials.php         # Helper for authenticating test users
+    ├── DummyTest.php           # Repository pattern example CRUD tests
+    ├── DummyHexTest.php        # Hex/UUID example
+    ├── LoginTest.php           # Authentication flow
+    └── ... (add your own files here)
 ```
+
+:::info Want unit tests?
+Add additional directories (e.g., `tests/Service`) as needed—PHPUnit's configuration already looks at the whole `tests/` tree.
+:::
 
 ### Running Tests
 
 ```bash
-# Run all tests
-composer test
+# Run all tests using the composer script
+APP_ENV=test composer run test
 
-# Run specific test file
-./vendor/bin/phpunit tests/Rest/DummyTest.php
+# Run a specific test file
+APP_ENV=test ./vendor/bin/phpunit tests/Rest/DummyTest.php
 
-# Run specific test method
-./vendor/bin/phpunit --filter testFullCrud tests/Rest/DummyTest.php
+# Run a single test method
+APP_ENV=test ./vendor/bin/phpunit --filter testFullCrud tests/Rest/DummyTest.php
 
-# Run with coverage
-./vendor/bin/phpunit --coverage-html coverage/
+# Generate coverage (optional)
+APP_ENV=test ./vendor/bin/phpunit --coverage-html coverage/
 ```
 
 ## FakeApiRequester
@@ -89,24 +93,23 @@ The `FakeApiRequester` class enables in-process API testing without a web server
 ```php
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
-$request = new FakeApiRequester();
-$request
+$request = (new FakeApiRequester())
     ->withPsr7Request($this->getPsr7Request())
     ->withMethod('GET')
     ->withPath('/dummy/1')
     ->withRequestHeader(['Authorization' => 'Bearer ' . $token])
-    ->assertResponseCode(200);
+    ->expectStatus(200);
 
-$response = $this->assertRequest($request);
+$response = $this->sendRequest($request);
 $data = json_decode($response->getBody()->getContents(), true);
 ```
 
 ### FakeApiRequester Methods
 
 ```php
-// HTTP Method
-->withMethod('GET')           // GET, POST, PUT, DELETE, PATCH
-->withPath('/api/products')   // API endpoint path
+// HTTP Method & Path
+->withMethod('GET')             // GET, POST, PUT, DELETE, PATCH
+->withPath('/api/products')     // API endpoint path
 
 // Request Body
 ->withRequestBody(json_encode(['name' => 'Product']))
@@ -117,10 +120,11 @@ $data = json_decode($response->getBody()->getContents(), true);
 ->withRequestHeader(['Content-Type' => 'application/json'])
 
 // Query Parameters
-->withPath('/products?page=2&size=50')
+->withQuery(['page' => 2, 'size' => 50])
 
 // Expected Response
-->assertResponseCode(200)     // Expected HTTP status code
+->expectStatus(200)             // Assert HTTP status code
+->expectJsonContains(['name' => 'Product'])
 ```
 
 ## Writing API Tests
@@ -131,24 +135,58 @@ All API tests should extend `BaseApiTestCase`:
 
 **Location**: `tests/Rest/BaseApiTestCase.php`
 
-```php
-<?php
-
+```php title="tests/Rest/BaseApiTestCase.php"
 namespace Test\Rest;
 
-use ByJG\ApiTools\ApiTestCase;
+use ByJG\ApiTools\Base\Schema;
+use ByJG\ApiTools\OpenApiValidation;
+use ByJG\Config\Config;
+use ByJG\DbMigration\Database\MySqlDatabase;
+use ByJG\DbMigration\Migration;
+use ByJG\Util\Uri;
+use ByJG\WebRequest\Psr7\Request;
+use Exception;
+use PHPUnit\Framework\TestCase;
 
-class MyTest extends BaseApiTestCase
+class BaseApiTestCase extends TestCase
 {
+    use OpenApiValidation;
+
+    protected static bool $databaseReset = false;
+    protected string $filePath = __DIR__ . '/../../public/docs/openapi.json';
+
     protected function setUp(): void
     {
-        parent::setUp();
-        // Test setup
+        $this->setSchema(Schema::getInstance(file_get_contents($this->filePath)));
+        $this->resetDb();
     }
 
-    public function testSomething()
+    protected function tearDown(): void
     {
-        // Your test
+        $this->setSchema(null);
+    }
+
+    public function getPsr7Request(): Request
+    {
+        $uri = Uri::getInstanceFromString()
+            ->withScheme(Config::get('API_SCHEMA'))
+            ->withHost(Config::get('API_SERVER'));
+
+        return Request::getInstance($uri);
+    }
+
+    protected function resetDb(): void
+    {
+        if (!self::$databaseReset) {
+            if (Config::definition()->getCurrentEnvironment() !== 'test') {
+                throw new Exception('This test can only be executed in test environment');
+            }
+            Migration::registerDatabase(MySqlDatabase::class);
+            $migration = new Migration(new Uri(Config::get('DBDRIVER_CONNECTION')), __DIR__ . '/../../db');
+            $migration->prepareEnvironment();
+            $migration->reset();
+            self::$databaseReset = true;
+        }
     }
 }
 ```
@@ -159,11 +197,11 @@ class MyTest extends BaseApiTestCase
 // PSR-7 Request Factory
 $psr7Request = $this->getPsr7Request();
 
-// OpenAPI Schema Validation
-$this->assertRequest($request);  // Validates against OpenAPI schema
+// Send a FakeApiRequester and validate against OpenAPI automatically
+$response = $this->sendRequest($request);
 
-// Database Reset
-$this->resetDb();  // Resets database to migration state
+// Reset the database once per test process
+$this->resetDb();
 ```
 
 ### Basic Test Example
@@ -177,31 +215,26 @@ use RestReferenceArchitecture\Util\FakeApiRequester;
 
 class ProductTest extends BaseApiTestCase
 {
-    public function testGetProduct()
+    public function testGetProduct(): void
     {
-        // Login first to get token
-        $loginResponse = $this->assertRequest(
+        $loginResponse = $this->sendRequest(
             Credentials::requestLogin(Credentials::getAdminUser())
         );
-        $loginData = json_decode($loginResponse->getBody()->getContents(), true);
-        $token = $loginData['token'];
+        $token = json_decode($loginResponse->getBody()->getContents(), true)['token'];
 
-        // Test GET endpoint
-        $request = new FakeApiRequester();
-        $request
+        $request = (new FakeApiRequester())
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath('/products/1')
             ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-            ->assertResponseCode(200);
+            ->expectStatus(200);
 
-        $response = $this->assertRequest($request);
+        $response = $this->sendRequest($request);
         $product = json_decode($response->getBody()->getContents(), true);
 
-        // Assertions
         $this->assertArrayHasKey('id', $product);
         $this->assertArrayHasKey('name', $product);
-        $this->assertEquals(1, $product['id']);
+        $this->assertSame(1, $product['id']);
     }
 }
 ```
@@ -225,7 +258,7 @@ $userCreds = Credentials::getRegularUser();
 
 // Login request
 $loginRequest = Credentials::requestLogin(Credentials::getAdminUser());
-$response = $this->assertRequest($loginRequest);
+$response = $this->sendRequest($loginRequest);
 $data = json_decode($response->getBody()->getContents(), true);
 $token = $data['token'];
 ```

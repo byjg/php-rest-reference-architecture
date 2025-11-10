@@ -1,3 +1,7 @@
+---
+sidebar_position: 150
+---
+
 # Code Generator Template Customization
 
 Guide to customizing the code generator templates to match your project's specific needs.
@@ -13,31 +17,33 @@ Guide to customizing the code generator templates to match your project's specif
 
 ## Overview
 
-The code generator uses Jinja templates located in `builder/templates/` to generate code.
+The code generator uses [JinjaPhp](https://github.com/byjg/jinja_php) templates stored in `templates/codegen/`.
 
 **Template Engine**: JinjaPhp (Python Jinja2 syntax for PHP)
-**Location**: `builder/templates/`
+**Location**: `templates/codegen/`
 
 ### Template Types
 
-| Template | Generates | Pattern |
-|----------|-----------|---------|
-| `model.tpl` | Model class | Repository & ActiveRecord |
-| `repository.tpl` | Repository class | Repository only |
-| `service.tpl` | Service class | Repository only |
-| `rest.tpl` | REST controller | Both patterns |
-| `test.tpl` | Test class | Both patterns |
+| Template                  | Generates           | Pattern                   |
+|---------------------------|---------------------|---------------------------|
+| `model.php.jinja`         | Model class         | Repository & ActiveRecord |
+| `repository.php.jinja`    | Repository class    | Repository only           |
+| `service.php.jinja`       | Service class       | Repository only           |
+| `rest.php.jinja`          | REST controller     | Repository pattern        |
+| `restactiverecord.php.jinja` | REST controller | ActiveRecord pattern      |
+| `test.php.jinja`          | Test class          | Both patterns             |
 
 ## Template Structure
 
 ```
-builder/
-└── templates/
-    ├── model.tpl              # Model class
-    ├── repository.tpl         # Repository class
-    ├── service.tpl            # Service class
-    ├── rest.tpl               # REST controller
-    └── test.tpl               # Test class
+templates/
+└── codegen/
+    ├── model.php.jinja             # Model class
+    ├── repository.php.jinja        # Repository class
+    ├── service.php.jinja           # Service class
+    ├── rest.php.jinja              # Repository REST controller
+    ├── restactiverecord.php.jinja  # ActiveRecord REST controller
+    └── test.php.jinja              # Test class
 ```
 
 ## Available Variables
@@ -72,7 +78,7 @@ Each field in `{{ fields }}` contains:
 
 ### Example: Adding Custom Header
 
-Edit `builder/templates/model.tpl`:
+Edit `templates/codegen/model.php.jinja`:
 
 ```jinja
 <?php
@@ -91,7 +97,7 @@ namespace {{ namespace }};
 
 ### Example: Adding Custom Methods
 
-Add custom methods to `builder/templates/model.tpl`:
+Add custom methods to `templates/codegen/model.php.jinja`:
 
 ```jinja
 // ... existing getters/setters ...
@@ -122,7 +128,7 @@ Add custom methods to `builder/templates/model.tpl`:
 
 ### Example: Customizing REST Endpoints
 
-Edit `builder/templates/rest.tpl` to add custom endpoints:
+Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
 
 ```jinja
 // ... existing CRUD methods ...
@@ -130,6 +136,9 @@ Edit `builder/templates/rest.tpl` to add custom endpoints:
     /**
      * Search {{ class_name }}
      */
+    // At the top of the template file add:
+    // use ByJG\\RestServer\\Attributes\\RequireAuthenticated;
+
     #[OA\Get(
         path: "/{{ table_name }}/search",
         security: [["jwt-token" => []]],
@@ -157,7 +166,7 @@ Edit `builder/templates/rest.tpl` to add custom endpoints:
 
 ### Custom Template Example
 
-Create `builder/templates/dto.tpl` for Data Transfer Objects:
+Create `templates/codegen/dto.php.jinja` for Data Transfer Objects:
 
 ```jinja
 <?php
@@ -200,7 +209,7 @@ Modify `builder/Scripts.php` to use your custom template:
 ```php
 protected function generateDTO(string $tableName, array $fields): void
 {
-    $template = $this->jinja->render('dto.tpl', [
+    $template = $this->jinja->render('dto.php.jinja', [
         'namespace' => 'RestReferenceArchitecture\\DTO',
         'class_name' => $this->getClassName($tableName),
         'fields' => $fields

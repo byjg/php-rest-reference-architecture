@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 60
 ---
 
 # Rest Methods API integrated with OpenAPI
@@ -43,7 +43,8 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 
 class Login
-    public function mymethod(HttpRequest $request, HttpResponse $response)
+{
+    public function mymethod(HttpRequest $request, HttpResponse $response): void
     {
         // ...
     }
@@ -52,9 +53,9 @@ class Login
 
 We use the package byjg/restserver to handle the requests. Please refer to the documentation of this package at [https://github.com/byjg/restserver/tree/bump#2-processing-the-request-and-response](https://github.com/byjg/restserver/tree/bump#2-processing-the-request-and-response)
 
-## Documenting your application with PHPDOC and generating the OpenAPI specification
+## Documenting your application with PHP Attributes and generating the OpenAPI specification
 
-If you don't have an OpenAPI specification, you can document your application with PHPDOC and generate the OpenAPI specification from your code.
+If you don't have an OpenAPI specification, annotate your controllers with PHP 8 attributes (backed by [`zircote/swagger-php`](https://zircote.github.io/swagger-php/guide/)) and let the tooling generate `public/docs/openapi.json` for you.
 
 ```php
 namespace RestReferenceArchitecture\Rest;
@@ -64,7 +65,7 @@ use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 
 class Login
-
+{
     /**
      * Do log in
      */
@@ -85,7 +86,7 @@ class Login
     )]
     #[OA\Response(
         response: 200,
-        description: "The object to be created",
+        description: "Login result",
         content: new OA\JsonContent(
             required: [ "token" ],
             properties: [
@@ -98,7 +99,7 @@ class Login
             ]
         )
     )]
-    public function mymethod(HttpRequest $request, HttpResponse $response)
+    public function mymethod(HttpRequest $request, HttpResponse $response): void
     {
         // ...
     }
@@ -114,6 +115,10 @@ APP_ENV=dev composer run openapi
 The OpenAPI specification will be generated in the folder `public/docs`.
 
 We use the package zircote/swagger-php to generate the OpenAPI specification.
-Please refer to the documentation of this package at [https://zircote.github.io/swagger-php/](https://zircote.github.io/swagger-php/) to learn more about the PHPDOC annotations.
+Please refer to the documentation of this package at [https://zircote.github.io/swagger-php/](https://zircote.github.io/swagger-php/) to learn more about OpenAPI attributes.
 
 We use the package byjg/restserver to handle the requests. Please refer to the documentation of this package at [https://github.com/byjg/restserver](https://github.com/byjg/restserver)
+
+:::tip Keep docs in sync
+Whenever you change annotations, rerun `APP_ENV=dev composer run openapi`. The generated `public/docs/openapi.json` is what `OpenApiRouteList` reads at runtime and what the tests validate against.
+:::

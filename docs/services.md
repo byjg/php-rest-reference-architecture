@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 100
 ---
 
 # Service Layer
@@ -28,76 +28,78 @@ graph TD
 
 ## BaseService
 
-All services extend `BaseService`, which provides common CRUD operations:
+Every service extends `RestReferenceArchitecture\Service\BaseService`, so you automatically inherit the same safeguards used by the sample `DummyService`/`DummyHexService` classes.
 
-```php
-<?php
-
-namespace RestReferenceArchitecture\Service;
-
-use RestReferenceArchitecture\Repository\BaseRepository;
-
+```php title="src/Service/BaseService.php (excerpt)"
 abstract class BaseService
 {
-    protected BaseRepository $repository;
-
-    public function __construct(BaseRepository $repository)
+    public function __construct(protected BaseRepository $baseRepository)
     {
-        $this->repository = $repository;
     }
 
-    // Get a single record
-    public function get($id)
+    public function create(array $payload): mixed
     {
-        return $this->repository->get($id);
-    }
-
-    // Get a single record or throw 404
-    public function getOrFail($id)
-    {
-        $model = $this->repository->get($id);
-        if (is_null($model)) {
-            throw new \ByJG\RestServer\Exception\Error404Exception("Not found");
+        // Reject payloads that try to set the primary key manually
+        $primaryKey = $this->baseRepository->getMapper()->getPrimaryKey();
+        foreach ($primaryKey as $pkField) {
+            if (!empty($payload[$pkField])) {
+                throw new Error422Exception("Create should not include primary key field: {$pkField}");
+            }
         }
+
+        $model = $this->baseRepository->getMapper()->getEntity($payload);
+        $this->baseRepository->save($model);
         return $model;
     }
 
-    // List all records
-    public function list(array $filter = [])
+    public function update(array $payload): mixed
     {
-        return $this->repository->getAll();
-    }
+        $primaryKey = $this->baseRepository->getMapper()->getPrimaryKey();
+        $pkValue = array_intersect_key($payload, array_flip($primaryKey));
+        if (count($pkValue) !== count($primaryKey)) {
+            throw new Error422Exception('Update requires primary key field(s): ' . implode(', ', $primaryKey));
+        }
 
-    // Create new record from payload
-    public function create(array $payload)
-    {
-        $model = $this->repository->getMapper()->getEntity($payload);
-        $this->repository->save($model);
+        $model = $this->getOrFail($pkValue);
+        ObjectCopy::copy($payload, $model);
+        $this->baseRepository->save($model);
         return $model;
     }
 
-    // Update existing record
-    public function update(array $payload)
+    public function get(array|string|int|LiteralInterface $id): mixed
     {
-        $model = $this->getOrFail($payload['id'] ?? null);
-        \ByJG\Util\ObjectCopy::copy($payload, $model);
-        $this->repository->save($model);
-        return $model;
+        return $this->baseRepository->get($id);
     }
 
-    // Generic save (create or update)
-    public function save($model)
+    public function getOrFail(array|string|int|LiteralInterface $id): mixed
     {
-        return $this->repository->save($model);
+        $result = $this->baseRepository->get($id);
+        if (empty($result)) {
+            throw new Error404Exception('Id not found');
+        }
+        return $result;
     }
 
-    // Delete a record
-    public function delete($model)
+    public function list(?int $page = 0, ?int $size = 20): array
     {
-        return $this->repository->delete($model);
+        return $this->baseRepository->list($page ?? 0, $size ?? 20);
+    }
+
+    public function save(mixed $model): void
+    {
+        $this->baseRepository->save($model);
+    }
+
+    public function delete(mixed $id): void
+    {
+        $this->baseRepository->delete($id);
     }
 }
 ```
+
+:::note Why enforce primary keys?
+Both `create()` and `update()` rely on the mapper metadata, so composite keys and UUIDs work exactly the same as plain integers. Keeping the rules in one place avoids duplicated validation in each service.
+:::
 
 ## Creating a Service
 
@@ -117,17 +119,16 @@ class ProductService extends BaseService
         parent::__construct($repository);
     }
 
-    // Add custom business logic methods here
     public function getActiveProducts(): array
     {
-        return $this->baseRepository->getActiveProducts();
+        return $this->baseRepository->getByStatus('active');
     }
 
     public function markAsDiscontinued(int $productId): void
     {
         $product = $this->getOrFail($productId);
         $product->setStatus('discontinued');
-        $this->baseRepository->save($product);
+        $this->save($product);
     }
 }
 ```
@@ -183,7 +184,7 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 ```php
 <?php
 
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 
 #[RequireAuthenticated]
 public function getDummy(HttpResponse $response, HttpRequest $request): void

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 13
+sidebar_position: 40
 ---
 
 # Add a New REST Method
@@ -102,7 +102,7 @@ If you've set the `security` property in your OpenAPI attributes, protect the en
 ```php
 <?php
 
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
@@ -144,9 +144,9 @@ If you need to access the current user's data:
 
 use RestReferenceArchitecture\Util\JwtContext;
 
-$jwtData = JwtContext::getCurrentJwtData($request);
-$userId = $jwtData['userid'];
-$userRole = $jwtData['role'];  // "admin" or "user"
+// JwtContext helpers expose the middleware-populated JWT information
+$userId = JwtContext::getUserId();
+$userRole = JwtContext::getRole();  // "admin" or "user"
 ```
 
 ## Validating Input
@@ -177,7 +177,7 @@ After validating the payload, use the service layer to update the record:
 
 use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
 
 /**

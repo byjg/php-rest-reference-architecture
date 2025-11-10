@@ -1,3 +1,7 @@
+---
+sidebar_position: 260
+---
+
 # Error Handling Guide
 
 This guide covers error handling patterns, exception types, and best practices for returning consistent error responses in your REST API.
@@ -40,18 +44,18 @@ Throwable
 
 ### Available Exceptions
 
-| Exception | HTTP Code | Use Case |
-|-----------|-----------|----------|
-| `Error400Exception` | 400 | Invalid request data, validation failures |
-| `Error401Exception` | 401 | Authentication required or failed |
-| `Error403Exception` | 403 | Authenticated but not authorized |
-| `Error404Exception` | 404 | Resource not found |
-| `Error405Exception` | 405 | HTTP method not allowed |
-| `Error409Exception` | 409 | Conflict (duplicate resource) |
-| `Error415Exception` | 415 | Wrong content-type |
-| `Error422Exception` | 422 | Validation error (semantic) |
-| `Error429Exception` | 429 | Rate limit exceeded |
-| `Error500Exception` | 500 | Server error |
+| Exception           | HTTP Code | Use Case                                  |
+|---------------------|-----------|-------------------------------------------|
+| `Error400Exception` | 400       | Invalid request data, validation failures |
+| `Error401Exception` | 401       | Authentication required or failed         |
+| `Error403Exception` | 403       | Authenticated but not authorized          |
+| `Error404Exception` | 404       | Resource not found                        |
+| `Error405Exception` | 405       | HTTP method not allowed                   |
+| `Error409Exception` | 409       | Conflict (duplicate resource)             |
+| `Error415Exception` | 415       | Wrong content-type                        |
+| `Error422Exception` | 422       | Validation error (semantic)               |
+| `Error429Exception` | 429       | Rate limit exceeded                       |
+| `Error500Exception` | 500       | Server error                              |
 
 ### Import Statements
 

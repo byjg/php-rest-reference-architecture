@@ -1,3 +1,7 @@
+---
+sidebar_position: 160
+---
+
 # Configuration Deep Dive
 
 Advanced configuration topics including environment inheritance, layered configs, credentials management, and multi-environment setup.
