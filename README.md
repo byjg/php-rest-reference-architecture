@@ -137,6 +137,19 @@ composer codegen -- --env=dev --table=users all --save
 - MySQL, PHP-FPM, and Nginx
 - One command to start
 
+### 🔧 Scriptify - Interactive Development
+
+- **Interactive PHP Terminal**: REPL with your project's autoloader
+- **CLI Script Runner**: Execute any PHP method from command line
+- **Service Management**: Install PHP classes as system daemons
+- Quick prototyping and debugging
+
+```bash
+composer terminal  # Start interactive PHP shell
+```
+
+**📚 [Scriptify Guide →](docs/scriptify.md)**
+
 ### ⚙️ Modern PHP Standards
 
 Implements PSR standards:
@@ -157,6 +170,7 @@ Implements PSR standards:
 | **Database**         | Migrations + ORM                   | [→ Docs](docs/migration.md)        |
 | **Testing**          | Functional test suite              | [→ Docs](docs/functional_test.md)  |
 | **Service Layer**    | Business logic separation          | [→ Docs](docs/services.md)         |
+| **Scriptify**        | Interactive terminal & CLI scripts | [→ Docs](docs/scriptify.md)        |
 | **Unattended Setup** | CI/CD friendly installation        | [→ Docs](docs/unattended_setup.md) |
 
 ## Documentation
@@ -191,6 +205,7 @@ Implements PSR standards:
 ### Infrastructure
 - **[PSR-11 Container](docs/psr11.md)** - Dependency injection container
 - **[Dependency Injection](docs/psr11_di.md)** - DI patterns and usage
+- **[Scriptify](docs/scriptify.md)** - Interactive terminal, CLI script runner, and service management
 - **[Unattended Setup](docs/unattended_setup.md)** - Automated installation for CI/CD
 - **[Windows Setup](docs/windows.md)** - Windows-specific instructions
 
