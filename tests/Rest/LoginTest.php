@@ -42,7 +42,7 @@ class LoginTest extends BaseApiTestCase
 
         // Clear the reset token
         $userRepo = Config::get(UsersDBDataset::class);
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $user->set(User::PROP_RESETTOKEN, null);
         $user->set(User::PROP_RESETTOKENEXPIRE, null);
         $user->set(User::PROP_RESETCODE, null);
@@ -50,7 +50,7 @@ class LoginTest extends BaseApiTestCase
         $userRepo->save($user);
 
         // Check if the reset token was cleared
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $this->assertNotNull($user);
         $this->assertEmpty($user->get(User::PROP_RESETTOKEN));
         $this->assertEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
@@ -70,7 +70,7 @@ class LoginTest extends BaseApiTestCase
 
         // Check if the reset token was created
         $userRepo = Config::get(UsersDBDataset::class);
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
@@ -84,7 +84,7 @@ class LoginTest extends BaseApiTestCase
 
         // Clear the reset token
         $userRepo = Config::get(UsersDBDataset::class);
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
@@ -111,7 +111,7 @@ class LoginTest extends BaseApiTestCase
 
         // Clear the reset token
         $userRepo = Config::get(UsersDBDataset::class);
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
@@ -130,7 +130,7 @@ class LoginTest extends BaseApiTestCase
         $this->sendRequest($request);
 
         // Check if the reset token was created
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
@@ -145,7 +145,7 @@ class LoginTest extends BaseApiTestCase
 
         // Clear the reset token
         $userRepo = Config::get(UsersDBDataset::class);
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $this->assertNotNull($user);
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKEN));
         $this->assertNotEmpty($user->get(User::PROP_RESETTOKENEXPIRE));
@@ -168,7 +168,7 @@ class LoginTest extends BaseApiTestCase
         $this->sendRequest($request);
 
         // Check if the reset token was created
-        $user = $userRepo->getByEmail($email);
+        $user = $userRepo->get($email, $userRepo->getUserDefinition()->getEmail());
         $this->assertNotNull($user);
         $this->assertEquals("83bfd34a3ebc0973609f5f2ec0080080286e3879", $user->getPassword());
         $this->assertEmpty($user->get(User::PROP_RESETTOKEN));

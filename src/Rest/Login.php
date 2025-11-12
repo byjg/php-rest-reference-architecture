@@ -154,7 +154,7 @@ class Login
         $json = ValidateRequest::getPayload();
 
         $users = Config::get(UsersDBDataset::class);
-        $user = $users->getByEmail($json["email"]);
+        $user = $users->get($json["email"], $users->getUserDefinition()->getEmail());
 
         $token = BaseRepository::getUuid();
         $code = rand(10000, 99999);
@@ -168,7 +168,7 @@ class Login
 
             // Send email using MailWrapper
             $mailWrapper = Config::get(MailWrapperInterface::class);
-            $envelope = Config::get('MAIL_ENVELOPE', [$json["email"], "RestReferenceArchitecture - Password Reset", "email_code.html", [
+            $envelope = Config::get('MAIL_ENVELOPE', [$json["email"], "ByJGService - Password Reset", "email_code.html", [
                 "code" => trim(chunk_split($code, 1, ' ')),
                 "expire" => 10
             ]]);
@@ -184,7 +184,7 @@ class Login
         $json = OpenApiContext::validateRequest($request);
 
         $users = Config::get(UsersDBDataset::class);
-        $user = $users->getByEmail($json["email"]);
+        $user = $users->get($json["email"], $users->getUserDefinition()->getEmail());
 
         if (is_null($user)) {
             throw new Error422Exception("Invalid data");
