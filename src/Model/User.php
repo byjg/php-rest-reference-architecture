@@ -78,11 +78,6 @@ class User extends UserModel
     #[OA\Property(type: "string", format: "string")]
     protected ?string $admin = null;
 
-    /**
-     * @OA\Property()
-     * @var ?string
-     */
-    protected ?string $uuid = null;
 
     protected array $propertyList = [];
 
@@ -231,22 +226,6 @@ class User extends UserModel
         } else {
             $property->setValue($value);
         }
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getUuid(): ?string
-    {
-        return $this->uuid;
-    }
-
-    /**
-     * @param mixed $uuid
-     */
-    public function setUuid(?string $uuid)
-    {
-        $this->uuid = $uuid;
     }
 
     public function getUpdated(): ?string

@@ -15,7 +15,6 @@ class UserDefinition extends \ByJG\Authenticate\Definition\UserDefinition
     {
         parent::__construct($table, $model, $loginField, $fieldDef);
 
-        $this->markPropertyAsReadOnly("uuid");
         $this->markPropertyAsReadOnly("created");
         $this->markPropertyAsReadOnly("updated");
         $this->defineGenerateKey(UuidSeedGenerator::class);

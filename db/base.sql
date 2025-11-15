@@ -3,16 +3,17 @@
 create table users
 (
     userid binary(16) DEFAULT (uuid_to_bin(uuid())) NOT NULL,
-    `uuid` varchar(36) GENERATED ALWAYS AS (insert(insert(insert(insert(hex(`userid`),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')) VIRTUAL,
     name varchar(50),
     email varchar(120),
     username varchar(20) not null,
     password char(40) not null,
-    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created DATETIME DEFAULT (now()),
+    updated DATETIME ON UPDATE CURRENT_TIMESTAMP,
     admin enum('yes','no'),
 
-    constraint pk_users primary key (userid)
+    constraint pk_users primary key (userid),
+    constraint ix_username unique (username),
+    constraint ix_xmlnuke_users_2 unique (email)
 ) ENGINE=InnoDB;
 
 
@@ -38,8 +39,8 @@ insert into users (userid, name, email, username, password, admin) VALUES
 create table users_property
 (
     id integer AUTO_INCREMENT not null,
-    name varchar(20),
-    value varchar(100),
+    name varchar(50),
+    value varchar(250),
     userid binary(16) NOT NULL,
 
     constraint pk_custom primary key (id),
