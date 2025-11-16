@@ -2,10 +2,9 @@
 
 namespace RestReferenceArchitecture\Rest;
 
-use ByJG\Authenticate\UsersDBDataset;
+use ByJG\Authenticate\Service\UsersService;
 use ByJG\Config\Config;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
-use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
@@ -61,13 +60,11 @@ class Login
         // Get the validated payload - returns array for JSON content-type
         $json = ValidateRequest::getPayload();
 
-        $users = Config::get(UsersDBDataset::class);
-        $user = $users->isValidUser($json["username"], $json["password"]);
-        $metadata = JwtContext::createUserMetadata($user);
+        $userToken = JwtContext::createUserMetadata($json["username"], $json["password"]);
 
         $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
-        $response->write(['token' => JwtContext::createToken($metadata)]);
-        $response->write(['data' => $metadata]);
+        $response->write(['token' => $userToken->token]);
+        $response->write(['data' => $userToken->data]);
     }
 
     /**
@@ -110,14 +107,15 @@ class Login
             throw new Error401Exception("You only can refresh the token 5 minutes before expire");
         }
 
-        $users = Config::get(UsersDBDataset::class);
-        $user = $users->getById(new HexUuidLiteral(JwtContext::getUserId()));
+        /** @var UsersService $usersService */
+        $usersService = Config::get(UsersService::class);
+        $user = $usersService->getById(JwtContext::getUserId());
 
         $metadata = JwtContext::createUserMetadata($user);
 
         $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
-        $response->write(['token' => JwtContext::createToken($metadata)]);
-        $response->write(['data' => $metadata]);
+        $response->write(['token' => $metadata->token]);
+        $response->write(['data' => $metadata->data]);
 
     }
 
@@ -153,8 +151,8 @@ class Login
     {
         $json = ValidateRequest::getPayload();
 
-        $users = Config::get(UsersDBDataset::class);
-        $user = $users->get($json["email"], $users->getUserDefinition()->getEmail());
+        $usersService = Config::get(UsersService::class);
+        $user = $usersService->getByEmail($json["email"]);
 
         $token = BaseRepository::getUuid();
         $code = rand(10000, 99999);
@@ -164,7 +162,7 @@ class Login
             $user->set(User::PROP_RESETTOKENEXPIRE, date('Y-m-d H:i:s', strtotime('+10 minutes')));
             $user->set(User::PROP_RESETCODE, $code);
             $user->set(User::PROP_RESETALLOWED, null);
-            $users->save($user);
+            $usersService->save($user);
 
             // Send email using MailWrapper
             $mailWrapper = Config::get(MailWrapperInterface::class);
@@ -183,8 +181,8 @@ class Login
     {
         $json = OpenApiContext::validateRequest($request);
 
-        $users = Config::get(UsersDBDataset::class);
-        $user = $users->get($json["email"], $users->getUserDefinition()->getEmail());
+        $usersService = Config::get(UsersService::class);
+        $user = $usersService->getByEmail($json["email"]);
 
         if (is_null($user)) {
             throw new Error422Exception("Invalid data");
@@ -198,7 +196,7 @@ class Login
             throw new Error422Exception("Invalid data");
         }
 
-        return [$users, $user, $json];
+        return [$usersService, $user, $json];
     }
 
     /**
@@ -237,14 +235,14 @@ class Login
     )]
     public function postConfirmCode(HttpResponse $response, HttpRequest $request)
     {
-        list($users, $user, $json) = $this->validateResetToken($response, $request);
+        list($usersService, $user, $json) = $this->validateResetToken($response, $request);
 
         if ($user->get("resetcode") != $json["code"]) {
             throw new Error422Exception("Invalid data");
         }
 
         $user->set("resetallowed", "yes");
-        $users->save($user);
+        $usersService->save($user);
 
         $response->write(['token' => $json["token"]]);
     }
@@ -285,7 +283,7 @@ class Login
     )]
     public function postResetPassword(HttpResponse $response, HttpRequest $request)
     {
-        list($users, $user, $json) = $this->validateResetToken($response, $request);
+        list($usersService, $user, $json) = $this->validateResetToken($response, $request);
 
         if ($user->get("resetallowed") != "yes") {
             throw new Error422Exception("Invalid data");
@@ -296,7 +294,7 @@ class Login
         $user->set("resettokenexpire", null);
         $user->set("resetcode", null);
         $user->set("resetallowed", null);
-        $users->save($user);
+        $usersService->save($user);
 
         $response->write(['token' => $json["token"]]);
     }

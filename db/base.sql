@@ -7,9 +7,10 @@ create table users
     email varchar(120),
     username varchar(20) not null,
     password char(40) not null,
-    created DATETIME DEFAULT (now()),
-    updated DATETIME ON UPDATE CURRENT_TIMESTAMP,
-    admin enum('yes','no'),
+    role varchar(50),
+    created_at DATETIME DEFAULT (now()),
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
 
     constraint pk_users primary key (userid),
     constraint ix_username unique (username),
@@ -24,11 +25,11 @@ ALTER TABLE `users`
 
 -- Default Password is "pwd"
 -- Please change it!
-insert into users (name, email, username, password, admin) VALUES
-    ('Administrator', 'admin@example.com', 'admin', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'yes');   -- !P4ssw0rdstr!
+insert into users (name, email, username, password, role) VALUES
+    ('Administrator', 'admin@example.com', 'admin', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'admin');   -- !P4ssw0rdstr!
 
-insert into users (userid, name, email, username, password, admin) VALUES
-    (0x5f6e7fe7bd1b11ed8ca90242ac120002, 'Regular User', 'user@example.com', 'user', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'no')        -- !P4ssw0rdstr!
+insert into users (userid, name, email, username, password, role) VALUES
+    (0x5f6e7fe7bd1b11ed8ca90242ac120002, 'Regular User', 'user@example.com', 'user', '9800aa1b77334ff0952b203062f0fbb0c480d3de', 'user')        -- !P4ssw0rdstr!
 ;
 
 -- random binary(16) generator

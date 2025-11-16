@@ -2,6 +2,9 @@
 
 namespace RestReferenceArchitecture\Util;
 
+use ByJG\Authenticate\Enum\UserField;
+use ByJG\Authenticate\Model\UserToken;
+use ByJG\Authenticate\Service\UsersService;
 use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
@@ -9,9 +12,9 @@ use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\JwtWrapper\JwtWrapper;
-use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
+use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Model\User;
@@ -26,17 +29,41 @@ class JwtContext
      * @throws Error401Exception
      * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
      */
-    public static function createUserMetadata(?User $user): array
+    public static function createUserMetadata(User|string $user, $password = ""): UserToken
     {
-        if (is_null($user)) {
-            throw new Error401Exception('Username or password is invalid');
+        /** @var UsersService $usersService */
+        $usersService = Config::get(UsersService::class);
+
+        try {
+            $jwtWrapper = Config::get(JwtWrapper::class);
+            $expires = 3600;
+            $tokenFields = [
+                UserField::Userid,
+                UserField::Name,
+                UserField::Role,
+            ];
+
+            if (empty($password)) {
+                $userToken = $usersService->createInsecureAuthToken(
+                    login: $user,
+                    jwtWrapper: $jwtWrapper,
+                    expires: $expires,
+                    tokenUserFields: $tokenFields
+                );
+            } else {
+                $userToken = $usersService->createAuthToken(
+                    login: $user,
+                    password: $password,
+                    jwtWrapper: $jwtWrapper,
+                    expires: $expires,
+                    tokenUserFields: $tokenFields
+                );
+            }
+        } catch (Exception $ex) {
+            throw new Error401Exception($ex->getMessage());
         }
 
-        return [
-            'role' => ($user->getAdmin() === User::VALUE_YES ? User::ROLE_ADMIN : User::ROLE_USER),
-            'userid' => HexUuidLiteral::getFormattedUuid($user->getUserid()),
-            'name' => $user->getName(),
-        ];
+        return $userToken;
     }
 
     /**

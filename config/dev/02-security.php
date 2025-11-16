@@ -1,9 +1,10 @@
 <?php
 
 use ByJG\Authenticate\Definition\PasswordDefinition;
-use ByJG\Authenticate\Definition\UserDefinition;
-use ByJG\Authenticate\Definition\UserPropertiesDefinition;
-use ByJG\Authenticate\UsersDBDataset;
+use ByJG\Authenticate\Enum\LoginField;
+use ByJG\Authenticate\Repository\UserPropertiesRepository;
+use ByJG\Authenticate\Repository\UsersRepository;
+use ByJG\Authenticate\Service\UsersService;
 use ByJG\Config\Config;
 use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
@@ -11,7 +12,7 @@ use ByJG\JwtWrapper\JwtHashHmacSecret;
 use ByJG\JwtWrapper\JwtKeyInterface;
 use ByJG\JwtWrapper\JwtWrapper;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Repository\UserDefinition as UserDefinitionAlias;
+use RestReferenceArchitecture\Model\UserProperties;
 
 return [
 
@@ -38,32 +39,24 @@ return [
         ]])
         ->toSingleton(),
 
-    // User Management
-    UserDefinition::class => DI::bind(UserDefinitionAlias::class)
-        ->withConstructorArgs(
-            [
-                'users',       // Table name
-                User::class,   // User class
-                UserDefinition::LOGIN_IS_EMAIL,
-                [
-                    // Field name in the User class => Field name in the database
-                    'userid' => 'userid',
-                    'name' => 'name',
-                    'email' => 'email',
-                    'username' => 'username',
-                    'password' => 'password',
-                    'created' => 'created',
-                    'admin' => 'admin'
-                ]
-            ]
-        )
+    // User Repositories
+    UsersRepository::class => DI::bind(UsersRepository::class)
+        ->withInjectedConstructorOverrides([
+            'usersClass' => User::class
+        ])
         ->toSingleton(),
 
-    UserPropertiesDefinition::class => DI::bind(UserPropertiesDefinition::class)
+    UserPropertiesRepository::class => DI::bind(UserPropertiesRepository::class)
+        ->withInjectedConstructorOverrides([
+            'propertiesClass' => UserProperties::class
+        ])
         ->toSingleton(),
 
-    UsersDBDataset::class => DI::bind(UsersDBDataset::class)
-        ->withInjectedConstructor()
+    // Users Service (replaces UserDefinition and UsersDBDataset)
+    UsersService::class => DI::bind(UsersService::class)
+        ->withInjectedConstructorOverrides([
+            'loginField' => LoginField::Email,  // Use email as login field
+        ])
         ->toSingleton(),
 
     // CORS Configuration
