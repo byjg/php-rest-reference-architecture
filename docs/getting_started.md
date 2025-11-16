@@ -46,6 +46,39 @@ mkdir ~/tutorial
 composer -sdev create-project byjg/rest-reference-architecture ~/tutorial master
 ```
 
+### Alternative: `shellscript.download`
+
+If you prefer an unattended installer (especially on fresh Linux boxes), use the `shellscript.download` loader:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://shellscript.download/install/loader)"
+```
+
+After the loader is installed, run the dedicated script:
+
+```bash
+# Minimal install
+load.sh php-rest-api -- my-api --namespace=MyApp --name=mycompany/my-api
+
+# Fully customised
+load.sh php-rest-api -- my-api \
+  --namespace=MyApp \
+  --name=mycompany/my-api \
+  --mysql-uri=mysql://root:secret@mysql-container/mydb \
+  --install-examples=n \
+  --version="^6.0" \
+  --php-version=8.4 \
+  --timezone=America/New_York
+```
+
+The script:
+- Generates a temporary `setup.json` (one directory above the target folder) with all answers.
+- Runs `composer create-project byjg/rest-reference-architecture ...` using those values.
+- Cleans up `setup.json` after success and is safe to re-run (it recreates the project folder).
+
+Required flags: the target folder, `--namespace`, and `--name`. Everything else is optional (defaults match the interactive installer). 
+Ensure Composer exists locally or combine it with `load.sh php-docker` first.
+
 ### Setup Configuration
 
 The installation will prompt you for configuration details:
