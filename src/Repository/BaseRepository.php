@@ -17,7 +17,6 @@ use ByJG\MicroOrm\Exception\UpdateConstraintException;
 use ByJG\MicroOrm\Interface\QueryBuilderInterface;
 use ByJG\MicroOrm\Interface\UpdateConstraintInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
-use ByJG\MicroOrm\Literal\Literal;
 use ByJG\MicroOrm\Literal\LiteralInterface;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
@@ -213,15 +212,7 @@ abstract class BaseRepository
      */
     public function save(mixed $model, UpdateConstraintInterface|array|null $updateConstraint = null): mixed
     {
-        $model = $this->repository->save($model, $updateConstraint);
-
-        $primaryKey = $this->repository->getMapper()->getPrimaryKey()[0];
-
-        if ($model->{"get$primaryKey"}() instanceof Literal) {
-            $model->{"set$primaryKey"}(HexUuidLiteral::create($model->{"get$primaryKey"}()));
-        }
-
-        return $model;
+        return $this->repository->save($model, $updateConstraint);
     }
 
     /**
