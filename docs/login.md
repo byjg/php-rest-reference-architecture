@@ -4,198 +4,208 @@ sidebar_position: 70
 
 # Login Integration with JWT
 
-This project includes user management, login, and JWT authentication out of the box.
+Authentication, password management, and JWT issuance are powered by [`byjg/authuser`](https://github.com/byjg/authuser). This section describes how the default wiring works and what you need to change when you customize users or credentials.
 
-For most use cases, you only need to configure the dependency injection settings. No code changes are required.
+## Database Schema
 
-## User Table Structure
-
-The database table created by the project is `users` with the following structure:
+Two tables ship with the reference architecture:
 
 ```sql
 CREATE TABLE `users` (
-    userid binary(16) DEFAULT (uuid_to_bin(uuid())) NOT NULL,
-    `uuid` varchar(36) GENERATED ALWAYS AS (insert(insert(insert(insert(hex(`userid`),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')) VIRTUAL,
-    name varchar(50),
-    email varchar(120),
-    username varchar(20) not null,
-    password char(40) not null,
-    created datetime,
-    admin enum('yes','no'),
-    PRIMARY KEY (userid)
-);
+    `userid`     BINARY(16) DEFAULT (uuid_to_bin(uuid())) NOT NULL,
+    `name`       VARCHAR(50),
+    `email`      VARCHAR(120),
+    `username`   VARCHAR(20) NOT NULL,
+    `password`   CHAR(40) NOT NULL,
+    `role`       VARCHAR(50),
+    `created_at` DATETIME DEFAULT (NOW()),
+    `updated_at` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    `deleted_at` DATETIME,
+    PRIMARY KEY (`userid`),
+    UNIQUE KEY `ix_username` (`username`),
+    UNIQUE KEY `ix_email` (`email`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `users_property` (
+    `id`      INT AUTO_INCREMENT PRIMARY KEY,
+    `name`    VARCHAR(50),
+    `value`   VARCHAR(250),
+    `userid`  BINARY(16) NOT NULL,
+    CONSTRAINT `fk_user_property` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`)
+) ENGINE=InnoDB;
 ```
 
-The `RestReferenceArchitecture\Model\User` class provides the model mapping for this table.
+- `users.role` drives the built-in RBAC helpers (`User::ROLE_ADMIN` / `User::ROLE_USER`). Add more roles if needed.
+- `users_property` stores arbitrary metadata (profile picture, MFA flags, etc.) and is automatically loaded by `UsersService`.
 
-## Customize Field Mapping
+## Model Mapping
 
-If your database uses different field names, you can customize the mapping in `config/dev/02-security.php`:
+Models live in `src/Model` and already extend the AuthUser abstractions:
+
+- `RestReferenceArchitecture\Model\User` extends `ByJG\Authenticate\Model\UserModel`. It uses `FieldUuidAttribute` and OpenAPI attributes to sync the schema.
+- `RestReferenceArchitecture\Model\UserProperties` extends `ByJG\Authenticate\Model\UserPropertiesModel`.
+
+To customize fields, either modify these models or create your own classes and update the container bindings described below.
+
+## AuthUser Service Configuration
+
+`config/dev/02-security.php` wires the repositories and service:
 
 ```php
-<?php
-
+use ByJG\Authenticate\Enum\LoginField;
+use ByJG\Authenticate\Repository\UserPropertiesRepository;
+use ByJG\Authenticate\Repository\UsersRepository;
+use ByJG\Authenticate\Service\UsersService;
 use RestReferenceArchitecture\Model\User;
-use ByJG\Authenticate\Definition\UserDefinition;
-use ByJG\Config\DependencyInjection as DI;
+use RestReferenceArchitecture\Model\UserProperties;
 
 return [
-    UserDefinition::class => DI::bind(UserDefinitionAlias::class)
-        ->withConstructorArgs([
-            'users',                         // Table name
-            User::class,                     // User model class
-            UserDefinition::LOGIN_IS_EMAIL,  // Login type
-            [
-                // Model property => Database column
-                'userid'   => 'userid',
-                'name'     => 'name',
-                'email'    => 'email',
-                'username' => 'username',
-                'password' => 'password',
-                'created'  => 'created',
-                'admin'    => 'admin'
-            ]
+    UsersRepository::class => DI::bind(UsersRepository::class)
+        ->withInjectedConstructorOverrides([
+            'usersClass' => User::class,
+        ])
+        ->toSingleton(),
+
+    UserPropertiesRepository::class => DI::bind(UserPropertiesRepository::class)
+        ->withInjectedConstructorOverrides([
+            'propertiesClass' => UserProperties::class,
+        ])
+        ->toSingleton(),
+
+    UsersService::class => DI::bind(UsersService::class)
+        ->withInjectedConstructorOverrides([
+            'loginField' => LoginField::Email, // or LoginField::Username
         ])
         ->toSingleton(),
 ];
 ```
 
-For complete customization options, refer to the [byjg/authuser](https://github.com/byjg/authuser) documentation.
+- Swap `LoginField::Email` for `LoginField::Username` if you prefer username-based logins.
+- If you add custom user models, update the `usersClass` / `propertiesClass` overrides.
 
 ## Password Policy Configuration
 
-Configure password requirements in `config/dev/02-security.php`:
+The password policy also lives in `config/dev/02-security.php`:
 
 ```php
-<?php
-
 use ByJG\Authenticate\Definition\PasswordDefinition;
-use ByJG\Config\DependencyInjection as DI;
 
 return [
     PasswordDefinition::class => DI::bind(PasswordDefinition::class)
         ->withConstructorArgs([[
-            PasswordDefinition::MINIMUM_CHARS => 12,      // Minimum password length
-            PasswordDefinition::REQUIRE_UPPERCASE => 1,   // Number of uppercase letters
-            PasswordDefinition::REQUIRE_LOWERCASE => 1,   // Number of lowercase letters
-            PasswordDefinition::REQUIRE_SYMBOLS => 1,     // Number of special characters
-            PasswordDefinition::REQUIRE_NUMBERS => 1,     // Number of digits
-            PasswordDefinition::ALLOW_WHITESPACE => 0,    // Allow spaces (0=no, 1=yes)
-            PasswordDefinition::ALLOW_SEQUENTIAL => 0,    // Allow sequences like "abc" or "123"
-            PasswordDefinition::ALLOW_REPEATED => 0       // Allow repeated characters like "aaa"
+            PasswordDefinition::MINIMUM_CHARS    => 12,
+            PasswordDefinition::REQUIRE_UPPERCASE => 1,
+            PasswordDefinition::REQUIRE_LOWERCASE => 1,
+            PasswordDefinition::REQUIRE_SYMBOLS   => 1,
+            PasswordDefinition::REQUIRE_NUMBERS   => 1,
+            PasswordDefinition::ALLOW_WHITESPACE  => 0,
+            PasswordDefinition::ALLOW_SEQUENTIAL  => 0,
+            PasswordDefinition::ALLOW_REPEATED    => 0,
         ]])
         ->toSingleton(),
 ];
 ```
 
+AuthUser uses the mapper configured on `User::$password` to hash passwords (`PasswordSha1Mapper` by default). Override the mapper if you need a different algorithm.
+
 ## JWT Configuration
 
-### Available Endpoints
+### Secret & Wrapper
 
-The project provides the following JWT-related endpoints:
+`JwtWrapper` bindings read the secret from each environment’s `credentials.env` file.
 
-- **`POST /login`** - Generate a JWT token
-- **`POST /refresh`** - Refresh an existing token
-- **`GET /sampleprotected/ping`** - Example protected endpoint (requires authentication)
-
-### Configure JWT Secret
-
-:::warning Security
-Never commit your JWT secret to version control. Each environment should have a unique secret.
-:::
-
-The JWT secret is configured in each environment's `credentials.env` file:
-
-**`config/dev/credentials.env`**:
-```env
+```
+# config/dev/credentials.env
 JWT_SECRET=jwt_super_secret_key
 ```
 
-**`config/prod/credentials.env`**:
-```env
-JWT_SECRET=your_production_secret_here_minimum_64_chars_recommended
-```
-
-The secret is automatically loaded in `config/dev/02-security.php`:
-
 ```php
-<?php
-
-use ByJG\JwtWrapper\JwtKeyInterface;
-use ByJG\JwtWrapper\JwtHashHmacSecret;
-use ByJG\Config\DependencyInjection as DI;
 use ByJG\Config\Param;
+use ByJG\JwtWrapper\JwtHashHmacSecret;
+use ByJG\JwtWrapper\JwtKeyInterface;
+use ByJG\JwtWrapper\JwtWrapper;
 
 return [
     JwtKeyInterface::class => DI::bind(JwtHashHmacSecret::class)
         ->withConstructorArgs([Param::get('JWT_SECRET')])
         ->toSingleton(),
+
+    JwtWrapper::class => DI::bind(JwtWrapper::class)
+        ->withConstructorArgs([Param::get('API_SERVER'), Param::get(JwtKeyInterface::class)])
+        ->toSingleton(),
 ];
 ```
 
-### Testing Authentication
+Never commit secrets—each environment gets its own `config/<env>/credentials.env`.
 
-1. **Get a token:**
+### Available Endpoints
+
+`src/Rest/Login.php` provides:
+
+| Endpoint                      | Description                                 |
+|-------------------------------|---------------------------------------------|
+| `POST /login`                 | Validate credentials, return JWT            |
+| `POST /refreshtoken`          | Refresh an expiring token (last 5 minutes)  |
+| `POST /login/resetrequest`    | Send password reset token + email code      |
+| `POST /login/confirmcode`     | Confirm the email + code pair               |
+| `POST /login/resetpassword`   | Set a new password after confirmation       |
+| `GET /sampleprotected/ping`   | Sample endpoint requiring authentication    |
+
+The password reset flow sends emails through `ByJG\Mail\Wrapper\MailWrapperInterface`. Customize the sender/template in `config/dev/06-external.php`, which defines the `MAIL_ENVELOPE` factory.
+
+## Testing Authentication
+
 ```bash
+# Obtain a token
 curl -X POST http://localhost:8080/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin@example.com","password":"!P4ssw0rdstr!"}'
-```
 
-2. **Use the token:**
-```bash
+# Use the token
 curl -X GET http://localhost:8080/sampleprotected/ping \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ## Using JWT in Your Code
 
-### Protect Endpoints with Attributes
-
-The authentication gate is provided by `ByJG\RestServer\Attributes\RequireAuthenticated`, so you do not need to build a custom attribute—just import it alongside your project-specific ones.
+### Protect Endpoints
 
 ```php
-<?php
-
-use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 class MyProtectedRest
 {
-    // Require any authenticated user
     #[RequireAuthenticated]
-    public function getProtectedData(HttpResponse $response, HttpRequest $request)
+    public function getProtectedData(HttpResponse $response): void
     {
         $response->write(['message' => 'You are authenticated!']);
     }
 
-    // Require specific role
     #[RequireRole(User::ROLE_ADMIN)]
-    public function getAdminData(HttpResponse $response, HttpRequest $request)
+    public function getAdminData(HttpResponse $response): void
     {
         $response->write(['message' => 'You are an admin!']);
     }
 }
 ```
 
-### Access JWT Data
+### Read JWT Claims
 
 ```php
-<?php
-
 use RestReferenceArchitecture\Util\JwtContext;
 
-// Access user information captured by JwtContext::parseJwt()
-$userId = JwtContext::getUserId();
+// JwtContext::parseJwt() runs inside the middleware pipeline
+$userId   = JwtContext::getUserId();
 $userName = JwtContext::getName();
-$userRole = JwtContext::getRole();  // "admin" or "user"
+$userRole = JwtContext::getRole(); // e.g., "admin" or "user"
 ```
 
-:::tip Need the raw payload?
-If you want the entire decoded token, call `HttpRequest::param('jwt.data')` inside your controller. The helper methods above already read from the same source while keeping your code cleaner.
-:::
+Need the full payload? Access `HttpRequest::param('jwt.data')` directly, but prefer `JwtContext` helpers to keep controllers focused.
 
-For more information, refer to the [byjg/jwt-wrapper](https://github.com/byjg/jwt-wrapper) documentation.
+## Additional Resources
+
+- `src/Rest/Login.php` – Reference implementation for all endpoints.
+- `src/Util/JwtContext.php` – Helper used by controllers and tests.
+- `config/dev/02-security.php` – Central location for auth wiring.

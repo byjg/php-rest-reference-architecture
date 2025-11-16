@@ -101,7 +101,7 @@ Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to 
 ## Updating the Tests
 
 We only need to update the `getSampleData()` method to include the new field.
-Open the file: `tests/Functional/Rest/ExampleCrudTest.php`
+Open the file: `tests/Rest/ExampleCrudTest.php`
 
 ```php
 protected function getSampleData($array = false)

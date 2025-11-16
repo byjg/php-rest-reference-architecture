@@ -63,24 +63,15 @@ $model = $repository->model();
 
 namespace RestReferenceArchitecture\Repository;
 
-use ByJG\MicroOrm\Mapper;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
 use ByJG\MicroOrm\Repository;
 use RestReferenceArchitecture\Model\Dummy;
 
 class DummyRepository extends BaseRepository
 {
-    public function __construct()
+    public function __construct(DatabaseExecutor $executor)
     {
-        $mapper = new Mapper(
-            Dummy::class,
-            'dummy',
-            'id'
-        );
-
-        $this->repository = new Repository(
-            Config::get(\ByJG\AnyDataset\Db\DbDriverInterface::class),
-            $mapper
-        );
+        $this->repository = new Repository($executor, Dummy::class);
     }
 }
 ```
@@ -279,135 +270,73 @@ $filter = [
 
 ## UUID Handling
 
-The BaseRepository provides powerful UUID handling for binary UUID storage.
+Binary UUIDs offer a 16-byte storage footprint without losing usability. The reference architecture wires everything for you.
 
-### Generate New UUID
-
-**Location**: `src/Repository/BaseRepository.php:148`
-
-#### Static Method
+### Generate a UUID on Demand
 
 ```php
-// Generate UUID string
-$uuid = BaseRepository::getUuid();
-// Returns: "550E8400-E29B-41D4-A716-446655440000"
+$uuid = BaseRepository::getUuid(); // "550E8400-E29B-41D4-A716-446655440000"
 ```
 
-#### Closure for Auto-Generation
+Use this helper when you need a UUID string outside of ORM inserts (e.g., building fixtures).
+
+### Attribute-Based Binary Columns
+
+Use `TableMySqlUuidPKAttribute` and `FieldUuidAttribute` to keep repositories tiny while persisting binary UUIDs:
 
 ```php
-use ByJG\MicroOrm\FieldMapping;
+use ByJG\MicroOrm\Attributes\FieldAttribute;
+use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
+use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
+use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\MicroOrm\Literal\Literal;
 
-// Use in Mapper for auto-generation on insert
-$mapper->addFieldMapping(
-    FieldMapping::create('id')
-        ->withDefaultValue(DummyRepository::getClosureNewUUID())
-);
-```
-
-**Location**: `src/Repository/BaseRepository.php:148`
-
-This returns a closure that generates binary UUID literals:
-
-```php
-public static function getClosureNewUUID(): Closure
-{
-    return function () {
-        return new Literal("X'" . Config::get(DbDriverInterface::class)
-            ->getScalar("SELECT hex(uuid_to_bin(uuid()))") . "'");
-    };
-}
-```
-
-### Binary UUID Conversion
-
-Store UUIDs efficiently as binary (16 bytes) instead of strings (36 bytes):
-
-**Location**: `src/Repository/BaseRepository.php:176`
-
-```php
-protected function setClosureFixBinaryUUID(
-    ?Mapper $mapper,
-    $binPropertyName = 'id',
-    $uuidStrPropertyName = 'uuid'
-): FieldMapping
-```
-
-#### Example: Binary UUID Field
-
-```php
-class DummyHexRepository extends BaseRepository
-{
-    public function __construct()
-    {
-        $mapper = new Mapper(
-            DummyHex::class,
-            'dummy_hex',
-            'id'
-        );
-
-        // Convert between binary storage and string representation
-        $this->setClosureFixBinaryUUID($mapper, 'id', 'uuid');
-
-        // Auto-generate UUID on insert
-        $mapper->addFieldMapping(
-            FieldMapping::create('id')
-                ->withDefaultValue(self::getClosureNewUUID())
-        );
-
-        $this->repository = new Repository(
-            Config::get(\ByJG\AnyDataset\Db\DbDriverInterface::class),
-            $mapper
-        );
-    }
-}
-```
-
-#### How It Works
-
-1. **On Insert/Update**: Converts UUID string to binary literal
-2. **On Select**: Converts binary back to UUID string format
-3. **Property Mapping**: Maps binary `id` field to string `uuid` property
-
-#### Model Setup
-
-```php
+#[TableMySqlUuidPKAttribute("dummy_hex")]
 class DummyHex
 {
-    #[FieldAttribute(primaryKey: true, fieldName: "id")]
-    protected string|null $id = null;
+    #[FieldUuidAttribute(primaryKey: true)]
+    protected string|HexUuidLiteral|null $id = null;
 
-    // Virtual property for UUID string representation
-    protected string|null $uuid = null;
+    #[FieldAttribute(fieldName: "uuid", syncWithDb: false)]
+    protected ?string $uuid = null;
 
-    public function getUuid(): ?string
+    public function setId(string|Literal|null $id): static
     {
-        return $this->uuid;
-    }
-
-    public function setUuid(?string $uuid): static
-    {
-        $this->uuid = $uuid;
-        $this->id = $uuid; // Sync to id
+        if ($id instanceof Literal) {
+            $id = new HexUuidLiteral($id);
+        }
+        $this->id = $id;
         return $this;
     }
 }
 ```
 
-### Using HexUuidLiteral Directly
+`TableMySqlUuidPKAttribute` generates a UUID literal automatically when inserting rows, while `FieldUuidAttribute` handles binary ⇄ string conversion on selects/updates.
+
+The repository stays simple:
 
 ```php
-use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\MicroOrm\Repository;
 
-// Get by UUID (handles conversion automatically)
-$dummy = $repository->get($uuidString);
-
-// In BaseRepository::get()
-public function get($itemId)
+class DummyHexRepository extends BaseRepository
 {
-    return $this->repository->get(HexUuidLiteral::create($itemId));
+    public function __construct(DatabaseExecutor $executor)
+    {
+        $this->repository = new Repository($executor, DummyHex::class);
+    }
 }
 ```
+
+### Querying by UUID
+
+`BaseRepository::get()` uses `HexUuidLiteral::create($itemId)` internally, so passing a UUID string “just works”:
+
+```php
+$entity = $repository->get('550e8400-e29b-41d4-a716-446655440000');
+```
+
+When you need to build queries manually, wrap UUIDs with `HexUuidLiteral::create()` to generate the correct binary literal for the database driver.
 
 ## Custom Query Methods
 

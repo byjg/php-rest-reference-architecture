@@ -145,7 +145,7 @@ The project is ready! You can start by:
 ## Run Tests
 
 ```shell script
-APP_ENV=dev composer run test
+APP_ENV=test composer run test
 # OR: docker exec -it $CONTAINER_NAME composer run test
 ```
 

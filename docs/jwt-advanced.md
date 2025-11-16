@@ -46,8 +46,8 @@ The `JwtContext` class provides methods for creating tokens and extracting user 
 ### Available Methods
 
 ```php
-// Create user metadata from User model
-JwtContext::createUserMetadata(User $user): array
+// Create a UserToken (token + claims) from a User instance or login string
+JwtContext::createUserMetadata(User|string $user, string $password = ""): UserToken
 
 // Create JWT token with custom data
 JwtContext::createToken(array $properties): string
@@ -72,21 +72,14 @@ JwtContext::getName(): ?string
 #[ValidateRequest]
 public function post(HttpResponse $response, HttpRequest $request)
 {
-    // Get validated credentials
     $json = ValidateRequest::getPayload();
 
-    // Validate user credentials
-    $users = Config::get(UsersDBDataset::class);
-    $user = $users->isValidUser($json["username"], $json["password"]);
+    // AuthUser validates credentials and returns a token + claims
+    $userToken = JwtContext::createUserMetadata($json["username"], $json["password"]);
 
-    // Create JWT metadata
-    $metadata = JwtContext::createUserMetadata($user);
-
-    // Generate token
-    $token = JwtContext::createToken($metadata);
-
-    // Return token and user data
-    $response->write(['token' => $token, 'data' => $metadata]);
+    $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
+    $response->write(['token' => $userToken->token]);
+    $response->write(['data' => $userToken->data]);
 }
 ```
 
@@ -126,20 +119,38 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### Default JWT Payload
 
-**Location**: `src/Util/JwtContext.php:29`
+**Location**: `src/Util/JwtContext.php:24`
 
 ```php
-public static function createUserMetadata(?User $user): array
+public static function createUserMetadata(User|string $user, $password = ""): UserToken
 {
-    return [
-        'userid' => HexUuidLiteral::getFormattedUuid($user->getUserid()),
-        'name' => $user->getName(),
-        'role' => ($user->getAdmin() === User::VALUE_YES
-            ? User::ROLE_ADMIN
-            : User::ROLE_USER),
+    $usersService = Config::get(UsersService::class);
+    $jwtWrapper = Config::get(JwtWrapper::class);
+    $expires = 3600; // 1 hour access token
+    $tokenFields = [
+        UserField::Userid,
+        UserField::Name,
+        UserField::Role,
     ];
+
+    return empty($password)
+        ? $usersService->createInsecureAuthToken(
+            login: $user,
+            jwtWrapper: $jwtWrapper,
+            expires: $expires,
+            tokenUserFields: $tokenFields
+        )
+        : $usersService->createAuthToken(
+            login: $user,
+            password: $password,
+            jwtWrapper: $jwtWrapper,
+            expires: $expires,
+            tokenUserFields: $tokenFields
+        );
 }
 ```
+
+`UserToken::$data` is what ends up inside the JWT. Add or remove values by changing the `$tokenFields` array.
 
 ### Decoded Token Example
 
@@ -172,19 +183,41 @@ Extend `JwtContext` to add custom claims:
 
 namespace RestReferenceArchitecture\Util;
 
+use ByJG\Authenticate\Enum\UserField;
+use ByJG\Authenticate\Model\UserToken;
+use ByJG\Authenticate\Service\UsersService;
+use ByJG\Config\Config;
+use ByJG\JwtWrapper\JwtWrapper;
+
 class CustomJwtContext extends JwtContext
 {
-    public static function createUserMetadata(?User $user): array
+    public static function createUserMetadata(User|string $user, string $password = ""): UserToken
     {
-        $metadata = parent::createUserMetadata($user);
+        $usersService = Config::get(UsersService::class);
+        $jwtWrapper = Config::get(JwtWrapper::class);
+        $expires = 3600;
+        $tokenFields = [
+            UserField::Userid,
+            UserField::Name,
+            UserField::Role,
+            UserField::Email,      // built-in extra claim
+            'department',          // custom property (must exist in your model/properties)
+        ];
 
-        // Add custom claims
-        $metadata['email'] = $user->getEmail();
-        $metadata['department'] = $user->getDepartment();
-        $metadata['permissions'] = $user->getPermissions();
-        $metadata['tenant_id'] = $user->getTenantId();
-
-        return $metadata;
+        return empty($password)
+            ? $usersService->createInsecureAuthToken(
+                login: $user,
+                jwtWrapper: $jwtWrapper,
+                expires: $expires,
+                tokenUserFields: $tokenFields
+            )
+            : $usersService->createAuthToken(
+                login: $user,
+                password: $password,
+                jwtWrapper: $jwtWrapper,
+                expires: $expires,
+                tokenUserFields: $tokenFields
+            );
     }
 
     // Add getter methods
@@ -211,15 +244,19 @@ class CustomJwtContext extends JwtContext
 }
 ```
 
+This approach copies the default implementation so you can tweak the `$tokenFields` array before AuthUser generates the token. Use `UserField` enum values for built-in columns (userid, name, email, etc.) and literal strings for custom fields exposed by your `User` model or `users_property` table.
+
 ### Update DI Configuration
 
-Register your custom class in `config/02-security/02-jwt.php`:
+Register your custom class in `config/dev/02-security.php` (or the equivalent file for each environment):
 
 ```php
+use ByJG\Config\DependencyInjection as DI;
 use RestReferenceArchitecture\Util\CustomJwtContext;
+use RestReferenceArchitecture\Util\JwtContext;
 
 return [
-    // Use your custom context
+    JwtContext::class => DI::bind(CustomJwtContext::class)->toSingleton(),
 ];
 ```
 
@@ -256,20 +293,21 @@ public function getMyData(HttpResponse $response, HttpRequest $request): void
 #[RequireAuthenticated]
 public function refreshToken(HttpResponse $response, HttpRequest $request)
 {
-    // Extract current token data
-    $metadata = [
-        'userid' => JwtContext::getUserId(),
-        'name' => JwtContext::getName(),
-        'role' => JwtContext::getRole(),
-    ];
+    $diff = ($request->param("jwt.exp") - time()) / 60;
 
-    // Generate new token with extended expiration
-    $newToken = JwtContext::createToken($metadata);
+    if ($diff > 5) {
+        throw new Error401Exception("You only can refresh the token 5 minutes before expire");
+    }
 
-    $response->write([
-        'token' => $newToken,
-        'data' => $metadata
-    ]);
+    /** @var UsersService $usersService */
+    $usersService = Config::get(UsersService::class);
+    $user = $usersService->getById(JwtContext::getUserId());
+
+    $userToken = JwtContext::createUserMetadata($user);
+
+    $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
+    $response->write(['token' => $userToken->token]);
+    $response->write(['data' => $userToken->data]);
 }
 ```
 
@@ -571,6 +609,12 @@ public function protectedEndpoint(...) { }
 Use shorter expiration times for sensitive operations:
 
 ```php
+$metadata = [
+    'userid' => JwtContext::getUserId(),
+    'name' => JwtContext::getName(),
+    'role' => JwtContext::getRole(),
+];
+
 // Regular operations: 7 days
 $regularToken = JwtContext::createToken($metadata);
 
@@ -628,13 +672,14 @@ class Login
 {
     public function post(HttpResponse $response, HttpRequest $request)
     {
-        // Login logic...
+        $payload = ValidateRequest::getPayload();
+        $userToken = JwtContext::createUserMetadata($payload['username'], $payload['password']);
 
         $response->write([
-            'token' => $token,
+            'token' => $userToken->token,
             'expires_in' => 60 * 60 * 24 * 7, // 7 days
             'refresh_after' => 60 * 60 * 24 * 3, // Suggest refresh after 3 days
-            'data' => $metadata
+            'data' => $userToken->data
         ]);
     }
 }
@@ -651,10 +696,10 @@ public function deleteAccount(HttpResponse $response, HttpRequest $request): voi
     $userId = JwtContext::getUserId();
 
     // Verify user still exists and is active
-    $userService = Config::get(UserService::class);
-    $user = $userService->getOrFail($userId);
+    $usersService = Config::get(UsersService::class);
+    $user = $usersService->getById($userId);
 
-    if ($user->getStatus() !== User::STATUS_ACTIVE) {
+    if ($user === null || $user->getDeletedAt() !== null) {
         throw new Error401Exception('Account is no longer active');
     }
 
@@ -682,9 +727,14 @@ public function post(HttpResponse $response, HttpRequest $request)
 public function post(HttpResponse $response, HttpRequest $request)
 {
     $json = ValidateRequest::getPayload();
+    $usersService = Config::get(UsersService::class);
 
     try {
-        $user = $users->isValidUser($json["username"], $json["password"]);
+        $user = $usersService->isValidUser($json["username"], $json["password"]);
+
+        if ($user === null) {
+            throw new Error401Exception('Invalid credentials');
+        }
 
         // Log successful login
         $logger->info('User logged in', [
@@ -713,11 +763,15 @@ public function post(HttpResponse $response, HttpRequest $request)
 public function post(HttpResponse $response, HttpRequest $request)
 {
     $json = ValidateRequest::getPayload();
-    $user = $users->isValidUser($json["username"], $json["password"]);
+    $usersService = Config::get(UsersService::class);
+    $user = $usersService->isValidUser($json["username"], $json["password"]);
 
-    // Check if MFA is enabled for user
-    if ($user->getMfaEnabled()) {
-        // Generate temporary token for MFA verification
+    if ($user === null) {
+        throw new Error401Exception('Invalid credentials');
+    }
+
+    // Check if MFA is enabled for user via properties table
+    if ($usersService->hasProperty($user->getUserid(), 'mfa_enabled', 'yes')) {
         $tempToken = $this->createTempToken($user);
 
         $response->write([
@@ -728,7 +782,8 @@ public function post(HttpResponse $response, HttpRequest $request)
         return;
     }
 
-    // Normal login flow...
+    $userToken = JwtContext::createUserMetadata($user);
+    $response->write(['token' => $userToken->token, 'data' => $userToken->data]);
 }
 
 #[OA\Post(path: "/login/verify-mfa", tags: ["Login"])]
@@ -739,10 +794,9 @@ public function verifyMfa(HttpResponse $response, HttpRequest $request)
     // Verify MFA code
     if ($this->verifyMfaCode($json['temp_token'], $json['mfa_code'])) {
         $user = $this->getUserFromTempToken($json['temp_token']);
-        $metadata = JwtContext::createUserMetadata($user);
-        $token = JwtContext::createToken($metadata);
+        $userToken = JwtContext::createUserMetadata($user);
 
-        $response->write(['token' => $token, 'data' => $metadata]);
+        $response->write(['token' => $userToken->token, 'data' => $userToken->data]);
     } else {
         throw new Error401Exception('Invalid MFA code');
     }

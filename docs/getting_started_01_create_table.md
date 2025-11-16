@@ -83,7 +83,7 @@ This creates:
 - `./src/Repository/ExampleCrudRepository.php` - Repository class
 - `./src/Service/ExampleCrudService.php` - Service class
 - `./src/Rest/ExampleCrudRest.php` - REST controller
-- `./tests/Functional/Rest/ExampleCrudTest.php` - Functional tests
+- `./tests/Rest/ExampleCrudTest.php` - Functional tests
 
 :::tip Automatic Configuration
 The repository and service are automatically registered in:
@@ -107,7 +107,7 @@ See [Code Generator Documentation](code_generator.md) for details.
 
 ## Run the Tests
 
-The automatically generated test is located at `tests/Functional/Rest/ExampleCrudTest.php`.
+The automatically generated test is located at `tests/Rest/ExampleCrudTest.php`.
 
 Run it:
 

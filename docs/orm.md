@@ -4,103 +4,110 @@ sidebar_position: 90
 
 # Database ORM
 
-The project uses [byjg/micro-orm](https://github.com/byjg/micro-orm) for database operations.
+The reference architecture uses [byjg/micro-orm](https://github.com/byjg/micro-orm) with PHP 8 attributes. Your models declare the mapping, repositories receive the shared `DatabaseExecutor`, and `BaseRepository` supplies common helpers.
 
-## Creating a Repository
+## 1. Model Mapping with Attributes
 
-Start by creating a class that extends `BaseRepository` and defines the table name and primary key:
+Annotate your models with `TableAttribute` / `FieldAttribute` (or the UUID variants) so Micro ORM knows how to persist each property.
+
+```php
+<?php
+
+namespace RestReferenceArchitecture\Model;
+
+use ByJG\MicroOrm\Attributes\FieldAttribute;
+use ByJG\MicroOrm\Attributes\TableAttribute;
+
+#[TableAttribute("dummy")]
+class Dummy
+{
+    #[FieldAttribute(primaryKey: true, fieldName: "id")]
+    protected ?int $id = null;
+
+    #[FieldAttribute(fieldName: "field")]
+    protected ?string $field = null;
+
+    // getters/setters omitted for brevity
+}
+```
+
+Need UUID support? Use `#[TableMySqlUuidPKAttribute]` + `#[FieldUuidAttribute]` as shown in `src/Model/DummyHex.php` and `src/Model/User.php`. They automatically read/write binary UUIDs via `HexUuidLiteral`.
+
+## 2. Repository Definition
+
+Repositories extend `RestReferenceArchitecture\Repository\BaseRepository`. Inject `ByJG\AnyDataset\Db\DatabaseExecutor` and hand it to `ByJG\MicroOrm\Repository`, pointing at your model class:
 
 ```php
 <?php
 
 namespace RestReferenceArchitecture\Repository;
 
-use ByJG\MicroOrm\Mapper;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
 use ByJG\MicroOrm\Repository;
-use ByJG\AnyDataset\Db\DbDriverInterface;
-use RestReferenceArchitecture\Model\YourModel;
+use RestReferenceArchitecture\Model\Dummy;
 
-class YourRepository extends BaseRepository
+class DummyRepository extends BaseRepository
 {
-    public function __construct(DbDriverInterface $dbDriver)
+    public function __construct(DatabaseExecutor $executor)
     {
-        $mapper = new Mapper(
-            YourModel::class,    // Model class
-            'table_name',        // Table name
-            'id'                 // Primary key field
-        );
-
-        $this->repository = new Repository($dbDriver, $mapper);
+        $this->repository = new Repository($executor, Dummy::class);
     }
 }
 ```
 
-## Basic CRUD Operations
-
-The repository provides basic CRUD methods:
+`BaseRepository` already exposes useful helpers:
 
 ```php
-<?php
-
-// Get a single record by primary key
-$model = $repository->get($id);
-
-// Get all records
-$models = $repository->getAll();
-
-// Save (insert or update)
-$repository->save($model);
-
-// Delete a record
-$repository->delete($model);
+$dummy = $repository->get($id);
+$list  = $repository->list(page: 0, size: 20);
+$model = $repository->model();          // New instance of mapped entity
+$repo  = $repository->getRepository();  // Direct access to ByJG\Repository
+$mapper = $repository->getMapper();     // Underlying Mapper instance
 ```
 
-## Custom Queries
-
-Create custom query methods in your repository:
+Saving and deleting records delegates to Micro ORM while keeping literals in sync:
 
 ```php
-<?php
+$model = $repository->model()
+    ->setField('hello world');
 
+$saved = $repository->save($model);
+$repository->delete($saved->getId());
+```
+
+## 3. Custom Queries
+
+Use `ByJG\MicroOrm\Query` (or any `QueryBuilderInterface`) for filtered results:
+
+```php
 use ByJG\MicroOrm\Query;
 
-public function getByName(string $name): ?YourModel
+class DummyRepository extends BaseRepository
 {
-    $query = Query::getInstance()
-        ->table('table_name')
-        ->where('table_name.name = :name', ['name' => $name]);
+    public function findByField(string $value): array
+    {
+        $query = Query::getInstance()
+            ->table($this->getMapper()->getTable())
+            ->where('field = :value', ['value' => $value])
+            ->orderBy(['id DESC']);
 
-    return $this->repository->getByQuery($query);
-}
-
-public function getActiveRecords(): array
-{
-    $query = Query::getInstance()
-        ->table('table_name')
-        ->where('status = :status', ['status' => 'active'])
-        ->orderBy(['created_at' => 'DESC']);
-
-    return $this->repository->getByQuery($query, Mapper::RESULT_ARRAY);
+        return $this->getRepository()->getByQuery($query);
+    }
 }
 ```
 
-## Using Services
+`listQuery()` (in `BaseRepository`) already builds paginated queries—pass filters, order clauses, and selected fields as needed. For raw arrays (instead of model hydration), call `listGeneric()` to run ad-hoc queries while reusing the same pagination helpers.
 
-:::tip Best Practice
-Instead of using repositories directly in your REST controllers, use the **Service Layer**. Services handle business logic and can orchestrate multiple repositories.
-:::
+## 4. Working with UUIDs
 
-Example using a service:
+Binary UUID columns are transparent when you rely on the attribute helpers:
 
-```php
-<?php
+- `#[TableMySqlUuidPKAttribute("dummy_hex")]` wires the table and default UUID generator.
+- `#[FieldUuidAttribute(primaryKey: true)]` handles binary ⇄ string conversion automatically.
+- `HexUuidLiteral::create($uuid)` lets you query by UUID strings without manual hex handling.
 
-use ByJG\Config\Config;
-use RestReferenceArchitecture\Service\YourService;
+`BaseRepository::save()` normalizes any UUID `Literal` back to a formatted string so controllers/tests can keep using human-readable IDs.
 
-// In your REST controller
-$service = Config::get(YourService::class);
-$model = $service->getOrFail($id);
-```
+## 5. Services and REST Controllers
 
-See the [Service Layer](services.md) documentation for more details.
+Repositories are registered in `config/<env>/04-repositories.php` and injected into services (see `src/Service/DummyService.php`). Services orchestrate repositories, and REST controllers resolve services via the PSR-11 container. For deeper patterns (DTOs, filters, transactions), read [Repository Patterns](repository-advanced.md) and [Service Layer](services.md).
