@@ -1179,6 +1179,16 @@
                     "email"
                 ],
                 "properties": {
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
                     "userid": {
                         "type": "string",
                         "format": "string"
@@ -1199,15 +1209,7 @@
                         "type": "string",
                         "format": "string"
                     },
-                    "created": {
-                        "type": "string",
-                        "format": "string"
-                    },
-                    "updated": {
-                        "type": "string",
-                        "format": "string"
-                    },
-                    "admin": {
+                    "role": {
                         "type": "string",
                         "format": "string"
                     }

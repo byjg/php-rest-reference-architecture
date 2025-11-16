@@ -12,11 +12,18 @@ use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\Literal;
 use Exception;
 use OpenApi\Attributes as OA;
+use RestReferenceArchitecture\Trait\OaCreatedAt;
+use RestReferenceArchitecture\Trait\OaDeletedAt;
+use RestReferenceArchitecture\Trait\OaUpdatedAt;
 
 #[TableMySqlUuidPKAttribute("users")]
 #[OA\Schema(required: ["email"], type: "object", xml: new OA\Xml(name: "User"))]
 class User extends UserModel
 {
+    use OaCreatedAt;
+    use OaUpdatedAt;
+    use OaDeletedAt;
+
     // Property Fields
     const PROP_RESETTOKENEXPIRE = 'resettokenexpire';
     const PROP_RESETTOKEN = 'resettoken';
