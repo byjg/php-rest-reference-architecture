@@ -51,7 +51,7 @@ class JwtContext
             $tokenFields = [
                 UserField::Userid,
                 UserField::Name,
-                UserField::Role,
+                UserField::Role->value => User::ROLE_USER, // If role is empty, return User::ROLE_USER
             ];
 
             if (empty($password)) {
