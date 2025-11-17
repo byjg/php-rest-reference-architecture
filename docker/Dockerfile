@@ -1,4 +1,4 @@
-FROM byjg/php:8.4-fpm-nginx-2025.10
+FROM byjg/php:8.4-fpm-nginx-2025.11
 
 # Refer to the documentation to setup the environment variables
 # https://github.com/byjg/docker-php/blob/master/docs/environment.md
@@ -19,20 +19,34 @@ COPY ./docker/nginx/conf.d /etc/nginx/http.d/
 # Temporarily switch to root to install system packages, then switch back to `app`.
 USER root
 RUN apk add --no-cache --update tzdata
-USER app
 
 # Copy project files
-
-COPY builder /srv/builder
-COPY config /srv/config
-COPY src /srv/src
-COPY public /srv/public
-COPY templates /srv/templates
+COPY --chown=app:app builder /srv/builder
+COPY --chown=app:app config /srv/config
+COPY --chown=app:app src /srv/src
+COPY --chown=app:app public /srv/public
+COPY --chown=app:app templates /srv/templates
 
 # This is necessary for the migration script
+COPY --chown=app:app composer.* /srv
 
-COPY composer.* /srv
-COPY phpunit.xml.dist /srv
-COPY db /srv/db
-RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader && \
+# Optional: Override app user UID/GID to match host user for volume permissions
+# This is useful when mounting host directories as volumes to avoid permission issues.
+# Pass USER_ID and GROUP_ID as build args to enable this feature.
+# Example: docker-compose build --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
+ARG USER_ID
+ARG GROUP_ID
+RUN if [ -n "$USER_ID" ]; then \
+        find / -user app -exec chown ${USER_ID} {} + 2>/dev/null || true && \
+        find / -group app -exec chgrp ${GROUP_ID} {} + 2>/dev/null || true && \
+        deluser app && \
+        addgroup -g ${GROUP_ID} app && \
+        adduser -D -u ${USER_ID} -G app -s /bin/bash app && \
+        chown -R app:app /run; \
+    fi
+
+USER app
+
+RUN git config --global --add safe.directory /srv && \
+    composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader && \
     composer dump-autoload --optimize --classmap-authoritative -q
