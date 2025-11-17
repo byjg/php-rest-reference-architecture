@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHP REST Reference Architecture</title>
+    <title>PHP REST Reference Architecture - API Test Console</title>
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <style>
@@ -351,6 +351,89 @@
             text-decoration: underline;
         }
 
+        .response-container {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        .response-header h3 {
+            color: #f8f8f2;
+            font-size: 1.1em;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .status-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .response-body {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .clear-btn-resp {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .clear-btn-resp:hover {
+            background: #5a6268;
+        }
+
+        .copy-token-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .copy-token-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-token-btn.copied {
+            background: #28a745;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8em;
@@ -539,6 +622,97 @@ public function getProduct(HttpResponse $response, HttpRequest $request): void {
             </div>
 
             <div class="section">
+                <h2>🧪 API Test Console</h2>
+
+                <div id="authStatusSection" style="margin-bottom: 20px;">
+                    <div id="authStatus" style="padding: 15px; border-radius: 8px; font-weight: 600; text-align: center; font-size: 1.1em;"></div>
+                    <div id="tokenDisplay" style="margin-top: 10px;"></div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🔐 Authentication</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="login('user')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            Login as User<br><small style="opacity: 0.9;">user@example.com</small>
+                        </button>
+                        <button onclick="login('admin')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            Login as Admin<br><small style="opacity: 0.9;">admin@example.com</small>
+                        </button>
+                        <button onclick="logout()" style="background: #6c757d; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Start Example -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🌐 Public Endpoints</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/sample/ping')" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /sample/ping<br><small style="opacity: 0.9;">No auth required</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🔒 Protected Endpoints</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/sampleprotected/ping')" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /sampleprotected/ping<br><small style="opacity: 0.9;">Auth required</small>
+                        </button>
+                        <button onclick="apiCall('GET', '/sampleprotected/pingadm')" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /sampleprotected/pingadm<br><small style="opacity: 0.9;">Admin only</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">📦 CRUD - Dummy</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/dummy')" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy<br><small style="opacity: 0.9;">List all</small>
+                        </button>
+                        <button onclick="createDummy()" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            POST /dummy<br><small style="opacity: 0.9;">Create new</small>
+                        </button>
+                        <button onclick="apiCall('GET', '/dummy/1')" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy/1<br><small style="opacity: 0.9;">Get by ID</small>
+                        </button>
+                        <button onclick="updateDummy()" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            PUT /dummy/1<br><small style="opacity: 0.9;">Update</small>
+                        </button>
+                        <button onclick="apiCall('DELETE', '/dummy/1')" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            DELETE /dummy/1<br><small style="opacity: 0.9;">Delete</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🔷 CRUD - DummyHex (UUID)</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/dummy/hex')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy/hex<br><small style="opacity: 0.9;">List all</small>
+                        </button>
+                        <button onclick="createDummyHex()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            POST /dummy/hex<br><small style="opacity: 0.9;">Create new</small>
+                        </button>
+                        <button onclick="getDummyHexById()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy/hex/{uuid}<br><small style="opacity: 0.9;">Get by UUID</small>
+                        </button>
+                        <button onclick="updateDummyHex()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            PUT /dummy/hex<br><small style="opacity: 0.9;">Update</small>
+                        </button>
+                        <button onclick="deleteDummyHex()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            DELETE /dummy/hex/{uuid}<br><small style="opacity: 0.9;">Delete</small>
+                        </button>
+                    </div>
+                </div>
+                <!-- End Example -->
+
+                <div id="responseContainer"></div>
+            </div>
+
+            <div class="section">
                 <div class="resources">
                     <h3>🔍 Want More?</h3>
                     <ul>
@@ -653,7 +827,242 @@ public function getProduct(HttpResponse $response, HttpRequest $request): void {
                     block.innerHTML = highlightPHP(code);
                 }
             });
+
+            // Initialize API test console
+            updateAuthStatus();
         });
+
+        // API Test Console Functions
+        let currentToken = localStorage.getItem('jwt_token') || null;
+        // Start Example
+        let lastCreatedUuid = null;
+        // End Example
+
+        function updateAuthStatus() {
+            const statusEl = document.getElementById('authStatus');
+            const tokenDisplayEl = document.getElementById('tokenDisplay');
+
+            if (!statusEl) return;
+
+            if (currentToken) {
+                statusEl.style.background = '#28a745';
+                statusEl.style.color = 'white';
+                statusEl.textContent = '✓ Logged In';
+
+                try {
+                    const payload = JSON.parse(atob(currentToken.split('.')[1]));
+                    const userId = payload.data?.userid || 'unknown';
+                    const name = payload.data?.name || 'unknown';
+                    const role = payload.data?.role || 'unknown';
+
+                    tokenDisplayEl.innerHTML = `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <strong style="color: #667eea;">Current Token:</strong>
+                            <div style="margin-top: 8px;">User ID: ${userId} | Name: ${name} | Role: ${role}</div>
+                            <code style="display: block; margin-top: 8px; background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 4px; word-break: break-all; font-size: 0.85em;">${currentToken.substring(0, 50)}...</code>
+                            <button class="copy-token-btn" onclick="copyToken(this)">Copy Token</button>
+                        </div>
+                    `;
+                } catch (e) {
+                    tokenDisplayEl.innerHTML = `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <strong style="color: #667eea;">Current Token:</strong>
+                            <code style="display: block; margin-top: 8px; background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 4px; word-break: break-all; font-size: 0.85em;">${currentToken.substring(0, 50)}...</code>
+                            <button class="copy-token-btn" onclick="copyToken(this)">Copy Token</button>
+                        </div>
+                    `;
+                }
+            } else {
+                statusEl.style.background = '#dc3545';
+                statusEl.style.color = 'white';
+                statusEl.textContent = '✗ Not Logged In';
+                tokenDisplayEl.innerHTML = '';
+            }
+        }
+
+        function copyToken(button) {
+            navigator.clipboard.writeText(currentToken).then(function() {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(function() {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+                button.textContent = 'Failed';
+                setTimeout(function() {
+                    button.textContent = 'Copy Token';
+                }, 2000);
+            });
+        }
+
+        async function login(type) {
+            const credentials = {
+                user: { username: 'user@example.com', password: '!P4ssw0rdstr!' },
+                admin: { username: 'admin@example.com', password: '!P4ssw0rdstr!' }
+            };
+
+            const creds = credentials[type];
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(creds)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    currentToken = data.token;
+                    localStorage.setItem('jwt_token', currentToken);
+                    updateAuthStatus();
+                    displayResponse('POST /login', response.status, data);
+                } else {
+                    displayResponse('POST /login', response.status, data);
+                }
+            } catch (error) {
+                displayResponse('POST /login', 0, { error: error.message });
+            }
+        }
+
+        function logout() {
+            currentToken = null;
+            localStorage.removeItem('jwt_token');
+            updateAuthStatus();
+            displayResponse('Logout', 200, { message: 'Logged out successfully' });
+        }
+
+        async function apiCall(method, endpoint, body = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (currentToken) {
+                headers['Authorization'] = `Bearer ${currentToken}`;
+            }
+
+            const options = {
+                method: method,
+                headers: headers
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(endpoint, options);
+                let data;
+
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    data = await response.text();
+                }
+
+                displayResponse(`${method} ${endpoint}`, response.status, data);
+
+                // Start Example
+                // Store UUID if creating dummyhex
+                if (method === 'POST' && endpoint === '/dummy/hex' && response.ok && data.id) {
+                    lastCreatedUuid = data.id;
+                }
+                // End Example
+
+                return data;
+            } catch (error) {
+                displayResponse(`${method} ${endpoint}`, 0, { error: error.message });
+            }
+        }
+
+        // Start Example
+        function createDummy() {
+            const data = {
+                field: 'Test Value ' + new Date().getTime()
+            };
+            apiCall('POST', '/dummy', data);
+        }
+
+        function updateDummy() {
+            const data = {
+                id: 1,
+                field: 'Updated Value ' + new Date().getTime()
+            };
+            apiCall('PUT', '/dummy', data);
+        }
+
+        function createDummyHex() {
+            const data = {
+                field: 'Hex Test ' + new Date().getTime()
+            };
+            apiCall('POST', '/dummy/hex', data);
+        }
+
+        function getDummyHexById() {
+            if (!lastCreatedUuid) {
+                alert('Please create a dummyhex record first to get a UUID');
+                return;
+            }
+            apiCall('GET', `/dummy/hex/${lastCreatedUuid}`);
+        }
+
+        function updateDummyHex() {
+            if (!lastCreatedUuid) {
+                alert('Please create a dummyhex record first to get a UUID');
+                return;
+            }
+            const data = {
+                id: lastCreatedUuid,
+                field: 'Updated Hex ' + new Date().getTime()
+            };
+            apiCall('PUT', `/dummy/hex`, data);
+        }
+
+        function deleteDummyHex() {
+            if (!lastCreatedUuid) {
+                alert('Please create a dummyhex record first to get a UUID');
+                return;
+            }
+            apiCall('DELETE', `/dummy/hex/${lastCreatedUuid}`);
+        }
+        // End Example
+
+        function displayResponse(endpoint, status, data) {
+            const container = document.getElementById('responseContainer');
+            if (!container) return;
+
+            const isSuccess = status >= 200 && status < 300;
+
+            const html = `
+                <div class="response-container">
+                    <div class="response-header">
+                        <h3>${endpoint}</h3>
+                        <div>
+                            <span class="status-badge ${isSuccess ? 'status-success' : 'status-error'}">
+                                ${status} ${isSuccess ? 'Success' : 'Error'}
+                            </span>
+                            <button class="clear-btn-resp" onclick="clearResponse()">Clear</button>
+                        </div>
+                    </div>
+                    <div class="response-body">${typeof data === 'string' ? data : JSON.stringify(data, null, 2)}</div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function clearResponse() {
+            const container = document.getElementById('responseContainer');
+            if (container) {
+                container.innerHTML = '';
+            }
+        }
     </script>
 </body>
 </html>

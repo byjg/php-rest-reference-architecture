@@ -230,6 +230,29 @@ class PostCreateScript
                 echo "  Cleaned: config/dev/05-services.php\n";
             }
 
+            // Clean up index.html - remove example sections marked with <!-- Start Example --> and <!-- End Example -->
+            $indexFile = "$workdir/public/index.html";
+            if (file_exists($indexFile)) {
+                $contents = file_get_contents($indexFile);
+
+                // Remove all content between <!-- Start Example --> and <!-- End Example --> markers (HTML)
+                $contents = preg_replace(
+                    '/<!--\s*Start Example\s*-->.*?<!--\s*End Example\s*-->\s*/s',
+                    '',
+                    $contents
+                );
+
+                // Remove all content between // Start Example and // End Example markers (JavaScript)
+                $contents = preg_replace(
+                    '/\/\/\s*Start Example.*?\/\/\s*End Example\s*/s',
+                    '',
+                    $contents
+                );
+
+                file_put_contents($indexFile, $contents);
+                echo "  Cleaned: public/index.html - removed example sections\n";
+            }
+
             echo "Example files removed successfully.\n";
         }
 
