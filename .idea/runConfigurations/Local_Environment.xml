@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Docker Environment" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
+  <configuration default="false" name="Local Environment" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
     <deployment type="docker-compose.yml">
       <settings>
         <option name="commandLineOptions" value="--build" />
-        <option name="sourceFilePath" value="docker-compose-dev.yml" />
+        <option name="sourceFilePath" value="docker-compose.yml" />
       </settings>
     </deployment>
     <method v="2" />

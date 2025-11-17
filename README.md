@@ -29,7 +29,7 @@ composer -sdev create-project byjg/rest-reference-architecture my-api ^6.0
 
 # Start containers
 cd my-api
-docker compose -f docker-compose-dev.yml up -d
+docker compose -f docker-compose.yml up -d
 
 # Run migrations
 composer migrate -- --env=dev reset --yes

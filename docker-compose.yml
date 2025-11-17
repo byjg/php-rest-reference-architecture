@@ -1,4 +1,3 @@
-version: '3.2'
 services:
   rest:
     image: resttest:dev

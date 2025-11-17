@@ -133,7 +133,7 @@ Press <ENTER> to continue
 
 ```shell
 cd ~/tutorial
-docker compose -f docker-compose-dev.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 ## Database Setup

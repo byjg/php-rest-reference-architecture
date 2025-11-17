@@ -70,7 +70,7 @@ class PostCreateScript
             'config/test/credentials.env',
             'config/staging/credentials.env',
             'config/prod/credentials.env',
-            'docker-compose-dev.yml',
+            'docker-compose.yml',
         ];
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
@@ -99,7 +99,7 @@ class PostCreateScript
             }
             $contents = str_replace('resttest', $composerParts[1], $contents);
 
-            if ($file === 'docker-compose-dev.yml' && !empty($dbConfig['password'])) {
+            if ($file === 'docker-compose.yml' && !empty($dbConfig['password'])) {
                 $contents = preg_replace(
                     '/(MYSQL_ROOT_PASSWORD:\s*)([^\s]+)/',
                     '$1' . $dbConfig['password'],
