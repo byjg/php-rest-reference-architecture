@@ -57,7 +57,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -107,6 +107,7 @@ jobs:
           for tag in $(echo "${{ steps.meta.outputs.tags }}"); do
             docker run \
               -e APP_ENV=test \
+              -e CI_ENV=github_actions \
               -p 80:80 \
               --name tester \
               --rm -d \
