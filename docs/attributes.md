@@ -373,7 +373,7 @@ public function createUser(HttpResponse $response, HttpRequest $request): void
 ### Example: Multiple Authorization Checks
 
 ```php
-use ByJG\RestServer\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 
 #[RequireAuthenticated]  // Must be logged in
 #[RequireRole(User::ROLE_ADMIN)]  // Must be admin

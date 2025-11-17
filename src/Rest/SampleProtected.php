@@ -2,13 +2,10 @@
 
 namespace RestReferenceArchitecture\Rest;
 
-use ByJG\RestServer\Attributes\RequireAuthenticated;
-use ByJG\RestServer\Exception\Error401Exception;
-use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
-use Psr\SimpleCache\InvalidArgumentException;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\RequireRole;
 
 class SampleProtected
@@ -18,8 +15,6 @@ class SampleProtected
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
-     * @throws Error401Exception
-     * @throws InvalidArgumentException
      */
     #[OA\Get(
         path: "/sampleprotected/ping",
@@ -59,9 +54,6 @@ class SampleProtected
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
-     * @throws Error401Exception
-     * @throws InvalidArgumentException
-     * @throws Error403Exception
      */
     #[OA\Get(
         path: "/sampleprotected/pingadm",

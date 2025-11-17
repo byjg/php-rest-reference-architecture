@@ -4,6 +4,7 @@ FROM byjg/php:8.4-fpm-nginx-2025.10
 # https://github.com/byjg/docker-php/blob/master/docs/environment.md
 ENV NGINX_ROOT="/srv/public"
 ENV PHP_CONTROLLER="/app.php"
+ENV TZ=UTC
 # ---------------------------------------------
 
 WORKDIR /srv
@@ -13,10 +14,12 @@ WORKDIR /srv
 COPY ./docker/fpm/php /etc/php84/conf.d
 COPY ./docker/nginx/conf.d /etc/nginx/http.d/
 
-# Setup DateFile
-
+# Custom system-level installations
+# The Docker image runs as non-root user `app` for security.
+# Temporarily switch to root to install system packages, then switch back to `app`.
+USER root
 RUN apk add --no-cache --update tzdata
-ENV TZ=UTC
+USER app
 
 # Copy project files
 

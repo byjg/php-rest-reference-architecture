@@ -171,7 +171,7 @@ curl -X GET http://localhost:8080/sampleprotected/ping \
 ### Protect Endpoints
 
 ```php
-use ByJG\RestServer\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\RequireRole;
 use RestReferenceArchitecture\Model\User;
 

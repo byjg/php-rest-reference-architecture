@@ -184,7 +184,7 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 ```php
 <?php
 
-use ByJG\RestServer\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 
 #[RequireAuthenticated]
 public function getDummy(HttpResponse $response, HttpRequest $request): void

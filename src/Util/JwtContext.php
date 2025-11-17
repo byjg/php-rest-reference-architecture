@@ -11,10 +11,13 @@ use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\Config\Exception\RunTimeException;
 use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Model\User;
@@ -24,12 +27,20 @@ class JwtContext
     protected static ?HttpRequest $request;
 
     /**
-     * @param ?User $user
-     * @return array
+     * @param User|string $user
+     * @param string $password
+     * @return UserToken
+     * @throws ConfigException
+     * @throws DependencyInjectionException
      * @throws Error401Exception
-     * @throws \ByJG\MicroOrm\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws RunTimeException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public static function createUserMetadata(User|string $user, $password = ""): UserToken
+    public static function createUserMetadata(User|string $user, string $password = ""): UserToken
     {
         /** @var UsersService $usersService */
         $usersService = Config::get(UsersService::class);
@@ -84,7 +95,7 @@ class JwtContext
         return $jwt->generateToken($jwtData);
     }
 
-    public static function parseJwt(HttpRequest $request): void
+    public static function setRequest(HttpRequest $request): void
     {
         self::$request = $request;
     }

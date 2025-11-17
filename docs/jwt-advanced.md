@@ -371,7 +371,7 @@ scheduleRefresh();
 ### Require Authentication
 
 ```php
-use ByJG\RestServer\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 
 #[OA\Get(path: "/profile", tags: ["User"])]
 #[RequireAuthenticated]
