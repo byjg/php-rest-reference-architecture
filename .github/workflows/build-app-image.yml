@@ -32,7 +32,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
   # Unit test
-  DB_DATABASE: mydb
+  DB_DATABASE: localtest
   DB_USERNAME: root
   DB_PASSWORD: mysqlp455w0rd
 
