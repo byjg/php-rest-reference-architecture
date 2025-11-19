@@ -5,11 +5,13 @@ namespace Test\Rest;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\ObjectCopy;
+use Override;
 use RestReferenceArchitecture\Model\Dummy;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
 class DummyTest extends BaseApiTestCase
 {
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

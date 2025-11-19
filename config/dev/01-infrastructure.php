@@ -1,8 +1,8 @@
 <?php
 
 use ByJG\AnyDataset\Db\DatabaseExecutor;
-use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\AnyDataset\Db\Factory;
+use ByJG\AnyDataset\Db\Interfaces\DbDriverInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Config\DependencyInjection as DI;

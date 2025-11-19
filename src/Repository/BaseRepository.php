@@ -14,12 +14,12 @@ use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
 use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
 use ByJG\MicroOrm\Exception\RepositoryReadOnlyException;
 use ByJG\MicroOrm\Exception\UpdateConstraintException;
-use ByJG\MicroOrm\Interface\QueryBuilderInterface;
 use ByJG\MicroOrm\Interface\UpdateConstraintInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\MicroOrm\Literal\LiteralInterface;
 use ByJG\MicroOrm\Mapper;
 use ByJG\MicroOrm\Query;
+use ByJG\MicroOrm\QueryBasic;
 use ByJG\MicroOrm\Repository;
 use ByJG\Serializer\Exception\InvalidArgumentException;
 use ByJG\XmlUtil\Exception\FileException;
@@ -81,7 +81,7 @@ abstract class BaseRepository
      * @throws FileException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getByQuery(QueryBuilderInterface $query): array
+    public function getByQuery(Query|QueryBasic $query): array
     {
         $query->table($this->repository->getMapper()->getTable());
         return $this->repository->getByQuery($query);

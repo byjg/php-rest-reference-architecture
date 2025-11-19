@@ -6,7 +6,7 @@ use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
-use ByJG\MicroOrm\Literal\Literal;
+use ByJG\MicroOrm\Literal\LiteralInterface;
 use OpenApi\Attributes as OA;
 
 
@@ -20,11 +20,11 @@ class DummyHex
 {
 
     /**
-     * @var string|null
+     * @var string|LiteralInterface|null
      */
     #[OA\Property(type: "string", format: "string")]
     #[FieldUuidAttribute(primaryKey: true, fieldName: "id")]
-    protected string|HexUuidLiteral|null $id = null;
+    protected string|LiteralInterface|null $id = null;
 
     /**
      * @var string|null
@@ -43,20 +43,20 @@ class DummyHex
 
 
     /**
-     * @return string|HexUuidLiteral|null
+     * @return string|LiteralInterface|null
      */
-    public function getId(): string|HexUuidLiteral|null
+    public function getId(): string|LiteralInterface|null
     {
         return $this->id;
     }
 
     /**
-     * @param string|Literal|null $id
+     * @param string|LiteralInterface|null $id
      * @return $this
      */
-    public function setId(string|Literal|null $id): static
+    public function setId(string|LiteralInterface|null $id): static
     {
-        if ($id instanceof Literal) {
+        if ($id instanceof LiteralInterface) {
             $id = new HexUuidLiteral($id);
         }
         $this->id = $id;

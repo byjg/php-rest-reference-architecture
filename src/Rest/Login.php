@@ -5,11 +5,13 @@ namespace RestReferenceArchitecture\Rest;
 use ByJG\Authenticate\Service\UsersService;
 use ByJG\Config\Config;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
+use ByJG\XmlUtil\XmlDocument;
 use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\ValidateRequest;
@@ -155,7 +157,7 @@ class Login
         $user = $usersService->getByEmail($json["email"]);
 
         $token = BaseRepository::getUuid();
-        $code = rand(10000, 99999);
+        $code = strval(rand(10000, 99999));
 
         if (!is_null($user)) {
             $user->set(User::PROP_RESETTOKEN, $token);
@@ -180,6 +182,10 @@ class Login
     protected function validateResetToken($response, $request): array
     {
         $json = OpenApiContext::validateRequest($request);
+
+        if ($json instanceof XmlDocument) {
+            throw new Error400Exception("Cannot accept content type xml");
+        }
 
         $usersService = Config::get(UsersService::class);
         $user = $usersService->getByEmail($json["email"]);

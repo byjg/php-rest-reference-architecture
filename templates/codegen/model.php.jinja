@@ -6,8 +6,8 @@ use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
+use ByJG\MicroOrm\Literal\LiteralInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
-use ByJG\MicroOrm\Literal\Literal;
 {% if activerecord %}use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Trait\ActiveRecord;
 {% endif %}use OpenApi\Attributes as OA;
@@ -34,29 +34,29 @@ class {{ className }}
 {% endif %}
 {% endif %}{% for field in fields %}{% if field.field != 'created_at' and field.field != 'updated_at' and field.field != 'deleted_at' %}
     /**
-     * @var {{ field.php_type }}|null
+     * @var {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null
      */
     #[OA\Property(type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %})]
     #[Field{% if 'binary' in field.type %}Uuid{% endif %}Attribute({% if field.key == "PRI" %}primaryKey: true, {% endif %}fieldName: "{{ field.field }}"{% if 'VIRTUAL' in field.extra %}, syncWithDb: false{% endif %})]
-    protected {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }} = null;
+    protected {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null ${{ field.property }} = null;
 {% endif %}{% endfor %}
 
 {% for field in fields %}{% if field.field != 'created_at' and field.field != 'updated_at' and field.field != 'deleted_at' %}
     /**
-     * @return {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null
+     * @return {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null
      */
-    public function get{{ field.property | capitalize }}(): {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null
+    public function get{{ field.property | capitalize }}(): {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null
     {
         return $this->{{ field.property }};
     }
 
     /**
-     * @param {{ field.php_type }}{% if 'binary' in field.type %}|Literal{% endif %}|null ${{ field.property }}
+     * @param {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null ${{ field.property }}
      * @return $this
      */
-    public function set{{ field.property | capitalize }}({{ field.php_type }}{% if 'binary' in field.type %}|Literal{% endif %}|null ${{ field.property }}): static
+    public function set{{ field.property | capitalize }}({{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null ${{ field.property }}): static
     {
-        {% if 'binary' in field.type %}if (${{ field.property }} instanceof Literal) {
+        {% if 'binary' in field.type %}if (${{ field.property }} instanceof LiteralInterface) {
             ${{ field.property }} = new HexUuidLiteral(${{ field.property }});
         }{% endif %}
         $this->{{ field.property }} = ${{ field.property }};

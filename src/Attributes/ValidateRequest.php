@@ -13,6 +13,7 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\XmlUtil\Exception\FileException;
 use ByJG\XmlUtil\Exception\XmlUtilException;
+use Override;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -49,6 +50,7 @@ class ValidateRequest implements BeforeRouteInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[Override]
     public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
         // OpenApiContext::validateRequest returns proper format based on content-type:

@@ -20,6 +20,7 @@ use ByJG\RestServer\MockRequestHandler;
 use ByJG\RestServer\Route\OpenApiRouteList;
 use ByJG\WebRequest\Exception\RequestException;
 use ByJG\WebRequest\MockClient;
+use Override;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -49,6 +50,7 @@ class FakeApiRequester extends AbstractRequester
      * @throws ReflectionException
      * @throws RequestException
      */
+    #[Override]
     protected function handleRequest(RequestInterface $request): ResponseInterface
     {
         $mock = new MockRequestHandler(Config::get(LoggerInterface::class));

@@ -11,6 +11,7 @@ use ByJG\DbMigration\Migration;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Psr7\Request;
 use Exception;
+use Override;
 use PHPUnit\Framework\TestCase;
 
 class BaseApiTestCase extends TestCase
@@ -21,12 +22,14 @@ class BaseApiTestCase extends TestCase
 
     protected string $filePath = __DIR__ . '/../../public/docs/openapi.json';
 
+    #[Override]
     protected function setUp(): void
     {
         $this->setSchema(Schema::getInstance(file_get_contents($this->filePath)));
         $this->resetDb();
     }
 
+    #[Override]
     protected function tearDown(): void
     {
         $this->setSchema(null);

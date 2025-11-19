@@ -29,7 +29,7 @@ class JwtContext
     /**
      * @param User|string $user
      * @param string $password
-     * @return UserToken
+     * @return UserToken|null
      * @throws ConfigException
      * @throws DependencyInjectionException
      * @throws Error401Exception
@@ -40,7 +40,7 @@ class JwtContext
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public static function createUserMetadata(User|string $user, string $password = ""): UserToken
+    public static function createUserMetadata(User|string $user, string $password = ""): UserToken|null
     {
         /** @var UsersService $usersService */
         $usersService = Config::get(UsersService::class);
