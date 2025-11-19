@@ -117,7 +117,7 @@ jobs:
             docker cp phpunit.xml* tester:/srv
             docker cp db tester:/srv
 
-            docker exec tester composer run migrate -- reset --yes
+            docker exec tester composer run migrate -- reset
             docker exec tester composer install --dev --no-interaction --no-progress
             docker exec tester composer run test
             docker stop tester
