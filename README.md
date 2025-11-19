@@ -32,7 +32,7 @@ cd my-api
 docker compose -f docker-compose.yml up -d
 
 # Run migrations
-composer migrate -- --env=dev reset --yes
+composer migrate -- --env=dev reset
 
 # Your API is ready!
 curl http://localhost:8080/sample/ping

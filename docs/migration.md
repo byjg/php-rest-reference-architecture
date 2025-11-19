@@ -23,12 +23,23 @@ You can specify the environment in two ways:
 
 ### Available Commands
 
-| Command   | Description                               |
-|-----------|-------------------------------------------|
-| `reset`   | Drop all tables and recreate the database |
-| `update`  | Apply pending migrations                  |
-| `version` | Show current database version             |
-| `install` | Install migration tracking table          |
+| Command   | Description                                                      |
+|-----------|------------------------------------------------------------------|
+| `version` | Show current database version (alias: `status`)                  |
+| `create`  | Create migration version table (alias: `install`)                |
+| `reset`   | Reset database to base.sql and optionally migrate to a version   |
+| `up`      | Migrate up to a specific version or latest                       |
+| `down`    | Migrate down to a specific version or 0                          |
+| `update`  | Intelligently migrate up or down to a specific version           |
+
+### Available Options
+
+| Option              | Description                                           |
+|---------------------|-------------------------------------------------------|
+| `-u, --version <n>` | Target version for migration                          |
+| `--force`           | Force migration even if database is in partial state  |
+| `--no-transaction`  | Disable transaction support                           |
+| `-v, -vv, -vvv`     | Increase verbosity (shows more details)               |
 
 ## Create a New Database
 
@@ -36,14 +47,17 @@ You can create a fresh new database using the command:
 
 ```bash
 # Using APP_ENV
-APP_ENV=dev composer migrate -- reset --yes
+APP_ENV=dev composer migrate -- reset
 
 # Using --env parameter
-composer migrate -- --env=dev reset --yes
+composer migrate -- --env=dev reset
+
+# Reset and migrate to specific version
+composer migrate -- --env=dev reset --version 5
 ```
 
 :::warning
-Use this command carefully. It will drop all tables and create a new database.
+Use this command carefully. It will drop all tables and create a new database from base.sql.
 :::
 
 ## Update the Database
@@ -51,19 +65,28 @@ Use this command carefully. It will drop all tables and create a new database.
 You can update the database using the command:
 
 ```bash
-# Using APP_ENV
-APP_ENV=dev composer migrate -- update --up-to=x
+# Migrate to latest version
+APP_ENV=dev composer migrate -- up
 
-# Using --env parameter
-composer migrate -- --env=dev update --up-to=x
+# Migrate to specific version
+composer migrate -- --env=dev update --version 5
+
+# Migrate with verbose output
+APP_ENV=dev composer migrate -- up -vv
 ```
 
-This command updates the database using migration files in the `db/migrations` folder. It applies only unapplied migrations up to migration number `x`. To apply all pending migrations, omit the `--up-to=x` parameter.
+The `up` command applies all pending migrations. The `update` command intelligently migrates up or down to reach the specified version.
 
-Apply all pending migrations:
+## Rollback the Database
+
+You can rollback the database to a previous version:
 
 ```bash
-APP_ENV=dev composer migrate -- update
+# Rollback to version 3
+APP_ENV=dev composer migrate -- down --version 3
+
+# Rollback completely (to version 0)
+composer migrate -- --env=dev down --version 0
 ```
 
 ## Create a New Migration Version

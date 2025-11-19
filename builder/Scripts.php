@@ -9,12 +9,8 @@ use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
-use ByJG\DbMigration\Database\MySqlDatabase;
-use ByJG\DbMigration\Exception\InvalidMigrationFile;
-use ByJG\DbMigration\Migration;
 use ByJG\JinjaPhp\Exception\TemplateParseException;
 use ByJG\JinjaPhp\Loader\FileSystemLoader;
-use ByJG\Util\Uri;
 use Composer\Script\Event;
 use Exception;
 use OpenApi\Generator;
@@ -31,12 +27,8 @@ class Scripts extends BaseScripts
     /**
      * @param Event $event
      * @return void
-     * @throws ConfigException
      * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
@@ -90,89 +82,91 @@ class Scripts extends BaseScripts
             "  composer migrate -- --env=<environment> <command> [options]\n\n" .
             $this->getEnvironmentHelpText() .
             "Available Commands:\n" .
-            "  reset                 Drop all tables and recreate the database\n" .
-            "  update                Apply pending migrations\n" .
-            "  version               Show current database version\n\n" .
+            "  version               Show current database version (alias: status)\n" .
+            "  create                Create migration version table (alias: install)\n" .
+            "  reset                 Reset database to base.sql and optionally migrate to a version\n" .
+            "  up                    Migrate up to a specific version or latest\n" .
+            "  down                  Migrate down to a specific version or 0\n" .
+            "  update                Intelligently migrate up or down to a specific version\n\n" .
             "Options:\n" .
-            "  --yes                 Confirm reset operation (required for reset)\n" .
-            "  --up-to=<version>     Apply migrations up to specified version\n" .
-            "  --force               Force migration even if already applied\n\n" .
+            "  -u, --version <ver>   Target version for migration\n" .
+            "  --force               Force migration even if database is in partial state\n" .
+            "  --no-transaction      Disable transaction support\n" .
+            "  -v, -vv, -vvv         Increase verbosity\n\n" .
             "Examples:\n" .
-            "  # Using APP_ENV environment variable\n" .
-            "  APP_ENV=dev composer migrate -- reset --yes\n" .
-            "  APP_ENV=dev composer migrate -- update\n\n" .
-            "  # Using --env parameter (overrides APP_ENV)\n" .
-            "  composer migrate -- --env=dev update --up-to=5\n" .
-            "  composer migrate -- --env=test version\n";
+            "  # Show current version\n" .
+            "  APP_ENV=dev composer migrate -- version\n\n" .
+            "  # Reset database and migrate to version 5\n" .
+            "  APP_ENV=dev composer migrate -- reset --version 5\n\n" .
+            "  # Migrate up to latest version\n" .
+            "  composer migrate -- --env=dev up -vv\n\n" .
+            "  # Migrate to specific version (up or down automatically)\n" .
+            "  APP_ENV=dev composer migrate -- update --version 10\n";
     }
 
     /**
+     * Thin wrapper around native migrate CLI that reads connection from Config
+     *
      * @param $arguments
      * @return void
      * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
-     * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws ConfigException
-     * @throws InvalidDateException
      * @throws Exception
      */
     public function runMigrate($arguments): void
     {
-        $argumentList = $this->extractArguments($arguments);
-
-        // Get and validate environment
-        $env = $this->getEnvironment($argumentList, $this->getMigrateHelp());
-
-        // Check if command is provided
-        if (isset($argumentList["command"])) {
-            echo "> Command: " . $argumentList["command"] . "\n";
-            echo "> Environment: " . $env . "\n";
-        } else {
-            throw new Exception("Command not found.\n\n" . $this->getMigrateHelp());
+        // Extract --env parameter if present (don't use extractArguments for better compatibility)
+        $env = null;
+        $filteredArgs = [];
+        foreach ($arguments as $arg) {
+            if (str_starts_with($arg, '--env=')) {
+                $env = substr($arg, 6);
+            } elseif ($arg === '--env' || $arg === '-e') {
+                // Skip this and next argument
+                continue;
+            } else {
+                $filteredArgs[] = $arg;
+            }
         }
 
-        // This will instantiate the Definition with the environment in the correct place.
+        // Fallback to APP_ENV environment variable
+        if (empty($env)) {
+            $env = getenv('APP_ENV') ?? null;
+        }
+
+        if (empty($env)) {
+            throw new Exception("Environment is required. Set APP_ENV or use --env parameter.\n\n" . $this->getMigrateHelp());
+        }
+
+        // Load Config with the specified environment
         putenv("APP_ENV=$env");
         Config::reset();
 
         $dbConnection = Config::get('DBDRIVER_CONNECTION');
 
-        Migration::registerDatabase(MySqlDatabase::class);
+        echo "> Environment: $env\n";
+        echo "> Database: " . preg_replace('/:[^:]+@/', ':****@', $dbConnection) . "\n\n";
 
-        $migration = new Migration(new Uri($dbConnection), $this->workdir . "/db");
-        $migration->withTransactionEnabled(true);
-        $migration->addCallbackProgress(function ($cmd, $version) {
-            echo "Doing $cmd, $version\n";
-        });
+        // Build command for native migrate CLI
+        $migrateBin = $this->workdir . "/vendor/bin/migrate";
+        $migrationPath = $this->workdir . "/db";
 
-        $exec['reset'] = function () use ($migration, $argumentList) {
-            if (!isset($argumentList["--yes"])) {
-                throw new Exception("Reset require the argument '--yes'");
-            }
-            $migration->prepareEnvironment();
-            $migration->reset();
-        };
+        // Escape arguments for shell
+        $escapedConnection = escapeshellarg($dbConnection);
+        $escapedPath = escapeshellarg($migrationPath);
+        $escapedArgs = array_map('escapeshellarg', $filteredArgs);
 
+        // Build the full command
+        $command = "$migrateBin -c $escapedConnection -p $escapedPath " . implode(' ', $escapedArgs);
 
-        $exec["update"] = function () use ($migration, $argumentList) {
-            $migration->update($argumentList["--up-to"], $argumentList["--force"]);
-        };
+        // Execute the native migrate CLI
+        passthru($command, $exitCode);
 
-        $exec["version"] = function () use ($migration, $argumentList) {
-            foreach ($migration->getCurrentVersion() as $key => $value) {
-                echo "$key: $value\n";
-            }
-        };
-
-        // Validate command exists
-        if (!isset($exec[$argumentList['command']])) {
-            throw new Exception("Invalid command: " . $argumentList['command'] . "\n\n" . $this->getMigrateHelp());
+        if ($exitCode !== 0) {
+            throw new Exception("Migration command failed with exit code $exitCode");
         }
-
-        $exec[$argumentList['command']]();
     }
 
     /**
