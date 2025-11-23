@@ -125,6 +125,42 @@ class PostCreateScript
         }
 
         // ------------------------------------------------
+        // Create .env.sample file with database connection example
+        // Build a localhost connection string for the developer's local machine
+        $localhostDbConfig = $dbConfig;
+        $localhostDbConfig['host'] = '127.0.0.1';
+        $localhostConnection = self::buildConnectionString($localhostDbConfig, $dbConfig['dev_database']);
+
+        $envSampleContent = <<<ENV
+# IMPORTANT: This is NOT the main environment configuration file!
+#
+# The config/.env file should be used ONLY for specific/sensitive configurations
+# on your local developer machine that you don't want to commit to version control.
+#
+# Main environment configurations should be placed in:
+# - config/dev/credentials.env
+# - config/test/credentials.env
+# - config/staging/credentials.env
+# - config/prod/credentials.env
+#
+# Use this file to override specific settings for your local machine only.
+# Common use cases:
+# - Local database connection strings
+# - Developer-specific API keys
+# - Local service URLs
+# - Any sensitive data that shouldn't be in version control
+
+# Example: Override database connection for local development
+;DBDRIVER_CONNECTION=$localhostConnection
+
+# Example: Override JWT secret for local testing
+;JWT_SECRET=local-dev-secret-key
+ENV;
+
+        file_put_contents("$workdir/config/.env.sample", $envSampleContent);
+        echo "Created config/.env.sample\n";
+
+        // ------------------------------------------------
         // Adjusting namespace
         $objects = new RecursiveIteratorIterator($filter);
         foreach ($objects as $name => $object) {
