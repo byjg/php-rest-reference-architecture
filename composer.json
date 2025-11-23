@@ -16,7 +16,7 @@
     "byjg/authuser": "^6.0",
     "byjg/mailwrapper": "^6.0",
     "byjg/restserver": "^6.0",
-    "zircote/swagger-php": "^4.6.1",
+    "zircote/swagger-php": "^4.7|^5.2",
     "byjg/swagger-test": "^6.0",
     "byjg/migration": "^6.0",
     "byjg/scriptify": "^6.0",
