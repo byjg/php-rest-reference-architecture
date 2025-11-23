@@ -2,8 +2,13 @@ name: PHPUnit
 
 on:
   push:
+    branches:
+      - master
+    tags:
+      - "*.*.*"
   pull_request:
-  workflow_dispatch:
+    branches:
+      - master
 
 jobs:
   Build:
@@ -14,14 +19,17 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8.0
+        image: mysql:8.0.20
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: false
           MYSQL_ROOT_PASSWORD: mysqlp455w0rd
-          MYSQL_DATABASE: localtest
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          - "3306:3306"
+        options: >-
+          --health-cmd="mysqladmin ping" 
+          --health-interval=10s 
+          --health-timeout=20s 
+          --health-retries=10
 
     strategy:
       matrix:
@@ -76,3 +84,4 @@ jobs:
       project: ${{ github.event.repository.name }}
     secrets:
       DOC_TOKEN: ${{ secrets.DOC_TOKEN }}
+
