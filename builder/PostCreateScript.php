@@ -158,20 +158,11 @@ class PostCreateScript
         }
 
         // ------------------------------------------------
-        // Remove Documentation job from build-app-image.yml workflow
-        $workflowFile = "$workdir/.github/workflows/build-app-image.yml";
-        if (file_exists($workflowFile)) {
-            $contents = file_get_contents($workflowFile);
-
-            // Remove the Documentation job section (from "  Documentation:" to the end of file)
-            $contents = preg_replace(
-                '/\n\n  Documentation:\n.*$/s',
-                '',
-                $contents
-            );
-
-            file_put_contents($workflowFile, $contents);
-            echo "Removed Documentation job from .github/workflows/build-app-image.yml\n";
+        // Remove phpunit.yml workflow (it's for the reference architecture repo only)
+        $phpunitWorkflowFile = "$workdir/.github/workflows/phpunit.yml";
+        if (file_exists($phpunitWorkflowFile)) {
+            unlink($phpunitWorkflowFile);
+            echo "Removed .github/workflows/phpunit.yml\n";
         }
 
         // ------------------------------------------------
@@ -414,7 +405,7 @@ class PostCreateScript
         $dbConfig = $defaultDbConfig;
 
         $validatePHPVersion = function ($arg) {
-            $validPHPVersions = ['8.1', '8.2', '8.3', '8.4'];
+            $validPHPVersions = ['8.3', '8.4', '8.5'];
             if (in_array($arg, $validPHPVersions)) {
                 return $arg;
             }

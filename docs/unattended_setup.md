@@ -126,7 +126,7 @@ SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/re
 |--------------------|---------|---------------------------------------------------|-------------------------------------------------|
 | `git_user_name`    | string  | Global git config or "Your Name"                  | Git user name for the project                   |
 | `git_user_email`   | string  | Global git config or "your.email@example.com"     | Git user email for the project                  |
-| `php_version`      | string  | Current PHP version                               | PHP version (8.1, 8.2, 8.3, 8.4)                |
+| `php_version`      | string  | Current PHP version                               | PHP version (8.3, 8.4, 8.5)                     |
 | `namespace`        | string  | "MyRest"                                          | Project namespace (CamelCase)                   |
 | `composer_name`    | string  | "me/myrest"                                       | Composer package name (vendor/package)          |
 | `db_schema`        | string  | `mysql`                                           | One of: `mysql`, `postgres`, `sqlsrv`, `sqlite` |

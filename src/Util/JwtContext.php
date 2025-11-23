@@ -54,16 +54,29 @@ class JwtContext
                 UserField::Role->value => User::ROLE_USER, // If role is empty, return User::ROLE_USER
             ];
 
+            if (is_string($user)) {
+                $login = $user;
+            } else {
+                $usernameValue = $user->get(UserField::Username->value);
+                if (!is_string($usernameValue)) {
+                    throw new Error401Exception("Username must be a string");
+                }
+                $login = $usernameValue;
+            }
+            if (empty($login)) {
+                throw new Error401Exception("Username not found");
+            }
+
             if (empty($password)) {
                 $userToken = $usersService->createInsecureAuthToken(
-                    login: $user,
+                    login: $login,
                     jwtWrapper: $jwtWrapper,
                     expires: $expires,
                     tokenUserFields: $tokenFields
                 );
             } else {
                 $userToken = $usersService->createAuthToken(
-                    login: $user,
+                    login: $login,
                     password: $password,
                     jwtWrapper: $jwtWrapper,
                     expires: $expires,

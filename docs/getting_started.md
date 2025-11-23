@@ -107,7 +107,7 @@ Press <ENTER> to continue
 
 #### Configuration Options
 
-- **PHP Version**: The PHP version for your Docker container (8.1, 8.2, 8.3, 8.4)
+- **PHP Version**: The PHP version for your Docker container (8.3, 8.4, 8.5)
 - **Project namespace**: Your application's root namespace (must be CamelCase, e.g., `MyApp`, `Tutorial`)
 - **Composer name**: Package name in `vendor/package` format (e.g., `me/myrest`)
 - **Database schema**: Supported drivers: `mysql`, `postgres`, `sqlsrv`, or `sqlite`

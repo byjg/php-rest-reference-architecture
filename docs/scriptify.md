@@ -421,7 +421,7 @@ This file is executed before the terminal starts, allowing you to:
 
 ## Requirements
 
-- PHP 8.1 or higher
+- PHP 8.3 or higher
 - `readline` extension (for interactive terminal)
 - Root access (for installing system services)
 

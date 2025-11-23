@@ -9,6 +9,7 @@ use ByJG\MicroOrm\Trait\ActiveRecord;
 use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Trait\OaCreatedAt;
 use RestReferenceArchitecture\Trait\OaUpdatedAt;
+use RuntimeException;
 
 
 /**
@@ -115,6 +116,9 @@ class DummyActiveRecord
      */
     public static function getByName($name): ?array
     {
+        if (self::$repository === null) {
+            throw new RuntimeException("Repository not initialized");
+        }
         $query = Query::getInstance()
             ->table(self::$repository->getMapper()->getTable(), 'alias')
             ->where('alias.name = :value', ['value' => $name]);

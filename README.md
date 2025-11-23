@@ -1,5 +1,6 @@
 # PHP REST Reference Architecture
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml/badge.svg?branch=6.0)](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-rest-reference-architecture)
@@ -243,7 +244,7 @@ You just created a complete CRUD API with:
 
 ## Requirements
 
-- PHP 8.1+ (8.4 recommended)
+- PHP 8.3+ (8.5 recommended)
 - Docker & Docker Compose (optional but recommended)
 - Composer
 - Git

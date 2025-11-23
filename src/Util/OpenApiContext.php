@@ -46,7 +46,8 @@ class OpenApiContext
 
         $path = $request->getRequestPath();
         $method = $request->server('REQUEST_METHOD');
-        $contentType = strtolower($request->getHeader('Content-Type') ?? '');
+        $contentTypeHeader = $request->getHeader('Content-Type') ?? '';
+        $contentType = is_string($contentTypeHeader) ? strtolower($contentTypeHeader) : '';
 
         // Handle XML content separately - it's processed differently
         if (str_contains($contentType, 'xml')) {
@@ -69,8 +70,10 @@ class OpenApiContext
         // Handle JSON and other content types
         if (str_contains($contentType, 'multipart/')) {
             $requestBody = $request->post();
-            $files = $request->uploadedFiles()->getKeys();
-            $requestBody = array_merge($requestBody, array_combine($files, $files));
+            if (is_array($requestBody)) {
+                $files = $request->uploadedFiles()->getKeys();
+                $requestBody = array_merge($requestBody, array_combine($files, $files));
+            }
         } else {
             $requestBody = json_decode($request->payload(), true);
         }
@@ -86,6 +89,11 @@ class OpenApiContext
         }
 
         $requestBody = empty($requestBody) ? [] : $requestBody;
+
+        // Ensure we have an array at this point
+        if (!is_array($requestBody)) {
+            $requestBody = [];
+        }
 
         // Apply null value handling for JSON/form data
         if (!$preserveNullValues) {

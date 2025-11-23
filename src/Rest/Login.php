@@ -19,6 +19,7 @@ use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Repository\BaseRepository;
 use RestReferenceArchitecture\Util\JwtContext;
 use RestReferenceArchitecture\Util\OpenApiContext;
+use RuntimeException;
 
 class Login
 {
@@ -63,6 +64,10 @@ class Login
         $json = ValidateRequest::getPayload();
 
         $userToken = JwtContext::createUserMetadata($json["username"], $json["password"]);
+
+        if ($userToken === null) {
+            throw new Error401Exception("Failed to create user token");
+        }
 
         $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
         $response->write(['token' => $userToken->token]);
@@ -111,9 +116,25 @@ class Login
 
         /** @var UsersService $usersService */
         $usersService = Config::get(UsersService::class);
-        $user = $usersService->getById(JwtContext::getUserId());
+        $userId = JwtContext::getUserId();
 
+        if ($userId === null) {
+            throw new Error401Exception("User ID not found in token");
+        }
+
+        $userModel = $usersService->getById($userId);
+
+        if ($userModel === null) {
+            throw new Error401Exception("User not found");
+        }
+
+        /** @var User $user */
+        $user = $userModel;
         $metadata = JwtContext::createUserMetadata($user);
+
+        if ($metadata === null) {
+            throw new Error401Exception("Failed to create user metadata");
+        }
 
         $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
         $response->write(['token' => $metadata->token]);
@@ -160,8 +181,12 @@ class Login
         $code = strval(rand(10000, 99999));
 
         if (!is_null($user)) {
+            $expireTimestamp = strtotime('+10 minutes');
+            if ($expireTimestamp === false) {
+                throw new RuntimeException("Failed to calculate expiration time");
+            }
             $user->set(User::PROP_RESETTOKEN, $token);
-            $user->set(User::PROP_RESETTOKENEXPIRE, date('Y-m-d H:i:s', strtotime('+10 minutes')));
+            $user->set(User::PROP_RESETTOKENEXPIRE, date('Y-m-d H:i:s', $expireTimestamp));
             $user->set(User::PROP_RESETCODE, $code);
             $user->set(User::PROP_RESETALLOWED, null);
             $usersService->save($user);
