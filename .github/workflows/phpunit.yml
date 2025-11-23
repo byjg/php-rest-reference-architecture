@@ -18,7 +18,7 @@ jobs:
       options: --user root --privileged
 
     services:
-      mysql:
+      mysql-container:
         image: mysql:8.0.20
         env:
           MYSQL_ROOT_PASSWORD: mysqlp455w0rd
@@ -40,8 +40,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - name: Prepare environment
-        run: echo "mysql://root:mysqlp455w0rd@127.0.0.1/localtest" > config/.env
+#      - name: Prepare environment
+#        run: echo "mysql://root:mysqlp455w0rd@127.0.0.1/localtest" > config/.env
       - run: composer install
       - run: composer test
 
