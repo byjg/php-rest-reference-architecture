@@ -270,20 +270,7 @@ This project is open source. See [LICENSE](https://opensource.byjg.com/opensourc
 
 ## Dependencies
 
-```mermaid
-graph TD
-  byjg/rest-reference-architecture --> byjg/config
-  byjg/rest-reference-architecture --> byjg/anydataset-db
-  byjg/rest-reference-architecture --> byjg/micro-orm
-  byjg/rest-reference-architecture --> byjg/authuser
-  byjg/rest-reference-architecture --> byjg/mailwrapper
-  byjg/rest-reference-architecture --> byjg/restserver
-  byjg/rest-reference-architecture --> byjg/swagger-test
-  byjg/rest-reference-architecture --> byjg/migration
-  byjg/rest-reference-architecture --> byjg/scriptify
-  byjg/rest-reference-architecture --> byjg/shortid
-  byjg/rest-reference-architecture --> byjg/jinja-php
-```
+**📚 [Complete Component Dependency Graph →](docs/components-dependency.md)**
 
 ---
 
