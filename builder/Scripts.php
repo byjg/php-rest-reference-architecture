@@ -9,8 +9,16 @@ use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\DbMigration\Database\MySqlDatabase;
+use ByJG\DbMigration\Database\PgsqlDatabase;
+use ByJG\DbMigration\Database\SqliteDatabase;
+use ByJG\DbMigration\Exception\DatabaseIsIncompleteException;
+use ByJG\DbMigration\Exception\DatabaseNotVersionedException;
+use ByJG\DbMigration\Exception\InvalidMigrationFile;
+use ByJG\DbMigration\Migration;
 use ByJG\JinjaPhp\Exception\TemplateParseException;
 use ByJG\JinjaPhp\Loader\FileSystemLoader;
+use ByJG\Util\Uri;
 use Composer\Script\Event;
 use Exception;
 use OpenApi\Generator;
@@ -105,7 +113,7 @@ class Scripts extends BaseScripts
     }
 
     /**
-     * Thin wrapper around native migrate CLI that reads connection from Config
+     * Run database migrations using Migration API
      *
      * @param $arguments
      * @return void
@@ -117,7 +125,7 @@ class Scripts extends BaseScripts
      */
     public function runMigrate($arguments): void
     {
-        // Extract --env parameter if present (don't use extractArguments for better compatibility)
+        // Extract --env parameter if present
         $env = null;
         $filteredArgs = [];
         foreach ($arguments as $arg) {
@@ -149,24 +157,146 @@ class Scripts extends BaseScripts
         echo "> Environment: $env\n";
         echo "> Database: " . preg_replace('/:[^:]+@/', ':****@', $dbConnection) . "\n\n";
 
-        // Build command for native migrate CLI
-        $migrateBin = $this->workdir . "/vendor/bin/migrate";
-        $migrationPath = $this->workdir . "/db";
+        // Parse migration arguments
+        $command = null;
+        $version = null;
+        $force = false;
+        $noTransaction = false;
+        $verbosity = 0;
 
-        // Escape arguments for shell
-        $escapedConnection = escapeshellarg($dbConnection);
-        $escapedPath = escapeshellarg($migrationPath);
-        $escapedArgs = array_map('escapeshellarg', $filteredArgs);
-
-        // Build the full command
-        $command = "$migrateBin -c $escapedConnection -p $escapedPath " . implode(' ', $escapedArgs);
-
-        // Execute the native migrate CLI
-        passthru($command, $exitCode);
-
-        if ($exitCode !== 0) {
-            throw new Exception("Migration command failed with exit code $exitCode");
+        foreach ($filteredArgs as $arg) {
+            if (str_starts_with($arg, '--version=') || str_starts_with($arg, '-u=')) {
+                $version = (int) substr($arg, strpos($arg, '=') + 1);
+            } elseif ($arg === '--force') {
+                $force = true;
+            } elseif ($arg === '--no-transaction') {
+                $noTransaction = true;
+            } elseif ($arg === '-v') {
+                $verbosity = 1;
+            } elseif ($arg === '-vv') {
+                $verbosity = 2;
+            } elseif ($arg === '-vvv') {
+                $verbosity = 3;
+            } elseif (empty($command) && !str_starts_with($arg, '-')) {
+                $command = $arg;
+            }
         }
+
+        if (empty($command)) {
+            throw new Exception("Command is required.\n\n" . $this->getMigrateHelp());
+        }
+
+        // Normalize command aliases
+        if ($command === 'status') {
+            $command = 'version';
+        } elseif ($command === 'install') {
+            $command = 'create';
+        }
+
+        // Register database drivers
+        $this->registerMigrationDatabases();
+
+        // Create migration instance
+        $migrationPath = $this->workdir . "/db";
+        $migration = new Migration(new Uri($dbConnection), $migrationPath);
+
+        // Configure transaction support
+        if (!$noTransaction) {
+            $migration->withTransactionEnabled(true);
+        }
+
+        // Add progress callback for verbose output
+        if ($verbosity > 0) {
+            $migration->addCallbackProgress(function($action, $version, $fileInfo) use ($verbosity) {
+                if ($verbosity >= 2) {
+                    echo "  [{$action}] Version {$version}: {$fileInfo['description']}\n";
+                } elseif ($verbosity === 1) {
+                    echo "  [{$action}] Version {$version}\n";
+                }
+            });
+        }
+
+        // Execute migration command
+        try {
+            switch ($command) {
+                case 'version':
+                    $currentVersion = $migration->getCurrentVersion();
+                    echo "Current version: {$currentVersion['version']}\n";
+                    echo "Status: {$currentVersion['status']}\n";
+                    break;
+
+                case 'create':
+                    echo "Creating migration version table...\n";
+                    $migration->prepareEnvironment();
+                    $migration->createVersion();
+                    echo "Migration table created successfully.\n";
+                    break;
+
+                case 'reset':
+                    echo "Resetting database...\n";
+                    $migration->prepareEnvironment();
+                    $migration->reset($version);
+                    echo "Database reset successfully";
+                    if ($version !== null) {
+                        echo " to version {$version}";
+                    }
+                    echo ".\n";
+                    break;
+
+                case 'up':
+                    echo "Migrating up";
+                    if ($version !== null) {
+                        echo " to version {$version}";
+                    } else {
+                        echo " to latest version";
+                    }
+                    echo "...\n";
+                    $migration->up($version, $force);
+                    echo "Migration completed successfully.\n";
+                    break;
+
+                case 'down':
+                    echo "Migrating down";
+                    if ($version !== null) {
+                        echo " to version {$version}";
+                    } else {
+                        echo " to version 0";
+                    }
+                    echo "...\n";
+                    $migration->down($version, $force);
+                    echo "Migration completed successfully.\n";
+                    break;
+
+                case 'update':
+                    echo "Updating to version ";
+                    echo $version !== null ? $version : "latest";
+                    echo "...\n";
+                    $migration->update($version, $force);
+                    echo "Migration completed successfully.\n";
+                    break;
+
+                default:
+                    throw new Exception("Unknown command: {$command}\n\n" . $this->getMigrateHelp());
+            }
+        } catch (DatabaseIsIncompleteException $e) {
+            throw new Exception("Database is in an incomplete state. Use --force to override.\n" . $e->getMessage());
+        } catch (DatabaseNotVersionedException $e) {
+            throw new Exception("Database is not versioned. Run 'create' command first.\n" . $e->getMessage());
+        } catch (InvalidMigrationFile $e) {
+            throw new Exception("Invalid migration file.\n" . $e->getMessage());
+        }
+    }
+
+    /**
+     * Register database drivers for migrations
+     *
+     * @return void
+     */
+    protected function registerMigrationDatabases(): void
+    {
+        Migration::registerDatabase(MySqlDatabase::class);
+        Migration::registerDatabase(PgsqlDatabase::class);
+        Migration::registerDatabase(SqliteDatabase::class);
     }
 
     /**
