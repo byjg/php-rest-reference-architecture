@@ -3,26 +3,33 @@
 
 namespace Test\Rest;
 
-use ByJG\ApiTools\ApiTestCase;
 use ByJG\ApiTools\Base\Schema;
+use ByJG\ApiTools\OpenApiValidation;
+use ByJG\Config\Config;
 use ByJG\DbMigration\Database\MySqlDatabase;
 use ByJG\DbMigration\Migration;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Psr7\Request;
 use Exception;
-use RestReferenceArchitecture\Psr11;
+use Override;
+use PHPUnit\Framework\TestCase;
 
-class BaseApiTestCase extends ApiTestCase
+class BaseApiTestCase extends TestCase
 {
+    use OpenApiValidation;
+
     protected static bool $databaseReset = false;
 
     protected string $filePath = __DIR__ . '/../../public/docs/openapi.json';
 
+    #[Override]
     protected function setUp(): void
     {
         $this->setSchema(Schema::getInstance(file_get_contents($this->filePath)));
+        $this->resetDb();
     }
 
+    #[Override]
     protected function tearDown(): void
     {
         $this->setSchema(null);
@@ -31,8 +38,8 @@ class BaseApiTestCase extends ApiTestCase
     public function getPsr7Request(): Request
     {
         $uri = Uri::getInstanceFromString()
-            ->withScheme(Psr11::get("API_SCHEMA"))
-            ->withHost(Psr11::get("API_SERVER"));
+            ->withScheme(Config::get("API_SCHEMA"))
+            ->withHost(Config::get("API_SERVER"));
 
         return Request::getInstance($uri);
     }
@@ -40,11 +47,11 @@ class BaseApiTestCase extends ApiTestCase
     public function resetDb()
     {
         if (!self::$databaseReset) {
-            if (Psr11::environment()->getCurrentEnvironment() != "test") {
+            if (Config::definition()->getCurrentEnvironment() != "test") {
                 throw new Exception("This test can only be executed in test environment");
             }
             Migration::registerDatabase(MySqlDatabase::class);
-            $migration = new Migration(new Uri(Psr11::get('DBDRIVER_CONNECTION')), __DIR__ . "/../../../db");
+            $migration = new Migration(new Uri(Config::get('DBDRIVER_CONNECTION')), __DIR__ . "/../../db");
             $migration->prepareEnvironment();
             $migration->reset();
             self::$databaseReset = true;

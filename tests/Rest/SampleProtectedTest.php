@@ -22,43 +22,43 @@ class SampleProtectedTest extends BaseApiTestCase
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/sampleprotected/ping")
-            ->assertResponseCode(401)
+            ->expectStatus(401)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testGetAuthorized()
     {
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+        $result = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/sampleprotected/ping")
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testGetAuthorizedRole1()
     {
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+        $result = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/sampleprotected/pingadm")
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testGetAuthorizedRole2()
@@ -66,18 +66,18 @@ class SampleProtectedTest extends BaseApiTestCase
         $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
 
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+        $result = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/sampleprotected/pingadm")
-            ->assertResponseCode(401)
+            ->expectStatus(401)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 }

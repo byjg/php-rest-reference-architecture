@@ -2,12 +2,12 @@
 
 namespace {{ namespace }}\Repository;
 
-use {{ namespace }}\Psr11;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmModelInvalidException;
-use ReflectionException;
-use ByJG\AnyDataset\Db\DbDriverInterface;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
+use ReflectionException;
 use {{ namespace }}\Model\{{ className }};
 
 class {{ className }}Repository extends BaseRepository
@@ -15,13 +15,14 @@ class {{ className }}Repository extends BaseRepository
     /**
      * {{ className }}Repository constructor.
      *
-     * @param DbDriverInterface $dbDriver
+     * @param DatabaseExecutor $executor
      * @throws OrmModelInvalidException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
-    public function __construct(DbDriverInterface $dbDriver)
+    public function __construct(DatabaseExecutor $executor)
     {
-        $this->repository = new Repository($dbDriver, {{ className }}::class);
+        $this->repository = new Repository($executor, {{ className }}::class);
     }
 {% for index in indexes -%}
 {% if index.key_name != 'PRIMARY' -%}
@@ -34,8 +35,7 @@ class {{ className }}Repository extends BaseRepository
         $query = Query::getInstance()
             ->table('{{ tableName }}')
             ->where('{{ tableName }}.{{ index.column_name }} = :value', ['value' => ${{ index.camelColumnName }}]);
-        $result = $this->repository->getByQuery($query);
-        return $result;
+        return $this->repository->getByQuery($query);
     }
 {% endif %}
 {% endfor %}

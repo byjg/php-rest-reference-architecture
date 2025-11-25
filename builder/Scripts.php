@@ -2,13 +2,18 @@
 
 namespace Builder;
 
-use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
 use ByJG\DbMigration\Database\MySqlDatabase;
+use ByJG\DbMigration\Database\PgsqlDatabase;
+use ByJG\DbMigration\Database\SqliteDatabase;
+use ByJG\DbMigration\Exception\DatabaseIsIncompleteException;
+use ByJG\DbMigration\Exception\DatabaseNotVersionedException;
 use ByJG\DbMigration\Exception\InvalidMigrationFile;
 use ByJG\DbMigration\Migration;
 use ByJG\JinjaPhp\Exception\TemplateParseException;
@@ -19,7 +24,6 @@ use Exception;
 use OpenApi\Generator;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use RestReferenceArchitecture\Psr11;
 
 class Scripts extends BaseScripts
 {
@@ -31,12 +35,8 @@ class Scripts extends BaseScripts
     /**
      * @param Event $event
      * @return void
-     * @throws ConfigException
      * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
-     * @throws InvalidDateException
-     * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
@@ -79,57 +79,255 @@ class Scripts extends BaseScripts
     }
 
     /**
+     * Get migrate usage help text
+     *
+     * @return string
+     */
+    protected function getMigrateHelp(): string
+    {
+        return "Usage:\n" .
+            "  APP_ENV=<environment> composer migrate -- <command> [options]\n" .
+            "  composer migrate -- --env=<environment> <command> [options]\n\n" .
+            $this->getEnvironmentHelpText() .
+            "Available Commands:\n" .
+            "  version               Show current database version (alias: status)\n" .
+            "  create                Create migration version table (alias: install)\n" .
+            "  reset                 Reset database to base.sql and optionally migrate to a version\n" .
+            "  up                    Migrate up to a specific version or latest\n" .
+            "  down                  Migrate down to a specific version or 0\n" .
+            "  update                Intelligently migrate up or down to a specific version\n\n" .
+            "Options:\n" .
+            "  -u, --version <ver>   Target version for migration\n" .
+            "  --force               Force migration even if database is in partial state\n" .
+            "  --no-transaction      Disable transaction support\n" .
+            "  -v, -vv, -vvv         Increase verbosity\n\n" .
+            "Examples:\n" .
+            "  # Show current version\n" .
+            "  APP_ENV=dev composer migrate -- version\n\n" .
+            "  # Reset database and migrate to version 5\n" .
+            "  APP_ENV=dev composer migrate -- reset --version 5\n\n" .
+            "  # Migrate up to latest version\n" .
+            "  composer migrate -- --env=dev up -vv\n\n" .
+            "  # Migrate to specific version (up or down automatically)\n" .
+            "  APP_ENV=dev composer migrate -- update --version 10\n";
+    }
+
+    /**
+     * Run database migrations using Migration API
+     *
      * @param $arguments
      * @return void
      * @throws ConfigNotFoundException
-     * @throws DependencyInjectionException
      * @throws InvalidArgumentException
-     * @throws InvalidMigrationFile
      * @throws KeyNotFoundException
      * @throws ReflectionException
-     * @throws ConfigException
-     * @throws InvalidDateException
      * @throws Exception
      */
     public function runMigrate($arguments): void
     {
-        $argumentList = $this->extractArguments($arguments);
-        if (isset($argumentList["command"])) {
-            echo "> Command: " . $argumentList["command"] . "\n";
-        } else {
-            throw new Exception("Command not found. Use: reset, update, version");
+        // Extract --env parameter if present
+        $env = null;
+        $filteredArgs = [];
+        foreach ($arguments as $arg) {
+            if (str_starts_with($arg, '--env=')) {
+                $env = substr($arg, 6);
+            } elseif ($arg === '--env' || $arg === '-e') {
+                // Skip this and next argument
+                continue;
+            } else {
+                $filteredArgs[] = $arg;
+            }
         }
 
-        $dbConnection = Psr11::container($argumentList["--env"])->get('DBDRIVER_CONNECTION');
+        // Fallback to APP_ENV environment variable
+        if (empty($env)) {
+            $env = getenv('APP_ENV') ?? null;
+        }
 
+        if (empty($env)) {
+            throw new Exception("Environment is required. Set APP_ENV or use --env parameter.\n\n" . $this->getMigrateHelp());
+        }
+
+        // Load Config with the specified environment
+        putenv("APP_ENV=$env");
+        Config::reset();
+
+        $dbConnection = Config::get('DBDRIVER_CONNECTION');
+
+        echo "> Environment: $env\n";
+        echo "> Database: " . preg_replace('/:[^:]+@/', ':****@', $dbConnection) . "\n\n";
+
+        // Parse migration arguments
+        $command = null;
+        $version = null;
+        $force = false;
+        $noTransaction = false;
+        $verbosity = 0;
+
+        foreach ($filteredArgs as $arg) {
+            if (str_starts_with($arg, '--version=') || str_starts_with($arg, '-u=')) {
+                $version = (int) substr($arg, strpos($arg, '=') + 1);
+            } elseif ($arg === '--force') {
+                $force = true;
+            } elseif ($arg === '--no-transaction') {
+                $noTransaction = true;
+            } elseif ($arg === '-v') {
+                $verbosity = 1;
+            } elseif ($arg === '-vv') {
+                $verbosity = 2;
+            } elseif ($arg === '-vvv') {
+                $verbosity = 3;
+            } elseif (empty($command) && !str_starts_with($arg, '-')) {
+                $command = $arg;
+            }
+        }
+
+        if (empty($command)) {
+            throw new Exception("Command is required.\n\n" . $this->getMigrateHelp());
+        }
+
+        // Normalize command aliases
+        if ($command === 'status') {
+            $command = 'version';
+        } elseif ($command === 'install') {
+            $command = 'create';
+        }
+
+        // Register database drivers
+        $this->registerMigrationDatabases();
+
+        // Create migration instance
+        $migrationPath = $this->workdir . "/db";
+        $migration = new Migration(new Uri($dbConnection), $migrationPath);
+
+        // Configure transaction support
+        if (!$noTransaction) {
+            $migration->withTransactionEnabled(true);
+        }
+
+        // Add progress callback for verbose output
+        if ($verbosity > 0) {
+            $migration->addCallbackProgress(function($action, $version, $fileInfo) use ($verbosity) {
+                if ($verbosity >= 2) {
+                    echo "  [{$action}] Version {$version}: {$fileInfo['description']}\n";
+                } elseif ($verbosity === 1) {
+                    echo "  [{$action}] Version {$version}\n";
+                }
+            });
+        }
+
+        // Execute migration command
+        try {
+            switch ($command) {
+                case 'version':
+                    $currentVersion = $migration->getCurrentVersion();
+                    echo "Current version: {$currentVersion['version']}\n";
+                    echo "Status: {$currentVersion['status']}\n";
+                    break;
+
+                case 'create':
+                    echo "Creating migration version table...\n";
+                    $migration->prepareEnvironment();
+                    $migration->createVersion();
+                    echo "Migration table created successfully.\n";
+                    break;
+
+                case 'reset':
+                    echo "Resetting database...\n";
+                    $migration->prepareEnvironment();
+                    $migration->reset($version);
+                    echo "Database reset successfully";
+                    if ($version !== null) {
+                        echo " to version {$version}";
+                    }
+                    echo ".\n";
+                    break;
+
+                case 'up':
+                    echo "Migrating up";
+                    if ($version !== null) {
+                        echo " to version {$version}";
+                    } else {
+                        echo " to latest version";
+                    }
+                    echo "...\n";
+                    $migration->up($version, $force);
+                    echo "Migration completed successfully.\n";
+                    break;
+
+                case 'down':
+                    echo "Migrating down";
+                    if ($version !== null) {
+                        echo " to version {$version}";
+                    } else {
+                        echo " to version 0";
+                    }
+                    echo "...\n";
+                    $migration->down($version, $force);
+                    echo "Migration completed successfully.\n";
+                    break;
+
+                case 'update':
+                    echo "Updating to version ";
+                    echo $version !== null ? $version : "latest";
+                    echo "...\n";
+                    $migration->update($version, $force);
+                    echo "Migration completed successfully.\n";
+                    break;
+
+                default:
+                    throw new Exception("Unknown command: {$command}\n\n" . $this->getMigrateHelp());
+            }
+        } catch (DatabaseIsIncompleteException $e) {
+            throw new Exception("Database is in an incomplete state. Use --force to override.\n" . $e->getMessage());
+        } catch (DatabaseNotVersionedException $e) {
+            throw new Exception("Database is not versioned. Run 'create' command first.\n" . $e->getMessage());
+        } catch (InvalidMigrationFile $e) {
+            throw new Exception("Invalid migration file.\n" . $e->getMessage());
+        }
+    }
+
+    /**
+     * Register database drivers for migrations
+     *
+     * @return void
+     */
+    protected function registerMigrationDatabases(): void
+    {
         Migration::registerDatabase(MySqlDatabase::class);
+        Migration::registerDatabase(PgsqlDatabase::class);
+        Migration::registerDatabase(SqliteDatabase::class);
+    }
 
-        $migration = new Migration(new Uri($dbConnection), $this->workdir . "/db");
-        $migration->withTransactionEnabled(true);
-        $migration->addCallbackProgress(function ($cmd, $version) {
-            echo "Doing $cmd, $version\n";
-        });
+    /**
+     * Get common environment help text
+     *
+     * @return string
+     */
+    protected function getEnvironmentHelpText(): string
+    {
+        return "Environment:\n" .
+            "  --env=<environment>   Environment (dev, test, prod) - overrides APP_ENV\n" .
+            "  APP_ENV               Environment variable (used if --env not specified)\n\n";
+    }
 
-        $exec['reset'] = function () use ($migration, $argumentList) {
-            if (!isset($argumentList["--yes"])) {
-                throw new Exception("Reset require the argument '--yes'");
-            }
-            $migration->prepareEnvironment();
-            $migration->reset();
-        };
+    /**
+     * Extract and validate environment from arguments or APP_ENV
+     *
+     * @param array $argumentList Extracted arguments array
+     * @param string $helpText Help text to display on error
+     * @return string The validated environment
+     * @throws Exception
+     */
+    protected function getEnvironment(array $argumentList, string $helpText): string
+    {
+        $env = $argumentList['--env'] ?? getenv('APP_ENV') ?? null;
 
+        if (empty($env)) {
+            throw new Exception("Environment is required. Set APP_ENV or use --env parameter.\n\n" . $helpText);
+        }
 
-        $exec["update"] = function () use ($migration, $argumentList) {
-            $migration->update($argumentList["--up-to"], $argumentList["--force"]);
-        };
-
-        $exec["version"] = function () use ($migration, $argumentList) {
-            foreach ($migration->getCurrentVersion() as $key => $value) {
-                echo "$key: $value\n";
-            }
-        };
-
-        $exec[$argumentList['command']]();
+        return $env;
     }
 
     /**
@@ -146,15 +344,19 @@ class Scripts extends BaseScripts
             '--env' => null
         ];
 
-        $start = 0;
-        if ($hasCmd) {
-            $ret['command'] = $arguments[0] ?? null;
-            $start = 1;
-        }
-
-        for ($i=$start; $i < count($arguments); $i++) {
-            $args = explode("=", $arguments[$i]);
-            $ret[$args[0]] = $args[1] ?? true;
+        $commandFound = false;
+        foreach ($arguments as $argument) {
+            // Check if it's an option (starts with --)
+            if (str_starts_with($argument, '--')) {
+                $args = explode("=", $argument, 2);
+                $ret[$args[0]] = $args[1] ?? true;
+            } else {
+                // It's the command (if we're expecting one and haven't found it yet)
+                if ($hasCmd && !$commandFound) {
+                    $ret['command'] = $argument;
+                    $commandFound = true;
+                }
+            }
         }
 
         return $ret;
@@ -181,6 +383,41 @@ class Scripts extends BaseScripts
     }
 
     /**
+     * Get code generator usage help text
+     *
+     * @return string
+     */
+    protected function getCodeGeneratorHelp(): string
+    {
+        return "Usage:\n" .
+            "  APP_ENV=<environment> composer codegen -- --table=<table_name> <arguments> [options]\n" .
+            "  composer codegen -- --env=<environment> --table=<table_name> <arguments> [options]\n\n" .
+            "Required:\n" .
+            "  --table=<name>        Database table name\n\n" .
+            $this->getEnvironmentHelpText() .
+            "Arguments (at least one required):\n" .
+            "  all                   Generate all components for the selected pattern\n" .
+            "  model                 Generate Model\n" .
+            "  repo|repository       Generate Repository (Repository pattern only)\n" .
+            "  service               Generate Service (Repository pattern only)\n" .
+            "  rest                  Generate REST controller\n" .
+            "  test                  Generate Test\n\n" .
+            "Options:\n" .
+            "  --activerecord        Use ActiveRecord pattern instead of Repository pattern\n" .
+            "  --save                Save generated files to disk\n" .
+            "  --debug               Show debug information\n\n" .
+            "Examples:\n" .
+            "  # Repository pattern (default) - using APP_ENV\n" .
+            "  APP_ENV=dev composer codegen -- --table=users all --save\n\n" .
+            "  # ActiveRecord pattern - using --env parameter\n" .
+            "  composer codegen -- --env=dev --table=users all --activerecord --save\n\n" .
+            "  # Generate only specific components\n" .
+            "  APP_ENV=dev composer codegen -- --table=users model rest --save\n\n" .
+            "  # Preview without saving\n" .
+            "  composer codegen -- --env=dev --table=users all --activerecord\n";
+    }
+
+    /**
      * @param array $arguments
      * @return void
      * @throws ConfigException
@@ -195,38 +432,64 @@ class Scripts extends BaseScripts
      */
     public function runCodeGenerator(array $arguments): void
     {
-        // Get Table Name
+        // Get Table Name - support both --table=value and --table value formats
         $table = null;
-        if (in_array("--table", $arguments)) {
-            $index = array_search("--table", $arguments);
-            $table = $arguments[$index + 1] ?? null;
-            unset($arguments[$index + 1]);
-            unset($arguments[$index]);
+        foreach ($arguments as $index => $arg) {
+            if (str_starts_with($arg, "--table=")) {
+                $table = substr($arg, 8); // Extract value after --table=
+                unset($arguments[$index]);
+                break;
+            } elseif ($arg === "--table") {
+                $table = $arguments[$index + 1] ?? null;
+                unset($arguments[$index + 1]);
+                unset($arguments[$index]);
+                break;
+            }
         }
+        // Reindex array after unsetting elements
+        $arguments = array_values($arguments);
+
         if (empty($table)) {
-            throw new Exception("Table name is required (--table=table_name)");
+            throw new Exception("Table name is required.\n\n" . $this->getCodeGeneratorHelp());
         }
+
+        // Extract arguments and validate environment
+        $argumentList = $this->extractArguments($arguments, false);
+        $env = $this->getEnvironment($argumentList, $this->getCodeGeneratorHelp());
+
+        echo "Environment: $env\n";
+
+        // This will instantiate the Definition with the environment in the correct place.
+        putenv("APP_ENV=$env");
+        Config::reset();
+
+        // Extract --activerecord flag
+        $isActiveRecord = in_array("--activerecord", $arguments);
 
         // Check Arguments
         $foundArguments = [];
-        $validArguments = ['model', 'repo', 'config' , 'rest', 'test', 'all', "--save", "--debug"];
+        $validArguments = ['model', 'repo', 'repository', 'service', 'rest', 'test', 'all', "--save", "--debug", "--env", "--activerecord", "--table"];
         foreach ($arguments as $argument) {
+            // Skip --env=value and --table=value formats
+            if (str_starts_with($argument, "--env=") || str_starts_with($argument, "--table=")) {
+                continue;
+            }
             if (!in_array($argument, $validArguments)) {
-                throw new Exception("Invalid argument: $argument\nValids are: " . implode(", ", $validArguments) . "\n");
+                throw new Exception("Invalid argument: $argument\n\n" . $this->getCodeGeneratorHelp());
             } else {
                 $foundArguments[] = $argument;
             }
         }
         if (empty($foundArguments)) {
-            throw new Exception("At least one argument is required (" . implode(", ", $validArguments) . ")");
+            throw new Exception("At least one argument is required.\n\n" . $this->getCodeGeneratorHelp());
         }
         $save = in_array("--save", $arguments);
 
-        /** @var DbDriverInterface $dbDriver */
-        $dbDriver = Psr11::get(DbDriverInterface::class);
+        /** @var DatabaseExecutor $executor */
+        $executor = Config::get(DatabaseExecutor::class);
 
-        $tableDefinition = $dbDriver->getIterator("EXPLAIN " . strtolower($table))->toArray();
-        $tableIndexes = $dbDriver->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
+        $tableDefinition = $executor->getIterator("EXPLAIN " . strtolower($table))->toArray();
+        $tableIndexes = $executor->getIterator("SHOW INDEX FROM " . strtolower($table))->toArray();
         $autoIncrement = false;
 
         // Convert DB Types to PHP Types
@@ -318,6 +581,22 @@ class Scripts extends BaseScripts
             }, $field['column_name']);
         }
 
+        // Detect timestamp fields for trait usage
+        $hasCreatedAt = false;
+        $hasUpdatedAt = false;
+        $hasDeletedAt = false;
+        foreach ($tableDefinition as $field) {
+            if ($field['field'] == 'created_at') {
+                $hasCreatedAt = true;
+            }
+            if ($field['field'] == 'updated_at') {
+                $hasUpdatedAt = true;
+            }
+            if ($field['field'] == 'deleted_at') {
+                $hasDeletedAt = true;
+            }
+        }
+
         $data = [
             'namespace' => 'RestReferenceArchitecture',
             'autoIncrement' => $autoIncrement ? 'yes' : 'no',
@@ -335,6 +614,10 @@ class Scripts extends BaseScripts
             'nullableFields' => $nullableFields,
             'nonNullableFields' => $nonNullableFields,
             'indexes' => $tableIndexes,
+            'activerecord' => $isActiveRecord,
+            'hasCreatedAt' => $hasCreatedAt,
+            'hasUpdatedAt' => $hasUpdatedAt,
+            'hasDeletedAt' => $hasDeletedAt,
         ];
 
         if (in_array("--debug", $arguments)) {
@@ -346,7 +629,8 @@ class Scripts extends BaseScripts
         $loader = new FileSystemLoader(__DIR__ . '/../templates/codegen');
 
         if (in_array('all', $arguments) || in_array('model', $arguments)) {
-            echo "Processing Model for table $table...\n";
+            $modelType = $isActiveRecord ? "ActiveRecord Model" : "Model";
+            echo "Processing $modelType for table $table...\n";
             $template = $loader->getTemplate('model.php');
             if ($save) {
                 $file = __DIR__ . '/../src/Model/' . $data['className'] . '.php';
@@ -357,21 +641,51 @@ class Scripts extends BaseScripts
             }
         }
 
-        if (in_array('all', $arguments) || in_array('repo', $arguments)) {
+        // Repository - only for Repository pattern (skip for ActiveRecord)
+        if (!$isActiveRecord && (in_array('all', $arguments) || in_array('repo', $arguments) || in_array('repository', $arguments))) {
             echo "Processing Repository for table $table...\n";
             $template = $loader->getTemplate('repository.php');
             if ($save) {
                 $file = __DIR__ . '/../src/Repository/' . $data['className'] . 'Repository.php';
                 file_put_contents($file, $template->render($data));
                 echo "File saved in $file\n";
+
+                // Add to config if not exists
+                $this->addToConfig(
+                    __DIR__ . '/../config/dev/04-repositories.php',
+                    $data['className'] . 'Repository',
+                    $data['namespace']
+                );
+            } else {
+                print_r($template->render($data));
+            }
+        }
+
+        // Service - only for Repository pattern (skip for ActiveRecord)
+        if (!$isActiveRecord && (in_array('all', $arguments) || in_array('service', $arguments))) {
+            echo "Processing Service for table $table...\n";
+            $template = $loader->getTemplate('service.php');
+            if ($save) {
+                $file = __DIR__ . '/../src/Service/' . $data['className'] . 'Service.php';
+                file_put_contents($file, $template->render($data));
+                echo "File saved in $file\n";
+
+                // Add to config if not exists
+                $this->addToConfig(
+                    __DIR__ . '/../config/dev/05-services.php',
+                    $data['className'] . 'Service',
+                    $data['namespace']
+                );
             } else {
                 print_r($template->render($data));
             }
         }
 
         if (in_array('all', $arguments) || in_array('rest', $arguments)) {
-            echo "Processing Rest for table $table...\n";
-            $template = $loader->getTemplate('rest.php');
+            $restType = $isActiveRecord ? "ActiveRecord Rest" : "Rest";
+            $templateName = $isActiveRecord ? 'restactiverecord.php' : 'rest.php';
+            echo "Processing $restType for table $table...\n";
+            $template = $loader->getTemplate($templateName);
             if ($save) {
                 $file = __DIR__ . '/../src/Rest/' . $data['className'] . 'Rest.php';
                 file_put_contents($file, $template->render($data));
@@ -392,11 +706,65 @@ class Scripts extends BaseScripts
                 print_r($template->render($data));
             }
         }
+    }
 
-        if (in_array('all', $arguments) || in_array('config', $arguments)) {
-            echo "Processing Config for table $table...\n";
-            $template = $loader->getTemplate('config.php');
-            print_r($template->render($data));
+    /**
+     * Add DI binding to config file if it doesn't exist
+     *
+     * @param string $configFile Path to the config file
+     * @param string $className Class name (without namespace, e.g., 'DummyRepository')
+     * @param string $namespace Namespace (e.g., 'RestReferenceArchitecture')
+     * @return void
+     */
+    protected function addToConfig(string $configFile, string $className, string $namespace): void
+    {
+        $contents = file_get_contents($configFile);
+        $modified = false;
+
+        // Determine the type (Repository or Service) based on class name
+        $type = str_ends_with($className, 'Repository') ? 'Repository' : 'Service';
+        $fullClassName = "$namespace\\{$type}\\$className";
+        $useStatement = "use $fullClassName;";
+
+        // Check if use statement already exists
+        if (!str_contains($contents, $useStatement)) {
+            // Find the last use statement and add after it
+            $lines = explode("\n", $contents);
+            $lastUseLine = 0;
+
+            foreach ($lines as $index => $line) {
+                if (preg_match('/^use\s+.*?;/', trim($line))) {
+                    $lastUseLine = $index;
+                }
+            }
+
+            // Insert the new use statement after the last use statement
+            array_splice($lines, $lastUseLine + 1, 0, $useStatement);
+            $contents = implode("\n", $lines);
+            $modified = true;
+            echo "Added use statement for $className to " . basename($configFile) . "\n";
+        }
+
+        // Check if DI binding already exists
+        if (!str_contains($contents, "$className::class")) {
+            // Create the DI binding
+            $binding = "\n    $className::class => DI::bind($className::class)\n" .
+                       "        ->withInjectedConstructor()\n" .
+                       "        ->toSingleton(),\n";
+
+            // Find the position before the closing ];
+            $pos = strrpos($contents, '];');
+            if ($pos !== false) {
+                $contents = substr_replace($contents, $binding, $pos, 0);
+                $modified = true;
+                echo "Added DI binding for $className to " . basename($configFile) . "\n";
+            }
+        }
+
+        if ($modified) {
+            file_put_contents($configFile, $contents);
+        } else {
+            echo "$className already exists in " . basename($configFile) . "\n";
         }
     }
 }

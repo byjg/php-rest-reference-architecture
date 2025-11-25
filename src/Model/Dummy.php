@@ -6,6 +6,7 @@ use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use OpenApi\Attributes as OA;
 
+
 /**
  * Class Dummy
  * @package RestReferenceArchitecture\Model
@@ -45,6 +46,7 @@ class Dummy
      */
     public function setId(int|null $id): static
     {
+        
         $this->id = $id;
         return $this;
     }
@@ -63,6 +65,7 @@ class Dummy
      */
     public function setField(string|null $field): static
     {
+        
         $this->field = $field;
         return $this;
     }

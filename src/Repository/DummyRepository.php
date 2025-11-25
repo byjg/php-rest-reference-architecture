@@ -2,7 +2,8 @@
 
 namespace RestReferenceArchitecture\Repository;
 
-use ByJG\AnyDataset\Db\DbDriverInterface;
+use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmModelInvalidException;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Repository;
@@ -14,13 +15,14 @@ class DummyRepository extends BaseRepository
     /**
      * DummyRepository constructor.
      *
-     * @param DbDriverInterface $dbDriver
+     * @param DatabaseExecutor $executor
      * @throws OrmModelInvalidException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
-    public function __construct(DbDriverInterface $dbDriver)
+    public function __construct(DatabaseExecutor $executor)
     {
-        $this->repository = new Repository($dbDriver, Dummy::class);
+        $this->repository = new Repository($executor, Dummy::class);
     }
 
 
@@ -33,8 +35,7 @@ class DummyRepository extends BaseRepository
         $query = Query::getInstance()
             ->table('dummy')
             ->where('dummy.field = :value', ['value' => $field]);
-        $result = $this->repository->getByQuery($query);
-        return $result;
+        return $this->repository->getByQuery($query);
     }
 
 }

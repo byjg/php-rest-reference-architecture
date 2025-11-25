@@ -2,6 +2,7 @@
 
 namespace {{ namespace }}\Rest;
 
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -16,15 +17,13 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use {{ namespace }}\Model\{{ className }};
-use {{ namespace }}\Psr11;
-use {{ namespace }}\Repository\{{ className }}Repository;
+use {{ namespace }}\Attributes\RequireAuthenticated;
+use {{ namespace }}\Attributes\RequireRole;
+use {{ namespace }}\Attributes\ValidateRequest;
 use {{ namespace }}\Model\User;
-use {{ namespace }}\Util\JwtContext;
-use {{ namespace }}\Util\OpenApiContext;
+use {{ namespace }}\Service\{{ className }}Service;
 
 class {{ className }}Rest
 {
@@ -66,27 +65,19 @@ class {{ className }}Rest
         description: "The object {{ className }}",
         content: new OA\JsonContent(ref: "#/components/schemas/{{ className }}")
     )]
+    #[RequireAuthenticated]
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
-        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
-        $id = $request->param('id');
-
-        $result = ${{ varTableName }}Repo->get($id);
-        if (empty($result)) {
-            throw new Error404Exception('Id not found');
-        }
-        $response->write(
-            $result
-        );
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
+        $result = ${{ varTableName }}Service->getOrFail($request->param('id'));
+        $response->write($result);
     }
 
     /**
      * List {{ className }}
      *
-     * @param mixed $response
-     * @param mixed $request
+     * @param HttpResponse $response
+     * @param HttpRequest $request
      * @return void
      * @throws ConfigException
      * @throws ConfigNotFoundException
@@ -152,21 +143,12 @@ class {{ className }}Rest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireAuthenticated]
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
-        $repo = Psr11::get({{ className }}Repository::class);
-
-        $page = $request->get('page');
-        $size = $request->get('size');
-        // $orderBy = $request->get('orderBy');
-        // $filter = $request->get('filter');
-
-        $result = $repo->list($page, $size);
-        $response->write(
-            $result
-        );
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
+        $result = ${{ varTableName }}Service->list($request->get('page'), $request->get('size'));
+        $response->write($result);
     }
 
 
@@ -227,19 +209,13 @@ class {{ className }}Rest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
-        
-        $model = new {{ className }}();
-        ObjectCopy::copy($payload, $model);
-
-        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
-        ${{ varTableName }}Repo->save($model);
-
-        $response->write([ "id" => $model->getId()]);
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
+        $model = ${{ varTableName }}Service->create(ValidateRequest::getPayload());
+        $response->write(["id" => $model->getId()]);
     }
 
 
@@ -286,20 +262,12 @@ class {{ className }}Rest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
-
-        ${{ varTableName }}Repo = Psr11::get({{ className }}Repository::class);
-        $model = ${{ varTableName }}Repo->get($payload['{{ fields.0.field }}']);
-        if (empty($model)) {
-            throw new Error404Exception('Id not found');
-        }
-        ObjectCopy::copy($payload, $model);
-
-        ${{ varTableName }}Repo->save($model);
+        ${{ varTableName }}Service = Config::get({{ className }}Service::class);
+        ${{ varTableName }}Service->update(ValidateRequest::getPayload());
     }
 
 }

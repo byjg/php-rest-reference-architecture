@@ -1,138 +1,119 @@
-# RestAPI Functional Test
+---
+sidebar_position: 240
+---
 
-## Running the tests
+# Functional Unit Tests
 
-The project has some tests implemented. You can run the tests from the VSCode interface or from the command line.
+## Running the Tests
 
-```php
-# Create an empty database for test
-APP_TEST=test composer run migrate reset yes
+The project includes functional tests. You can run them from your IDE or command line.
 
-# Set optional values
+```bash
+# Create or reset the testing database
+APP_ENV=test composer migrate -- reset --yes
+
+# Optional: customise test credentials
 # export TEST_ADMIN_USER=admin@example.com
 # export TEST_ADMIN_PASSWORD='!P4ssw0rdstr!'
 # export TEST_REGULAR_USER=user@example.com
 # export TEST_REGULAR_PASSWORD='!P4ssw0rdstr!'
 
-# Run the tests
-APP_TEST=test composer run test
+# Execute the suite
+APP_ENV=test composer run test
 ```
 
-## Creating your tests
+:::info Database resets automatically
+`tests/Rest/BaseApiTestCase.php` already calls `Migration::reset()` the first time a test runs, but pre-resetting with the command above avoids surprises if you run the suite outside PHPUnit (e.g., invoking migrations manually).
+:::
+
+## Creating Your Tests
 
 We can test the RestAPI as follows:
 
 ```php
-namespace Test\Functional\Rest;
+namespace Test\Rest;
 
-
-use ByJG\ApiTools\Base\Schema;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
-/**
- * Create a TestCase inherited from SwaggerTestCase
- */
 class SampleTest extends BaseApiTestCase
 {
-    protected $filePath = __DIR__ . '/../../../public/docs/openapi.json';
-
-    protected function setUp(): void
+    public function testPing(): void
     {
-        $schema = Schema::getInstance(file_get_contents($this->filePath));
-        $this->setSchema($schema);
-
-        parent::setUp();
-    }
-
-    public function testPing()
-    {
-        $request = new FakeApiRequester();
-        $request
+        $request = (new FakeApiRequester())
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath("/sample/ping")
-        ;
-        $this->assertRequest($request);
+            ->withPath('/sample/ping')
+            ->expectStatus(200);
+
+        $this->sendRequest($request);
     }
 }
 ```
 
-The `BaseApiTestCase` is a class that extends the `ByJG\ApiTools\Base\SwaggerTestCase` and provides some helper methods to test the RestAPI.
+`BaseApiTestCase` extends `PHPUnit\Framework\TestCase` and mixes in the `OpenApiValidation` trait, so every call to `sendRequest()` validates the result against `public/docs/openapi.json`. All routing happens in-memory via `FakeApiRequester`, so you don't need a running web server—only a configured database.
 
-The `testPing` method will test the `/sample/ping` endpoint. The `assertRequest` method will test the endpoint and will throw an exception if the endpoint does not match the OpenAPI specification for the status code `200`.
+However, as it is a functional test, you need to have the database and other resources accessed by the endpoint running.
 
-There is no necessary have a webserver running to test the RestAPI. The `BaseApiTestCase` will create the request and will pass to the `FakeApiRequester` object. The `FakeApiRequester` will call the endpoint as a PHP method and will try to match the result with the OpenAPI specification.
-
-However, as it is a functional test you need to have the database and other resources accessed by the endpoint running.
-
-## Send body data to the test
+## Sending Body Data to Tests
 
 We can send body data to the test as follows:
 
 ```php
-public function testPing()
+public function testPingWithBody()
 {
-    $request = new FakeApiRequester();
-    $request
+    $request = (new FakeApiRequester())
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('POST')
-        ->withPath("/sample/ping")
-        ->withBody([
+        ->withPath('/sample/ping')
+        ->withRequestBody(json_encode([
             'name' => 'John Doe'
-        ])
-    ;
-    $this->assertRequest($request);
+        ]));
+
+    $this->sendRequest($request);
 }
 ```
 
-## Send query parameters to the test
+## Sending Query Parameters to Tests
 
 ```php
-public function testPing()
+public function testPingWithQuery()
 {
-    $request = new FakeApiRequester();
-    $request
+    $request = (new FakeApiRequester())
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
-        ->withPath("/sample/ping")
-        ->withQuery([
-            'name' => 'John Doe'
-        ])
-    ;
-    $this->assertRequest($request);
+        ->withPath('/sample/ping')
+        ->withQuery(['name' => 'John Doe']);
+
+    $this->sendRequest($request);
 }
 ```
 
-## Expect a specific status code
+## Expecting a Specific Status Code
 
 ```php
-public function testPing()
+public function testPingNotFound()
 {
-    $request = new FakeApiRequester();
-    $request
+    $request = (new FakeApiRequester())
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
-        ->withPath("/sample/ping")
-        ->assertResponseCode(404)
-    ;
-    $this->assertRequest($request);
+        ->withPath('/sample/ping')
+        ->expectStatus(404);
+
+    $this->sendRequest($request);
 }
 ```
 
-## Expect a specific response body
+## Expecting a Specific Response Body
 
 ```php
-public function testPing()
+public function testPingResponse()
 {
-    $request = new FakeApiRequester();
-    $request
+    $request = (new FakeApiRequester())
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
-        ->withPath("/sample/ping")
-        ->assertResponseBody([
-            'message' => 'pong'
-        ])
-    ;
-    $this->assertRequest($request);
+        ->withPath('/sample/ping')
+        ->expectJsonContains(['result' => 'pong']);
+
+    $this->sendRequest($request);
 }
 ```

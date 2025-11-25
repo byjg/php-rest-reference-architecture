@@ -6,8 +6,15 @@ use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
+use ByJG\MicroOrm\Literal\LiteralInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
-use OpenApi\Attributes as OA;
+{% if activerecord %}use ByJG\MicroOrm\Query;
+use ByJG\MicroOrm\Trait\ActiveRecord;
+{% endif %}use OpenApi\Attributes as OA;
+{% if hasCreatedAt %}use {{ namespace }}\Trait\OaCreatedAt;
+{% endif %}{% if hasUpdatedAt %}use {{ namespace }}\Trait\OaUpdatedAt;
+{% endif %}{% if hasDeletedAt %}use {{ namespace }}\Trait\OaDeletedAt;
+{% endif %}
 
 /**
  * Class {{ className }}
@@ -17,33 +24,57 @@ use OpenApi\Attributes as OA;
 #[Table{% if autoIncrement == "no" %}MySqlUuidPK{% endif %}Attribute("{{ tableName }}")]
 class {{ className }}
 {
-{% for field in fields %}
+{% if activerecord %}    // Add the ActiveRecord trait to enable Active Record pattern
+    use ActiveRecord;
+
+{% endif %}{% if hasCreatedAt or hasUpdatedAt or hasDeletedAt %}    // Add timestamp traits for automatic timestamp handling
+{% if hasCreatedAt %}    use OaCreatedAt;
+{% endif %}{% if hasUpdatedAt %}    use OaUpdatedAt;
+{% endif %}{% if hasDeletedAt %}    use OaDeletedAt;
+{% endif %}
+{% endif %}{% for field in fields %}{% if field.field != 'created_at' and field.field != 'updated_at' and field.field != 'deleted_at' %}
     /**
-     * @var {{ field.php_type }}|null
+     * @var {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null
      */
     #[OA\Property(type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %})]
     #[Field{% if 'binary' in field.type %}Uuid{% endif %}Attribute({% if field.key == "PRI" %}primaryKey: true, {% endif %}fieldName: "{{ field.field }}"{% if 'VIRTUAL' in field.extra %}, syncWithDb: false{% endif %})]
-    protected {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }} = null;
-{% endfor %}
+    protected {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null ${{ field.property }} = null;
+{% endif %}{% endfor %}
 
-{% for field in fields %}
+{% for field in fields %}{% if field.field != 'created_at' and field.field != 'updated_at' and field.field != 'deleted_at' %}
     /**
-     * @return {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null
+     * @return {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null
      */
-    public function get{{ field.property | capitalize }}(): {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null
+    public function get{{ field.property | capitalize }}(): {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null
     {
         return $this->{{ field.property }};
     }
 
     /**
-     * @param {{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }}
+     * @param {{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null ${{ field.property }}
      * @return $this
      */
-    public function set{{ field.property | capitalize }}({{ field.php_type }}{% if 'binary' in field.type %}|HexUuidLiteral{% endif %}|null ${{ field.property }}): static
+    public function set{{ field.property | capitalize }}({{ field.php_type }}{% if 'binary' in field.type %}|LiteralInterface{% endif %}|null ${{ field.property }}): static
     {
+        {% if 'binary' in field.type %}if (${{ field.property }} instanceof LiteralInterface) {
+            ${{ field.property }} = new HexUuidLiteral(${{ field.property }});
+        }{% endif %}
         $this->{{ field.property }} = ${{ field.property }};
         return $this;
     }
-{% endfor %}
+{% endif %}{% endfor %}
+{% if activerecord %}{% for index in indexes %}{% if index.key_name != 'PRIMARY' %}
 
+    /**
+     * @param mixed ${{ index.camelColumnName }}
+     * @return null|{{ className }}[]
+     */
+    public static function getBy{{ index.camelColumnName | capitalize }}(${{ index.camelColumnName }}): ?array
+    {
+        $query = Query::getInstance()
+            ->table(self::$repository->getMapper()->getTable(), 'alias')
+            ->where('alias.{{ index.column_name }} = :value', ['value' => ${{ index.camelColumnName }}]);
+        return self::query($query);
+    }
+{% endif %}{% endfor %}{% endif %}
 }

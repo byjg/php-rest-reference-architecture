@@ -1,0 +1,13 @@
+<?php
+
+namespace {{ namespace }}\Service;
+
+use {{ namespace }}\Repository\{{ className }}Repository;
+
+class {{ className }}Service extends BaseService
+{
+    public function __construct({{ className }}Repository $baseRepository)
+    {
+        parent::__construct($baseRepository);
+    }
+}

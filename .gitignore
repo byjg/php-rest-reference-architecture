@@ -14,3 +14,8 @@ thunder-tests
 .secrets
 .env
 ignore.txt
+/.claude/settings.local.json
+/.bash_history
+
+# Setup configuration (keep example only)
+setup.json

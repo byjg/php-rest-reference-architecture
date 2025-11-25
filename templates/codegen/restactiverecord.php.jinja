@@ -1,0 +1,255 @@
+<?php
+
+namespace {{ namespace }}\Rest;
+
+use ByJG\Config\Exception\ConfigException;
+use ByJG\Config\Exception\ConfigNotFoundException;
+use ByJG\Config\Exception\DependencyInjectionException;
+use ByJG\Config\Exception\InvalidDateException;
+use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\MicroOrm\Exception\InvalidArgumentException;
+use ByJG\MicroOrm\Exception\OrmBeforeInvalidException;
+use ByJG\MicroOrm\Exception\OrmInvalidFieldsException;
+use ByJG\RestServer\Exception\Error400Exception;
+use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use OpenApi\Attributes as OA;
+use ReflectionException;
+use {{ namespace }}\Attributes\RequireAuthenticated;
+use {{ namespace }}\Attributes\RequireRole;
+use {{ namespace }}\Attributes\ValidateRequest;
+use {{ namespace }}\Model\{{ className }};
+use {{ namespace }}\Model\User;
+
+class {{ className }}Rest
+{
+    /**
+     * Get the {{ className }} by id
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @throws Error404Exception
+     */
+    #[OA\Get(
+        path: "/{{ restPath }}/{id}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"],
+    )]
+    #[OA\Parameter(
+        name: "id",
+        in: "path",
+        required: true,
+        schema: new OA\Schema(
+            type: "{{ fields.0.openapi_type }}",
+            format: "{{ fields.0.openapi_format }}"
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object {{ className }}",
+        content: new OA\JsonContent(ref: "#/components/schemas/{{ className }}")
+    )]
+    #[RequireAuthenticated]
+    public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
+    {
+        $model = {{ className }}::get($request->param('id'));
+
+        if (is_null($model)) {
+            throw new Error404Exception("{{ className }} not found");
+        }
+
+        $response->write($model);
+    }
+
+    /**
+     * List {{ className }}
+     *
+     * @param mixed $response
+     * @param mixed $request
+     * @return void
+     */
+    #[OA\Get(
+        path: "/{{ restPath }}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"]
+    )]
+    #[OA\Parameter(
+        name: "page",
+        description: "Page number",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "integer",
+        )
+    )]
+    #[OA\Parameter(
+        name: "size",
+        description: "Page size",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "integer",
+        )
+    )]
+    #[OA\Parameter(
+        name: "orderBy",
+        description: "Order by",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "string",
+        )
+    )]
+    #[OA\Parameter(
+        name: "filter",
+        description: "Filter",
+        in: "query",
+        required: false,
+        schema: new OA\Schema(
+            type: "string",
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object {{ className }}",
+        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/{{ className }}"))
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    #[RequireAuthenticated]
+    public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
+    {
+        // Get all records with pagination (default is page 0, limit 50)
+        $models = {{ className }}::all($request->get('page') ?? 0, $request->get('size') ?? 50);
+        $response->write($models);
+    }
+
+
+    /**
+     * Create a new {{ className }}
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @return void
+     */
+    #[OA\Post(
+        path: "/{{ restPath }}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"]
+    )]
+    #[OA\RequestBody(
+        description: "The object {{ className }} to be created",
+        required: true,
+        content: new OA\JsonContent(
+            {% if nonNullableFields | count > 0 %}required: [ "{{ nonNullableFields | join('", "')}}" ],{% endif %}
+            properties: [
+{% for field in fields -%}{% if field.key != "PRI" && field.extra != 'VIRTUAL GENERATED' && field.property != 'createdAt' && field.property != 'updatedAt' && field.property != 'deletedAt' -%}
+                new OA\Property(property: "{{ field.property }}", type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"{% if field.null == "YES" %}, nullable: true{% endif %}){% if loop.last == false %}, {% endif %}
+{% endif %}{% endfor %}
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The object to be created",
+        content: new OA\JsonContent(
+            required: [ "{{ primaryKeys | join('", "') }}" ],
+            properties: [
+{% for field in fields -%}
+{% if field.key == 'PRI' -%}                new OA\Property(property: "{{ field.property }}", type: "{{ field.openapi_type }}", format: "{{ field.openapi_format }}"){% endif %}
+{% endfor %}
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
+    public function post{{ className }}(HttpResponse $response, HttpRequest $request): void
+    {
+        $payload = ValidateRequest::getPayload();
+
+        // Create a new ActiveRecord instance with payload
+        $model = {{ className }}::new($payload);
+        $model->save();
+
+        $response->write(["id" => $model->getId()]);
+    }
+
+
+    /**
+     * Update an existing {{ className }}
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @return void
+     * @throws Error401Exception
+     * @throws Error404Exception
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws InvalidArgumentException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws Error400Exception
+     * @throws Error403Exception
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     */
+    #[OA\Put(
+        path: "/{{ restPath }}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["{{ restTag }}"]
+    )]
+    #[OA\RequestBody(
+        description: "The object {{ className }} to be updated",
+        required: true,
+        content: new OA\JsonContent(ref: "#/components/schemas/{{ className }}")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Nothing to return"
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
+    public function put{{ className }}(HttpResponse $response, HttpRequest $request): void
+    {
+        $payload = ValidateRequest::getPayload();
+
+        $model = {{ className }}::get($payload['id'] ?? null);
+
+        if (is_null($model)) {
+            throw new Error404Exception("{{ className }} not found");
+        }
+
+        // Update model with payload using fill() method
+        $model->fill($payload);
+        $model->save();
+    }
+
+}

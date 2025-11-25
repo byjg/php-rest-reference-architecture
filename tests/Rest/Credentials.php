@@ -2,9 +2,9 @@
 
 namespace Test\Rest;
 
+use ByJG\Config\Config;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Psr7\Request;
-use RestReferenceArchitecture\Psr11;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
 class Credentials
@@ -28,8 +28,8 @@ class Credentials
     public static function requestLogin($cred): FakeApiRequester
     {
         $uri = Uri::getInstanceFromString()
-            ->withScheme(Psr11::get("API_SCHEMA"))
-            ->withHost(Psr11::get("API_SERVER"));
+            ->withScheme(Config::get("API_SCHEMA"))
+            ->withHost(Config::get("API_SERVER"));
 
         $psr7Request = Request::getInstance($uri);
 
@@ -38,7 +38,7 @@ class Credentials
             ->withPsr7Request($psr7Request)
             ->withMethod('POST')
             ->withPath("/login")
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestBody($cred)
         ;
         return $request;

@@ -2,42 +2,92 @@
 
 namespace RestReferenceArchitecture\Util;
 
+use ByJG\Authenticate\Enum\UserField;
+use ByJG\Authenticate\Model\UserToken;
+use ByJG\Authenticate\Service\UsersService;
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
 use ByJG\Config\Exception\InvalidDateException;
 use ByJG\Config\Exception\KeyNotFoundException;
+use ByJG\Config\Exception\RunTimeException;
 use ByJG\JwtWrapper\JwtWrapper;
-use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\RestServer\Exception\Error401Exception;
-use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\Middleware\JwtMiddleware;
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
 
 class JwtContext
 {
     protected static ?HttpRequest $request;
 
     /**
-     * @param ?User $user
-     * @return array
+     * @param User|string $user
+     * @param string $password
+     * @return UserToken|null
+     * @throws ConfigException
+     * @throws DependencyInjectionException
      * @throws Error401Exception
+     * @throws InvalidArgumentException
+     * @throws KeyNotFoundException
+     * @throws ReflectionException
+     * @throws RunTimeException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public static function createUserMetadata(?User $user): array
+    public static function createUserMetadata(User|string $user, string $password = ""): UserToken|null
     {
-        if (is_null($user)) {
-            throw new Error401Exception('Username or password is invalid');
+        /** @var UsersService $usersService */
+        $usersService = Config::get(UsersService::class);
+
+        try {
+            $jwtWrapper = Config::get(JwtWrapper::class);
+            $expires = 3600;
+            $tokenFields = [
+                UserField::Userid,
+                UserField::Name,
+                UserField::Role->value => User::ROLE_USER, // If role is empty, return User::ROLE_USER
+            ];
+
+            if (is_string($user)) {
+                $login = $user;
+            } else {
+                $usernameValue = $user->get(UserField::Username->value);
+                if (!is_string($usernameValue)) {
+                    throw new Error401Exception("Username must be a string");
+                }
+                $login = $usernameValue;
+            }
+            if (empty($login)) {
+                throw new Error401Exception("Username not found");
+            }
+
+            if (empty($password)) {
+                $userToken = $usersService->createInsecureAuthToken(
+                    login: $login,
+                    jwtWrapper: $jwtWrapper,
+                    expires: $expires,
+                    tokenUserFields: $tokenFields
+                );
+            } else {
+                $userToken = $usersService->createAuthToken(
+                    login: $login,
+                    password: $password,
+                    jwtWrapper: $jwtWrapper,
+                    expires: $expires,
+                    tokenUserFields: $tokenFields
+                );
+            }
+        } catch (Exception $ex) {
+            throw new Error401Exception($ex->getMessage());
         }
 
-        return [
-            'role' => ($user->getAdmin() === User::VALUE_YES ? User::ROLE_ADMIN : User::ROLE_USER),
-            'userid' => HexUuidLiteral::getFormattedUuid($user->getUserid()),
-            'name' => $user->getName(),
-        ];
+        return $userToken;
     }
 
     /**
@@ -51,45 +101,16 @@ class JwtContext
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    public static function createToken(array $properties = [])
+    public static function createToken(array $properties = []): mixed
     {
-        $jwt = Psr11::get(JwtWrapper::class);
+        $jwt = Config::get(JwtWrapper::class);
         $jwtData = $jwt->createJwtData($properties, 60 * 60 * 24 * 7); // 7 Dias
         return $jwt->generateToken($jwtData);
     }
 
-    /**
-     * @param HttpRequest $request
-     * @return void
-     * @throws Error401Exception
-     */
-    public static function requireAuthenticated(HttpRequest $request): void
+    public static function setRequest(HttpRequest $request): void
     {
         self::$request = $request;
-        if ($request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS) !== JwtMiddleware::JWT_SUCCESS) {
-            throw new Error401Exception($request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE));
-        }
-    }
-
-    public static function parseJwt(HttpRequest $request): void
-    {
-        self::$request = $request;
-    }
-
-    /**
-     * @param HttpRequest $request
-     * @param string $role
-     * @return void
-     * @throws Error401Exception
-     * @throws Error403Exception
-     * @throws InvalidArgumentException
-     */
-    public static function requireRole(HttpRequest $request, string $role): void
-    {
-        self::requireAuthenticated($request);
-        if (JwtContext::getRole() !== $role) {
-            throw new Error403Exception('Insufficient privileges');
-        }
     }
 
     protected static function getRequestParam(string $value): ?string

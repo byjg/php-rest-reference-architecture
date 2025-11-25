@@ -1,52 +1,113 @@
+---
+sidebar_position: 90
+---
+
 # Database ORM
 
-To query the database you can use the ORM. The ORM uses the [byjg/micro-orm](https://github.com/byjg/micro-orm)
+The reference architecture uses [byjg/micro-orm](https://github.com/byjg/micro-orm) with PHP 8 attributes. Your models declare the mapping, repositories receive the shared `DatabaseExecutor`, and `BaseRepository` supplies common helpers.
 
-You can start by creating a class inheriting from `BaseRepository` and defining the table name and the primary key.
+## 1. Model Mapping with Attributes
+
+Annotate your models with `TableAttribute` / `FieldAttribute` (or the UUID variants) so Micro ORM knows how to persist each property.
 
 ```php
-    public function __construct(DbDriverInterface $dbDriver)
+<?php
+
+namespace RestReferenceArchitecture\Model;
+
+use ByJG\MicroOrm\Attributes\FieldAttribute;
+use ByJG\MicroOrm\Attributes\TableAttribute;
+
+#[TableAttribute("dummy")]
+class Dummy
+{
+    #[FieldAttribute(primaryKey: true, fieldName: "id")]
+    protected ?int $id = null;
+
+    #[FieldAttribute(fieldName: "field")]
+    protected ?string $field = null;
+
+    // getters/setters omitted for brevity
+}
+```
+
+Need UUID support? Use `#[TableMySqlUuidPKAttribute]` + `#[FieldUuidAttribute]` as shown in `src/Model/DummyHex.php` and `src/Model/User.php`. They automatically read/write binary UUIDs via `HexUuidLiteral`.
+
+## 2. Repository Definition
+
+Repositories extend `RestReferenceArchitecture\Repository\BaseRepository`. Inject `ByJG\AnyDataset\Db\DatabaseExecutor` and hand it to `ByJG\MicroOrm\Repository`, pointing at your model class:
+
+```php
+<?php
+
+namespace RestReferenceArchitecture\Repository;
+
+use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\MicroOrm\Repository;
+use RestReferenceArchitecture\Model\Dummy;
+
+class DummyRepository extends BaseRepository
+{
+    public function __construct(DatabaseExecutor $executor)
     {
-        $mapper = new Mapper(
-            Your_Model_Class::class,
-            'table_name',
-            'primary_key_field'
-        );
-
-        $this->repository = new Repository($dbDriver, $mapper);
+        $this->repository = new Repository($executor, Dummy::class);
     }
+}
 ```
 
-Then you can use the `Repository` class to query the database.
+`BaseRepository` already exposes useful helpers:
 
 ```php
-// Get a single row from DB based on your PK and return a model
-$repository->get($id)
-
-// Get all records from DB and create them as a list of models
-$repository->getAll()
-
-// Delete a row
-$repository->delete($model)
-
-// Insert a new row or update an existing row in the database
-$repository->save($model)
+$dummy = $repository->get($id);
+$list  = $repository->list(page: 0, size: 20);
+$model = $repository->model();          // New instance of mapped entity
+$repo  = $repository->getRepository();  // Direct access to ByJG\Repository
+$mapper = $repository->getMapper();     // Underlying Mapper instance
 ```
 
-You also can create custom queries:
+Saving and deleting records delegates to Micro ORM while keeping literals in sync:
 
 ```php
-    public function getByName($value)
+$model = $repository->model()
+    ->setField('hello world');
+
+$saved = $repository->save($model);
+$repository->delete($saved->getId());
+```
+
+## 3. Custom Queries
+
+Use `ByJG\MicroOrm\Query` (or any `QueryBuilderInterface`) for filtered results:
+
+```php
+use ByJG\MicroOrm\Query;
+
+class DummyRepository extends BaseRepository
+{
+    public function findByField(string $value): array
     {
         $query = Query::getInstance()
-            ->table('table_name')
-            ->where('table_name.name = :name', ['name' => $value]);
+            ->table($this->getMapper()->getTable())
+            ->where('field = :value', ['value' => $value])
+            ->orderBy(['id DESC']);
 
-        $result = $this->repository->getByQuery($query);
-        if (is_null($result)) {
-            return null;
-        }
-
-        return $result;
+        return $this->getRepository()->getByQuery($query);
     }
+}
 ```
+
+`listQuery()` (in `BaseRepository`) already builds paginated queries—pass filters, order clauses, and selected fields as needed. For raw arrays (instead of model hydration), call `listGeneric()` to run ad-hoc queries while reusing the same pagination helpers.
+
+## 4. Working with UUIDs
+
+Binary UUID columns are transparent when you rely on the attribute helpers:
+
+- `#[TableMySqlUuidPKAttribute("dummy_hex")]` wires the table and default UUID generator.
+- `#[FieldUuidAttribute(primaryKey: true)]` handles binary ⇄ string conversion automatically.
+- `HexUuidLiteral::create($uuid)` lets you query by UUID strings without manual hex handling.
+
+`BaseRepository::save()` normalizes any UUID `Literal` back to a formatted string so controllers/tests can keep using human-readable IDs.
+
+## 5. Services and REST Controllers
+
+Repositories are registered in `config/<env>/04-repositories.php` and injected into services (see `src/Service/DummyService.php`). Services orchestrate repositories, and REST controllers resolve services via the PSR-11 container. For deeper patterns (DTOs, filters, transactions), read [Repository Patterns](repository-advanced.md) and [Service Layer](services.md).

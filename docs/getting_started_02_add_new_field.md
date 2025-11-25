@@ -1,4 +1,8 @@
-# Getting Started - Adding a new field to the Table
+---
+sidebar_position: 30
+---
+
+# Add a New Field
 
 Now we have the table `example_crud` created in the [previous tutorial](getting_started_01_create_table.md),
 let's modify it to add a new field `status`.
@@ -25,6 +29,8 @@ alter table example_crud
 
 ```shell
 APP_ENV=dev composer run migrate -- update
+# OR
+composer run migrate -- --env=dev update
 ```
 
 
@@ -60,14 +66,17 @@ Open the file: `src/Model/ExampleCrud.php` and add the field `status`:
 ...
 ```
 
-## Adding the field status to the `Repository`
+## Updating the Repository
 
-As we are just adding a new field, and we already updated the Model to support this new field
-we don't need to change the `Repository` class.
+As we're just adding a new field and already updated the Model, we don't need to change the `Repository` class. The ORM will automatically handle the new field.
 
-## Adding the field status to the `Rest`
+## Updating the Service
 
-We just need to allow the rest receive the new field. If we don't do it the API will throw an error.
+Similarly, no changes needed in the `Service` class. The `BaseService` methods automatically work with the updated Model.
+
+## Updating the REST Controller
+
+We just need to allow the rest to receive the new field. If we don't do it, the API will throw an error.
 
 Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to method `postExampleCrud()`:
 
@@ -89,9 +98,9 @@ Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to 
     public function postExampleCrud(HttpResponse $response, HttpRequest $request)
 ```
 
-## Adding the field status to the `Test`
+## Updating the Tests
 
-We only need to change our method `getSample()` to return the status.
+We only need to update the `getSampleData()` method to include the new field.
 Open the file: `tests/Rest/ExampleCrudTest.php`
 
 ```php
@@ -117,9 +126,9 @@ composer run openapi
 If everything is ok, the tests should pass:
 
 ```shell
-composer run test
+APP_ENV=test composer run test
 ```
 
-## Continue the tutorial
+## Next Steps
 
-[Next: Creating a rest method](getting_started_03_create_rest_method.md)
+[Next: Creating a REST method](getting_started_03_create_rest_method.md)

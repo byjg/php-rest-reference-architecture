@@ -2,6 +2,7 @@
 
 namespace RestReferenceArchitecture\Rest;
 
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -16,15 +17,13 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Serializer\ObjectCopy;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use RestReferenceArchitecture\Model\Dummy;
+use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Psr11;
-use RestReferenceArchitecture\Repository\DummyRepository;
-use RestReferenceArchitecture\Util\JwtContext;
-use RestReferenceArchitecture\Util\OpenApiContext;
+use RestReferenceArchitecture\Service\DummyService;
 
 class DummyRest
 {
@@ -66,27 +65,19 @@ class DummyRest
         description: "The object Dummy",
         content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
     )]
+    #[RequireAuthenticated]
     public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
-        $dummyRepo = Psr11::get(DummyRepository::class);
-        $id = $request->param('id');
-
-        $result = $dummyRepo->get($id);
-        if (empty($result)) {
-            throw new Error404Exception('Id not found');
-        }
-        $response->write(
-            $result
-        );
+        $dummyService = Config::get(DummyService::class);
+        $result = $dummyService->getOrFail($request->param('id'));
+        $response->write($result);
     }
 
     /**
      * List Dummy
      *
-     * @param mixed $response
-     * @param mixed $request
+     * @param HttpResponse $response
+     * @param HttpRequest $request
      * @return void
      * @throws ConfigException
      * @throws ConfigNotFoundException
@@ -152,26 +143,17 @@ class DummyRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireAuthenticated]
     public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireAuthenticated($request);
-
-        $repo = Psr11::get(DummyRepository::class);
-
-        $page = $request->get('page');
-        $size = $request->get('size');
-        // $orderBy = $request->get('orderBy');
-        // $filter = $request->get('filter');
-
-        $result = $repo->list($page, $size);
-        $response->write(
-            $result
-        );
+        $dummyService = Config::get(DummyService::class);
+        $result = $dummyService->list($request->get('page'), $request->get('size'));
+        $response->write($result);
     }
 
 
     /**
-     * Create a new Dummy
+     * Create a new Dummy 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -225,24 +207,18 @@ class DummyRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
-
-        $model = new Dummy();
-        ObjectCopy::copy($payload, $model);
-
-        $dummyRepo = Psr11::get(DummyRepository::class);
-        $dummyRepo->save($model);
-
-        $response->write([ "id" => $model->getId()]);
+        $dummyService = Config::get(DummyService::class);
+        $model = $dummyService->create(ValidateRequest::getPayload());
+        $response->write(["id" => $model->getId()]);
     }
 
 
     /**
-     * Update an existing Dummy
+     * Update an existing Dummy 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -284,20 +260,12 @@ class DummyRest
         description: "Not Authorized",
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    #[ValidateRequest]
     public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        JwtContext::requireRole($request, User::ROLE_ADMIN);
-
-        $payload = OpenApiContext::validateRequest($request);
-
-        $dummyRepo = Psr11::get(DummyRepository::class);
-        $model = $dummyRepo->get($payload['id']);
-        if (empty($model)) {
-            throw new Error404Exception('Id not found');
-        }
-        ObjectCopy::copy($payload, $model);
-
-        $dummyRepo->save($model);
+        $dummyService = Config::get(DummyService::class);
+        $dummyService->update(ValidateRequest::getPayload());
     }
 
 }

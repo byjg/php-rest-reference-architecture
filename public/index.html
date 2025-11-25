@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP REST Reference Architecture - API Test Console</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 10px 5px 0;
+            font-size: 0.9em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #283E51;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .collapsible-section {
+            margin-bottom: 15px;
+        }
+
+        .collapsible {
+            background: #f8f9fa;
+            color: #333;
+            cursor: pointer;
+            padding: 18px 24px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+
+        .collapsible.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .collapsible::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .collapsible.active::after {
+            content: '−';
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #ffffff;
+        }
+
+        .collapsible-content.active {
+            max-height: 2000px;
+        }
+
+        .collapsible-inner {
+            padding: 24px;
+            border-left: 4px solid #e9ecef;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .step {
+            margin-bottom: 16px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .step::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .step strong {
+            color: #667eea;
+        }
+
+        code {
+            background: #f1f3f5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #764ba2;
+            display: inline-block;
+            margin: 4px 0;
+        }
+
+        .code-wrapper {
+            position: relative;
+            margin: 12px 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 16px;
+            padding-right: 140px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .code-block .keyword { color: #ff79c6; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .comment { color: #6272a4; font-style: italic; }
+        .code-block .function { color: #50fa7b; }
+        .code-block .class { color: #8be9fd; }
+        .code-block .variable { color: #bd93f9; }
+
+        .copy-btn, .open-btn {
+            position: absolute;
+            top: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            transition: opacity 0.2s, background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            line-height: normal;
+        }
+
+        .copy-btn {
+            right: 8px;
+        }
+
+        .open-btn {
+            right: 75px;
+            background: #764ba2;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            background: #5568d3;
+        }
+
+        .open-btn:hover {
+            opacity: 1;
+            background: #63408a;
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card h3 {
+            color: #283E51;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .resources {
+            margin-top: 32px;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .resources h3 {
+            color: #283E51;
+            margin-bottom: 16px;
+            font-size: 1.3em;
+        }
+
+        .resources ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .resources li {
+            padding: 8px 0;
+        }
+
+        .resources a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .resources a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .cta-section h2 {
+            color: white;
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        footer {
+            background: #1a1a2e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        footer p {
+            margin: 4px 0;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .response-container {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        .response-header h3 {
+            color: #f8f8f2;
+            font-size: 1.1em;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .status-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .response-body {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .clear-btn-resp {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .clear-btn-resp:hover {
+            background: #5a6268;
+        }
+
+        .copy-token-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .copy-token-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-token-btn.copied {
+            background: #28a745;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .code-block {
+                padding-right: 16px;
+            }
+
+            .copy-btn, .open-btn {
+                position: relative;
+                display: inline-block;
+                margin-top: 8px;
+                right: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 PHP REST Reference Architecture</h1>
+            <p>Production-ready boilerplate to build professional REST APIs</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>📚 Quick Start Guide</h2>
+
+                <div class="collapsible-section">
+                    <button class="collapsible">Create a New Migration</button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <div class="step"><strong>Step 1:</strong> Create an "up" migration file in <code>db/migrations/up/</code> using format <code>0000X-description.sql</code></div>
+                            <div class="step"><strong>Step 2:</strong> Create a "down" migration file in <code>db/migrations/down/</code> for rollbacks (number should be X-1)</div>
+                            <div class="step"><strong>Step 3:</strong> Apply the migration</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">APP_ENV=dev composer run migrate -- update</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Reset database:</strong> Destroys all data and reapplies migrations</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">APP_ENV=dev composer run migrate -- reset --yes</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-section">
+                    <button class="collapsible">Generate Classes from Database Table</button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <div class="step"><strong>Step 1:</strong> Ensure your table exists (via migrations)</div>
+                            <div class="step"><strong>Step 2:</strong> Run codegen for <strong>Repository Pattern</strong> (clean separation of concerns)</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">APP_ENV=dev composer run codegen -- --table=products all --save</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Alternative:</strong> Use <strong>ActiveRecord Pattern</strong> for rapid development</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">APP_ENV=dev composer run codegen -- --table=products all --activerecord --save</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Step 3:</strong> Update OpenAPI documentation</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">APP_ENV=dev composer run openapi</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Generated:</strong> Model, Repository/ActiveRecord, Service (repository only), REST Controller, Tests, and DI bindings</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-section">
+                    <button class="collapsible">View OpenAPI Documentation</button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <div class="step"><strong>Access Swagger UI:</strong> View interactive API documentation</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">http://localhost:8080/docs</div>
+                                <a href="http://localhost:8080/docs" target="_blank" class="open-btn">Open</a>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Update after code changes:</strong> Regenerate OpenAPI spec</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">APP_ENV=dev composer run openapi</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>OpenAPI file:</strong> <code>public/docs/openapi.json</code></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-section">
+                    <button class="collapsible">Use Dependency Injection</button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <div class="step"><strong>Step 1:</strong> Register in DI container (e.g., <code>config/dev/05-services.php</code>)</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">use ByJG\Config\DependencyInjection as DI;
+
+return [
+    ProductsService::class => DI::bind(ProductsService::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
+];</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Step 2:</strong> Get service from container in your code</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">use ByJG\Config\Config;
+
+$service = Config::get(ProductsService::class);
+$result = $service->getOrFail($id);</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Note:</strong> Codegen automatically creates DI bindings. Uses PSR-11 compatible container.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-section">
+                    <button class="collapsible">Create a New Endpoint</button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <div class="step"><strong>Step 1:</strong> Create REST controller with OpenAPI attributes</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">use OpenApi\Attributes as OA;
+use ByJG\Config\Config;
+
+#[OA\Get(
+    path: "/products/{id}",
+    security: [["jwt-token" => []]],
+    tags: ["Products"]
+)]
+#[RequireAuthenticated]
+public function getProduct(HttpResponse $response, HttpRequest $request): void {
+    $service = Config::get(ProductsService::class);
+    $result = $service->getOrFail($request->param('id'));
+    $response->write($result);
+}</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Step 2:</strong> Regenerate OpenAPI documentation</div>
+                            <div class="code-wrapper">
+                                <div class="code-block">APP_ENV=dev composer run openapi</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Tip:</strong> Use codegen to auto-create full CRUD endpoints</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-section">
+                    <button class="collapsible">Authentication & Authorization</button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <div class="step"><strong>Login to get JWT token:</strong></div>
+                            <div class="code-wrapper">
+                                <div class="code-block">curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin@example.com","password":"!P4ssw0rdstr!"}'</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Use token in requests:</strong></div>
+                            <div class="code-wrapper">
+                                <div class="code-block">curl http://localhost:8080/products/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"</div>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <div class="step"><strong>Protect endpoints:</strong> Use <code>#[RequireAuthenticated]</code> or <code>#[RequireRole(User::ROLE_ADMIN)]</code></div>
+                            <div class="step"><strong>Access user data:</strong> <code>JwtContext::getUserId()</code>, <code>JwtContext::getRole()</code></div>
+                            <div class="step"><strong>Default users:</strong> admin@example.com / user@example.com (password: !P4ssw0rdstr!)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🧪 API Test Console</h2>
+
+                <div id="authStatusSection" style="margin-bottom: 20px;">
+                    <div id="authStatus" style="padding: 15px; border-radius: 8px; font-weight: 600; text-align: center; font-size: 1.1em;"></div>
+                    <div id="tokenDisplay" style="margin-top: 10px;"></div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🔐 Authentication</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="login('user')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            Login as User<br><small style="opacity: 0.9;">user@example.com</small>
+                        </button>
+                        <button onclick="login('admin')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            Login as Admin<br><small style="opacity: 0.9;">admin@example.com</small>
+                        </button>
+                        <button onclick="logout()" style="background: #6c757d; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Start Example -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🌐 Public Endpoints</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/sample/ping')" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /sample/ping<br><small style="opacity: 0.9;">No auth required</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🔒 Protected Endpoints</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/sampleprotected/ping')" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /sampleprotected/ping<br><small style="opacity: 0.9;">Auth required</small>
+                        </button>
+                        <button onclick="apiCall('GET', '/sampleprotected/pingadm')" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /sampleprotected/pingadm<br><small style="opacity: 0.9;">Admin only</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">📦 CRUD - Dummy</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/dummy')" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy<br><small style="opacity: 0.9;">List all</small>
+                        </button>
+                        <button onclick="createDummy()" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            POST /dummy<br><small style="opacity: 0.9;">Create new</small>
+                        </button>
+                        <button onclick="apiCall('GET', '/dummy/1')" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy/1<br><small style="opacity: 0.9;">Get by ID</small>
+                        </button>
+                        <button onclick="updateDummy()" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            PUT /dummy/1<br><small style="opacity: 0.9;">Update</small>
+                        </button>
+                        <button onclick="apiCall('DELETE', '/dummy/1')" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            DELETE /dummy/1<br><small style="opacity: 0.9;">Delete</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #283E51; margin-bottom: 15px;">🔷 CRUD - DummyHex (UUID)</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <button onclick="apiCall('GET', '/dummy/hex')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy/hex<br><small style="opacity: 0.9;">List all</small>
+                        </button>
+                        <button onclick="createDummyHex()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            POST /dummy/hex<br><small style="opacity: 0.9;">Create new</small>
+                        </button>
+                        <button onclick="getDummyHexById()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            GET /dummy/hex/{uuid}<br><small style="opacity: 0.9;">Get by UUID</small>
+                        </button>
+                        <button onclick="updateDummyHex()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            PUT /dummy/hex<br><small style="opacity: 0.9;">Update</small>
+                        </button>
+                        <button onclick="deleteDummyHex()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">
+                            DELETE /dummy/hex/{uuid}<br><small style="opacity: 0.9;">Delete</small>
+                        </button>
+                    </div>
+                </div>
+                <!-- End Example -->
+
+                <div id="responseContainer"></div>
+            </div>
+
+            <div class="section">
+                <div class="resources">
+                    <h3>🔍 Want More?</h3>
+                    <ul>
+                        <li><a href="https://opensource.byjg.com/docs/php/micro-orm" target="_blank">Micro-ORM Documentation</a> - Lightweight database abstraction layer</li>
+                        <li><a href="https://opensource.byjg.com/docs/php/migration" target="_blank">Migration Tool</a> - Database version control</li>
+                        <li><a href="https://opensource.byjg.com/docs/php/anydataset" target="_blank">AnyDataset</a> - Work with multiple data sources</li>
+                        <li><a href="https://opensource.byjg.com/docs/php/rest-server" target="_blank">REST Server</a> - OpenAPI-first REST framework</li>
+                        <li><a href="https://opensource.byjg.com/docs/php/jwt-wrapper" target="_blank">JWT Wrapper</a> - JSON Web Token authentication</li>
+                        <li><a href="https://opensource.byjg.com" target="_blank">Complete Documentation</a> - All ByJG components</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <h2>🔍 Explore More</h2>
+                <p>View API documentation and source code</p>
+                <a href="/docs" class="btn">API Documentation</a>
+                <a href="https://github.com/byjg/php-rest-reference-architecture" class="btn btn-secondary" target="_blank">GitHub Project</a>
+                <a href="https://opensource.byjg.com" class="btn btn-secondary" target="_blank">Complete Documentation</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>PHP REST Reference ByJG | <a href="http://opensource.byjg.com" target="_blank">Open Source ByJG</a></p>
+            <p>Licensed under MIT | Built with ❤️ for the PHP Community</p>
+        </footer>
+    </div>
+
+    <script>
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                // Close all other sections
+                for (var j = 0; j < coll.length; j++) {
+                    if (coll[j] !== this) {
+                        coll[j].classList.remove("active");
+                        coll[j].nextElementSibling.classList.remove("active");
+                    }
+                }
+
+                // Toggle current section
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                content.classList.toggle("active");
+            });
+        }
+
+        function copyCode(button) {
+            var codeBlock = button.parentElement.querySelector('.code-block');
+            var code = codeBlock.textContent;
+
+            navigator.clipboard.writeText(code).then(function() {
+                var originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(function() {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+                button.textContent = 'Failed';
+                setTimeout(function() {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function highlightPHP(code) {
+            // Escape HTML first
+            code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            // Strings (do this first to protect their content)
+            code = code.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g, '<span class="string">$1</span>');
+
+            // Comments
+            code = code.replace(/(\/\/[^\n]*)/g, '<span class="comment">$1</span>');
+            code = code.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>');
+
+            // Attributes (PHP 8)
+            code = code.replace(/#\[([^\]]+)\]/g, function(match) {
+                return match.replace(/([A-Z][a-zA-Z0-9_\\]*)/g, '<span class="class">$1</span>');
+            });
+
+            // Class::constant or Class::method
+            code = code.replace(/\b([A-Z][a-zA-Z0-9_\\]*)::/g, '<span class="class">$1</span>::');
+
+            // Variables
+            code = code.replace(/(\$[a-zA-Z_][a-zA-Z0-9_]*)/g, '<span class="variable">$1</span>');
+
+            // Keywords (but not inside strings or comments)
+            var keywords = 'use|namespace|class|function|public|private|protected|static|return|new|if|else|foreach|as|extends|implements|interface|const|trait|void';
+            code = code.replace(new RegExp('\\b(' + keywords + ')\\b(?![^<]*<\\/span>)', 'g'), '<span class="keyword">$1</span>');
+
+            // Function calls (word followed by opening parenthesis)
+            code = code.replace(/\b([a-z_][a-zA-Z0-9_]*)\s*\(/g, '<span class="function">$1</span>(');
+
+            // Method calls
+            code = code.replace(/->([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '-&gt;<span class="function">$1</span>(');
+
+            return code;
+        }
+
+        // Apply syntax highlighting to all code blocks
+        document.addEventListener('DOMContentLoaded', function() {
+            var codeBlocks = document.querySelectorAll('.code-block');
+            codeBlocks.forEach(function(block) {
+                var code = block.textContent;
+                // Only highlight if it looks like PHP code
+                if (code.includes('use ') || code.includes('function ') || code.includes('class ') || code.includes('$')) {
+                    block.innerHTML = highlightPHP(code);
+                }
+            });
+
+            // Initialize API test console
+            updateAuthStatus();
+        });
+
+        // API Test Console Functions
+        let currentToken = localStorage.getItem('jwt_token') || null;
+        // Start Example
+        let lastCreatedUuid = null;
+        // End Example
+
+        function updateAuthStatus() {
+            const statusEl = document.getElementById('authStatus');
+            const tokenDisplayEl = document.getElementById('tokenDisplay');
+
+            if (!statusEl) return;
+
+            if (currentToken) {
+                statusEl.style.background = '#28a745';
+                statusEl.style.color = 'white';
+                statusEl.textContent = '✓ Logged In';
+
+                try {
+                    const payload = JSON.parse(atob(currentToken.split('.')[1]));
+                    const userId = payload.data?.userid || 'unknown';
+                    const name = payload.data?.name || 'unknown';
+                    const role = payload.data?.role || 'unknown';
+
+                    tokenDisplayEl.innerHTML = `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <strong style="color: #667eea;">Current Token:</strong>
+                            <div style="margin-top: 8px;">User ID: ${userId} | Name: ${name} | Role: ${role}</div>
+                            <code style="display: block; margin-top: 8px; background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 4px; word-break: break-all; font-size: 0.85em;">${currentToken.substring(0, 50)}...</code>
+                            <button class="copy-token-btn" onclick="copyToken(this)">Copy Token</button>
+                        </div>
+                    `;
+                } catch (e) {
+                    tokenDisplayEl.innerHTML = `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <strong style="color: #667eea;">Current Token:</strong>
+                            <code style="display: block; margin-top: 8px; background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 4px; word-break: break-all; font-size: 0.85em;">${currentToken.substring(0, 50)}...</code>
+                            <button class="copy-token-btn" onclick="copyToken(this)">Copy Token</button>
+                        </div>
+                    `;
+                }
+            } else {
+                statusEl.style.background = '#dc3545';
+                statusEl.style.color = 'white';
+                statusEl.textContent = '✗ Not Logged In';
+                tokenDisplayEl.innerHTML = '';
+            }
+        }
+
+        function copyToken(button) {
+            navigator.clipboard.writeText(currentToken).then(function() {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(function() {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+                button.textContent = 'Failed';
+                setTimeout(function() {
+                    button.textContent = 'Copy Token';
+                }, 2000);
+            });
+        }
+
+        async function login(type) {
+            const credentials = {
+                user: { username: 'user@example.com', password: '!P4ssw0rdstr!' },
+                admin: { username: 'admin@example.com', password: '!P4ssw0rdstr!' }
+            };
+
+            const creds = credentials[type];
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(creds)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    currentToken = data.token;
+                    localStorage.setItem('jwt_token', currentToken);
+                    updateAuthStatus();
+                    displayResponse('POST /login', response.status, data);
+                } else {
+                    displayResponse('POST /login', response.status, data);
+                }
+            } catch (error) {
+                displayResponse('POST /login', 0, { error: error.message });
+            }
+        }
+
+        function logout() {
+            currentToken = null;
+            localStorage.removeItem('jwt_token');
+            updateAuthStatus();
+            displayResponse('Logout', 200, { message: 'Logged out successfully' });
+        }
+
+        async function apiCall(method, endpoint, body = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (currentToken) {
+                headers['Authorization'] = `Bearer ${currentToken}`;
+            }
+
+            const options = {
+                method: method,
+                headers: headers
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(endpoint, options);
+                let data;
+
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    data = await response.text();
+                }
+
+                displayResponse(`${method} ${endpoint}`, response.status, data);
+
+                // Start Example
+                // Store UUID if creating dummyhex
+                if (method === 'POST' && endpoint === '/dummy/hex' && response.ok && data.id) {
+                    lastCreatedUuid = data.id;
+                }
+                // End Example
+
+                return data;
+            } catch (error) {
+                displayResponse(`${method} ${endpoint}`, 0, { error: error.message });
+            }
+        }
+
+        // Start Example
+        function createDummy() {
+            const data = {
+                field: 'Test Value ' + new Date().getTime()
+            };
+            apiCall('POST', '/dummy', data);
+        }
+
+        function updateDummy() {
+            const data = {
+                id: 1,
+                field: 'Updated Value ' + new Date().getTime()
+            };
+            apiCall('PUT', '/dummy', data);
+        }
+
+        function createDummyHex() {
+            const data = {
+                field: 'Hex Test ' + new Date().getTime()
+            };
+            apiCall('POST', '/dummy/hex', data);
+        }
+
+        function getDummyHexById() {
+            if (!lastCreatedUuid) {
+                alert('Please create a dummyhex record first to get a UUID');
+                return;
+            }
+            apiCall('GET', `/dummy/hex/${lastCreatedUuid}`);
+        }
+
+        function updateDummyHex() {
+            if (!lastCreatedUuid) {
+                alert('Please create a dummyhex record first to get a UUID');
+                return;
+            }
+            const data = {
+                id: lastCreatedUuid,
+                field: 'Updated Hex ' + new Date().getTime()
+            };
+            apiCall('PUT', `/dummy/hex`, data);
+        }
+
+        function deleteDummyHex() {
+            if (!lastCreatedUuid) {
+                alert('Please create a dummyhex record first to get a UUID');
+                return;
+            }
+            apiCall('DELETE', `/dummy/hex/${lastCreatedUuid}`);
+        }
+        // End Example
+
+        function displayResponse(endpoint, status, data) {
+            const container = document.getElementById('responseContainer');
+            if (!container) return;
+
+            const isSuccess = status >= 200 && status < 300;
+
+            const html = `
+                <div class="response-container">
+                    <div class="response-header">
+                        <h3>${endpoint}</h3>
+                        <div>
+                            <span class="status-badge ${isSuccess ? 'status-success' : 'status-error'}">
+                                ${status} ${isSuccess ? 'Success' : 'Error'}
+                            </span>
+                            <button class="clear-btn-resp" onclick="clearResponse()">Clear</button>
+                        </div>
+                    </div>
+                    <div class="response-body">${typeof data === 'string' ? data : JSON.stringify(data, null, 2)}</div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function clearResponse() {
+            const container = document.getElementById('responseContainer');
+            if (container) {
+                container.innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>

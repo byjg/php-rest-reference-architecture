@@ -5,11 +5,13 @@ namespace Test\Rest;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\ObjectCopy;
+use Override;
 use RestReferenceArchitecture\Model\Dummy;
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
 class DummyTest extends BaseApiTestCase
 {
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -45,9 +47,9 @@ class DummyTest extends BaseApiTestCase
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/dummy/1")
-            ->assertResponseCode(401)
+            ->expectStatus(401)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testListUnauthorized()
@@ -60,9 +62,9 @@ class DummyTest extends BaseApiTestCase
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/dummy/1")
-            ->assertResponseCode(401)
+            ->expectStatus(401)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testPostUnauthorized()
@@ -76,9 +78,9 @@ class DummyTest extends BaseApiTestCase
             ->withMethod('POST')
             ->withPath("/dummy")
             ->withRequestBody(json_encode($this->getSampleData(true)))
-            ->assertResponseCode(401)
+            ->expectStatus(401)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testPutUnauthorized()
@@ -92,9 +94,9 @@ class DummyTest extends BaseApiTestCase
             ->withMethod('PUT')
             ->withPath("/dummy")
             ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
-            ->assertResponseCode(401)
+            ->expectStatus(401)
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testPostInsufficientPrivileges()
@@ -102,7 +104,7 @@ class DummyTest extends BaseApiTestCase
         $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
 
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+        $result = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
@@ -110,12 +112,12 @@ class DummyTest extends BaseApiTestCase
             ->withMethod('POST')
             ->withPath("/dummy")
             ->withRequestBody(json_encode($this->getSampleData(true)))
-            ->assertResponseCode(403)
+            ->expectStatus(403)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testPutInsufficientPrivileges()
@@ -123,7 +125,7 @@ class DummyTest extends BaseApiTestCase
         $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage('Insufficient privileges');
 
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+        $result = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
@@ -131,17 +133,17 @@ class DummyTest extends BaseApiTestCase
             ->withMethod('PUT')
             ->withPath("/dummy")
             ->withRequestBody(json_encode($this->getSampleData(true) + ['id' => 1]))
-            ->assertResponseCode(403)
+            ->expectStatus(403)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testFullCrud()
     {
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
+        $result = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
@@ -149,12 +151,12 @@ class DummyTest extends BaseApiTestCase
             ->withMethod('POST')
             ->withPath("/dummy")
             ->withRequestBody(json_encode($this->getSampleData(true)))
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $body = $this->assertRequest($request);
+        $body = $this->sendRequest($request);
         $bodyAr = json_decode($body->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
@@ -162,12 +164,12 @@ class DummyTest extends BaseApiTestCase
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/dummy/" . $bodyAr['id'])
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $body = $this->assertRequest($request);
+        $body = $this->sendRequest($request);
 
         $request = new FakeApiRequester();
         $request
@@ -175,28 +177,28 @@ class DummyTest extends BaseApiTestCase
             ->withMethod('PUT')
             ->withPath("/dummy")
             ->withRequestBody($body->getBody()->getContents())
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 
     public function testList()
     {
-        $result = json_decode($this->assertRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
+        $result = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true);
 
         $request = new FakeApiRequester();
         $request
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
             ->withPath("/dummy")
-            ->assertResponseCode(200)
+            ->expectStatus(200)
             ->withRequestHeader([
                 "Authorization" => "Bearer " . $result['token']
             ])
         ;
-        $this->assertRequest($request);
+        $this->sendRequest($request);
     }
 }

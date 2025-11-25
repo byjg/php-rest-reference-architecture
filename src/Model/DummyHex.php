@@ -6,23 +6,25 @@ use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\FieldUuidAttribute;
 use ByJG\MicroOrm\Attributes\TableMySqlUuidPKAttribute;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
+use ByJG\MicroOrm\Literal\LiteralInterface;
 use OpenApi\Attributes as OA;
+
 
 /**
  * Class DummyHex
  * @package RestReferenceArchitecture\Model
  */
 #[OA\Schema(required: ["id", "field"], type: "object", xml: new OA\Xml(name: "DummyHex"))]
-#[TableMySqlUuidPKAttribute("dummyhex")]
+#[TableMySqlUuidPKAttribute("dummy_hex")]
 class DummyHex
 {
 
     /**
-     * @var string|null
+     * @var string|LiteralInterface|null
      */
     #[OA\Property(type: "string", format: "string")]
     #[FieldUuidAttribute(primaryKey: true, fieldName: "id")]
-    protected string|HexUuidLiteral|null $id = null;
+    protected string|LiteralInterface|null $id = null;
 
     /**
      * @var string|null
@@ -41,19 +43,22 @@ class DummyHex
 
 
     /**
-     * @return string|HexUuidLiteral|null
+     * @return string|LiteralInterface|null
      */
-    public function getId(): string|HexUuidLiteral|null
+    public function getId(): string|LiteralInterface|null
     {
         return $this->id;
     }
 
     /**
-     * @param string|HexUuidLiteral|null $id
+     * @param string|LiteralInterface|null $id
      * @return $this
      */
-    public function setId(string|HexUuidLiteral|null $id): static
+    public function setId(string|LiteralInterface|null $id): static
     {
+        if ($id instanceof LiteralInterface) {
+            $id = new HexUuidLiteral($id);
+        }
         $this->id = $id;
         return $this;
     }
@@ -72,6 +77,7 @@ class DummyHex
      */
     public function setUuid(string|null $uuid): static
     {
+        
         $this->uuid = $uuid;
         return $this;
     }
@@ -90,6 +96,7 @@ class DummyHex
      */
     public function setField(string|null $field): static
     {
+        
         $this->field = $field;
         return $this;
     }

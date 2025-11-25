@@ -10,7 +10,6 @@ use ByJG\Config\Exception\KeyNotFoundException;
 use Closure;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use RestReferenceArchitecture\Psr11;
 
 class BaseScripts
 {
@@ -22,27 +21,27 @@ class BaseScripts
         $this->workdir = realpath(__DIR__ . '/..');
     }
 
-    public function getSystemOs(): string
-    {
-        if (!$this->systemOs) {
-            $this->systemOs = php_uname('s');
-            if (preg_match('/[Dd]arwin/', $this->systemOs)) {
-                $this->systemOs = 'Darwin';
-            } elseif (preg_match('/[Ww]in/', $this->systemOs)) {
-                $this->systemOs = 'Windows';
-            }
-        }
+//    public function getSystemOs(): string
+//    {
+//        if (!$this->systemOs) {
+//            $this->systemOs = php_uname('s');
+//            if (preg_match('/[Dd]arwin/', $this->systemOs)) {
+//                $this->systemOs = 'Darwin';
+//            } elseif (preg_match('/[Ww]in/', $this->systemOs)) {
+//                $this->systemOs = 'Windows';
+//            }
+//        }
+//
+//        return $this->systemOs;
+//    }
 
-        return $this->systemOs;
-    }
-
-    public function fixDir($command)
-    {
-        if ($this->getSystemOs() === "Windows") {
-            return str_replace('/', '\\', $command);
-        }
-        return $command;
-    }
+//    public function fixDir($command)
+//    {
+//        if ($this->getSystemOs() === "Windows") {
+//            return str_replace('/', '\\', $command);
+//        }
+//        return $command;
+//    }
 
     /**
      * Execute the given command by displaying console output live to the user.
@@ -58,51 +57,51 @@ class BaseScripts
      * @throws KeyNotFoundException
      * @throws ReflectionException
      */
-    protected function liveExecuteCommand(array|string $cmd): ?array
-    {
-        // while (@ ob_end_flush()); // end all output buffers if any
-
-        if (is_array($cmd)) {
-            foreach ($cmd as $item) {
-                $this->liveExecuteCommand($item);
-            }
-            return null;
-        }
-
-        $cmd = $this->replaceVariables($cmd);
-        echo "\n>> $cmd\n";
-
-        $complement = " 2>&1 ; echo Exit status : $?";
-        if ($this->getSystemOs() === "Windows") {
-            $complement = ' & echo Exit status : %errorlevel%';
-        }
-        $proc = popen("$cmd $complement", 'r');
-
-        $completeOutput = "";
-
-        while (!feof($proc)) {
-            $liveOutput     = fread($proc, 4096);
-            $completeOutput = $completeOutput . $liveOutput;
-            echo "$liveOutput";
-            @ flush();
-        }
-
-        pclose($proc);
-
-        // get exit status
-        preg_match('/[0-9]+$/', $completeOutput, $matches);
-
-        $exitStatus = intval($matches[0]);
-        // if ($exitStatus !== 0) {
-        //     exit($exitStatus);
-        // }
-
-        // return exit status and intended output
-        return array (
-            'exit_status'  => $exitStatus,
-            'output'       => str_replace("Exit status : " . $matches[0], '', $completeOutput)
-        );
-    }
+//    protected function liveExecuteCommand(array|string $cmd): ?array
+//    {
+//        // while (@ ob_end_flush()); // end all output buffers if any
+//
+//        if (is_array($cmd)) {
+//            foreach ($cmd as $item) {
+//                $this->liveExecuteCommand($item);
+//            }
+//            return null;
+//        }
+//
+//        $cmd = $this->replaceVariables($cmd);
+//        echo "\n>> $cmd\n";
+//
+//        $complement = " 2>&1 ; echo Exit status : $?";
+//        if ($this->getSystemOs() === "Windows") {
+//            $complement = ' & echo Exit status : %errorlevel%';
+//        }
+//        $proc = popen("$cmd $complement", 'r');
+//
+//        $completeOutput = "";
+//
+//        while (!feof($proc)) {
+//            $liveOutput     = fread($proc, 4096);
+//            $completeOutput = $completeOutput . $liveOutput;
+//            echo "$liveOutput";
+//            @ flush();
+//        }
+//
+//        pclose($proc);
+//
+//        // get exit status
+//        preg_match('/[0-9]+$/', $completeOutput, $matches);
+//
+//        $exitStatus = intval($matches[0]);
+//        // if ($exitStatus !== 0) {
+//        //     exit($exitStatus);
+//        // }
+//
+//        // return exit status and intended output
+//        return array (
+//            'exit_status'  => $exitStatus,
+//            'output'       => str_replace("Exit status : " . $matches[0], '', $completeOutput)
+//        );
+//    }
 
     /**
      * @param string|Closure $variableValue
@@ -115,19 +114,23 @@ class BaseScripts
      * @throws ConfigException
      * @throws InvalidDateException
      */
-    protected function replaceVariables($variableValue)
-    {
-        $args = [];
-        if (preg_match_all("/%[\\w\\d]+%/", $variableValue, $args)) {
-            foreach ($args[0] as $arg) {
-                $variableValue = str_replace(
-                    $arg,
-                    Psr11::get(substr($arg,1, -1)),
-                    $variableValue
-                );
-            }
-        }
-
-        return $variableValue;
-    }
+//    protected function replaceVariables($variableValue)
+//    {
+//        if (empty(Config::definition())) {
+//            require_once __DIR__ . "/../bootstrap.php";
+//        }
+//
+//        $args = [];
+//        if (preg_match_all("/%[\\w\\d]+%/", $variableValue, $args)) {
+//            foreach ($args[0] as $arg) {
+//                $variableValue = str_replace(
+//                    $arg,
+//                    Config::get(substr($arg,1, -1)),
+//                    $variableValue
+//                );
+//            }
+//        }
+//
+//        return $variableValue;
+//    }
 }
