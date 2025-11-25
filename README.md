@@ -4,9 +4,8 @@
 [![Build Status](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml/badge.svg?branch=6.0)](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-rest-reference-architecture)
-[![GitHub license](https://img.shields.io/github/license/byjg/php-rest-reference-architecture.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-rest-reference-architecture.svg)](https://opensource.byjg.com/license/)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-rest-reference-architecture.svg)](https://github.com/byjg/php-rest-reference-architecture/releases)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/php-rest-reference-architecture/badges/quality-score.png?b=6.0)](https://scrutinizer-ci.com/g/byjg/php-rest-reference-architecture/?branch=6.0)
 
 **Production-ready PHP REST API boilerplate** that lets you focus on building your business logic, not the infrastructure.
 
