@@ -416,4 +416,3 @@ return [
 - [Getting Started Guide](getting_started.md)
 - [PSR-11 Dependency Injection](psr11_di.md)
 - [JWT Configuration](jwt-advanced.md)
-- [Deployment](../README.md)
