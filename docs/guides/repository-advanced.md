@@ -1,5 +1,6 @@
 ---
-sidebar_position: 120
+sidebar_position: 170
+title: Advanced Repository Patterns
 ---
 
 # Advanced Repository Patterns
@@ -75,6 +76,59 @@ class DummyRepository extends BaseRepository
     }
 }
 ```
+
+## Filtering and Ordering
+
+`BaseRepository::list()` and `listQuery()` both accept `orderBy` and `filter` parameters. In a REST controller these are typically forwarded straight from HTTP query string parameters.
+
+### `orderBy`
+
+A string or array of `ORDER BY` clauses:
+
+```php
+// Single column
+$repository->list(page: 0, size: 20, orderBy: 'name ASC');
+
+// Multiple columns
+$repository->list(page: 0, size: 20, orderBy: ['created_at DESC', 'name ASC']);
+```
+
+### `filter`
+
+An array of `[$condition, $params]` tuples that are appended as `WHERE` clauses:
+
+```php
+$filter = [
+    ['status = :status', ['status' => 'active']],
+    ['created_at >= :since', ['since' => '2024-01-01']],
+];
+
+$repository->list(page: 0, size: 20, filter: $filter);
+```
+
+### Passing query params from a REST controller
+
+`DummyRest` exposes `orderBy` and `filter` as optional query string parameters and passes them directly to the service (which forwards them to the repository):
+
+```php
+#[OA\Parameter(name: "orderBy", in: "query", required: false, schema: new OA\Schema(type: "string"))]
+#[OA\Parameter(name: "filter",  in: "query", required: false, schema: new OA\Schema(type: "string"))]
+public function listDummy(HttpResponse $response, HttpRequest $request): void
+{
+    $service = Config::get(DummyService::class);
+    $result = $service->list(
+        page:    (int) ($request->get('page')    ?? 0),
+        size:    (int) ($request->get('size')    ?? 20),
+        orderBy: $request->get('orderBy'),
+        filter:  $request->get('filter'),
+    );
+    $response->write($result);
+}
+```
+
+:::info
+The `filter` query param expects JSON-encoded tuples when sent over HTTP. Validate and sanitize the value before passing it to the repository in production code.
+:::
 
 ## Advanced Querying
 
@@ -684,7 +738,7 @@ See [Custom Query Methods](#custom-query-methods) section above.
 - Need for testing isolation
 - Large enterprise applications
 
-See [Architecture Decision Guide](architecture-decisions.md) for detailed comparison.
+See [Architecture Decision Guide](../concepts/architecture.md) for detailed comparison.
 
 ## Advanced Examples
 
@@ -760,6 +814,6 @@ public function listActive($page = 0, $size = 20): array
 ## Related Documentation
 
 - [ORM Usage Guide](orm.md)
-- [Service Patterns](service-patterns.md)
-- [Architecture Decisions](architecture-decisions.md)
-- [Testing Guide](testing-guide.md)
+- [Service Patterns](services.md)
+- [Architecture Decisions](../concepts/architecture.md)
+- [Testing Guide](testing.md)

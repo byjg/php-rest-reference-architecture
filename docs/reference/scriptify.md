@@ -1,5 +1,6 @@
 ---
-sidebar_position: 200
+sidebar_position: 430
+title: Scriptify
 ---
 
 # Scriptify - Interactive Terminal and Script Runner

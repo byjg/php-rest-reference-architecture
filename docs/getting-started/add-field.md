@@ -1,10 +1,11 @@
 ---
 sidebar_position: 30
+title: Add a New Field
 ---
 
 # Add a New Field
 
-Now we have the table `example_crud` created in the [previous tutorial](getting_started_01_create_table.md),
+Now we have the table `example_crud` created in the [previous tutorial](first-table.md),
 let's modify it to add a new field `status`.
 
 ## Changing the table
@@ -131,4 +132,4 @@ APP_ENV=test composer run test
 
 ## Next Steps
 
-[Next: Creating a REST method](getting_started_03_create_rest_method.md)
+[Next: Creating a REST method](first-endpoint.md)

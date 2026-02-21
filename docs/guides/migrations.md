@@ -1,5 +1,6 @@
 ---
-sidebar_position: 80
+sidebar_position: 140
+title: Database Migrations
 ---
 
 # Database Migration

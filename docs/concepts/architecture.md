@@ -1,5 +1,6 @@
 ---
-sidebar_position: 170
+sidebar_position: 310
+title: Architecture Decisions
 ---
 
 # Architecture Decision Guide
@@ -279,7 +280,7 @@ Benefits:
 - Allows adding logic later without breaking controllers
 - Makes the codebase easier to understand
 
-See [Service Layer Patterns](service-patterns.md#architectural-pattern) for detailed examples.
+See [Service Layer Patterns](../guides/services.md#advanced-orchestration) for detailed examples.
 
 ### When to Add Custom Logic in Services
 
@@ -521,8 +522,8 @@ CREATE TABLE users (
 
 ## Related Documentation
 
-- [Repository Patterns](repository-advanced.md)
-- [Service Patterns](service-patterns.md)
-- [JWT Authentication](jwt-advanced.md)
-- [Testing Guide](testing-guide.md)
-- [Code Generator](code_generator.md)
+- [Repository Patterns](../guides/repository-advanced.md)
+- [Service Patterns](../guides/services.md)
+- [JWT Authentication](../guides/jwt-advanced.md)
+- [Testing Guide](../guides/testing.md)
+- [Code Generator](../reference/code-generator.md)

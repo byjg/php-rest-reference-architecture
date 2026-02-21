@@ -1,5 +1,6 @@
 ---
-sidebar_position: 220
+sidebar_position: 50
+title: Windows Setup
 ---
 
 # Running on Windows Without PHP
@@ -33,4 +34,4 @@ The docker commands you'll run outside.
 > Inside the container shell, the folder `~/tutorial` or else `/root/tutorial`
 is mapped to your current directory on Windows.
 
-Once inside the container, follow the regular [Getting Started](getting_started.md) guide.
+Once inside the container, follow the regular [Getting Started](installation.md) guide.

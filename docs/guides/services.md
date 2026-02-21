@@ -1,5 +1,6 @@
 ---
-sidebar_position: 100
+sidebar_position: 160
+title: Service Layer
 ---
 
 # Service Layer
@@ -314,12 +315,12 @@ class UserService extends BaseService
 
 class PaymentService extends BaseService
 {
-    public function processPayment(int $orderId, array $paymentData)
+    public function processPayment(int $orderId, array $paymentData): mixed
     {
-        $dbDriver = $this->repository->getDbDriver();
+        $executor = $this->baseRepository->getExecutorWrite();
 
         try {
-            $dbDriver->beginTransaction();
+            $executor->beginTransaction();
 
             // Process payment
             $payment = $this->create($paymentData);
@@ -328,12 +329,310 @@ class PaymentService extends BaseService
             $orderService = Config::get(OrderService::class);
             $orderService->markAsPaid($orderId);
 
-            $dbDriver->commit();
+            $executor->commitTransaction();
             return $payment;
 
         } catch (\Exception $e) {
-            $dbDriver->rollback();
+            $executor->rollbackTransaction();
             throw $e;
+        }
+    }
+}
+```
+
+## Code Generation
+
+Generate a service using the code generator:
+
+```bash
+# Generate service only
+APP_ENV=dev composer run codegen -- --table products service --save
+# OR: composer run codegen -- --env=dev --table products service --save
+
+# Generate service + repository + model
+APP_ENV=dev composer run codegen -- --table products all --save
+# OR: composer run codegen -- --env=dev --table products all --save
+```
+
+The service will automatically:
+- Extend `BaseService`
+- Inject the corresponding repository
+- Be registered in `config/dev/05-services.php`
+
+---
+
+## Advanced Orchestration
+
+### Always Call Service from Controllers
+
+**Rule**: REST controllers should ALWAYS call the Service layer, never the Repository directly.
+
+```php
+// ✓ CORRECT - Controller calls Service
+#[ValidateRequest]
+public function putDummyHex(HttpResponse $response, HttpRequest $request): void
+{
+    $dummyHexService = Config::get(DummyHexService::class);
+    $model = $dummyHexService->update(ValidateRequest::getPayload());
+    $response->write($model);
+}
+
+// ✗ WRONG - Controller calls Repository directly
+public function putDummyHex(HttpResponse $response, HttpRequest $request): void
+{
+    $repository = Config::get(DummyHexRepository::class);
+    $model = $repository->get($id);  // Don't do this!
+    // ...
+}
+```
+
+**Why this pattern?**
+
+1. **Consistency** – Controllers don't need to decide "Service or Repository?"; single entry point for all business operations.
+2. **Single Responsibility** – Controllers focus on HTTP concerns; services handle business logic; repositories handle data access.
+3. **Extensibility** – Add business logic later without changing controllers.
+4. **Testability** – Mock one Service instead of deciding between Service and Repository.
+
+### When You Need Direct Repository Access
+
+For complex queries or operations not covered by BaseService:
+
+```php
+class DummyService extends BaseService
+{
+    public function findActiveByCategory(string $category): array
+    {
+        $query = Query::getInstance()
+            ->table($this->baseRepository->getMapper()->getTable())
+            ->where('category = :category', ['category' => $category])
+            ->where('status = :status', ['status' => 'active']);
+
+        return $this->baseRepository->getByQuery($query);
+    }
+}
+```
+
+## Transaction Management
+
+### Single Service Transactions
+
+```php
+class OrderService extends BaseService
+{
+    public function createOrderWithItems(array $orderData, array $items): Order
+    {
+        $executor = $this->baseRepository->getExecutorWrite();
+
+        try {
+            $executor->beginTransaction();
+
+            $order = $this->create($orderData);
+
+            $orderItemService = Config::get(OrderItemService::class);
+            foreach ($items as $itemData) {
+                $itemData['order_id'] = $order->getId();
+                $orderItemService->create($itemData);
+            }
+
+            $executor->commitTransaction();
+
+            return $order;
+
+        } catch (\Exception $e) {
+            $executor->rollbackTransaction();
+            throw $e;
+        }
+    }
+}
+```
+
+### Multi-Service Transactions
+
+```php
+class OrderService extends BaseService
+{
+    public function processOrder(array $orderData): Order
+    {
+        $executor = $this->baseRepository->getExecutorWrite();
+
+        try {
+            $executor->beginTransaction();
+
+            $order = $this->create($orderData);
+
+            $productService = Config::get(ProductService::class);
+            foreach ($orderData['items'] as $item) {
+                $productService->reduceStock($item['product_id'], $item['quantity']);
+            }
+
+            $invoiceService = Config::get(InvoiceService::class);
+            $invoice = $invoiceService->createFromOrder($order);
+
+            $paymentService = Config::get(PaymentService::class);
+            $paymentService->recordPayment([
+                'order_id' => $order->getId(),
+                'amount' => $invoice->getTotal()
+            ]);
+
+            $executor->commitTransaction();
+
+            return $order;
+
+        } catch (\Exception $e) {
+            $executor->rollbackTransaction();
+            throw $e;
+        }
+    }
+}
+```
+
+### Transaction Helper Trait
+
+```php
+trait TransactionAware
+{
+    protected function inTransaction(callable $callback)
+    {
+        $executor = $this->baseRepository->getExecutorWrite();
+
+        try {
+            $executor->beginTransaction();
+            $result = $callback();
+            $executor->commitTransaction();
+            return $result;
+        } catch (\Exception $e) {
+            $executor->rollbackTransaction();
+            throw $e;
+        }
+    }
+}
+
+// Usage
+class OrderService extends BaseService
+{
+    use TransactionAware;
+
+    public function processOrder(array $data): Order
+    {
+        return $this->inTransaction(function() use ($data) {
+            $order = $this->create($data);
+            // More operations...
+            return $order;
+        });
+    }
+}
+```
+
+## Service Composition
+
+### Constructor Injection
+
+```php
+class OrderService extends BaseService
+{
+    protected ProductService $productService;
+    protected CustomerService $customerService;
+    protected PaymentService $paymentService;
+
+    public function __construct(
+        OrderRepository $repository,
+        ProductService $productService,
+        CustomerService $customerService,
+        PaymentService $paymentService
+    ) {
+        parent::__construct($repository);
+        $this->productService = $productService;
+        $this->customerService = $customerService;
+        $this->paymentService = $paymentService;
+    }
+
+    public function createOrder(array $orderData): Order
+    {
+        $customer = $this->customerService->getOrFail($orderData['customer_id']);
+
+        foreach ($orderData['items'] as $item) {
+            $product = $this->productService->getOrFail($item['product_id']);
+
+            if (!$this->productService->isInStock($product->getId())) {
+                throw new Error400Exception(
+                    "Product out of stock: {$product->getName()}"
+                );
+            }
+        }
+
+        $order = $this->create($orderData);
+
+        $this->paymentService->charge([
+            'customer_id' => $customer->getId(),
+            'amount' => $order->getTotal()
+        ]);
+
+        return $order;
+    }
+}
+```
+
+Register in `config/05-services/01-services.php`:
+
+```php
+use RestReferenceArchitecture\Service\OrderService;
+
+return [
+    OrderService::class => fn() => new OrderService(
+        Config::get(OrderRepository::class),
+        Config::get(ProductService::class),
+        Config::get(CustomerService::class),
+        Config::get(PaymentService::class)
+    )
+];
+```
+
+## Validation Patterns
+
+### Pre-Save Validation
+
+```php
+class UserService extends BaseService
+{
+    public function create(array $payload)
+    {
+        $this->validateEmail($payload['email'] ?? '');
+        $this->validateUniqueEmail($payload['email']);
+        $this->validatePasswordStrength($payload['password'] ?? '');
+
+        $user = parent::create($payload);
+
+        $user->setPassword(password_hash($payload['password'], PASSWORD_DEFAULT));
+        $this->save($user);
+
+        return $user;
+    }
+
+    protected function validateEmail(string $email): void
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Error400Exception('Invalid email address');
+        }
+    }
+
+    protected function validateUniqueEmail(string $email): void
+    {
+        $existing = $this->baseRepository->findByEmail($email);
+        if ($existing) {
+            throw new Error400Exception('Email already exists');
+        }
+    }
+
+    protected function validatePasswordStrength(string $password): void
+    {
+        if (strlen($password) < 8) {
+            throw new Error400Exception('Password must be at least 8 characters');
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            throw new Error400Exception('Password must contain uppercase letter');
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            throw new Error400Exception('Password must contain a number');
         }
     }
 }
@@ -368,24 +667,7 @@ class ProductServiceTest extends TestCase
 }
 ```
 
-## Code Generation
-
-Generate a service using the code generator:
-
-```bash
-# Generate service only
-APP_ENV=dev composer run codegen -- --table products service --save
-# OR: composer run codegen -- --env=dev --table products service --save
-
-# Generate service + repository + model
-APP_ENV=dev composer run codegen -- --table products all --save
-# OR: composer run codegen -- --env=dev --table products all --save
-```
-
-The service will automatically:
-- Extend `BaseService`
-- Inject the corresponding repository
-- Be registered in `config/dev/05-services.php`
+See [Testing](testing.md) for complete testing documentation.
 
 ## Best Practices
 
@@ -397,6 +679,8 @@ The service will automatically:
 5. **Make services testable** - Avoid static calls, use constructor injection
 6. **Return models, not arrays** - Services should return typed objects
 7. **Handle errors in services** - Throw meaningful exceptions
+8. **Transaction Boundaries** - Use transactions for multi-step operations
+9. **Validate Early** - Check business rules before database operations
 :::
 
 :::warning What NOT to Do
@@ -405,3 +689,10 @@ The service will automatically:
 - ❌ Don't make services depend on each other in circular ways
 - ❌ Don't duplicate repository methods in services without adding value
 :::
+
+## Related Documentation
+
+- [Repository Patterns](repository-advanced.md)
+- [REST Controllers](rest-controllers.md)
+- [Error Handling](error-handling.md)
+- [Testing](testing.md)

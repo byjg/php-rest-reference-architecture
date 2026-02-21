@@ -1,24 +1,11 @@
 ---
-sidebar_position: 230
+sidebar_position: 190
+title: Testing
 ---
 
-# Complete Testing Guide
+# Testing Guide
 
 This guide covers all aspects of testing your REST API, from unit tests to integration tests, using FakeApiRequester for in-process API testing.
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Test Structure](#test-structure)
-- [FakeApiRequester](#fakeapirequester)
-- [Writing API Tests](#writing-api-tests)
-- [Testing Authentication](#testing-authentication)
-- [Testing Authorization](#testing-authorization)
-- [Testing Validation](#testing-validation)
-- [Testing CRUD Operations](#testing-crud-operations)
-- [Unit Testing Services](#unit-testing-services)
-- [Test Data Management](#test-data-management)
-- [Best Practices](#best-practices)
 
 ## Overview
 
@@ -61,6 +48,9 @@ Add additional directories (e.g., `tests/Service`) as needed—PHPUnit's configu
 ### Running Tests
 
 ```bash
+# Create or reset the testing database
+APP_ENV=test composer migrate -- reset --yes
+
 # Run all tests using the composer script
 APP_ENV=test composer run test
 
@@ -74,11 +64,17 @@ APP_ENV=test ./vendor/bin/phpunit --filter testFullCrud tests/Rest/DummyTest.php
 APP_ENV=test ./vendor/bin/phpunit --coverage-html coverage/
 ```
 
+:::info Database resets automatically
+`tests/Rest/BaseApiTestCase.php` already calls `Migration::reset()` the first time a test runs, but pre-resetting with the command above avoids surprises if you run the suite outside PHPUnit (e.g., invoking migrations manually).
+:::
+
 ## FakeApiRequester
 
 The `FakeApiRequester` class enables in-process API testing without a web server.
 
 **Location**: `src/Util/FakeApiRequester.php`
+
+`BaseApiTestCase` extends `PHPUnit\Framework\TestCase` and mixes in the `OpenApiValidation` trait, so every call to `sendRequest()` validates the result against `public/docs/openapi.json`. All routing happens in-memory via `FakeApiRequester`, so you don't need a running web server—only a configured database.
 
 ### How It Works
 
@@ -113,7 +109,6 @@ $data = json_decode($response->getBody()->getContents(), true);
 
 // Request Body
 ->withRequestBody(json_encode(['name' => 'Product']))
-->withRequestBody('<xml>...</xml>')
 
 // Headers
 ->withRequestHeader(['Authorization' => 'Bearer token'])
@@ -125,6 +120,68 @@ $data = json_decode($response->getBody()->getContents(), true);
 // Expected Response
 ->expectStatus(200)             // Assert HTTP status code
 ->expectJsonContains(['name' => 'Product'])
+```
+
+### Sending Body Data
+
+```php
+public function testPingWithBody()
+{
+    $request = (new FakeApiRequester())
+        ->withPsr7Request($this->getPsr7Request())
+        ->withMethod('POST')
+        ->withPath('/sample/ping')
+        ->withRequestBody(json_encode([
+            'name' => 'John Doe'
+        ]));
+
+    $this->sendRequest($request);
+}
+```
+
+### Sending Query Parameters
+
+```php
+public function testPingWithQuery()
+{
+    $request = (new FakeApiRequester())
+        ->withPsr7Request($this->getPsr7Request())
+        ->withMethod('GET')
+        ->withPath('/sample/ping')
+        ->withQuery(['name' => 'John Doe']);
+
+    $this->sendRequest($request);
+}
+```
+
+### Expecting a Specific Status Code
+
+```php
+public function testPingNotFound()
+{
+    $request = (new FakeApiRequester())
+        ->withPsr7Request($this->getPsr7Request())
+        ->withMethod('GET')
+        ->withPath('/sample/ping')
+        ->expectStatus(404);
+
+    $this->sendRequest($request);
+}
+```
+
+### Expecting a Specific Response Body
+
+```php
+public function testPingResponse()
+{
+    $request = (new FakeApiRequester())
+        ->withPsr7Request($this->getPsr7Request())
+        ->withMethod('GET')
+        ->withPath('/sample/ping')
+        ->expectJsonContains(['result' => 'pong']);
+
+    $this->sendRequest($request);
+}
 ```
 
 ## Writing API Tests
@@ -213,28 +270,17 @@ namespace Test\Rest;
 
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
-class ProductTest extends BaseApiTestCase
+class SampleTest extends BaseApiTestCase
 {
-    public function testGetProduct(): void
+    public function testPing(): void
     {
-        $loginResponse = $this->sendRequest(
-            Credentials::requestLogin(Credentials::getAdminUser())
-        );
-        $token = json_decode($loginResponse->getBody()->getContents(), true)['token'];
-
         $request = (new FakeApiRequester())
             ->withPsr7Request($this->getPsr7Request())
             ->withMethod('GET')
-            ->withPath('/products/1')
-            ->withRequestHeader(['Authorization' => "Bearer {$token}"])
+            ->withPath('/sample/ping')
             ->expectStatus(200);
 
-        $response = $this->sendRequest($request);
-        $product = json_decode($response->getBody()->getContents(), true);
-
-        $this->assertArrayHasKey('id', $product);
-        $this->assertArrayHasKey('name', $product);
-        $this->assertSame(1, $product['id']);
+        $this->sendRequest($request);
     }
 }
 ```
@@ -263,6 +309,15 @@ $data = json_decode($response->getBody()->getContents(), true);
 $token = $data['token'];
 ```
 
+You can override the default credentials via environment variables:
+
+```bash
+export TEST_ADMIN_USER=admin@example.com
+export TEST_ADMIN_PASSWORD='!P4ssw0rdstr!'
+export TEST_REGULAR_USER=user@example.com
+export TEST_REGULAR_PASSWORD='!P4ssw0rdstr!'
+```
+
 ### Testing Unauthorized Access
 
 ```php
@@ -278,7 +333,7 @@ public function testGetUnauthorized()
         ->withPath('/dummy/1')
         ->assertResponseCode(401);
 
-    $this->assertRequest($request);
+    $this->sendRequest($request);
 }
 ```
 
@@ -290,7 +345,7 @@ public function testLoginInvalidCredentials()
     $this->expectException(Error401Exception::class);
     $this->expectExceptionMessage('Username or password is invalid');
 
-    $this->assertRequest(Credentials::requestLogin([
+    $this->sendRequest(Credentials::requestLogin([
         'username' => 'invalid',
         'password' => 'wrong'
     ]));
@@ -302,7 +357,6 @@ public function testLoginInvalidCredentials()
 ```php
 public function testExpiredToken()
 {
-    // Create expired token
     $expiredToken = JwtWrapper::createToken([
         'userid' => 1,
         'name' => 'Test User',
@@ -319,7 +373,7 @@ public function testExpiredToken()
         ->withRequestHeader(['Authorization' => "Bearer {$expiredToken}"])
         ->assertResponseCode(401);
 
-    $this->assertRequest($request);
+    $this->sendRequest($request);
 }
 ```
 
@@ -333,14 +387,12 @@ public function testInsufficientPrivileges()
     $this->expectException(Error403Exception::class);
     $this->expectExceptionMessage('Insufficient privileges');
 
-    // Login as regular user
-    $loginResponse = $this->assertRequest(
+    $loginResponse = $this->sendRequest(
         Credentials::requestLogin(Credentials::getRegularUser())
     );
     $data = json_decode($loginResponse->getBody()->getContents(), true);
     $token = $data['token'];
 
-    // Try admin-only endpoint
     $request = new FakeApiRequester();
     $request
         ->withPsr7Request($this->getPsr7Request())
@@ -349,136 +401,7 @@ public function testInsufficientPrivileges()
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->assertResponseCode(403);
 
-    $this->assertRequest($request);
-}
-```
-
-### Testing Different Roles
-
-```php
-public function testAdminCanDelete()
-{
-    $loginResponse = $this->assertRequest(
-        Credentials::requestLogin(Credentials::getAdminUser())
-    );
-    $data = json_decode($loginResponse->getBody()->getContents(), true);
-
-    $request = new FakeApiRequester();
-    $request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('DELETE')
-        ->withPath('/products/1')
-        ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
-        ->assertResponseCode(200);
-
-    $this->assertRequest($request);
-}
-
-public function testUserCannotDelete()
-{
-    $this->expectException(Error403Exception::class);
-
-    $loginResponse = $this->assertRequest(
-        Credentials::requestLogin(Credentials::getRegularUser())
-    );
-    $data = json_decode($loginResponse->getBody()->getContents(), true);
-
-    $request = new FakeApiRequester();
-    $request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('DELETE')
-        ->withPath('/products/1')
-        ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
-        ->assertResponseCode(403);
-
-    $this->assertRequest($request);
-}
-```
-
-## Testing Validation
-
-### Testing Required Fields
-
-```php
-public function testCreateWithoutRequiredField()
-{
-    $this->expectException(Error400Exception::class);
-
-    $loginResponse = $this->assertRequest(
-        Credentials::requestLogin(Credentials::getAdminUser())
-    );
-    $data = json_decode($loginResponse->getBody()->getContents(), true);
-
-    $request = new FakeApiRequester();
-    $request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('POST')
-        ->withPath('/products')
-        ->withRequestBody(json_encode([
-            // Missing required 'name' field
-            'price' => 99.99
-        ]))
-        ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
-        ->assertResponseCode(400);
-
-    $this->assertRequest($request);
-}
-```
-
-### Testing Data Type Validation
-
-```php
-public function testCreateWithInvalidType()
-{
-    $this->expectException(Error400Exception::class);
-
-    $loginResponse = $this->assertRequest(
-        Credentials::requestLogin(Credentials::getAdminUser())
-    );
-    $data = json_decode($loginResponse->getBody()->getContents(), true);
-
-    $request = new FakeApiRequester();
-    $request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('POST')
-        ->withPath('/products')
-        ->withRequestBody(json_encode([
-            'name' => 'Product',
-            'price' => 'not-a-number'  // Invalid type
-        ]))
-        ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
-        ->assertResponseCode(400);
-
-    $this->assertRequest($request);
-}
-```
-
-### Testing Business Rule Validation
-
-```php
-public function testCreateWithNegativePrice()
-{
-    $this->expectException(Error400Exception::class);
-    $this->expectExceptionMessage('Price cannot be negative');
-
-    $loginResponse = $this->assertRequest(
-        Credentials::requestLogin(Credentials::getAdminUser())
-    );
-    $data = json_decode($loginResponse->getBody()->getContents(), true);
-
-    $request = new FakeApiRequester();
-    $request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('POST')
-        ->withPath('/products')
-        ->withRequestBody(json_encode([
-            'name' => 'Product',
-            'price' => -10.00  // Negative price
-        ]))
-        ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
-        ->assertResponseCode(400);
-
-    $this->assertRequest($request);
+    $this->sendRequest($request);
 }
 ```
 
@@ -492,7 +415,7 @@ public function testCreateWithNegativePrice()
 public function testFullCrud()
 {
     // Login
-    $loginResponse = $this->assertRequest(
+    $loginResponse = $this->sendRequest(
         Credentials::requestLogin(Credentials::getAdminUser())
     );
     $loginData = json_decode($loginResponse->getBody()->getContents(), true);
@@ -508,7 +431,7 @@ public function testFullCrud()
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->assertResponseCode(200);
 
-    $createResponse = $this->assertRequest($createRequest);
+    $createResponse = $this->sendRequest($createRequest);
     $created = json_decode($createResponse->getBody()->getContents(), true);
     $id = $created['id'];
 
@@ -521,7 +444,7 @@ public function testFullCrud()
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->assertResponseCode(200);
 
-    $getResponse = $this->assertRequest($getRequest);
+    $getResponse = $this->sendRequest($getRequest);
     $retrieved = json_decode($getResponse->getBody()->getContents(), true);
 
     $this->assertEquals($id, $retrieved['id']);
@@ -539,7 +462,7 @@ public function testFullCrud()
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->assertResponseCode(200);
 
-    $this->assertRequest($updateRequest);
+    $this->sendRequest($updateRequest);
 
     // Verify update
     $verifyRequest = new FakeApiRequester();
@@ -550,19 +473,19 @@ public function testFullCrud()
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->assertResponseCode(200);
 
-    $verifyResponse = $this->assertRequest($verifyRequest);
+    $verifyResponse = $this->sendRequest($verifyRequest);
     $verified = json_decode($verifyResponse->getBody()->getContents(), true);
 
     $this->assertEquals('updated value', $verified['field']);
 }
 ```
 
-### Testing List Endpoint
+### Testing List & Pagination
 
 ```php
 public function testList()
 {
-    $loginResponse = $this->assertRequest(
+    $loginResponse = $this->sendRequest(
         Credentials::requestLogin(Credentials::getRegularUser())
     );
     $data = json_decode($loginResponse->getBody()->getContents(), true);
@@ -575,57 +498,12 @@ public function testList()
         ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
         ->assertResponseCode(200);
 
-    $response = $this->assertRequest($request);
+    $response = $this->sendRequest($request);
     $list = json_decode($response->getBody()->getContents(), true);
 
     $this->assertIsArray($list);
-    $this->assertGreaterThanOrEqual(0, count($list));
-
     if (count($list) > 0) {
         $this->assertArrayHasKey('id', $list[0]);
-        $this->assertArrayHasKey('field', $list[0]);
-    }
-}
-```
-
-### Testing Pagination
-
-```php
-public function testPagination()
-{
-    $loginResponse = $this->assertRequest(
-        Credentials::requestLogin(Credentials::getRegularUser())
-    );
-    $data = json_decode($loginResponse->getBody()->getContents(), true);
-    $token = $data['token'];
-
-    // Get first page
-    $page1Request = new FakeApiRequester();
-    $page1Request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('GET')
-        ->withPath('/dummy?page=0&size=10')
-        ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(200);
-
-    $page1Response = $this->assertRequest($page1Request);
-    $page1 = json_decode($page1Response->getBody()->getContents(), true);
-
-    // Get second page
-    $page2Request = new FakeApiRequester();
-    $page2Request
-        ->withPsr7Request($this->getPsr7Request())
-        ->withMethod('GET')
-        ->withPath('/dummy?page=1&size=10')
-        ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(200);
-
-    $page2Response = $this->assertRequest($page2Request);
-    $page2 = json_decode($page2Response->getBody()->getContents(), true);
-
-    // Verify pages are different
-    if (count($page1) > 0 && count($page2) > 0) {
-        $this->assertNotEquals($page1[0]['id'], $page2[0]['id']);
     }
 }
 ```
@@ -685,27 +563,6 @@ class ProductServiceTest extends TestCase
 
         $this->service->getOrFail(999);
     }
-
-    public function testCreate()
-    {
-        $payload = [
-            'name' => 'New Product',
-            'price' => 99.99
-        ];
-
-        $this->repository
-            ->expects($this->once())
-            ->method('getMapper')
-            ->willReturn($mockMapper);
-
-        $this->repository
-            ->expects($this->once())
-            ->method('save');
-
-        $result = $this->service->create($payload);
-
-        $this->assertInstanceOf(Product::class, $result);
-    }
 }
 ```
 
@@ -716,9 +573,6 @@ class ProductServiceTest extends TestCase
 ```php
 class ProductTest extends BaseApiTestCase
 {
-    /**
-     * Get sample product data
-     */
     protected function getSampleData(bool $array = false)
     {
         $sample = [
@@ -734,25 +588,6 @@ class ProductTest extends BaseApiTestCase
         ObjectCopy::copy($sample, $model = new Product());
         return $model;
     }
-
-    public function testCreate()
-    {
-        // Use as array
-        $payload = $this->getSampleData(true);
-
-        // Use as model
-        $model = $this->getSampleData(false);
-    }
-}
-```
-
-### Database Reset
-
-```php
-protected function setUp(): void
-{
-    parent::setUp();
-    $this->resetDb();  // Resets database to migration state
 }
 ```
 
@@ -771,14 +606,6 @@ protected function seedTestData()
         ]);
     }
 }
-
-public function testListWithData()
-{
-    $this->seedTestData();
-
-    // Now test list endpoint
-    // ...
-}
 ```
 
 ## Best Practices
@@ -790,11 +617,6 @@ public function testListWithData()
 public function testCreateProduct() { /* ... */ }
 public function testGetProduct() { /* ... */ }
 public function testUpdateProduct() { /* ... */ }
-
-// Bad - Multiple concerns
-public function testProductCrud() {
-    // create, read, update, delete all in one test
-}
 ```
 
 ### 2. Use Descriptive Test Names
@@ -803,10 +625,6 @@ public function testProductCrud() {
 // Good - Clear intent
 public function testCreateProductWithNegativePriceThrowsException() { }
 public function testUserCannotDeleteOtherUsersProducts() { }
-
-// Bad - Vague
-public function testProduct1() { }
-public function testFailure() { }
 ```
 
 ### 3. Arrange-Act-Assert Pattern
@@ -815,7 +633,7 @@ public function testFailure() { }
 public function testCreateProduct()
 {
     // ARRANGE
-    $loginResponse = $this->assertRequest(
+    $loginResponse = $this->sendRequest(
         Credentials::requestLogin(Credentials::getAdminUser())
     );
     $token = json_decode($loginResponse->getBody()->getContents(), true)['token'];
@@ -830,7 +648,7 @@ public function testCreateProduct()
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->assertResponseCode(200);
 
-    $response = $this->assertRequest($request);
+    $response = $this->sendRequest($request);
 
     // ASSERT
     $data = json_decode($response->getBody()->getContents(), true);
@@ -839,17 +657,7 @@ public function testCreateProduct()
 }
 ```
 
-### 4. Test Both Success and Failure Cases
-
-```php
-public function testCreateProductSuccess() { /* ... */ }
-public function testCreateProductWithoutName() { /* ... */ }
-public function testCreateProductWithInvalidPrice() { /* ... */ }
-public function testCreateProductWithoutAuthentication() { /* ... */ }
-public function testCreateProductWithoutAuthorization() { /* ... */ }
-```
-
-### 5. Use Data Providers for Similar Tests
+### 4. Use Data Providers for Similar Tests
 
 ```php
 /**
@@ -875,47 +683,24 @@ public function invalidProductDataProvider(): array
             ['name' => 'Product', 'price' => -10],
             'Price cannot be negative'
         ],
-        'invalid type' => [
-            ['name' => 'Product', 'price' => 'not-a-number'],
-            'Price must be a number'
-        ]
     ];
 }
 ```
 
-### 6. Clean Up After Tests
+### 5. Test Both Success and Failure Cases
 
 ```php
-protected function tearDown(): void
-{
-    // Reset database state
-    parent::tearDown();
-}
-```
-
-### 7. Use Helper Classes
-
-```php
-// Credentials helper
-$adminCreds = Credentials::getAdminUser();
-
-// Test data helper
-$sampleProduct = $this->getSampleData(true);
-```
-
-### 8. Test Edge Cases
-
-```php
-public function testListWithNoResults() { /* ... */ }
-public function testGetNonExistentProduct() { /* ... */ }
-public function testUpdateDeletedProduct() { /* ... */ }
-public function testPaginationBeyondLastPage() { /* ... */ }
+public function testCreateProductSuccess() { /* ... */ }
+public function testCreateProductWithoutName() { /* ... */ }
+public function testCreateProductWithInvalidPrice() { /* ... */ }
+public function testCreateProductWithoutAuthentication() { /* ... */ }
+public function testCreateProductWithoutAuthorization() { /* ... */ }
 ```
 
 ## Related Documentation
 
-- [REST API Development](rest.md)
-- [Attributes System](attributes.md) - Testing validation attributes
+- [REST Controllers](rest-controllers.md)
+- [Attributes System](../reference/attributes.md) - Testing validation attributes
 - [Error Handling](error-handling.md) - Testing error responses
-- [Service Patterns](service-patterns.md) - Unit testing services
-- [JWT Authentication](jwt-advanced.md) - Testing authentication
+- [Service Layer](services.md) - Unit testing services
+- [JWT Authentication Advanced](jwt-advanced.md) - Testing authentication

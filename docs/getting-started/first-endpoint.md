@@ -1,5 +1,6 @@
 ---
 sidebar_position: 40
+title: Create Your First Endpoint
 ---
 
 # Add a New REST Method

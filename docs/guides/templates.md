@@ -1,5 +1,6 @@
 ---
-sidebar_position: 150
+sidebar_position: 180
+title: Template Customization
 ---
 
 # Code Generator Template Customization
@@ -393,7 +394,7 @@ composer test
 
 ## Related Documentation
 
-- [Code Generator Usage](code_generator.md)
+- [Code Generator Usage](../reference/code-generator.md)
 - [ORM Guide](orm.md)
-- [REST API Development](rest.md)
-- [Architecture Decisions](architecture-decisions.md)
+- [REST API Development](rest-controllers.md)
+- [Architecture Decisions](../concepts/architecture.md)

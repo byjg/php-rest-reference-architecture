@@ -1,5 +1,6 @@
 ---
-sidebar_position: 90
+sidebar_position: 150
+title: ORM & Repository
 ---
 
 # Database ORM
@@ -111,3 +112,82 @@ Binary UUID columns are transparent when you rely on the attribute helpers:
 ## 5. Services and REST Controllers
 
 Repositories are registered in `config/<env>/04-repositories.php` and injected into services (see `src/Service/DummyService.php`). Services orchestrate repositories, and REST controllers resolve services via the PSR-11 container. For deeper patterns (DTOs, filters, transactions), read [Repository Patterns](repository-advanced.md) and [Service Layer](services.md).
+
+## 6. ActiveRecord REST Endpoints
+
+When using the ActiveRecord pattern, the controller calls model methods directly — no separate service class is required. The reference implementation is `src/Rest/DummyActiveRecordRest.php`.
+
+### GET — Fetch by ID
+
+```php title="src/Rest/DummyActiveRecordRest.php (GET by id)"
+#[RequireAuthenticated]
+public function getDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+{
+    $model = DummyActiveRecord::get($request->param('id'));
+
+    if (is_null($model)) {
+        throw new Error404Exception("DummyActiveRecord not found");
+    }
+
+    $response->write($model);
+}
+```
+
+### GET — List with Pagination
+
+```php title="src/Rest/DummyActiveRecordRest.php (list)"
+#[RequireAuthenticated]
+public function listDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+{
+    $models = DummyActiveRecord::all($request->get('page') ?? 0, $request->get('size') ?? 50);
+    $response->write($models);
+}
+```
+
+### POST — Create
+
+Use `DummyActiveRecord::new($payload)` to hydrate a new instance from an array, then call `save()`:
+
+```php title="src/Rest/DummyActiveRecordRest.php (create)"
+#[RequireRole(User::ROLE_ADMIN)]
+#[ValidateRequest]
+public function postDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+{
+    $payload = ValidateRequest::getPayload();
+
+    $model = DummyActiveRecord::new($payload);
+    $model->save();
+
+    $response->write(["id" => $model->getId()]);
+}
+```
+
+### PUT — Update
+
+Use `->fill($payload)` to apply changes to an existing instance, then call `save()`:
+
+```php title="src/Rest/DummyActiveRecordRest.php (update)"
+#[RequireRole(User::ROLE_ADMIN)]
+#[ValidateRequest]
+public function putDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+{
+    $payload = ValidateRequest::getPayload();
+
+    $model = DummyActiveRecord::get($payload['id'] ?? null);
+
+    if (is_null($model)) {
+        throw new Error404Exception("DummyActiveRecord not found");
+    }
+
+    $model->fill($payload);
+    $model->save();
+}
+```
+
+**Key differences from service-based controllers:**
+
+| Service pattern | ActiveRecord pattern |
+|---|---|
+| `Config::get(DummyService::class)->create($payload)` | `DummyActiveRecord::new($payload)->save()` |
+| `Config::get(DummyService::class)->getOrFail($id)` | `DummyActiveRecord::get($id)` |
+| `$service->update($payload)` | `$model->fill($payload); $model->save()` |

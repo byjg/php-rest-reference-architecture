@@ -1,5 +1,6 @@
 ---
-sidebar_position: 70
+sidebar_position: 130
+title: Authentication
 ---
 
 # Login Integration with JWT
@@ -51,7 +52,7 @@ To customize fields, either modify these models or create your own classes and u
 
 `config/dev/02-security.php` wires the repositories and service:
 
-```php
+```php title="config/dev/02-security.php"
 use ByJG\Authenticate\Enum\LoginField;
 use ByJG\Authenticate\Repository\UserPropertiesRepository;
 use ByJG\Authenticate\Repository\UsersRepository;
@@ -87,7 +88,7 @@ return [
 
 The password policy also lives in `config/dev/02-security.php`:
 
-```php
+```php title="config/dev/02-security.php"
 use ByJG\Authenticate\Definition\PasswordDefinition;
 
 return [
@@ -114,12 +115,15 @@ AuthUser uses the mapper configured on `User::$password` to hash passwords (`Pas
 
 `JwtWrapper` bindings read the secret from each environment’s `credentials.env` file.
 
-```
-# config/dev/credentials.env
+```ini title="config/dev/credentials.env"
 JWT_SECRET=jwt_super_secret_key
 ```
 
-```php
+:::caution Never commit secrets
+Each environment gets its own `config/<env>/credentials.env` — keep this file out of version control (it is already listed in `.gitignore`).
+:::
+
+```php title="config/dev/02-security.php"
 use ByJG\Config\Param;
 use ByJG\JwtWrapper\JwtHashHmacSecret;
 use ByJG\JwtWrapper\JwtKeyInterface;
@@ -136,7 +140,7 @@ return [
 ];
 ```
 
-Never commit secrets—each environment gets its own `config/<env>/credentials.env`.
+See the caution above — never commit `credentials.env`.
 
 ### Available Endpoints
 
@@ -196,7 +200,7 @@ class MyProtectedRest
 ```php
 use RestReferenceArchitecture\Util\JwtContext;
 
-// JwtContext::parseJwt() runs inside the middleware pipeline
+// JwtContext::setRequest() is called by #[RequireAuthenticated] and #[RequireRole]
 $userId   = JwtContext::getUserId();
 $userName = JwtContext::getName();
 $userRole = JwtContext::getRole(); // e.g., "admin" or "user"

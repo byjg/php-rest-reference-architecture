@@ -1,0 +1,8 @@
+{
+  "label": "Guides",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Task-oriented how-to guides for building features with the reference architecture."
+  }
+}

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 210
+sidebar_position: 60
+title: Unattended Setup
 ---
 
 # Unattended Setup Mode

@@ -1,5 +1,6 @@
 ---
 sidebar_position: 10
+title: Getting Started
 ---
 
 # Getting Started
@@ -171,7 +172,7 @@ Expected response:
 ### If You Skipped Examples
 
 The project is ready! You can start by:
-- Creating your first table following the [getting started tutorial](getting_started_01_create_table.md)
+- Creating your first table following the [getting started tutorial](first-table.md)
 - Accessing the API documentation at http://localhost:8080/docs
 - The `users` table and authentication endpoints are already available
 
@@ -193,4 +194,4 @@ open http://localhost:8080/docs
 
 ## Next Steps
 
-Continue with [creating a new table and CRUD operations](getting_started_01_create_table.md).
+Continue with [creating a new table and CRUD operations](first-table.md).

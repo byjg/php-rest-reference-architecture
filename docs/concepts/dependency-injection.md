@@ -1,10 +1,11 @@
 ---
-sidebar_position: 180
+sidebar_position: 330
+title: Dependency Injection
 ---
 
-# PSR-11 Container
+# Dependency Injection & Configuration Container
 
-The project uses the [PSR-11](https://www.php-fig.org/psr/psr-11/) container to manage dependencies.
+The project uses the [PSR-11](https://www.php-fig.org/psr/psr-11/) container to manage dependencies. This document covers both the configuration structure and the DI binding patterns that wire everything together.
 
 ## Configuration Structure
 
@@ -23,7 +24,7 @@ You must set the `APP_ENV` environment variable to specify which environment to 
 
 ### Example: credentials.env
 
-```env
+```env title="config/dev/credentials.env"
 WEB_SERVER=localhost
 DASH_SERVER=localhost
 WEB_SCHEMA=http
@@ -37,7 +38,7 @@ CORS_SERVERS=.*
 
 ### Example: 01-infrastructure.php
 
-```php
+```php title="config/dev/01-infrastructure.php"
 <?php
 
 use ByJG\Cache\Psr16\BaseCacheEngine;
@@ -56,7 +57,7 @@ return [
 
 The configuration is loaded by the [byjg/config](https://github.com/byjg/config) library.
 
-## Get the configuration
+## Getting Configuration Values
 
 Use the `Config::get()` method:
 
@@ -110,13 +111,11 @@ use ByJG\Config\Environment;
 return new class implements ConfigInitializeInterface {
     public function loadDefinition(?string $env = null): Definition
     {
-        // Define environments with inheritance and caching using fluent API
         $dev = Environment::create('dev');
         $test = Environment::create('test')->inheritFrom($dev);
         $staging = Environment::create('staging')->inheritFrom($dev)->withCache(new FileSystemCacheEngine());
         $prod = Environment::create('prod')->inheritFrom($staging, $dev)->withCache(new FileSystemCacheEngine());
 
-        // Create definition with all environments
         return (new Definition())
             ->addEnvironment($dev)
             ->addEnvironment($test)
@@ -131,3 +130,125 @@ return new class implements ConfigInitializeInterface {
 ```
 
 The Config is automatically initialized when first accessed, thanks to byjg/config's auto-initialization feature.
+
+---
+
+## Dependency Injection Patterns
+
+Dependency Injection (DI) decouples your code from specific implementations, making it easier to swap dependencies based on environment or requirements.
+
+### Example: Environment-Specific Cache
+
+You might want caching enabled in production but disabled in development for easier debugging.
+
+**Development** - `config/dev/01-infrastructure.php`:
+
+```php
+<?php
+
+use ByJG\Cache\Psr16\BaseCacheEngine;
+use ByJG\Cache\Psr16\NoCacheEngine;
+use ByJG\Config\DependencyInjection as DI;
+
+return [
+    BaseCacheEngine::class => DI::bind(NoCacheEngine::class)
+        ->toSingleton(),
+];
+```
+
+**Production** - `config/prod/01-infrastructure.php`:
+
+```php
+<?php
+
+use ByJG\Cache\Psr16\BaseCacheEngine;
+use ByJG\Cache\Psr16\FileSystemCacheEngine;
+use ByJG\Config\DependencyInjection as DI;
+
+return [
+    BaseCacheEngine::class => DI::bind(FileSystemCacheEngine::class)
+        ->toSingleton(),
+];
+```
+
+**Usage in Code:**
+
+```php
+<?php
+
+use ByJG\Config\Config;
+use ByJG\Cache\Psr16\BaseCacheEngine;
+
+// Get the cache instance (implementation depends on APP_ENV)
+$cache = Config::get(BaseCacheEngine::class);
+
+// Use it the same way regardless of environment
+$cache->set('key', 'value', 3600);
+$value = $cache->get('key');
+```
+
+The application automatically returns the correct implementation based on the `APP_ENV` environment variable.
+
+### Constructor Injection (`withInjectedConstructor`)
+
+```php
+DummyService::class => DI::bind(DummyService::class)
+    ->withInjectedConstructor()
+    ->toSingleton(),
+```
+
+The container automatically injects dependencies defined in the constructor based on their type hints.
+
+### Constructor with Parameters (`withConstructorArgs`)
+
+```php
+JwtWrapper::class => DI::bind(JwtWrapper::class)
+    ->withConstructorArgs([
+        Param::get('API_SERVER'),
+        Param::get(JwtKeyInterface::class)
+    ])
+    ->toSingleton(),
+```
+
+Mix environment parameters and other dependencies.
+
+### Factory Method (`withFactoryMethod`)
+
+```php
+DbDriverInterface::class => DI::bind(Factory::class)
+    ->withFactoryMethod("getDbRelationalInstance", [
+        Param::get('DBDRIVER_CONNECTION')
+    ])
+    ->toSingleton(),
+```
+
+Use a factory method instead of a constructor.
+
+### Singleton vs Transient (`toSingleton`)
+
+```php
+// Singleton - Same instance every time
+MyService::class => DI::bind(MyService::class)->toSingleton(),
+
+// Transient - New instance every time
+MyService::class => DI::bind(MyService::class),
+```
+
+## Configuration Organization
+
+Dependencies are organized by layer in numbered files:
+
+- `01-infrastructure.php` - Database, Cache, Logging
+- `02-security.php` - JWT, Authentication, User Management
+- `03-api.php` - OpenAPI, Routes, Middleware
+- `04-repositories.php` - Data access layer
+- `05-services.php` - Business logic layer
+- `06-external.php` - Email, SMS, external APIs
+
+This organization makes it easy to find and modify related configurations.
+
+## Related Documentation
+
+- [Configuration Guide](../guides/configuration.md) - Advanced configuration patterns
+- [Service Layer](../guides/services.md) - Registering services in the container
+- [Architecture](architecture.md) - How DI fits the overall architecture

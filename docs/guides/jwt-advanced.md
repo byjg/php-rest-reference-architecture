@@ -1,5 +1,6 @@
 ---
-sidebar_position: 250
+sidebar_position: 200
+title: JWT Advanced
 ---
 
 # JWT Authentication - Advanced Guide
@@ -805,8 +806,8 @@ public function verifyMfa(HttpResponse $response, HttpRequest $request)
 
 ## Related Documentation
 
-- [Attributes System](attributes.md) - RequireAuthenticated and RequireRole
-- [REST API Development](rest.md) - Protecting endpoints
+- [Attributes System](../reference/attributes.md) - RequireAuthenticated and RequireRole
+- [REST API Development](rest-controllers.md) - Protecting endpoints
 - [Error Handling](error-handling.md) - Authentication errors
-- [Testing Guide](testing-guide.md) - Testing authentication
-- [Configuration](configuration-advanced.md) - JWT configuration
+- [Testing Guide](testing.md) - Testing authentication
+- [Configuration](configuration.md) - JWT configuration

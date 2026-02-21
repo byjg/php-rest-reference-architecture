@@ -1,5 +1,6 @@
 ---
-sidebar_position: 50
+sidebar_position: 400
+title: Code Generator
 ---
 
 # Code Generator

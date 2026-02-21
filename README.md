@@ -11,15 +11,9 @@
 
 ## Why Use This?
 
-Stop wasting time configuring infrastructure. This template provides everything you need to build professional REST APIs:
+Every new REST API needs the same boilerplate: authentication, migrations, an ORM, OpenAPI docs, a test harness, and a DI container. Setting all of that up correctly takes days — and it's not the work your users care about.
 
-- ✅ **Start coding in minutes** - Not hours or days
-- ✅ **Production-ready** - Security, authentication, and best practices built-in
-- ✅ **Code generator** - Automatically create CRUD operations from database tables
-- ✅ **Two architectural patterns** - Choose between Repository or ActiveRecord
-- ✅ **OpenAPI documentation** - Auto-generated, always in sync
-- ✅ **Fully tested** - Includes a functional test suite
-- ✅ **Docker-ready** - Containerized development and deployment
+This template does the wiring once, correctly, so you start on day one writing business logic instead of plumbing. And because it's a **template you own** — not a framework you depend on — you can change, remove, or replace any part of it without asking permission.
 
 ## Quick Start
 
@@ -29,7 +23,7 @@ composer -sdev create-project byjg/rest-reference-architecture my-api ^6.0
 
 # Start containers
 cd my-api
-docker compose -f docker-compose.yml up -d
+docker compose up -d
 
 # Run migrations
 composer migrate -- --env=dev reset
@@ -38,7 +32,7 @@ composer migrate -- --env=dev reset
 curl http://localhost:8080/sample/ping
 ```
 
-**📚 [Complete Getting Started Guide →](docs/getting_started.md)**
+**📚 [Complete Getting Started Guide →](docs/getting-started/installation.md)**
 
 ## Architecture Overview
 
@@ -54,8 +48,8 @@ mindmap
     ("Database")
       ("ORM Integration")
       ("Migration")
-      ("Routing")
     ("OpenAPI Integration")
+      ("Routing")
       ("Rest Methods")
       ("Contract Testing")
       ("Documentation")
@@ -64,150 +58,55 @@ mindmap
 
 ## Key Features
 
-### 🚀 Code Generation
-Automatically generate Models, Repositories, Services, REST Controllers, and Tests from your database schema.
+- 🚀 **Code generator** — one command scaffolds Model, Repository, Service, REST controller, and tests from any database table
+- 🏗️ **Two patterns** — choose Repository (DI + Service layer) or ActiveRecord per entity; mix them in the same project
+- 🔐 **Auth out of the box** — JWT login, token refresh, password reset, and role-based access control (RBAC) included
+- 📖 **OpenAPI-first** — routes are driven by `openapi.json`; Swagger UI, contract testing, and docs stay in sync automatically
+- 🗄️ **Database migrations** — versioned up/down SQL migrations with a one-command runner and ORM integration
+- 🧪 **In-process testing** — `FakeApiRequester` runs the full API stack inside PHPUnit, no web server needed
+- 🐳 **Docker ready** — MySQL, PHP-FPM, and Nginx pre-configured; `docker compose up -d` and you're running
+- ⚙️ **PSR standards** — PSR-7 (HTTP messages), PSR-11 (container), PSR-6/16 (cache)
 
 ```bash
-composer codegen -- --env=dev --table=users all --save
+# Generate a complete CRUD API from a single table
+composer codegen -- --env=dev --table=products all --save
 ```
-
-**📚 [Code Generator Documentation →](docs/code_generator.md)**
-
-### 🏗️ Two Architectural Patterns
-
-**Repository Pattern** (default)
-- Clean separation of concerns
-- Service layer for business logic
-- Full dependency injection
-
-**ActiveRecord Pattern**
-- Rapid prototyping
-- Less boilerplate
-- Direct database access from models
-
-**📚 [Choose Your Pattern →](docs/code_generator.md#what-it-generates)**
-
-### 🔐 Authentication & Authorization Built-in
-
-- JWT-based authentication
-- Role-based access control (RBAC)
-- Secure by default
-- Ready-to-use login endpoints
-
-**📚 [Authentication Guide →](docs/login.md)**
-
-### 📖 OpenAPI Integration
-
-- Auto-generated documentation
-- Interactive API explorer (Swagger UI)
-- Always synchronized with your code
-- Contract testing support
-
-**📚 [REST API Documentation →](docs/rest.md)**
-
-### 🗄️ Database Management
-
-**Migrations**
-- Version control your database schema
-- Up/down migration support
-- Zero-downtime deployments
-
-**📚 [Migration Guide →](docs/migration.md)**
-
-**ORM Integration**
-- MicroORM for lightweight data access
-- Query builder
-- Relationship mapping
-
-**📚 [ORM Documentation →](docs/orm.md)**
-
-### 🧪 Testing Built-in
-
-- Functional test suite included
-- Test helpers and fixtures
-- OpenAPI contract testing
-- Supports custom test scenarios
-
-**📚 [Testing Guide →](docs/functional_test.md)**
-
-### 🐳 Docker Ready
-
-- Pre-configured Docker setup
-- Development and production configurations
-- MySQL, PHP-FPM, and Nginx
-- One command to start
-
-### 🔧 Scriptify - Interactive Development
-
-- **Interactive PHP Terminal**: REPL with your project's autoloader
-- **CLI Script Runner**: Execute any PHP method from command line
-- **Service Management**: Install PHP classes as system daemons
-- Quick prototyping and debugging
-
-```bash
-composer terminal  # Start interactive PHP shell
-```
-
-**📚 [Scriptify Guide →](docs/scriptify.md)**
-
-### ⚙️ Modern PHP Standards
-
-Implements PSR standards:
-- PSR-7: HTTP Message Interface
-- PSR-11: Container Interface
-- PSR-6 & PSR-16: Cache Interface
-- And more...
-
-**📚 [PSR-11 Container →](docs/psr11.md)** | **[Dependency Injection →](docs/psr11_di.md)**
-
-## What's Included
-
-| Feature              | Description                        | Documentation                      |
-|----------------------|------------------------------------|------------------------------------|
-| **Code Generator**   | Generate CRUD from database tables | [→ Docs](docs/code_generator.md)   |
-| **REST API**         | OpenAPI-documented endpoints       | [→ Docs](docs/rest.md)             |
-| **Authentication**   | JWT with role-based access         | [→ Docs](docs/login.md)            |
-| **Database**         | Migrations + ORM                   | [→ Docs](docs/migration.md)        |
-| **Testing**          | Functional test suite              | [→ Docs](docs/functional_test.md)  |
-| **Service Layer**    | Business logic separation          | [→ Docs](docs/services.md)         |
-| **Scriptify**        | Interactive terminal & CLI scripts | [→ Docs](docs/scriptify.md)        |
-| **Unattended Setup** | CI/CD friendly installation        | [→ Docs](docs/unattended_setup.md) |
 
 ## Documentation
 
 ### Getting Started
-1. **[Installation & Setup](docs/getting_started.md)** – Install the template, configure environments, and review prerequisites.
-2. **[Create Your First Table](docs/getting_started_01_create_table.md)** – Define your first migration and schema.
-3. **[Add Fields](docs/getting_started_02_add_new_field.md)** – Safely evolve existing tables.
-4. **[Create REST Endpoints](docs/getting_started_03_create_rest_method.md)** – Generate REST handlers from your tables.
+1. **[Installation & Setup](docs/getting-started/installation.md)** – Install the template, configure environments, and review prerequisites.
+2. **[Create Your First Table](docs/getting-started/first-table.md)** – Define your first migration and schema.
+3. **[Add Fields](docs/getting-started/add-field.md)** – Safely evolve existing tables.
+4. **[Create REST Endpoints](docs/getting-started/first-endpoint.md)** – Generate REST handlers from your tables.
+5. **[Windows Setup](docs/getting-started/windows.md)** – WSL/Windows-specific checklist.
+6. **[Unattended Setup](docs/getting-started/unattended-setup.md)** – Automate installs for CI/CD pipelines.
 
-### Build Your API
-- **[Code Generator](docs/code_generator.md)** – Automate models, repositories, services, controllers, and tests.
-- **[REST API](docs/rest.md)** – Implement endpoints that stay in sync with OpenAPI contracts.
-- **[Authentication](docs/login.md)** – Configure JWT login flows and RBAC enforcement.
-- **[Database Migration](docs/migration.md)** – Version and run schema migrations in every environment.
-- **[ORM](docs/orm.md)** – Use MicroORM for repository and ActiveRecord patterns.
-- **[Service Layer](docs/services.md)** – Organize business logic and transaction boundaries.
-- **[Service Patterns](docs/service-patterns.md)** – Adopt advanced orchestration, validation, and DTO patterns.
-- **[Repository Patterns](docs/repository-advanced.md)** – Implement complex queries, UUID handling, and filtering helpers.
-- **[Attributes System](docs/attributes.md)** – Apply RequireRole, ValidateRequest, and custom attributes to controllers.
-- **[Traits Reference](docs/traits.md)** – Reuse timestamp and soft-delete helpers inside models.
-- **[Template Customization](docs/templates.md)** – Tailor the generator templates to match your coding standards.
+### Guides
+- **[REST Controllers](docs/guides/rest-controllers.md)** – Define routes with PHP attributes; keep controllers thin.
+- **[Authentication](docs/guides/authentication.md)** – Configure JWT login flows and RBAC enforcement.
+- **[Database Migrations](docs/guides/migrations.md)** – Version and run schema migrations in every environment.
+- **[ORM](docs/guides/orm.md)** – Use MicroORM for repository and ActiveRecord patterns.
+- **[Service Layer](docs/guides/services.md)** – Organize business logic, orchestration, and transaction boundaries.
+- **[Repository Patterns](docs/guides/repository-advanced.md)** – Implement complex queries, UUID handling, and filtering helpers.
+- **[Template Customization](docs/guides/templates.md)** – Tailor the generator templates to match your coding standards.
+- **[Testing](docs/guides/testing.md)** – Unit, integration, and contract testing with `FakeApiRequester`.
+- **[JWT Authentication Advanced](docs/guides/jwt-advanced.md)** – Extend tokens with custom claims and refresh logic.
+- **[Error Handling](docs/guides/error-handling.md)** – Map exceptions to HTTP responses and logging patterns.
+- **[Configuration](docs/guides/configuration.md)** – Layer configurations, secrets, and environment overrides.
 
-### Architecture & Operations
-- **[Configuration Deep Dive](docs/configuration-advanced.md)** – Layer configurations, secrets, and environment overrides.
-- **[Architecture Decisions](docs/architecture-decisions.md)** – Decide when to use Repository or ActiveRecord implementations.
-- **[PSR-11 Container](docs/psr11.md)** – Understand the default container bindings that power `src/`.
-- **[Dependency Injection](docs/psr11_di.md)** – Wire repositories, services, and factories through the container.
-- **[Scriptify](docs/scriptify.md)** – Use the REPL, CLI runner, and service manager utilities.
-- **[Unattended Setup](docs/unattended_setup.md)** – Automate installs for CI/CD pipelines.
-- **[Windows Setup](docs/windows.md)** – Follow the WSL/Windows specific checklist.
+### Concepts
+- **[Architecture](docs/concepts/architecture.md)** – Architectural decisions: when to use Repository vs ActiveRecord.
+- **[OpenAPI Integration](docs/concepts/openapi-integration.md)** – How swagger-php, the spec file, and Swagger UI fit together.
+- **[Dependency Injection](docs/concepts/dependency-injection.md)** – PSR-11 container, environment hierarchy, and DI binding patterns.
+- **[Request Lifecycle](docs/concepts/request-lifecycle.md)** – Trace an HTTP request from entry point to JSON response.
 
-### Testing & Quality
-- **[Complete Testing Guide](docs/testing-guide.md)** – Unit, integration, and contract testing reference.
-- **[Functional Tests](docs/functional_test.md)** – Use `FakeApiRequester` and fixtures for end-to-end coverage.
-- **[JWT Authentication Advanced](docs/jwt-advanced.md)** – Extend tokens with custom claims and refresh logic.
-- **[Error Handling](docs/error-handling.md)** – Map exceptions to HTTP responses and logging patterns.
+### Reference
+- **[Code Generator](docs/reference/code-generator.md)** – Automate models, repositories, services, controllers, and tests.
+- **[Attributes](docs/reference/attributes.md)** – `RequireAuthenticated`, `RequireRole`, `ValidateRequest`, and custom attributes.
+- **[Traits](docs/reference/traits.md)** – Timestamp and soft-delete helpers for models.
+- **[Scriptify](docs/reference/scriptify.md)** – REPL, CLI runner, and service manager utilities.
+- **[Components](docs/reference/components.md)** – Full PHP component dependency graph.
 
 ## Real-World Example
 
@@ -228,8 +127,17 @@ composer migrate -- --env=dev update
 # 3. Generate all code
 composer codegen -- --env=dev --table=products all --save
 
-# 4. Your CRUD API is ready!
-curl http://localhost:8080/products
+# 4. Generate the OpenAPI spec so routing is active
+composer run openapi
+
+# 5. Log in and capture the token
+TOKEN=$(curl -s -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin@example.com","password":"!P4ssw0rdstr!"}' \
+  | jq -r '.token')
+
+# 6. Call your new endpoint
+curl -s -H "Authorization: Bearer $TOKEN" http://localhost:8080/products | jq
 ```
 
 You just created a complete CRUD API with:
@@ -250,7 +158,7 @@ You just created a complete CRUD API with:
 
 ## Support & Community
 
-- 📖 **[Full Documentation](docs/getting_started.md)**
+- 📖 **[Full Documentation](docs/getting-started/installation.md)**
 - 🐛 **[Report Issues](https://github.com/byjg/php-rest-reference-architecture/issues)**
 - 💡 **[Request Features](https://github.com/byjg/php-rest-reference-architecture/issues)**
 - 🌐 **[ByJG Open Source](http://opensource.byjg.com)**
@@ -269,7 +177,7 @@ This project is open source. See [LICENSE](https://opensource.byjg.com/opensourc
 
 ## Dependencies
 
-**📚 [Complete Component Dependency Graph →](docs/components-dependency.md)**
+**📚 [Complete Component Dependency Graph →](docs/reference/components.md)**
 
 ---
 
