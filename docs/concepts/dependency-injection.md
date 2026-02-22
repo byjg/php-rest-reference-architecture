@@ -32,7 +32,7 @@ API_SERVER=localhost
 API_SCHEMA=http
 DBDRIVER_CONNECTION=mysql://root:mysqlp455w0rd@mysql-container/mydb
 EMAIL_CONNECTION=smtp://username:password@mail.example.com
-JWT_SECRET=your_secret_key_here
+JWT_SECRET=OFbOmC2VxlgQHNrBLa/wyj7/fFkgPnLpckbXMVuIU7Sqb3RTztNx3xzEYaoeA31JUpvBjkD7FRKBFGQ0+fnTig==
 CORS_SERVERS=.*
 ```
 

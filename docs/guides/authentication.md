@@ -116,8 +116,23 @@ AuthUser uses the mapper configured on `User::$password` to hash passwords (`Pas
 `JwtWrapper` bindings read the secret from each environment’s `credentials.env` file.
 
 ```ini title="config/dev/credentials.env"
-JWT_SECRET=jwt_super_secret_key
+JWT_SECRET=ZGV2LS1qd3Qtc2VjcmV0LWtleS1mb3ItbG9jYWwtZGV2ZWxvcG1lbnQtb25seS1wYWQtQUJDREVGR0hJSktMTU5P
 ```
+
+:::info JWT_SECRET format
+`JWT_SECRET` must be a **base64-encoded** string whose decoded value is at least **64 bytes** (required by HS512).
+`composer create-project` generates a fresh secret for every environment automatically.
+
+To regenerate manually, use `composer terminal`:
+
+```bash
+APP_ENV=dev composer terminal
+php> \ByJG\JwtWrapper\JwtWrapper::generateSecret(64)
+# => 'OFbOmC2VxlgQHNrBLa/wyj7/fFkgPnLpckbXMVuIU7Sqb3RTztNx3xzEYaoeA31JUpvBjkD7FRKBFGQ0+fnTig=='
+```
+
+Copy the output and replace `JWT_SECRET` in the appropriate `credentials.env`.
+:::
 
 :::caution Never commit secrets
 Each environment gets its own `config/<env>/credentials.env` — keep this file out of version control (it is already listed in `.gitignore`).
