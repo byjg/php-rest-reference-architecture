@@ -164,7 +164,7 @@ This file contains secrets — it is (and should remain) listed in `.gitignore`.
 DATABASE_URL=mysql://user:pass@localhost/myapp
 
 # JWT
-JWT_SECRET=your-super-secret-key-min-32-characters
+JWT_SECRET=OFbOmC2VxlgQHNrBLa/wyj7/fFkgPnLpckbXMVuIU7Sqb3RTztNx3xzEYaoeA31JUpvBjkD7FRKBFGQ0+fnTig==
 
 # External APIs
 STRIPE_KEY=sk_live_xxxxxxxxxxxx
@@ -364,8 +364,8 @@ return [
             throw new \RuntimeException('JWT_SECRET environment variable is required');
         }
 
-        if (strlen($secret) < 32) {
-            throw new \RuntimeException('JWT_SECRET must be at least 32 characters');
+        if (strlen(base64_decode($secret)) < 64) {
+            throw new \RuntimeException('JWT_SECRET must be a base64-encoded string that decodes to at least 64 bytes.);
         }
 
         return $secret;
