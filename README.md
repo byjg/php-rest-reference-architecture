@@ -1,7 +1,7 @@
 # PHP REST Reference Architecture
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
-[![Build Status](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml/badge.svg?branch=6.0)](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml)
+[![Build Status](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml/badge.svg?branch=master)](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-rest-reference-architecture)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-rest-reference-architecture.svg)](https://opensource.byjg.com/license/)
@@ -19,7 +19,7 @@ This template does the wiring once, correctly, so you start on day one writing b
 
 ```bash
 # Create your project
-composer -sdev create-project byjg/rest-reference-architecture my-api ^6.0
+composer -sdev create-project byjg/rest-reference-architecture my-api ^6.1
 
 # Start containers
 cd my-api

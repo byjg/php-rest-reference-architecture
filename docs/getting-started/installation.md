@@ -40,7 +40,7 @@ Choose one of the following installation methods:
 ```shell script
 # Standard installation
 mkdir ~/tutorial
-composer -sdev create-project byjg/rest-reference-architecture ~/tutorial ^6.0
+composer -sdev create-project byjg/rest-reference-architecture ~/tutorial ^6.1
 
 # OR Latest development version
 mkdir ~/tutorial
@@ -67,7 +67,7 @@ load.sh php-rest-api -- my-api \
   --name=mycompany/my-api \
   --mysql-uri=mysql://root:secret@mysql-container/mydb \
   --install-examples=n \
-  --version="^6.0" \
+  --version="^6.1" \
   --php-version=8.4 \
   --timezone=America/New_York
 ```

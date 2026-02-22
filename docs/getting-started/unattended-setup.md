@@ -23,7 +23,7 @@ The script searches for `setup.json` in the following locations (in priority ord
 Use the `SETUP_JSON` environment variable to specify a custom location:
 
 ```bash
-SETUP_JSON=/path/to/custom-setup.json composer -sdev create-project byjg/rest-reference-architecture my-project ^6.0
+SETUP_JSON=/path/to/custom-setup.json composer -sdev create-project byjg/rest-reference-architecture my-project ^6.1
 ```
 
 **Use cases:**
@@ -83,8 +83,8 @@ EOF
 
 # Now create projects anywhere - they'll use your defaults
 cd ~/projects
-composer -sdev create-project byjg/rest-reference-architecture project1 ^6.0
-composer -sdev create-project byjg/rest-reference-architecture project2 ^6.0
+composer -sdev create-project byjg/rest-reference-architecture project1 ^6.1
+composer -sdev create-project byjg/rest-reference-architecture project2 ^6.1
 ```
 
 ### Example 2: Parent Directory (Quick Setup)
@@ -101,7 +101,7 @@ cat > setup.json << 'EOF'
 EOF
 
 # Create project in the same directory
-composer -sdev create-project byjg/rest-reference-architecture my-project ^6.0
+composer -sdev create-project byjg/rest-reference-architecture my-project ^6.1
 ```
 
 ### Example 3: Environment Variable (CI/CD)
@@ -118,7 +118,7 @@ cat > /etc/ci-configs/rest-setup.json << 'EOF'
 EOF
 
 # Use it with environment variable
-SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/rest-reference-architecture production-app ^6.0
+SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/rest-reference-architecture production-app ^6.1
 ```
 
 ## Configuration Options
