@@ -1,0 +1,23 @@
+{
+  "skill_name": "php-rest-reference-architecture",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to add a new 'Product' entity to the API. It should have: name (string, required), price (decimal), category (string), and be soft-deletable. Create the model, repository, service, and REST controller with full CRUD endpoints (list, get by ID, create, update, delete). Require authentication on all endpoints. Also write the PHPUnit test.",
+      "expected_output": "Creates Product.php model with ORM and OpenAPI attributes using soft-delete trait, ProductRepository.php, ProductService.php, ProductRest.php with all CRUD endpoints using RequireAuthenticated and ValidateRequest attributes, ProductTest.php with test cases, DI registrations in config files, and runs 'composer run openapi' at the end.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I just cloned the project and need to get it ready to work. What do I need to do?",
+      "expected_output": "Provides the correct setup sequence: git fetch/pull/merge, composer update, docker compose up -d, run psalm and phpunit. Includes docker compose down at the end when done.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The GET /dummy/{id} endpoint currently only returns the dummy record. I need to modify it so that admin users can see ALL fields (including internal_notes), but regular authenticated users only see the public fields. How do I implement this?",
+      "expected_output": "Reads the existing DummyRest.php and Dummy model first. Suggests checking user role via JWT/RequireRole or manually in the method, modifying the service to have separate DTOs or filtering logic for admin vs regular users, with correct use of the byjg auth patterns. Runs psalm and phpunit at the end.",
+      "files": []
+    }
+  ]
+}
