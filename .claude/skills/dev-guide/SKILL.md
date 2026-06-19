@@ -107,7 +107,7 @@ src/
 ├── Service/        # Business logic — wraps repositories (Repository pattern only)
 ├── Repository/     # Data access — queries and persistence
 ├── Model/          # Database models with ORM + OpenAPI attributes
-├── Attributes/     # Custom PHP attributes (auth, validation middleware)
+├── Attribute/     # Custom PHP attributes (auth, validation middleware)
 ├── Trait/          # Shared traits (timestamps, soft-delete)
 └── OpenApiSpec.php # Root OpenAPI spec definition
 

@@ -190,8 +190,8 @@ curl -X GET http://localhost:8080/sampleprotected/ping \
 ### Protect Endpoints
 
 ```php
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 class MyProtectedRest

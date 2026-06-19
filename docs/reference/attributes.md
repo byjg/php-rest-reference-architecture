@@ -31,12 +31,12 @@ The `ValidateRequest` attribute automatically validates incoming requests agains
 
 ### Location
 
-`src/Attributes/ValidateRequest.php`
+`src/Attribute/ValidateRequest.php`
 
 ### Usage
 
 ```php
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 
 #[ValidateRequest]
 public function postDummy(HttpResponse $response, HttpRequest $request): void
@@ -227,12 +227,12 @@ The `RequireRole` attribute enforces role-based access control (RBAC) for protec
 
 ### Location
 
-`src/Attributes/RequireRole.php`
+`src/Attribute/RequireRole.php`
 
 ### Usage
 
 ```php
-use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attribute\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 #[RequireRole(User::ROLE_ADMIN)]
@@ -374,7 +374,7 @@ public function createUser(HttpResponse $response, HttpRequest $request): void
 ### Example: Multiple Authorization Checks
 
 ```php
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]  // Must be logged in
 #[RequireRole(User::ROLE_ADMIN)]  // Must be admin
@@ -394,7 +394,7 @@ You can create custom attributes to implement your own cross-cutting concerns.
 ```php
 <?php
 
-namespace RestReferenceArchitecture\Attributes;
+namespace RestReferenceArchitecture\Attribute;
 
 use Attribute;
 use ByJG\RestServer\Attributes\BeforeRouteInterface;
@@ -443,7 +443,7 @@ class RateLimit implements BeforeRouteInterface
 ### Step 2: Use Your Custom Attribute
 
 ```php
-use RestReferenceArchitecture\Attributes\RateLimit;
+use RestReferenceArchitecture\Attribute\RateLimit;
 
 #[OA\Post(path: "/api/heavy", tags: ["API"])]
 #[RateLimit(maxRequests: 10, windowSeconds: 60)]
@@ -458,7 +458,7 @@ public function heavyOperation(HttpResponse $response, HttpRequest $request): vo
 ```php
 <?php
 
-namespace RestReferenceArchitecture\Attributes;
+namespace RestReferenceArchitecture\Attribute;
 
 use Attribute;
 use ByJG\RestServer\Attributes\BeforeRouteInterface;

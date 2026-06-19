@@ -18,9 +18,9 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\RequireRole;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireRole;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\DummyActiveRecord;
 use RestReferenceArchitecture\Model\User;
 

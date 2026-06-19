@@ -138,7 +138,7 @@ Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
      * Search {{ class_name }}
      */
     // At the top of the template file add:
-    // use ByJG\\RestServer\\Attributes\\RequireAuthenticated;
+    // use ByJG\\RestServer\\Attribute\\RequireAuthenticated;
 
     #[OA\Get(
         path: "/{{ table_name }}/search",

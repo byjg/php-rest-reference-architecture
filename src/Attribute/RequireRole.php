@@ -1,6 +1,6 @@
 <?php
 
-namespace RestReferenceArchitecture\Attributes;
+namespace RestReferenceArchitecture\Attribute;
 
 use Attribute;
 use ByJG\RestServer\HttpRequest;
@@ -9,8 +9,13 @@ use Override;
 use RestReferenceArchitecture\Util\JwtContext;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-class RequireAuthenticated extends \ByJG\RestServer\Attributes\RequireAuthenticated
+class RequireRole extends \ByJG\RestServer\Attributes\RequireRole
 {
+    public function __construct(string $role)
+    {
+        parent::__construct($role, 'jwt.data', "role");
+    }
+
     #[Override]
     public function processBefore(HttpResponse $response, HttpRequest $request): void
     {

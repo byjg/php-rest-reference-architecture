@@ -103,9 +103,9 @@ If you've set the `security` property in your OpenAPI attributes, protect the en
 ```php
 <?php
 
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\RequireRole;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireRole;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
 
 // Option a: Require admin role
@@ -178,8 +178,8 @@ After validating the payload, use the service layer to update the record:
 
 use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 
 /**
  * Update the status of an Example CRUD record
