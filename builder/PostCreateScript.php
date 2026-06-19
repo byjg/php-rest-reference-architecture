@@ -22,9 +22,9 @@ class PostCreateScript
         // Defining function to interactively walking through the directories
         $directory = new RecursiveDirectoryIterator($workdir);
         $filter = new RecursiveCallbackFilterIterator($directory, function ($current/*, $key, $iterator*/) {
-            // Skip hidden files and directories.
+            // Skip hidden files and directories, except .claude/ (needs namespace replacement).
             if ($current->getFilename()[0] === '.') {
-                return false;
+                return $current->isDir() && $current->getFilename() === '.claude';
             }
             if ($current->isDir()) {
                 // Only recurse into intended subdirectories.
@@ -55,8 +55,8 @@ class PostCreateScript
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
             $contents = str_replace('ENV TZ=UTC', "ENV TZ=$timezone", $contents);
-            $contents = str_replace('php:8.4-fpm', "php:$phpVersion-fpm", $contents);
-            $contents = str_replace('php84', "php$phpVersionMSimple", $contents);
+            $contents = str_replace('php:8.5-fpm', "php:$phpVersion-fpm", $contents);
+            $contents = str_replace('php85', "php$phpVersionMSimple", $contents);
             file_put_contents(
                 "$workdir/$file",
                 $contents
@@ -285,21 +285,21 @@ ENV;
 
         // ------------------------------------------------
         // Configure git and initialize repository
-        shell_exec("composer update");
+        passthru("composer update");
 
         // Generate OpenAPI documentation
-        shell_exec("composer run openapi");
+        passthru("composer run openapi");
 
         // Initialize git repository first
-        shell_exec("git init");
-        shell_exec("git branch -m main");
+        passthru("git init");
+        passthru("git branch -m main");
 
         // Set git user config locally for this repository
-        shell_exec('git config user.name ' . escapeshellarg($gitUserName));
-        shell_exec('git config user.email ' . escapeshellarg($gitUserEmail));
+        passthru('git config user.name ' . escapeshellarg($gitUserName));
+        passthru('git config user.email ' . escapeshellarg($gitUserEmail));
 
-        shell_exec("git add .");
-        shell_exec("git commit -m 'Initial commit'");
+        passthru("git add .");
+        passthru("git commit -m 'Initial commit'");
     }
 
     /**

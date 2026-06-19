@@ -81,7 +81,7 @@ git fetch && git pull && git merge origin/master
 composer update
 docker compose up -d
 composer migrate -- --env=dev reset   # creates schema from scratch
-php vendor/bin/psalm                  # or: php84 vendor/bin/psalm
+php vendor/bin/psalm                  # or: php85 vendor/bin/psalm
 php vendor/bin/phpunit
 ```
 
@@ -477,7 +477,7 @@ Throw to return the right HTTP status:
 | `docker compose down` | Stop containers |
 | `composer update` | Update PHP dependencies |
 | `php vendor/bin/psalm` | Run static analysis |
-| `php84 vendor/bin/psalm` | Psalm fallback (if default is buggy) |
+| `php85 vendor/bin/psalm` | Psalm fallback (if default is buggy) |
 | `php vendor/bin/phpunit` | Run test suite |
 | `composer run openapi` | Regenerate OpenAPI spec from attributes |
 | `composer migrate -- --env=dev update` | Apply pending migrations (normal dev) |
