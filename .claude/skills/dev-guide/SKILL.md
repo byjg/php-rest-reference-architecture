@@ -103,7 +103,7 @@ When done: `docker compose down`
 
 ```
 src/
-├── Rest/           # HTTP controllers — attribute-based routing
+├── Controller/           # HTTP controllers — attribute-based routing
 ├── Service/        # Business logic — wraps repositories (Repository pattern only)
 ├── Repository/     # Data access — queries and persistence
 ├── Model/          # Database models with ORM + OpenAPI attributes
@@ -136,13 +136,13 @@ db/
 `Controller → Service → Repository → Model`
 - Use when: complex business logic, validation, multiple repos, team projects
 - Files: Model + Repository + Service + Controller (4 files + DI registrations + tests)
-- Reference: `src/Rest/DummyRest.php`, `src/Repository/DummyRepository.php`
+- Reference: `src/Controller/DummyRest.php`, `src/Repository/DummyRepository.php`
 
 ### ActiveRecord Pattern (fewer layers, simpler)
 `Controller → Model (handles its own persistence)`
 - Use when: simple CRUD, prototyping, admin panels
 - Files: Model + Controller (2 files + no DI registrations needed + tests)
-- Reference: `src/Rest/DummyActiveRecordRest.php`, `src/Model/DummyActiveRecord.php`
+- Reference: `src/Controller/DummyActiveRecordRest.php`, `src/Model/DummyActiveRecord.php`
 
 ---
 
@@ -377,7 +377,7 @@ class ProductTest extends BaseApiTestCase
 }
 ```
 
-Look at `tests/Rest/DummyTest.php` for a complete reference implementation.
+Look at `tests/Controller/DummyTest.php` for a complete reference implementation.
 
 ---
 
@@ -425,7 +425,7 @@ $name   = JwtContext::getName();     // JWT "name" claim
 
 **Role constants:** `User::ROLE_ADMIN`, `User::ROLE_USER`
 
-**Login flow** (implemented in `src/Rest/Login.php`):
+**Login flow** (implemented in `src/Controller/Login.php`):
 1. `POST /login` with `{username, password}` → `JwtContext::createUserMetadata()` validates via `UsersService`
 2. Returns `{token, data: {userid, name, role}}`
 3. Client sends `Authorization: Bearer <token>` on subsequent requests

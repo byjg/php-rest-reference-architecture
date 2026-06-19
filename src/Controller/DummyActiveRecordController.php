@@ -1,6 +1,6 @@
 <?php
 
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Controller;
 
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
@@ -24,7 +24,7 @@ use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\DummyActiveRecord;
 use RestReferenceArchitecture\Model\User;
 
-class DummyActiveRecordRest
+class DummyActiveRecordController
 {
     /**
      * Get the DummyActiveRecord by id

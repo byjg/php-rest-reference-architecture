@@ -1,4 +1,4 @@
-FROM byjg/php:8.4-fpm-nginx-2025.11
+FROM byjg/php:8.5-fpm-nginx-2026.02
 
 # Refer to the documentation to setup the environment variables
 # https://github.com/byjg/docker-php/blob/master/docs/environment.md
@@ -11,7 +11,7 @@ WORKDIR /srv
 
 # Setup Docker/Fpm
 
-COPY ./docker/fpm/php /etc/php84/conf.d
+COPY ./docker/fpm/php /etc/php85/conf.d
 COPY ./docker/nginx/conf.d /etc/nginx/http.d/
 
 # Custom system-level installations

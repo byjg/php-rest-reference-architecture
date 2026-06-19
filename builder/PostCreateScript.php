@@ -215,23 +215,23 @@ ENV;
                 'src/Model/Dummy.php',
                 'src/Repository/DummyRepository.php',
                 'src/Service/DummyService.php',
-                'src/Rest/DummyRest.php',
-                'tests/Rest/DummyTest.php',
+                'src/Controller/DummyController.php',
+                'tests/Controller/DummyTest.php',
                 // DummyHex files
                 'src/Model/DummyHex.php',
                 'src/Repository/DummyHexRepository.php',
                 'src/Service/DummyHexService.php',
-                'src/Rest/DummyHexRest.php',
-                'tests/Rest/DummyHexTest.php',
+                'src/Controller/DummyHexController.php',
+                'tests/Controller/DummyHexTest.php',
                 // DummyActiveRecord files
                 'src/Model/DummyActiveRecord.php',
-                'src/Rest/DummyActiveRecordRest.php',
-                'tests/Rest/DummyActiveRecordTest.php',
+                'src/Controller/DummyActiveRecordController.php',
+                'tests/Controller/DummyActiveRecordTest.php',
                 // Sample files
-                'src/Rest/Sample.php',
-                'src/Rest/SampleProtected.php',
-                'tests/Rest/SampleTest.php',
-                'tests/Rest/SampleProtectedTest.php',
+                'src/Controller/Sample.php',
+                'src/Controller/SampleProtected.php',
+                'tests/Controller/SampleTest.php',
+                'tests/Controller/SampleProtectedTest.php',
             ];
 
             foreach ($exampleFiles as $file) {

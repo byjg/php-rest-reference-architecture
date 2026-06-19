@@ -19,7 +19,7 @@
                     "Dummy"
                 ],
                 "summary": "Get the DummyActiveRecord by id",
-                "operationId": "GET::/dummy/active/record/{id}::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::getDummyActiveRecord",
+                "operationId": "GET::/dummy/active/record/{id}::RestReferenceArchitecture\\Controller\\DummyActiveRecordController::getDummyActiveRecord",
                 "parameters": [
                     {
                         "name": "id",
@@ -56,7 +56,7 @@
                     "Dummy"
                 ],
                 "summary": "List DummyActiveRecord",
-                "operationId": "GET::/dummy/active/record::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::listDummyActiveRecord",
+                "operationId": "GET::/dummy/active/record::RestReferenceArchitecture\\Controller\\DummyActiveRecordController::listDummyActiveRecord",
                 "parameters": [
                     {
                         "name": "page",
@@ -131,7 +131,7 @@
                     "Dummy"
                 ],
                 "summary": "Update an existing DummyActiveRecord",
-                "operationId": "PUT::/dummy/active/record::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::putDummyActiveRecord",
+                "operationId": "PUT::/dummy/active/record::RestReferenceArchitecture\\Controller\\DummyActiveRecordController::putDummyActiveRecord",
                 "requestBody": {
                     "description": "The object DummyActiveRecord to be updated",
                     "required": true,
@@ -169,7 +169,7 @@
                     "Dummy"
                 ],
                 "summary": "Create a new DummyActiveRecord",
-                "operationId": "POST::/dummy/active/record::RestReferenceArchitecture\\Rest\\DummyActiveRecordRest::postDummyActiveRecord",
+                "operationId": "POST::/dummy/active/record::RestReferenceArchitecture\\Controller\\DummyActiveRecordController::postDummyActiveRecord",
                 "requestBody": {
                     "description": "The object DummyActiveRecord to be created",
                     "required": true,
@@ -233,228 +233,13 @@
                 ]
             }
         },
-        "/dummy/hex/{id}": {
-            "get": {
-                "tags": [
-                    "Dummy"
-                ],
-                "summary": "Get the DummyHex by id",
-                "operationId": "GET::/dummy/hex/{id}::RestReferenceArchitecture\\Rest\\DummyHexRest::getDummyHex",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The object DummyHex",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DummyHex"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "jwt-token": []
-                    }
-                ]
-            }
-        },
-        "/dummy/hex": {
-            "get": {
-                "tags": [
-                    "Dummy"
-                ],
-                "summary": "List DummyHex",
-                "operationId": "GET::/dummy/hex::RestReferenceArchitecture\\Rest\\DummyHexRest::listDummyHex",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "size",
-                        "in": "query",
-                        "description": "Page size",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "orderBy",
-                        "in": "query",
-                        "description": "Order by",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "filter",
-                        "in": "query",
-                        "description": "Filter",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The object DummyHex",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/DummyHex"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Not Authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "jwt-token": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Dummy"
-                ],
-                "summary": "Update an existing DummyHex",
-                "operationId": "PUT::/dummy/hex::RestReferenceArchitecture\\Rest\\DummyHexRest::putDummyHex",
-                "requestBody": {
-                    "description": "The object DummyHex to be updated",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/DummyHex"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Nothing to return"
-                    },
-                    "401": {
-                        "description": "Not Authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "jwt-token": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Dummy"
-                ],
-                "summary": "Create a new DummyHex",
-                "operationId": "POST::/dummy/hex::RestReferenceArchitecture\\Rest\\DummyHexRest::postDummyHex",
-                "requestBody": {
-                    "description": "The object DummyHex to be created",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "field"
-                                ],
-                                "properties": {
-                                    "field": {
-                                        "type": "string",
-                                        "format": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "The object rto be created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "required": [
-                                        "id"
-                                    ],
-                                    "properties": {
-                                        "id": {
-                                            "type": "string",
-                                            "format": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Not Authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/error"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "jwt-token": []
-                    }
-                ]
-            }
-        },
         "/dummy/{id}": {
             "get": {
                 "tags": [
                     "Dummy"
                 ],
                 "summary": "Get the Dummy by id",
-                "operationId": "GET::/dummy/{id}::RestReferenceArchitecture\\Rest\\DummyRest::getDummy",
+                "operationId": "GET::/dummy/{id}::RestReferenceArchitecture\\Controller\\DummyController::getDummy",
                 "parameters": [
                     {
                         "name": "id",
@@ -491,7 +276,7 @@
                     "Dummy"
                 ],
                 "summary": "List Dummy",
-                "operationId": "GET::/dummy::RestReferenceArchitecture\\Rest\\DummyRest::listDummy",
+                "operationId": "GET::/dummy::RestReferenceArchitecture\\Controller\\DummyController::listDummy",
                 "parameters": [
                     {
                         "name": "page",
@@ -566,7 +351,7 @@
                     "Dummy"
                 ],
                 "summary": "Update an existing Dummy",
-                "operationId": "PUT::/dummy::RestReferenceArchitecture\\Rest\\DummyRest::putDummy",
+                "operationId": "PUT::/dummy::RestReferenceArchitecture\\Controller\\DummyController::putDummy",
                 "requestBody": {
                     "description": "The object Dummy to be updated",
                     "required": true,
@@ -604,7 +389,7 @@
                     "Dummy"
                 ],
                 "summary": "Create a new Dummy",
-                "operationId": "POST::/dummy::RestReferenceArchitecture\\Rest\\DummyRest::postDummy",
+                "operationId": "POST::/dummy::RestReferenceArchitecture\\Controller\\DummyController::postDummy",
                 "requestBody": {
                     "description": "The object Dummy to be created",
                     "required": true,
@@ -663,13 +448,228 @@
                 ]
             }
         },
+        "/dummy/hex/{id}": {
+            "get": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Get the DummyHex by id",
+                "operationId": "GET::/dummy/hex/{id}::RestReferenceArchitecture\\Controller\\DummyHexController::getDummyHex",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object DummyHex",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DummyHex"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
+        "/dummy/hex": {
+            "get": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "List DummyHex",
+                "operationId": "GET::/dummy/hex::RestReferenceArchitecture\\Controller\\DummyHexController::listDummyHex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Page size",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Order by",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The object DummyHex",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DummyHex"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Update an existing DummyHex",
+                "operationId": "PUT::/dummy/hex::RestReferenceArchitecture\\Controller\\DummyHexController::putDummyHex",
+                "requestBody": {
+                    "description": "The object DummyHex to be updated",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DummyHex"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Nothing to return"
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Create a new DummyHex",
+                "operationId": "POST::/dummy/hex::RestReferenceArchitecture\\Controller\\DummyHexController::postDummyHex",
+                "requestBody": {
+                    "description": "The object DummyHex to be created",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "field"
+                                ],
+                                "properties": {
+                                    "field": {
+                                        "type": "string",
+                                        "format": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The object rto be created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
+            }
+        },
         "/login": {
             "post": {
                 "tags": [
                     "Login"
                 ],
                 "summary": "Do login",
-                "operationId": "POST::/login::RestReferenceArchitecture\\Rest\\Login::post",
+                "operationId": "POST::/login::RestReferenceArchitecture\\Controller\\Login::post",
                 "requestBody": {
                     "description": "The Login Data",
                     "required": true,
@@ -739,7 +739,7 @@
                     "Login"
                 ],
                 "summary": "Refresh Token",
-                "operationId": "POST::/refreshtoken::RestReferenceArchitecture\\Rest\\Login::refreshToken",
+                "operationId": "POST::/refreshtoken::RestReferenceArchitecture\\Controller\\Login::refreshToken",
                 "responses": {
                     "200": {
                         "description": "The object rto be created",
@@ -797,7 +797,7 @@
                     "Login"
                 ],
                 "summary": "Initialize the Password Request",
-                "operationId": "POST::/login/resetrequest::RestReferenceArchitecture\\Rest\\Login::postResetRequest",
+                "operationId": "POST::/login/resetrequest::RestReferenceArchitecture\\Controller\\Login::postResetRequest",
                 "requestBody": {
                     "description": "The email to have the password reset",
                     "content": {
@@ -844,7 +844,7 @@
                     "Login"
                 ],
                 "summary": "Initialize the Password Request",
-                "operationId": "POST::/login/confirmcode::RestReferenceArchitecture\\Rest\\Login::postConfirmCode",
+                "operationId": "POST::/login/confirmcode::RestReferenceArchitecture\\Controller\\Login::postConfirmCode",
                 "requestBody": {
                     "description": "The email and code to confirm the password reset",
                     "content": {
@@ -909,7 +909,7 @@
                     "Login"
                 ],
                 "summary": "Initialize the Password Request",
-                "operationId": "POST::/login/resetpassword::RestReferenceArchitecture\\Rest\\Login::postResetPassword",
+                "operationId": "POST::/login/resetpassword::RestReferenceArchitecture\\Controller\\Login::postResetPassword",
                 "requestBody": {
                     "description": "The email and the new password",
                     "content": {
@@ -974,7 +974,7 @@
                     "zz_sample"
                 ],
                 "summary": "Simple ping",
-                "operationId": "GET::/sample/ping::RestReferenceArchitecture\\Rest\\Sample::getPing",
+                "operationId": "GET::/sample/ping::RestReferenceArchitecture\\Controller\\Sample::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -1004,7 +1004,7 @@
                     "zz_sampleprotected"
                 ],
                 "summary": "Sample Ping Only Authenticated",
-                "operationId": "GET::/sampleprotected/ping::RestReferenceArchitecture\\Rest\\SampleProtected::getPing",
+                "operationId": "GET::/sampleprotected/ping::RestReferenceArchitecture\\Controller\\SampleProtected::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -1049,7 +1049,7 @@
                     "zz_sampleprotected"
                 ],
                 "summary": "Sample Ping Only Admin",
-                "operationId": "GET::/sampleprotected/pingadm::RestReferenceArchitecture\\Rest\\SampleProtected::getPingAdm",
+                "operationId": "GET::/sampleprotected/pingadm::RestReferenceArchitecture\\Controller\\SampleProtected::getPingAdm",
                 "responses": {
                     "200": {
                         "description": "The object",

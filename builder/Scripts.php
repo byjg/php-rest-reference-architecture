@@ -682,12 +682,12 @@ class Scripts extends BaseScripts
         }
 
         if (in_array('all', $arguments) || in_array('rest', $arguments)) {
-            $restType = $isActiveRecord ? "ActiveRecord Rest" : "Rest";
+            $restType = $isActiveRecord ? "ActiveRecord Controller" : "Controller";
             $templateName = $isActiveRecord ? 'restactiverecord.php' : 'rest.php';
             echo "Processing $restType for table $table...\n";
             $template = $loader->getTemplate($templateName);
             if ($save) {
-                $file = __DIR__ . '/../src/Rest/' . $data['className'] . 'Rest.php';
+                $file = __DIR__ . '/../src/Controller/' . $data['className'] . 'Controller.php';
                 file_put_contents($file, $template->render($data));
                 echo "File saved in $file\n";
             } else {

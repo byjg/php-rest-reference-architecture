@@ -159,7 +159,7 @@ See the caution above — never commit `credentials.env`.
 
 ### Available Endpoints
 
-`src/Rest/Login.php` provides:
+`src/Controller/Login.php` provides:
 
 | Endpoint                      | Description                                 |
 |-------------------------------|---------------------------------------------|
@@ -225,6 +225,6 @@ Need the full payload? Access `HttpRequest::param('jwt.data')` directly, but pre
 
 ## Additional Resources
 
-- `src/Rest/Login.php` – Reference implementation for all endpoints.
+- `src/Controller/Login.php` – Reference implementation for all endpoints.
 - `src/Util/JwtContext.php` – Helper used by controllers and tests.
 - `config/dev/02-security.php` – Central location for auth wiring.

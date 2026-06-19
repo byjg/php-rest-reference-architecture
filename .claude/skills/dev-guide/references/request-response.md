@@ -25,7 +25,7 @@ Routes are declared entirely through OpenAPI attributes on controller methods. T
 `operationId` that `zircote/swagger-php` generates becomes the routing key:
 
 ```
-operationId: "RestReferenceArchitecture\\Rest\\DummyRest::getDummy"
+operationId: "RestReferenceArchitecture\\Controller\\DummyRest::getDummy"
                  └── class (fully qualified)      └── method
 ```
 

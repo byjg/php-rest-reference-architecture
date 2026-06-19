@@ -6,13 +6,13 @@ Tests are in-process (no real HTTP, no Docker port binding). `FakeApiRequester` 
 requests through the same `JwtMiddleware` + `OpenApiRouteList` as production, so they
 test the full stack including auth attribute processing and OpenAPI contract validation.
 
-**Base class:** `Test\Rest\BaseApiTestCase` (extends PHPUnit TestCase + uses OpenApiValidation trait)
+**Base class:** `Test\Controller\BaseApiTestCase` (extends PHPUnit TestCase + uses OpenApiValidation trait)
 **Request class:** `RestReferenceArchitecture\Util\FakeApiRequester`
 
 ## Test class setup
 
 ```php
-namespace Test\Rest;
+namespace Test\Controller;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use RestReferenceArchitecture\Util\FakeApiRequester;
@@ -194,17 +194,17 @@ docker compose up -d          # MySQL must be running
 php vendor/bin/phpunit        # all tests
 
 # Single file:
-php vendor/bin/phpunit tests/Rest/ProductTest.php
+php vendor/bin/phpunit tests/Controller/ProductTest.php
 
 # Single method:
-php vendor/bin/phpunit --filter testCreate tests/Rest/ProductTest.php
+php vendor/bin/phpunit --filter testCreate tests/Controller/ProductTest.php
 ```
 
 ## Reference test files
 
 | File | What it tests |
 |------|--------------|
-| `tests/Rest/DummyTest.php` | Complete Repository pattern (auth, CRUD, list) |
-| `tests/Rest/DummyActiveRecordTest.php` | ActiveRecord pattern |
-| `tests/Rest/DummyHexTest.php` | UUID primary key pattern |
-| `tests/Rest/LoginTest.php` | Login, refresh token, password reset |
+| `tests/Controller/DummyTest.php` | Complete Repository pattern (auth, CRUD, list) |
+| `tests/Controller/DummyActiveRecordTest.php` | ActiveRecord pattern |
+| `tests/Controller/DummyHexTest.php` | UUID primary key pattern |
+| `tests/Controller/LoginTest.php` | Login, refresh token, password reset |

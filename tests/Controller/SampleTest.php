@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Rest;
+namespace Test\Controller;
 
 
 use RestReferenceArchitecture\Util\FakeApiRequester;

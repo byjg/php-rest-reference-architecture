@@ -50,7 +50,7 @@ mindmap
       ("Migration")
     ("OpenAPI Integration")
       ("Routing")
-      ("Rest Methods")
+      ("Controller Methods")
       ("Contract Testing")
       ("Documentation")
     ("Error Handling")

@@ -1,6 +1,6 @@
 <?php
 
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Controller;
 
 use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
@@ -25,7 +25,7 @@ use RestReferenceArchitecture\Attributes\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Service\DummyService;
 
-class DummyRest
+class DummyController
 {
     /**
      * Get the Dummy by id

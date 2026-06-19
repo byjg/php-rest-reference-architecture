@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Rest;
+namespace Test\Controller;
 
 use ByJG\Authenticate\Service\UsersService;
 use ByJG\Config\Config;

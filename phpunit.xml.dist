@@ -30,12 +30,12 @@ and open the template in the editor.
   </source>
 
   <testsuites>
-    <testsuite name="Rest Tests">
-      <directory>./tests/Rest</directory>
+    <testsuite name="Controller Tests">
+      <directory>./tests/Controller</directory>
     </testsuite>
     <testsuite name="Other Tests">
       <directory>./tests/</directory>
-      <exclude>./tests/Rest</exclude>
+      <exclude>./tests/Controller</exclude>
     </testsuite>
   </testsuites>
 

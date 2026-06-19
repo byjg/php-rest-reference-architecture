@@ -23,8 +23,8 @@ The reference architecture provides a complete testing framework that allows you
 | Component          | Purpose                  | Location                         |
 |--------------------|--------------------------|----------------------------------|
 | `FakeApiRequester` | In-process API testing   | `src/Util/FakeApiRequester.php`  |
-| `BaseApiTestCase`  | Base class for API tests | `tests/Rest/BaseApiTestCase.php` |
-| `Credentials`      | Test user credentials    | `tests/Rest/Credentials.php`     |
+| `BaseApiTestCase`  | Base class for API tests | `tests/Controller/BaseApiTestCase.php` |
+| `Credentials`      | Test user credentials    | `tests/Controller/Credentials.php`     |
 
 ## Test Structure
 
@@ -32,7 +32,7 @@ The reference architecture provides a complete testing framework that allows you
 
 ```
 tests/
-└── Rest/
+└── Controller/
     ├── BaseApiTestCase.php     # Base test case with schema + DB reset
     ├── Credentials.php         # Helper for authenticating test users
     ├── DummyTest.php           # Repository pattern example CRUD tests
@@ -55,17 +55,17 @@ APP_ENV=test composer migrate -- reset --yes
 APP_ENV=test composer run test
 
 # Run a specific test file
-APP_ENV=test ./vendor/bin/phpunit tests/Rest/DummyTest.php
+APP_ENV=test ./vendor/bin/phpunit tests/Controller/DummyTest.php
 
 # Run a single test method
-APP_ENV=test ./vendor/bin/phpunit --filter testFullCrud tests/Rest/DummyTest.php
+APP_ENV=test ./vendor/bin/phpunit --filter testFullCrud tests/Controller/DummyTest.php
 
 # Generate coverage (optional)
 APP_ENV=test ./vendor/bin/phpunit --coverage-html coverage/
 ```
 
 :::info Database resets automatically
-`tests/Rest/BaseApiTestCase.php` already calls `Migration::reset()` the first time a test runs, but pre-resetting with the command above avoids surprises if you run the suite outside PHPUnit (e.g., invoking migrations manually).
+`tests/Controller/BaseApiTestCase.php` already calls `Migration::reset()` the first time a test runs, but pre-resetting with the command above avoids surprises if you run the suite outside PHPUnit (e.g., invoking migrations manually).
 :::
 
 ## FakeApiRequester
@@ -190,10 +190,10 @@ public function testPingResponse()
 
 All API tests should extend `BaseApiTestCase`:
 
-**Location**: `tests/Rest/BaseApiTestCase.php`
+**Location**: `tests/Controller/BaseApiTestCase.php`
 
-```php title="tests/Rest/BaseApiTestCase.php"
-namespace Test\Rest;
+```php title="tests/Controller/BaseApiTestCase.php"
+namespace Test\Controller;
 
 use ByJG\ApiTools\Base\Schema;
 use ByJG\ApiTools\OpenApiValidation;
@@ -266,7 +266,7 @@ $this->resetDb();
 ```php
 <?php
 
-namespace Test\Rest;
+namespace Test\Controller;
 
 use RestReferenceArchitecture\Util\FakeApiRequester;
 
@@ -289,10 +289,10 @@ class SampleTest extends BaseApiTestCase
 
 ### Test User Credentials
 
-**Location**: `tests/Rest/Credentials.php`
+**Location**: `tests/Controller/Credentials.php`
 
 ```php
-use Test\Rest\Credentials;
+use Test\Controller\Credentials;
 
 // Admin user
 $adminCreds = Credentials::getAdminUser();
@@ -409,7 +409,7 @@ public function testInsufficientPrivileges()
 
 ### Complete CRUD Test
 
-**Location**: `tests/Rest/DummyTest.php:142`
+**Location**: `tests/Controller/DummyTest.php:142`
 
 ```php
 public function testFullCrud()

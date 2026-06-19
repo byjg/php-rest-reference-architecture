@@ -34,7 +34,7 @@ The reference architecture uses JWT tokens for stateless authentication. Tokens 
 | Component              | Purpose                    | Location                         |
 |------------------------|----------------------------|----------------------------------|
 | `JwtContext`           | Token creation and parsing | `src/Util/JwtContext.php`        |
-| `Login` REST           | Login and token endpoints  | `src/Rest/Login.php`             |
+| `Login` REST           | Login and token endpoints  | `src/Controller/Login.php`             |
 | `RequireAuthenticated` | Endpoint authentication    | ByJG\RestServer\Attributes       |
 | `RequireRole`          | Role-based authorization   | `src/Attributes/RequireRole.php` |
 
@@ -66,7 +66,7 @@ JwtContext::getName(): ?string
 
 ### Login Endpoint
 
-**Location**: `src/Rest/Login.php:59`
+**Location**: `src/Controller/Login.php:59`
 
 ```php
 #[OA\Post(path: "/login", tags: ["Login"])]
@@ -287,7 +287,7 @@ public function getMyData(HttpResponse $response, HttpRequest $request): void
 
 ### Refresh Token Endpoint
 
-**Location**: `src/Rest/Login.php:77`
+**Location**: `src/Controller/Login.php:77`
 
 ```php
 #[OA\Post(path: "/refreshtoken", tags: ["Login"])]

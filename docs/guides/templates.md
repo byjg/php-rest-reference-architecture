@@ -93,7 +93,7 @@ Edit `templates/codegen/model.php.jinja`:
 
 namespace {{ namespace }};
 
-// Rest of template...
+// Controller of template...
 ```
 
 ### Example: Adding Custom Methods
@@ -386,7 +386,7 @@ composer codegen -- --env=dev --table=test_table all --save
 
 # Review generated code
 cat src/Model/TestTable.php
-cat src/Rest/TestTableRest.php
+cat src/Controller/TestTableRest.php
 
 # Run tests
 composer test
