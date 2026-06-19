@@ -185,7 +185,7 @@ If you already have an OpenAPI JSON spec, place it at `public/docs/openapi.json`
     "paths": {
         "/login": {
             "post": {
-                "operationId": "POST::/login::RestReferenceArchitecture\\Controller\\Login::mymethod"
+                "operationId": "POST::/login::RestReferenceArchitecture\\Controller\\LoginController::mymethod"
             }
         }
     }

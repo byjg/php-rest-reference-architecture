@@ -669,7 +669,7 @@
                     "Login"
                 ],
                 "summary": "Do login",
-                "operationId": "POST::/login::RestReferenceArchitecture\\Controller\\Login::post",
+                "operationId": "POST::/login::RestReferenceArchitecture\\Controller\\LoginController::post",
                 "requestBody": {
                     "description": "The Login Data",
                     "required": true,
@@ -739,7 +739,7 @@
                     "Login"
                 ],
                 "summary": "Refresh Token",
-                "operationId": "POST::/refreshtoken::RestReferenceArchitecture\\Controller\\Login::refreshToken",
+                "operationId": "POST::/refreshtoken::RestReferenceArchitecture\\Controller\\LoginController::refreshToken",
                 "responses": {
                     "200": {
                         "description": "The object rto be created",
@@ -797,7 +797,7 @@
                     "Login"
                 ],
                 "summary": "Initialize the Password Request",
-                "operationId": "POST::/login/resetrequest::RestReferenceArchitecture\\Controller\\Login::postResetRequest",
+                "operationId": "POST::/login/resetrequest::RestReferenceArchitecture\\Controller\\LoginController::postResetRequest",
                 "requestBody": {
                     "description": "The email to have the password reset",
                     "content": {
@@ -844,7 +844,7 @@
                     "Login"
                 ],
                 "summary": "Initialize the Password Request",
-                "operationId": "POST::/login/confirmcode::RestReferenceArchitecture\\Controller\\Login::postConfirmCode",
+                "operationId": "POST::/login/confirmcode::RestReferenceArchitecture\\Controller\\LoginController::postConfirmCode",
                 "requestBody": {
                     "description": "The email and code to confirm the password reset",
                     "content": {
@@ -909,7 +909,7 @@
                     "Login"
                 ],
                 "summary": "Initialize the Password Request",
-                "operationId": "POST::/login/resetpassword::RestReferenceArchitecture\\Controller\\Login::postResetPassword",
+                "operationId": "POST::/login/resetpassword::RestReferenceArchitecture\\Controller\\LoginController::postResetPassword",
                 "requestBody": {
                     "description": "The email and the new password",
                     "content": {
@@ -974,7 +974,7 @@
                     "zz_sample"
                 ],
                 "summary": "Simple ping",
-                "operationId": "GET::/sample/ping::RestReferenceArchitecture\\Controller\\Sample::getPing",
+                "operationId": "GET::/sample/ping::RestReferenceArchitecture\\Controller\\SampleController::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -1004,7 +1004,7 @@
                     "zz_sampleprotected"
                 ],
                 "summary": "Sample Ping Only Authenticated",
-                "operationId": "GET::/sampleprotected/ping::RestReferenceArchitecture\\Controller\\SampleProtected::getPing",
+                "operationId": "GET::/sampleprotected/ping::RestReferenceArchitecture\\Controller\\SampleProtectedController::getPing",
                 "responses": {
                     "200": {
                         "description": "The object",
@@ -1049,7 +1049,7 @@
                     "zz_sampleprotected"
                 ],
                 "summary": "Sample Ping Only Admin",
-                "operationId": "GET::/sampleprotected/pingadm::RestReferenceArchitecture\\Controller\\SampleProtected::getPingAdm",
+                "operationId": "GET::/sampleprotected/pingadm::RestReferenceArchitecture\\Controller\\SampleProtectedController::getPingAdm",
                 "responses": {
                     "200": {
                         "description": "The object",

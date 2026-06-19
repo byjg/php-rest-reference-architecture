@@ -228,8 +228,8 @@ ENV;
                 'src/Controller/DummyActiveRecordController.php',
                 'tests/Controller/DummyActiveRecordTest.php',
                 // Sample files
-                'src/Controller/Sample.php',
-                'src/Controller/SampleProtected.php',
+                'src/Controller/SampleController.php',
+                'src/Controller/SampleProtectedController.php',
                 'tests/Controller/SampleTest.php',
                 'tests/Controller/SampleProtectedTest.php',
             ];

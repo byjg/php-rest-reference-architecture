@@ -21,7 +21,7 @@ use RestReferenceArchitecture\Util\JwtContext;
 use RestReferenceArchitecture\Util\OpenApiContext;
 use RuntimeException;
 
-class Login
+class LoginController
 {
     /**
      * Do login

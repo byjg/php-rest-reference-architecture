@@ -8,7 +8,7 @@ use OpenApi\Attributes as OA;
 use RestReferenceArchitecture\Attributes\RequireAuthenticated;
 use RestReferenceArchitecture\Attributes\RequireRole;
 
-class SampleProtected
+class SampleProtectedController
 {
     /**
      * Sample Ping Only Authenticated
