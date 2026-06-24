@@ -69,7 +69,7 @@ class DummyHexController
     public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
         $dummyHexService = Config::get(DummyHexService::class);
-        $result = $dummyHexService->getOrFail($request->param('id'));
+        $result = $dummyHexService->getOrFail($request->attribute('id'));
         $response->write($result);
     }
 
@@ -147,7 +147,7 @@ class DummyHexController
     public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
         $dummyHexService = Config::get(DummyHexService::class);
-        $result = $dummyHexService->list($request->get('page'), $request->get('size'));
+        $result = $dummyHexService->list($request->query('page'), $request->query('size'));
         $response->write($result);
     }
 

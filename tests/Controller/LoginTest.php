@@ -2,8 +2,10 @@
 
 namespace Test\Controller;
 
+use ByJG\Authenticate\Enum\UserField;
 use ByJG\Authenticate\Service\UsersService;
 use ByJG\Config\Config;
+use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use RestReferenceArchitecture\Model\User;
@@ -34,6 +36,77 @@ class LoginTest extends BaseApiTestCase
             'username' => 'invalid',
             'password' => 'invalid'
         ]));
+    }
+
+    public function testRefreshTokenUnauthenticated(): void
+    {
+        $this->expectException(Error401Exception::class);
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('POST')
+            ->withPath('/refreshtoken')
+            ->expectStatus(401)
+        ;
+        $this->sendRequest($request);
+    }
+
+    public function testRefreshTokenTooEarlyToRefresh(): void
+    {
+        $this->expectException(Error401Exception::class);
+        $this->expectExceptionMessage('You only can refresh the token 5 minutes before expire');
+
+        // Login to get a fresh 3600s token — way more than 5 minutes remaining
+        $loginResponse = $this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()));
+        $token = json_decode($loginResponse->getBody()->getContents(), true)['token'];
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('POST')
+            ->withPath('/refreshtoken')
+            ->withRequestHeader(['Authorization' => 'Bearer ' . $token])
+            ->expectStatus(401)
+        ;
+        $this->sendRequest($request);
+    }
+
+    public function testRefreshTokenOk(): void
+    {
+        // Create a near-expiry token (4 minutes) using the same codepath as login,
+        // so the 5-minute refresh window is open.
+        /** @var UsersService $usersService */
+        $usersService = Config::get(UsersService::class);
+        /** @var JwtWrapper $jwt */
+        $jwt = Config::get(JwtWrapper::class);
+
+        $userToken = $usersService->createInsecureAuthToken(
+            login: Credentials::getAdminUser()['username'],
+            jwtWrapper: $jwt,
+            expires: 240,
+            tokenUserFields: [
+                UserField::Userid,
+                UserField::Name,
+                UserField::Role->value => User::ROLE_USER,
+            ]
+        );
+        $shortToken = $userToken->token;
+
+        $request = new FakeApiRequester();
+        $request
+            ->withPsr7Request($this->getPsr7Request())
+            ->withMethod('POST')
+            ->withPath('/refreshtoken')
+            ->withRequestHeader(['Authorization' => 'Bearer ' . $shortToken])
+            ->expectStatus(200)
+        ;
+        $response = $this->sendRequest($request);
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        $this->assertArrayHasKey('token', $data);
+        $this->assertNotEmpty($data['token']);
+        $this->assertArrayHasKey('data', $data);
     }
 
     public function testResetRequestOk()

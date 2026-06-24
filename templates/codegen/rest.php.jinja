@@ -69,7 +69,7 @@ class {{ className }}Controller
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         ${{ varTableName }}Service = Config::get({{ className }}Service::class);
-        $result = ${{ varTableName }}Service->getOrFail($request->param('id'));
+        $result = ${{ varTableName }}Service->getOrFail($request->attribute('id'));
         $response->write($result);
     }
 
@@ -147,7 +147,7 @@ class {{ className }}Controller
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         ${{ varTableName }}Service = Config::get({{ className }}Service::class);
-        $result = ${{ varTableName }}Service->list($request->get('page'), $request->get('size'));
+        $result = ${{ varTableName }}Service->list($request->queryString('page', 0), $request->queryString('size', 50));
         $response->write($result);
     }
 

@@ -10,6 +10,7 @@ use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\Route\OpenApiRouteList;
+use ByJG\RestServer\Server;
 use Psr\Log\LoggerInterface;
 
 return [
@@ -42,7 +43,7 @@ return [
         ->toSingleton(),
 
     // HTTP Request Handler
-    HttpRequestHandler::class => DI::bind(HttpRequestHandler::class)
+    Server::class => DI::bind(Server::class)
         ->withConstructorArgs([
             Param::get(LoggerInterface::class)
         ])

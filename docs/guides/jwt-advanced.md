@@ -294,7 +294,7 @@ public function getMyData(HttpResponse $response, HttpRequest $request): void
 #[RequireAuthenticated]
 public function refreshToken(HttpResponse $response, HttpRequest $request)
 {
-    $diff = ($request->param("jwt.exp") - time()) / 60;
+    $diff = ($request->attributeString("jwt.exp") - time()) / 60;
 
     if ($diff > 5) {
         throw new Error401Exception("You only can refresh the token 5 minutes before expire");
@@ -400,7 +400,7 @@ use RestReferenceArchitecture\Model\User;
 public function deleteUser(HttpResponse $response, HttpRequest $request): void
 {
     // Only admins can access
-    $id = $request->param('id');
+    $id = $request->attribute('id');
     // Delete user logic...
 }
 ```

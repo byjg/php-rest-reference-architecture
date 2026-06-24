@@ -69,7 +69,7 @@ class DummyController
     public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
         $dummyService = Config::get(DummyService::class);
-        $result = $dummyService->getOrFail($request->param('id'));
+        $result = $dummyService->getOrFail($request->attribute('id'));
         $response->write($result);
     }
 
@@ -147,7 +147,7 @@ class DummyController
     public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
         $dummyService = Config::get(DummyService::class);
-        $result = $dummyService->list($request->get('page'), $request->get('size'));
+        $result = $dummyService->list($request->query('page'), $request->query('size'));
         $response->write($result);
     }
 

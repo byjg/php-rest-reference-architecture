@@ -11,9 +11,6 @@ use RuntimeException;
 class UuidSeedGenerator implements MapperFunctionInterface
 {
 
-    /**
-     * @inheritDoc
-     */
     #[Override]
     public function processedValue(mixed $value, mixed $instance, ?DatabaseExecutor $executor = null): mixed
     {

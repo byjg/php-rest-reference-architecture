@@ -154,7 +154,7 @@ class Product
 class ProductRest
 {
     public function getProduct(HttpResponse $response, HttpRequest $request) {
-        $id = $request->param('id');
+        $id = $request->attribute('id');
         $product = Product::get($id);
 
         if (!$product) {

@@ -40,12 +40,12 @@ class OpenApiContext
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public static function validateRequest(HttpRequest $request, bool $preserveNullValues = false)
+    public static function validateRequest(HttpRequest $request, bool $preserveNullValues = false, ?Schema $schema = null)
     {
-        $schema = Config::get(Schema::class);
+        $schema = $schema ?? Config::get(Schema::class);
 
         $path = $request->getRequestPath();
-        $method = $request->server('REQUEST_METHOD');
+        $method = $request->serverString('REQUEST_METHOD') ?? 'GET';
         $contentTypeHeader = $request->getHeader('Content-Type') ?? '';
         $contentType = is_string($contentTypeHeader) ? strtolower($contentTypeHeader) : '';
 
@@ -69,7 +69,7 @@ class OpenApiContext
 
         // Handle JSON and other content types
         if (str_contains($contentType, 'multipart/')) {
-            $requestBody = $request->post();
+            $requestBody = $request->body();
             if (is_array($requestBody)) {
                 $files = $request->uploadedFiles()->getKeys();
                 $requestBody = array_merge($requestBody, array_combine($files, $files));

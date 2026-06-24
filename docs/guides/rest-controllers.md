@@ -71,8 +71,8 @@ Declare path parameters directly in the path string and use `#[OA\Parameter]` to
 #[OA\Response(response: 200, description: "The dummy object")]
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
-    $id = $request->param('id');
-    $page = $request->get('page');
+    $id = $request->attribute('id');
+    $page = $request->query('page');
     // ...
 }
 ```
@@ -136,7 +136,7 @@ use RestReferenceArchitecture\Attribute\RequireAuthenticated;
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
     $service = Config::get(DummyService::class);
-    $result = $service->getOrFail($request->param('id'));
+    $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
 ```
@@ -152,7 +152,7 @@ use RestReferenceArchitecture\Service\DummyService;
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
     $service = Config::get(DummyService::class);
-    $result = $service->getOrFail($request->param('id'));
+    $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
 ```
@@ -161,10 +161,10 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 
 ```php
 // Path parameter (from the URL pattern, e.g. /dummy/{id})
-$id = $request->param('id');
+$id = $request->attribute('id');
 
 // Query string parameter (from ?page=2)
-$page = $request->get('page');
+$page = $request->query('page');
 
 // Request body as string
 $rawBody = $request->payload();

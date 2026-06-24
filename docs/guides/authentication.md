@@ -221,7 +221,7 @@ $userName = JwtContext::getName();
 $userRole = JwtContext::getRole(); // e.g., "admin" or "user"
 ```
 
-Need the full payload? Access `HttpRequest::param('jwt.data')` directly, but prefer `JwtContext` helpers to keep controllers focused.
+Need the full payload? Access `HttpRequest::attribute('jwt.data')` directly, but prefer `JwtContext` helpers to keep controllers focused.
 
 ## Additional Resources
 

@@ -135,7 +135,7 @@ public function updateClient(HttpResponse $response, HttpRequest $request): void
     // Note: "email" with null is REMOVED
 
     // Add primary key to payload (service will use it to fetch the record)
-    $payload['id'] = $request->param('id');
+    $payload['id'] = $request->attribute('id');
 
     // Service update() does: getOrFail() + ObjectCopy::copy() + save()
     $clientService = Config::get(ClientService::class);
@@ -163,7 +163,7 @@ public function updateClient(HttpResponse $response, HttpRequest $request): void
     // Note: "email" with null is KEPT
 
     // Add primary key to payload (service will use it to fetch the record)
-    $payload['id'] = $request->param('id');
+    $payload['id'] = $request->attribute('id');
 
     // Service update() does: getOrFail() + ObjectCopy::copy() + save()
     $clientService = Config::get(ClientService::class);
@@ -280,7 +280,7 @@ public function deleteDummy(HttpResponse $response, HttpRequest $request): void
 {
     // Only admins can delete
     $dummyService = Config::get(DummyService::class);
-    $dummyService->delete($request->param('id'));
+    $dummyService->delete($request->attribute('id'));
 }
 ```
 

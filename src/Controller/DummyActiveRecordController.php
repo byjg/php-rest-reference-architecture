@@ -57,7 +57,7 @@ class DummyActiveRecordController
     #[RequireAuthenticated]
     public function getDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
     {
-        $model = DummyActiveRecord::get($request->param('id'));
+        $model = DummyActiveRecord::get($request->attribute('id'));
 
         if (is_null($model)) {
             throw new Error404Exception("DummyActiveRecord not found");
@@ -130,7 +130,7 @@ class DummyActiveRecordController
     public function listDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
     {
         // Get all records with pagination (default is page 0, limit 50)
-        $models = DummyActiveRecord::all($request->get('page') ?? 0, $request->get('size') ?? 50);
+        $models = DummyActiveRecord::all($request->queryString('page', 0), $request->queryString('size', 50));
         $response->write($models);
     }
 

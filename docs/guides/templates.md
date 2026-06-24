@@ -154,7 +154,7 @@ Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
     #[RequireAuthenticated]
     public function search{{ class_name }}(HttpResponse $response, HttpRequest $request): void
     {
-        $searchTerm = $request->get('q');
+        $searchTerm = $request->query('q');
         $service = Config::get({{ class_name }}Service::class);
 
         // Implement search logic
