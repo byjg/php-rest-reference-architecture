@@ -500,8 +500,8 @@ When several endpoints share the same complex response shape, extract it into a 
 attribute class:
 
 ```php
-// src/Attributes/WithdrawResponseAttributes.php
-namespace App\Attributes;
+// src/Attribute/WithdrawResponseAttributes.php
+namespace App\Attribute;
 
 use OpenApi\Attributes as OA;
 

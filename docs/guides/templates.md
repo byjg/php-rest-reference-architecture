@@ -93,7 +93,7 @@ Edit `templates/codegen/model.php.jinja`:
 
 namespace {{ namespace }};
 
-// Rest of template...
+// Controller of template...
 ```
 
 ### Example: Adding Custom Methods
@@ -138,7 +138,7 @@ Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
      * Search {{ class_name }}
      */
     // At the top of the template file add:
-    // use ByJG\\RestServer\\Attributes\\RequireAuthenticated;
+    // use ByJG\\RestServer\\Attribute\\RequireAuthenticated;
 
     #[OA\Get(
         path: "/{{ table_name }}/search",
@@ -154,7 +154,7 @@ Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
     #[RequireAuthenticated]
     public function search{{ class_name }}(HttpResponse $response, HttpRequest $request): void
     {
-        $searchTerm = $request->get('q');
+        $searchTerm = $request->query('q');
         $service = Config::get({{ class_name }}Service::class);
 
         // Implement search logic
@@ -386,7 +386,7 @@ composer codegen -- --env=dev --table=test_table all --save
 
 # Review generated code
 cat src/Model/TestTable.php
-cat src/Rest/TestTableRest.php
+cat src/Controller/TestTableRest.php
 
 # Run tests
 composer test

@@ -159,7 +159,7 @@ See the caution above — never commit `credentials.env`.
 
 ### Available Endpoints
 
-`src/Rest/Login.php` provides:
+`src/Controller/Login.php` provides:
 
 | Endpoint                      | Description                                 |
 |-------------------------------|---------------------------------------------|
@@ -190,8 +190,8 @@ curl -X GET http://localhost:8080/sampleprotected/ping \
 ### Protect Endpoints
 
 ```php
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 class MyProtectedRest
@@ -221,10 +221,10 @@ $userName = JwtContext::getName();
 $userRole = JwtContext::getRole(); // e.g., "admin" or "user"
 ```
 
-Need the full payload? Access `HttpRequest::param('jwt.data')` directly, but prefer `JwtContext` helpers to keep controllers focused.
+Need the full payload? Access `HttpRequest::attribute('jwt.data')` directly, but prefer `JwtContext` helpers to keep controllers focused.
 
 ## Additional Resources
 
-- `src/Rest/Login.php` – Reference implementation for all endpoints.
+- `src/Controller/Login.php` – Reference implementation for all endpoints.
 - `src/Util/JwtContext.php` – Helper used by controllers and tests.
 - `config/dev/02-security.php` – Central location for auth wiring.

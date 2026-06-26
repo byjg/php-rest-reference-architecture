@@ -47,7 +47,7 @@ You can specify the environment in two ways:
 
 | Argument               | Description              | Repository Pattern | ActiveRecord Pattern        |
 |------------------------|--------------------------|--------------------|-----------------------------|
-| `all`                  | Generate all components  | ✓ All components   | ✓ Model, Rest, Test         |
+| `all`                  | Generate all components  | ✓ All components   | ✓ Model, Controller, Test         |
 | `model`                | Generate Model           | ✓                  | ✓ (with ActiveRecord trait) |
 | `repo` or `repository` | Generate Repository      | ✓                  | ✗ Not applicable            |
 | `service`              | Generate Service         | ✓                  | ✗ Not applicable            |
@@ -78,8 +78,8 @@ This creates:
 - `src/Model/Users.php`
 - `src/Repository/UsersRepository.php`
 - `src/Service/UsersService.php`
-- `src/Rest/UsersRest.php`
-- `tests/Rest/UsersTest.php`
+- `src/Controller/UsersRest.php`
+- `tests/Controller/UsersTest.php`
 - Automatically adds DI bindings to `config/dev/04-repositories.php` and `config/dev/05-services.php`
 
 Generate only specific components:
@@ -102,8 +102,8 @@ composer codegen -- --env=test --table=users all --activerecord --save
 
 This creates:
 - `src/Model/Users.php` (with ActiveRecord trait)
-- `src/Rest/UsersRest.php`
-- `tests/Rest/UsersTest.php`
+- `src/Controller/UsersRest.php`
+- `tests/Controller/UsersTest.php`
 
 Generate only the model:
 

@@ -168,7 +168,7 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
     // Lots of business logic in the controller
     $repository = Config::get(DummyRepository::class);
-    $model = $repository->get($request->param('id'));
+    $model = $repository->get($request->attribute('id'));
 
     if (is_null($model)) {
         throw new Error404Exception("Dummy not found");
@@ -185,13 +185,13 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 ```php
 <?php
 
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
     $service = Config::get(DummyService::class);
-    $result = $service->getOrFail($request->param('id'));
+    $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
 ```

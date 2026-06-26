@@ -1,6 +1,6 @@
 <?php
 
-namespace RestReferenceArchitecture\Attributes;
+namespace RestReferenceArchitecture\Attribute;
 
 use Attribute;
 use ByJG\Config\Exception\ConfigException;

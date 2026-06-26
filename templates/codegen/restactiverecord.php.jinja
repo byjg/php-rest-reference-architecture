@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ namespace }}\Rest;
+namespace {{ namespace }}\Controller;
 
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
@@ -18,13 +18,13 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use {{ namespace }}\Attributes\RequireAuthenticated;
-use {{ namespace }}\Attributes\RequireRole;
-use {{ namespace }}\Attributes\ValidateRequest;
+use {{ namespace }}\Attribute\RequireAuthenticated;
+use {{ namespace }}\Attribute\RequireRole;
+use {{ namespace }}\Attribute\ValidateRequest;
 use {{ namespace }}\Model\{{ className }};
 use {{ namespace }}\Model\User;
 
-class {{ className }}Rest
+class {{ className }}Controller
 {
     /**
      * Get the {{ className }} by id
@@ -57,7 +57,7 @@ class {{ className }}Rest
     #[RequireAuthenticated]
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
-        $model = {{ className }}::get($request->param('id'));
+        $model = {{ className }}::get($request->attribute('id'));
 
         if (is_null($model)) {
             throw new Error404Exception("{{ className }} not found");
@@ -130,7 +130,7 @@ class {{ className }}Rest
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         // Get all records with pagination (default is page 0, limit 50)
-        $models = {{ className }}::all($request->get('page') ?? 0, $request->get('size') ?? 50);
+        $models = {{ className }}::all($request->queryString('page', 0), $request->queryString('size', 50));
         $response->write($models);
     }
 

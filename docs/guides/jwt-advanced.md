@@ -34,9 +34,9 @@ The reference architecture uses JWT tokens for stateless authentication. Tokens 
 | Component              | Purpose                    | Location                         |
 |------------------------|----------------------------|----------------------------------|
 | `JwtContext`           | Token creation and parsing | `src/Util/JwtContext.php`        |
-| `Login` REST           | Login and token endpoints  | `src/Rest/Login.php`             |
-| `RequireAuthenticated` | Endpoint authentication    | ByJG\RestServer\Attributes       |
-| `RequireRole`          | Role-based authorization   | `src/Attributes/RequireRole.php` |
+| `Login` REST           | Login and token endpoints  | `src/Controller/Login.php`             |
+| `RequireAuthenticated` | Endpoint authentication    | ByJG\RestServer\Attribute       |
+| `RequireRole`          | Role-based authorization   | `src/Attribute/RequireRole.php` |
 
 ## JwtContext Utility
 
@@ -66,7 +66,7 @@ JwtContext::getName(): ?string
 
 ### Login Endpoint
 
-**Location**: `src/Rest/Login.php:59`
+**Location**: `src/Controller/Login.php:59`
 
 ```php
 #[OA\Post(path: "/login", tags: ["Login"])]
@@ -287,14 +287,14 @@ public function getMyData(HttpResponse $response, HttpRequest $request): void
 
 ### Refresh Token Endpoint
 
-**Location**: `src/Rest/Login.php:77`
+**Location**: `src/Controller/Login.php:77`
 
 ```php
 #[OA\Post(path: "/refreshtoken", tags: ["Login"])]
 #[RequireAuthenticated]
 public function refreshToken(HttpResponse $response, HttpRequest $request)
 {
-    $diff = ($request->param("jwt.exp") - time()) / 60;
+    $diff = ($request->attributeString("jwt.exp") - time()) / 60;
 
     if ($diff > 5) {
         throw new Error401Exception("You only can refresh the token 5 minutes before expire");
@@ -372,7 +372,7 @@ scheduleRefresh();
 ### Require Authentication
 
 ```php
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
 
 #[OA\Get(path: "/profile", tags: ["User"])]
 #[RequireAuthenticated]
@@ -392,7 +392,7 @@ public function getProfile(HttpResponse $response, HttpRequest $request): void
 ### Require Specific Role
 
 ```php
-use RestReferenceArchitecture\Attributes\RequireRole;
+use RestReferenceArchitecture\Attribute\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 #[OA\Delete(path: "/users/{id}", tags: ["Admin"])]
@@ -400,7 +400,7 @@ use RestReferenceArchitecture\Model\User;
 public function deleteUser(HttpResponse $response, HttpRequest $request): void
 {
     // Only admins can access
-    $id = $request->param('id');
+    $id = $request->attribute('id');
     // Delete user logic...
 }
 ```
@@ -719,7 +719,7 @@ public function deleteAccount(HttpResponse $response, HttpRequest $request): voi
 ### 8. Rate Limit Authentication Endpoints
 
 ```php
-use RestReferenceArchitecture\Attributes\RateLimit;
+use RestReferenceArchitecture\Attribute\RateLimit;
 
 #[OA\Post(path: "/login", tags: ["Login"])]
 #[RateLimit(maxRequests: 5, windowSeconds: 60)]  // 5 attempts per minute
@@ -814,7 +814,7 @@ public function verifyMfa(HttpResponse $response, HttpRequest $request)
 
 ## Related Documentation
 
-- [Attributes System](../reference/attributes.md) - RequireAuthenticated and RequireRole
+- [Attribute System](../reference/attributes.md) - RequireAuthenticated and RequireRole
 - [REST API Development](rest-controllers.md) - Protecting endpoints
 - [Error Handling](error-handling.md) - Authentication errors
 - [Testing Guide](testing.md) - Testing authentication

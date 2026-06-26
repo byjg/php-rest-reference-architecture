@@ -1,12 +1,12 @@
 <?php
 
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Controller;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 
-class Sample
+class SampleController
 {
     /**
      * Simple ping

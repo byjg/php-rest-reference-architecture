@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ namespace }}\Rest;
+namespace {{ namespace }}\Controller;
 
 use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
@@ -19,13 +19,13 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use {{ namespace }}\Attributes\RequireAuthenticated;
-use {{ namespace }}\Attributes\RequireRole;
-use {{ namespace }}\Attributes\ValidateRequest;
+use {{ namespace }}\Attribute\RequireAuthenticated;
+use {{ namespace }}\Attribute\RequireRole;
+use {{ namespace }}\Attribute\ValidateRequest;
 use {{ namespace }}\Model\User;
 use {{ namespace }}\Service\{{ className }}Service;
 
-class {{ className }}Rest
+class {{ className }}Controller
 {
     /**
      * Get the {{ className }} by id
@@ -69,7 +69,7 @@ class {{ className }}Rest
     public function get{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         ${{ varTableName }}Service = Config::get({{ className }}Service::class);
-        $result = ${{ varTableName }}Service->getOrFail($request->param('id'));
+        $result = ${{ varTableName }}Service->getOrFail($request->attribute('id'));
         $response->write($result);
     }
 
@@ -147,7 +147,7 @@ class {{ className }}Rest
     public function list{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         ${{ varTableName }}Service = Config::get({{ className }}Service::class);
-        $result = ${{ varTableName }}Service->list($request->get('page'), $request->get('size'));
+        $result = ${{ varTableName }}Service->list($request->queryString('page', 0), $request->queryString('size', 50));
         $response->write($result);
     }
 

@@ -103,9 +103,9 @@ If you've set the `security` property in your OpenAPI attributes, protect the en
 ```php
 <?php
 
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\RequireRole;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireRole;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
 
 // Option a: Require admin role
@@ -178,8 +178,8 @@ After validating the payload, use the service layer to update the record:
 
 use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 
 /**
  * Update the status of an Example CRUD record
@@ -224,18 +224,18 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 
 Create a functional test to ensure your endpoint works correctly and continues to function as expected.
 
-Create or update the test file `tests/Rest/ExampleCrudTest.php`:
+Create or update the test file `tests/Controller/ExampleCrudTest.php`:
 
 ```php
 <?php
 
-namespace Test\Rest;
+namespace Test\Controller;
 
 use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
 use RestReferenceArchitecture\Util\FakeApiRequester;
-use Test\Rest\BaseApiTestCase;
-use Test\Rest\Credentials;
+use Test\Controller\BaseApiTestCase;
+use Test\Controller\Credentials;
 
 class ExampleCrudTest extends BaseApiTestCase
 {

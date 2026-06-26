@@ -83,8 +83,8 @@ This creates:
 - `./src/Model/ExampleCrud.php` - Model class
 - `./src/Repository/ExampleCrudRepository.php` - Repository class
 - `./src/Service/ExampleCrudService.php` - Service class
-- `./src/Rest/ExampleCrudRest.php` - REST controller
-- `./tests/Rest/ExampleCrudTest.php` - Functional tests
+- `./src/Controller/ExampleCrudRest.php` - REST controller
+- `./tests/Controller/ExampleCrudTest.php` - Functional tests
 
 :::tip Automatic Configuration
 The repository and service are automatically registered in:
@@ -108,7 +108,7 @@ See [Code Generator Documentation](../reference/code-generator.md) for details.
 
 ## Run the Tests
 
-The automatically generated test is located at `tests/Rest/ExampleCrudTest.php`.
+The automatically generated test is located at `tests/Controller/ExampleCrudTest.php`.
 
 Run it:
 
@@ -124,7 +124,7 @@ Initial tests **_will fail_** because we need to:
 composer run openapi
 ```
 
-2. Fix the test data by updating `tests/Rest/ExampleCrudTest.php`:
+2. Fix the test data by updating `tests/Controller/ExampleCrudTest.php`:
 
  
 Locate:

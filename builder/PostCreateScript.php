@@ -22,9 +22,9 @@ class PostCreateScript
         // Defining function to interactively walking through the directories
         $directory = new RecursiveDirectoryIterator($workdir);
         $filter = new RecursiveCallbackFilterIterator($directory, function ($current/*, $key, $iterator*/) {
-            // Skip hidden files and directories.
+            // Skip hidden files and directories, except .claude/ (needs namespace replacement).
             if ($current->getFilename()[0] === '.') {
-                return false;
+                return $current->isDir() && $current->getFilename() === '.claude';
             }
             if ($current->isDir()) {
                 // Only recurse into intended subdirectories.
@@ -55,8 +55,8 @@ class PostCreateScript
         foreach ($files as $file) {
             $contents = file_get_contents("$workdir/$file");
             $contents = str_replace('ENV TZ=UTC', "ENV TZ=$timezone", $contents);
-            $contents = str_replace('php:8.4-fpm', "php:$phpVersion-fpm", $contents);
-            $contents = str_replace('php84', "php$phpVersionMSimple", $contents);
+            $contents = str_replace('php:8.5-fpm', "php:$phpVersion-fpm", $contents);
+            $contents = str_replace('php85', "php$phpVersionMSimple", $contents);
             file_put_contents(
                 "$workdir/$file",
                 $contents
@@ -215,23 +215,23 @@ ENV;
                 'src/Model/Dummy.php',
                 'src/Repository/DummyRepository.php',
                 'src/Service/DummyService.php',
-                'src/Rest/DummyRest.php',
-                'tests/Rest/DummyTest.php',
+                'src/Controller/DummyController.php',
+                'tests/Controller/DummyTest.php',
                 // DummyHex files
                 'src/Model/DummyHex.php',
                 'src/Repository/DummyHexRepository.php',
                 'src/Service/DummyHexService.php',
-                'src/Rest/DummyHexRest.php',
-                'tests/Rest/DummyHexTest.php',
+                'src/Controller/DummyHexController.php',
+                'tests/Controller/DummyHexTest.php',
                 // DummyActiveRecord files
                 'src/Model/DummyActiveRecord.php',
-                'src/Rest/DummyActiveRecordRest.php',
-                'tests/Rest/DummyActiveRecordTest.php',
+                'src/Controller/DummyActiveRecordController.php',
+                'tests/Controller/DummyActiveRecordTest.php',
                 // Sample files
-                'src/Rest/Sample.php',
-                'src/Rest/SampleProtected.php',
-                'tests/Rest/SampleTest.php',
-                'tests/Rest/SampleProtectedTest.php',
+                'src/Controller/SampleController.php',
+                'src/Controller/SampleProtectedController.php',
+                'tests/Controller/SampleTest.php',
+                'tests/Controller/SampleProtectedTest.php',
             ];
 
             foreach ($exampleFiles as $file) {
@@ -285,21 +285,21 @@ ENV;
 
         // ------------------------------------------------
         // Configure git and initialize repository
-        shell_exec("composer update");
+        passthru("composer update");
 
         // Generate OpenAPI documentation
-        shell_exec("composer run openapi");
+        passthru("composer run openapi");
 
         // Initialize git repository first
-        shell_exec("git init");
-        shell_exec("git branch -m main");
+        passthru("git init");
+        passthru("git branch -m main");
 
         // Set git user config locally for this repository
-        shell_exec('git config user.name ' . escapeshellarg($gitUserName));
-        shell_exec('git config user.email ' . escapeshellarg($gitUserEmail));
+        passthru('git config user.name ' . escapeshellarg($gitUserName));
+        passthru('git config user.email ' . escapeshellarg($gitUserEmail));
 
-        shell_exec("git add .");
-        shell_exec("git commit -m 'Initial commit'");
+        passthru("git add .");
+        passthru("git commit -m 'Initial commit'");
     }
 
     /**

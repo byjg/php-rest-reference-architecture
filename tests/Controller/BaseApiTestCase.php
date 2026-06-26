@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Rest;
+namespace Test\Controller;
 
 use ByJG\ApiTools\Base\Schema;
 use ByJG\ApiTools\OpenApiValidation;

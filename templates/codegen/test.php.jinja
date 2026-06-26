@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Rest;
+namespace Test\Controller;
 
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;

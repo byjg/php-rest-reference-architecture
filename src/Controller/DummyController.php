@@ -1,7 +1,8 @@
 <?php
 
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Controller;
 
+use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
 use ByJG\Config\Exception\ConfigNotFoundException;
 use ByJG\Config\Exception\DependencyInjectionException;
@@ -18,23 +19,33 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\RequireRole;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
-use RestReferenceArchitecture\Model\DummyActiveRecord;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireRole;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
+use RestReferenceArchitecture\Service\DummyService;
 
-class DummyActiveRecordRest
+class DummyController
 {
     /**
-     * Get the DummyActiveRecord by id
+     * Get the Dummy by id
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error401Exception
      * @throws Error404Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     #[OA\Get(
-        path: "/dummy/active/record/{id}",
+        path: "/dummy/{id}",
         security: [
             ["jwt-token" => []]
         ],
@@ -51,30 +62,36 @@ class DummyActiveRecordRest
     )]
     #[OA\Response(
         response: 200,
-        description: "The object DummyActiveRecord",
-        content: new OA\JsonContent(ref: "#/components/schemas/DummyActiveRecord")
+        description: "The object Dummy",
+        content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
     )]
     #[RequireAuthenticated]
-    public function getDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+    public function getDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $model = DummyActiveRecord::get($request->param('id'));
-
-        if (is_null($model)) {
-            throw new Error404Exception("DummyActiveRecord not found");
-        }
-
-        $response->write($model);
+        $dummyService = Config::get(DummyService::class);
+        $result = $dummyService->getOrFail($request->attribute('id'));
+        $response->write($result);
     }
 
     /**
-     * List DummyActiveRecord
+     * List Dummy
      *
-     * @param mixed $response
-     * @param mixed $request
+     * @param HttpResponse $response
+     * @param HttpRequest $request
      * @return void
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error401Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     #[OA\Get(
-        path: "/dummy/active/record",
+        path: "/dummy",
         security: [
             ["jwt-token" => []]
         ],
@@ -118,8 +135,8 @@ class DummyActiveRecordRest
     )]
     #[OA\Response(
         response: 200,
-        description: "The object DummyActiveRecord",
-        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/DummyActiveRecord"))
+        description: "The object Dummy",
+        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/Dummy"))
     )]
     #[OA\Response(
         response: 401,
@@ -127,43 +144,56 @@ class DummyActiveRecordRest
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
     #[RequireAuthenticated]
-    public function listDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+    public function listDummy(HttpResponse $response, HttpRequest $request): void
     {
-        // Get all records with pagination (default is page 0, limit 50)
-        $models = DummyActiveRecord::all($request->get('page') ?? 0, $request->get('size') ?? 50);
-        $response->write($models);
+        $dummyService = Config::get(DummyService::class);
+        $result = $dummyService->list($request->query('page'), $request->query('size'));
+        $response->write($result);
     }
 
 
     /**
-     * Create a new DummyActiveRecord
+     * Create a new Dummy 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @return void
+     * @throws ConfigException
+     * @throws ConfigNotFoundException
+     * @throws DependencyInjectionException
+     * @throws Error400Exception
+     * @throws Error401Exception
+     * @throws Error403Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidDateException
+     * @throws KeyNotFoundException
+     * @throws OrmBeforeInvalidException
+     * @throws OrmInvalidFieldsException
+     * @throws \ByJG\Serializer\Exception\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     #[OA\Post(
-        path: "/dummy/active/record",
+        path: "/dummy",
         security: [
             ["jwt-token" => []]
         ],
         tags: ["Dummy"]
     )]
     #[OA\RequestBody(
-        description: "The object DummyActiveRecord to be created",
+        description: "The object Dummy to be created",
         required: true,
         content: new OA\JsonContent(
-            required: [ "name" ],
+            required: [ "field" ],
             properties: [
 
-                new OA\Property(property: "name", type: "string", format: "string"),
-                new OA\Property(property: "value", type: "string", format: "string", nullable: true),
+                new OA\Property(property: "field", type: "string", format: "string")
             ]
         )
     )]
     #[OA\Response(
         response: 200,
-        description: "The object to be created",
+        description: "The object rto be created",
         content: new OA\JsonContent(
             required: [ "id" ],
             properties: [
@@ -179,20 +209,16 @@ class DummyActiveRecordRest
     )]
     #[RequireRole(User::ROLE_ADMIN)]
     #[ValidateRequest]
-    public function postDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+    public function postDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $payload = ValidateRequest::getPayload();
-
-        // Create a new ActiveRecord instance with payload
-        $model = DummyActiveRecord::new($payload);
-        $model->save();
-
+        $dummyService = Config::get(DummyService::class);
+        $model = $dummyService->create(ValidateRequest::getPayload());
         $response->write(["id" => $model->getId()]);
     }
 
 
     /**
-     * Update an existing DummyActiveRecord
+     * Update an existing Dummy 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -214,16 +240,16 @@ class DummyActiveRecordRest
      * @throws ReflectionException
      */
     #[OA\Put(
-        path: "/dummy/active/record",
+        path: "/dummy",
         security: [
             ["jwt-token" => []]
         ],
         tags: ["Dummy"]
     )]
     #[OA\RequestBody(
-        description: "The object DummyActiveRecord to be updated",
+        description: "The object Dummy to be updated",
         required: true,
-        content: new OA\JsonContent(ref: "#/components/schemas/DummyActiveRecord")
+        content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
     )]
     #[OA\Response(
         response: 200,
@@ -236,19 +262,10 @@ class DummyActiveRecordRest
     )]
     #[RequireRole(User::ROLE_ADMIN)]
     #[ValidateRequest]
-    public function putDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+    public function putDummy(HttpResponse $response, HttpRequest $request): void
     {
-        $payload = ValidateRequest::getPayload();
-
-        $model = DummyActiveRecord::get($payload['id'] ?? null);
-
-        if (is_null($model)) {
-            throw new Error404Exception("DummyActiveRecord not found");
-        }
-
-        // Update model with payload using fill() method
-        $model->fill($payload);
-        $model->save();
+        $dummyService = Config::get(DummyService::class);
+        $dummyService->update(ValidateRequest::getPayload());
     }
 
 }

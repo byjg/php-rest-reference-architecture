@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Rest;
+namespace Test\Controller;
 
 use ByJG\Config\Config;
 use ByJG\Util\Uri;

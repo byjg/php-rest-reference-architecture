@@ -117,10 +117,10 @@ public function listDummy(HttpResponse $response, HttpRequest $request): void
 {
     $service = Config::get(DummyService::class);
     $result = $service->list(
-        page:    (int) ($request->get('page')    ?? 0),
-        size:    (int) ($request->get('size')    ?? 20),
-        orderBy: $request->get('orderBy'),
-        filter:  $request->get('filter'),
+        page:    (int) ($request->query('page')    ?? 0),
+        size:    (int) ($request->query('size')    ?? 20),
+        orderBy: $request->query('orderBy'),
+        filter:  $request->query('filter'),
     );
     $response->write($result);
 }

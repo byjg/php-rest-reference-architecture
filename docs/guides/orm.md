@@ -115,15 +115,15 @@ Repositories are registered in `config/<env>/04-repositories.php` and injected i
 
 ## 6. ActiveRecord REST Endpoints
 
-When using the ActiveRecord pattern, the controller calls model methods directly — no separate service class is required. The reference implementation is `src/Rest/DummyActiveRecordRest.php`.
+When using the ActiveRecord pattern, the controller calls model methods directly — no separate service class is required. The reference implementation is `src/Controller/DummyActiveRecordRest.php`.
 
 ### GET — Fetch by ID
 
-```php title="src/Rest/DummyActiveRecordRest.php (GET by id)"
+```php title="src/Controller/DummyActiveRecordRest.php (GET by id)"
 #[RequireAuthenticated]
 public function getDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
 {
-    $model = DummyActiveRecord::get($request->param('id'));
+    $model = DummyActiveRecord::get($request->attribute('id'));
 
     if (is_null($model)) {
         throw new Error404Exception("DummyActiveRecord not found");
@@ -135,11 +135,11 @@ public function getDummyActiveRecord(HttpResponse $response, HttpRequest $reques
 
 ### GET — List with Pagination
 
-```php title="src/Rest/DummyActiveRecordRest.php (list)"
+```php title="src/Controller/DummyActiveRecordRest.php (list)"
 #[RequireAuthenticated]
 public function listDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
 {
-    $models = DummyActiveRecord::all($request->get('page') ?? 0, $request->get('size') ?? 50);
+    $models = DummyActiveRecord::all($request->query('page') ?? 0, $request->query('size') ?? 50);
     $response->write($models);
 }
 ```
@@ -148,7 +148,7 @@ public function listDummyActiveRecord(HttpResponse $response, HttpRequest $reque
 
 Use `DummyActiveRecord::new($payload)` to hydrate a new instance from an array, then call `save()`:
 
-```php title="src/Rest/DummyActiveRecordRest.php (create)"
+```php title="src/Controller/DummyActiveRecordRest.php (create)"
 #[RequireRole(User::ROLE_ADMIN)]
 #[ValidateRequest]
 public function postDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
@@ -166,7 +166,7 @@ public function postDummyActiveRecord(HttpResponse $response, HttpRequest $reque
 
 Use `->fill($payload)` to apply changes to an existing instance, then call `save()`:
 
-```php title="src/Rest/DummyActiveRecordRest.php (update)"
+```php title="src/Controller/DummyActiveRecordRest.php (update)"
 #[RequireRole(User::ROLE_ADMIN)]
 #[ValidateRequest]
 public function putDummyActiveRecord(HttpResponse $response, HttpRequest $request): void

@@ -1,6 +1,6 @@
 <?php
 
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Controller;
 
 use ByJG\Config\Config;
 use ByJG\Config\Exception\ConfigException;
@@ -19,16 +19,16 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\RequireRole;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireRole;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Service\DummyService;
+use RestReferenceArchitecture\Service\DummyHexService;
 
-class DummyRest
+class DummyHexController
 {
     /**
-     * Get the Dummy by id
+     * Get the DummyHex by id
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -45,7 +45,7 @@ class DummyRest
      * @throws ReflectionException
      */
     #[OA\Get(
-        path: "/dummy/{id}",
+        path: "/dummy/hex/{id}",
         security: [
             ["jwt-token" => []]
         ],
@@ -56,25 +56,25 @@ class DummyRest
         in: "path",
         required: true,
         schema: new OA\Schema(
-            type: "integer",
-            format: "int32"
+            type: "string",
+            format: "string"
         )
     )]
     #[OA\Response(
         response: 200,
-        description: "The object Dummy",
-        content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
+        description: "The object DummyHex",
+        content: new OA\JsonContent(ref: "#/components/schemas/DummyHex")
     )]
     #[RequireAuthenticated]
-    public function getDummy(HttpResponse $response, HttpRequest $request): void
+    public function getDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Config::get(DummyService::class);
-        $result = $dummyService->getOrFail($request->param('id'));
+        $dummyHexService = Config::get(DummyHexService::class);
+        $result = $dummyHexService->getOrFail($request->attribute('id'));
         $response->write($result);
     }
 
     /**
-     * List Dummy
+     * List DummyHex
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -91,7 +91,7 @@ class DummyRest
      * @throws ReflectionException
      */
     #[OA\Get(
-        path: "/dummy",
+        path: "/dummy/hex",
         security: [
             ["jwt-token" => []]
         ],
@@ -135,8 +135,8 @@ class DummyRest
     )]
     #[OA\Response(
         response: 200,
-        description: "The object Dummy",
-        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/Dummy"))
+        description: "The object DummyHex",
+        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/DummyHex"))
     )]
     #[OA\Response(
         response: 401,
@@ -144,16 +144,16 @@ class DummyRest
         content: new OA\JsonContent(ref: "#/components/schemas/error")
     )]
     #[RequireAuthenticated]
-    public function listDummy(HttpResponse $response, HttpRequest $request): void
+    public function listDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Config::get(DummyService::class);
-        $result = $dummyService->list($request->get('page'), $request->get('size'));
+        $dummyHexService = Config::get(DummyHexService::class);
+        $result = $dummyHexService->list($request->query('page'), $request->query('size'));
         $response->write($result);
     }
 
 
     /**
-     * Create a new Dummy 
+     * Create a new DummyHex 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -174,14 +174,14 @@ class DummyRest
      * @throws ReflectionException
      */
     #[OA\Post(
-        path: "/dummy",
+        path: "/dummy/hex",
         security: [
             ["jwt-token" => []]
         ],
         tags: ["Dummy"]
     )]
     #[OA\RequestBody(
-        description: "The object Dummy to be created",
+        description: "The object DummyHex to be created",
         required: true,
         content: new OA\JsonContent(
             required: [ "field" ],
@@ -198,7 +198,7 @@ class DummyRest
             required: [ "id" ],
             properties: [
 
-                new OA\Property(property: "id", type: "integer", format: "int32")
+                new OA\Property(property: "id", type: "string", format: "string")
             ]
         )
     )]
@@ -209,16 +209,16 @@ class DummyRest
     )]
     #[RequireRole(User::ROLE_ADMIN)]
     #[ValidateRequest]
-    public function postDummy(HttpResponse $response, HttpRequest $request): void
+    public function postDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Config::get(DummyService::class);
-        $model = $dummyService->create(ValidateRequest::getPayload());
+        $dummyHexService = Config::get(DummyHexService::class);
+        $model = $dummyHexService->create(ValidateRequest::getPayload());
         $response->write(["id" => $model->getId()]);
     }
 
 
     /**
-     * Update an existing Dummy 
+     * Update an existing DummyHex 
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
@@ -240,16 +240,16 @@ class DummyRest
      * @throws ReflectionException
      */
     #[OA\Put(
-        path: "/dummy",
+        path: "/dummy/hex",
         security: [
             ["jwt-token" => []]
         ],
         tags: ["Dummy"]
     )]
     #[OA\RequestBody(
-        description: "The object Dummy to be updated",
+        description: "The object DummyHex to be updated",
         required: true,
-        content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
+        content: new OA\JsonContent(ref: "#/components/schemas/DummyHex")
     )]
     #[OA\Response(
         response: 200,
@@ -262,10 +262,10 @@ class DummyRest
     )]
     #[RequireRole(User::ROLE_ADMIN)]
     #[ValidateRequest]
-    public function putDummy(HttpResponse $response, HttpRequest $request): void
+    public function putDummyHex(HttpResponse $response, HttpRequest $request): void
     {
-        $dummyService = Config::get(DummyService::class);
-        $dummyService->update(ValidateRequest::getPayload());
+        $dummyHexService = Config::get(DummyHexService::class);
+        $dummyHexService->update(ValidateRequest::getPayload());
     }
 
 }

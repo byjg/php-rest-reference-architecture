@@ -1,27 +1,27 @@
 <?php
 
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Controller;
 
 use ByJG\Authenticate\Service\UsersService;
 use ByJG\Config\Config;
 use ByJG\Mail\Wrapper\MailWrapperInterface;
+use ByJG\RestServer\Enum\OutputMode;
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\XmlUtil\XmlDocument;
 use OpenApi\Attributes as OA;
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Repository\BaseRepository;
 use RestReferenceArchitecture\Util\JwtContext;
 use RestReferenceArchitecture\Util\OpenApiContext;
 use RuntimeException;
 
-class Login
+class LoginController
 {
     /**
      * Do login
@@ -69,7 +69,7 @@ class Login
             throw new Error401Exception("Failed to create user token");
         }
 
-        $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
+        $response->getResponseBody()->serializeAs(OutputMode::SingleObject);
         $response->write(['token' => $userToken->token]);
         $response->write(['data' => $userToken->data]);
     }
@@ -108,7 +108,7 @@ class Login
     #[RequireAuthenticated]
     public function refreshToken(HttpResponse $response, HttpRequest $request)
     {
-        $diff = ($request->param("jwt.exp") - time()) / 60;
+        $diff = (intval($request->attributeString("jwt.exp")) - time()) / 60;
 
         if ($diff > 5) {
             throw new Error401Exception("You only can refresh the token 5 minutes before expire");
@@ -136,7 +136,7 @@ class Login
             throw new Error401Exception("Failed to create user metadata");
         }
 
-        $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
+        $response->getResponseBody()->serializeAs(OutputMode::SingleObject);
         $response->write(['token' => $metadata->token]);
         $response->write(['data' => $metadata->data]);
 

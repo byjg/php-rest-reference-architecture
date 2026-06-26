@@ -12,7 +12,7 @@ REST controllers in this architecture map HTTP routes to PHP methods using PHP 8
 Annotate controller classes with `zircote/swagger-php` attributes to describe each endpoint. The tooling generates `public/docs/openapi.json` from these annotations, and `OpenApiRouteList` uses that file to dispatch requests at runtime.
 
 ```php
-namespace RestReferenceArchitecture\Rest;
+namespace RestReferenceArchitecture\Controller;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
@@ -71,8 +71,8 @@ Declare path parameters directly in the path string and use `#[OA\Parameter]` to
 #[OA\Response(response: 200, description: "The dummy object")]
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
-    $id = $request->param('id');
-    $page = $request->get('page');
+    $id = $request->attribute('id');
+    $page = $request->query('page');
     // ...
 }
 ```
@@ -113,7 +113,7 @@ Document every response status code so the OpenAPI spec (and test validation) st
 Add `#[ValidateRequest]` to a controller method to automatically validate the incoming request body against the OpenAPI schema before the method executes. Invalid payloads receive a 422 response.
 
 ```php
-use RestReferenceArchitecture\Attributes\ValidateRequest;
+use RestReferenceArchitecture\Attribute\ValidateRequest;
 
 #[ValidateRequest]
 public function postDummy(HttpResponse $response, HttpRequest $request): void
@@ -130,13 +130,13 @@ public function postDummy(HttpResponse $response, HttpRequest $request): void
 Add `#[RequireAuthenticated]` to protect an endpoint. Requests without a valid JWT receive a 401 response.
 
 ```php
-use RestReferenceArchitecture\Attributes\RequireAuthenticated;
+use RestReferenceArchitecture\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
     $service = Config::get(DummyService::class);
-    $result = $service->getOrFail($request->param('id'));
+    $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
 ```
@@ -152,7 +152,7 @@ use RestReferenceArchitecture\Service\DummyService;
 public function getDummy(HttpResponse $response, HttpRequest $request): void
 {
     $service = Config::get(DummyService::class);
-    $result = $service->getOrFail($request->param('id'));
+    $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
 ```
@@ -161,10 +161,10 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 
 ```php
 // Path parameter (from the URL pattern, e.g. /dummy/{id})
-$id = $request->param('id');
+$id = $request->attribute('id');
 
 // Query string parameter (from ?page=2)
-$page = $request->get('page');
+$page = $request->query('page');
 
 // Request body as string
 $rawBody = $request->payload();
@@ -185,7 +185,7 @@ If you already have an OpenAPI JSON spec, place it at `public/docs/openapi.json`
     "paths": {
         "/login": {
             "post": {
-                "operationId": "POST::/login::RestReferenceArchitecture\\Rest\\Login::mymethod"
+                "operationId": "POST::/login::RestReferenceArchitecture\\Controller\\LoginController::mymethod"
             }
         }
     }

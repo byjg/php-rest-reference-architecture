@@ -79,7 +79,7 @@ Similarly, no changes needed in the `Service` class. The `BaseService` methods a
 
 We just need to allow the rest to receive the new field. If we don't do it, the API will throw an error.
 
-Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to method `postExampleCrud()`:
+Open the file: `src/Controller/ExampleCrudRest.php` and add the attribute `status` to method `postExampleCrud()`:
 
 ```php
 #[OA\RequestBody(
@@ -102,7 +102,7 @@ Open the file: `src/Rest/ExampleCrudRest.php` and add the attribute `status` to 
 ## Updating the Tests
 
 We only need to update the `getSampleData()` method to include the new field.
-Open the file: `tests/Rest/ExampleCrudTest.php`
+Open the file: `tests/Controller/ExampleCrudTest.php`
 
 ```php
 protected function getSampleData($array = false)
