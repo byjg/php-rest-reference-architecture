@@ -154,7 +154,12 @@ After generating REST controllers, remember to:
 
 ## Customizing Templates
 
-You can modify existing templates or create your own. Templates are located in `templates/codegen/` and use the [Jinja template engine for PHP](https://github.com/byjg/jinja_php).
+You can modify existing templates or create your own. The default templates ship inside **byjg/gluo-core** (`vendor/byjg/gluo-core/templates/codegen/`) and use the [Jinja template engine for PHP](https://github.com/byjg/jinja_php). To customize, copy them into your project — a local `templates/codegen/` directory takes precedence over the package templates:
+
+```bash
+mkdir -p templates
+cp -r vendor/byjg/gluo-core/templates/codegen templates/codegen
+```
 
 **Available templates:**
 

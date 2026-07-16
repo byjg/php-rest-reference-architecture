@@ -103,9 +103,9 @@ If you've set the `security` property in your OpenAPI attributes, protect the en
 ```php
 <?php
 
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
-use RestReferenceArchitecture\Attribute\RequireRole;
-use RestReferenceArchitecture\Attribute\ValidateRequest;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\RequireRole;
+use ByJG\Gluo\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
 
 // Option a: Require admin role
@@ -143,7 +143,7 @@ If you need to access the current user's data:
 ```php
 <?php
 
-use RestReferenceArchitecture\Util\JwtContext;
+use ByJG\Gluo\Util\JwtContext;
 
 // JwtContext helpers expose the middleware-populated JWT information
 $userId = JwtContext::getUserId();
@@ -178,8 +178,8 @@ After validating the payload, use the service layer to update the record:
 
 use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
-use RestReferenceArchitecture\Attribute\ValidateRequest;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\ValidateRequest;
 
 /**
  * Update the status of an Example CRUD record
@@ -233,7 +233,7 @@ namespace Test\Controller;
 
 use ByJG\Config\Config;
 use RestReferenceArchitecture\Service\ExampleCrudService;
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Util\FakeApiRequester;
 use Test\Controller\BaseApiTestCase;
 use Test\Controller\Credentials;
 

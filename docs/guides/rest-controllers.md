@@ -18,7 +18,7 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 
-class Login
+class LoginController
 {
     /**
      * Do log in
@@ -113,7 +113,7 @@ Document every response status code so the OpenAPI spec (and test validation) st
 Add `#[ValidateRequest]` to a controller method to automatically validate the incoming request body against the OpenAPI schema before the method executes. Invalid payloads receive a 422 response.
 
 ```php
-use RestReferenceArchitecture\Attribute\ValidateRequest;
+use ByJG\Gluo\Attribute\ValidateRequest;
 
 #[ValidateRequest]
 public function postDummy(HttpResponse $response, HttpRequest $request): void
@@ -130,7 +130,7 @@ public function postDummy(HttpResponse $response, HttpRequest $request): void
 Add `#[RequireAuthenticated]` to protect an endpoint. Requests without a valid JWT receive a 401 response.
 
 ```php
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]
 public function getDummy(HttpResponse $response, HttpRequest $request): void

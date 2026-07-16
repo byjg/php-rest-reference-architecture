@@ -31,12 +31,12 @@ The `ValidateRequest` attribute automatically validates incoming requests agains
 
 ### Location
 
-`src/Attribute/ValidateRequest.php`
+`ByJG\Gluo\Attribute\ValidateRequest` (byjg/gluo-core)
 
 ### Usage
 
 ```php
-use RestReferenceArchitecture\Attribute\ValidateRequest;
+use ByJG\Gluo\Attribute\ValidateRequest;
 
 #[ValidateRequest]
 public function postDummy(HttpResponse $response, HttpRequest $request): void
@@ -227,12 +227,12 @@ The `RequireRole` attribute enforces role-based access control (RBAC) for protec
 
 ### Location
 
-`src/Attribute/RequireRole.php`
+`ByJG\Gluo\Attribute\RequireRole` (byjg/gluo-core)
 
 ### Usage
 
 ```php
-use RestReferenceArchitecture\Attribute\RequireRole;
+use ByJG\Gluo\Attribute\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 #[RequireRole(User::ROLE_ADMIN)]
@@ -374,7 +374,7 @@ public function createUser(HttpResponse $response, HttpRequest $request): void
 ### Example: Multiple Authorization Checks
 
 ```php
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]  // Must be logged in
 #[RequireRole(User::ROLE_ADMIN)]  // Must be admin
@@ -443,7 +443,7 @@ class RateLimit implements BeforeRouteInterface
 ### Step 2: Use Your Custom Attribute
 
 ```php
-use RestReferenceArchitecture\Attribute\RateLimit;
+use RestReferenceArchitecture\Attribute\RateLimit; // your custom attribute (not part of gluo-core)
 
 #[OA\Post(path: "/api/heavy", tags: ["API"])]
 #[RateLimit(maxRequests: 10, windowSeconds: 60)]

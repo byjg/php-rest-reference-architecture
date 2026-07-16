@@ -40,11 +40,11 @@ Choose one of the following installation methods:
 ```shell script
 # Standard installation
 mkdir ~/tutorial
-composer -sdev create-project byjg/rest-reference-architecture ~/tutorial ^6.1
+composer -sdev create-project byjg/gluo ~/tutorial ^6.1
 
 # OR Latest development version
 mkdir ~/tutorial
-composer -sdev create-project byjg/rest-reference-architecture ~/tutorial master
+composer -sdev create-project byjg/gluo ~/tutorial master
 ```
 
 ### Alternative: `shellscript.download`
@@ -74,7 +74,7 @@ load.sh php-rest-api -- my-api \
 
 The script:
 - Generates a temporary `setup.json` (one directory above the target folder) with all answers.
-- Runs `composer create-project byjg/rest-reference-architecture ...` using those values.
+- Runs `composer create-project byjg/gluo ...` using those values.
 - Cleans up `setup.json` after success and is safe to re-run (it recreates the project folder).
 
 Required flags: the target folder, `--namespace`, and `--name`. Everything else is optional (defaults match the interactive installer). 

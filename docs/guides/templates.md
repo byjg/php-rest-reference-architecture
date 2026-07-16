@@ -18,10 +18,21 @@ Guide to customizing the code generator templates to match your project's specif
 
 ## Overview
 
-The code generator uses [JinjaPhp](https://github.com/byjg/jinja_php) templates stored in `templates/codegen/`.
+The code generator uses [JinjaPhp](https://github.com/byjg/jinja_php) templates shipped inside **byjg/gluo-core** (`vendor/byjg/gluo-core/templates/codegen/`), so template improvements arrive with `composer update`.
 
 **Template Engine**: JinjaPhp (Python Jinja2 syntax for PHP)
-**Location**: `templates/codegen/`
+**Default location**: `vendor/byjg/gluo-core/templates/codegen/`
+
+**Overriding**: create a `templates/codegen/` directory in your project and the
+generator uses it instead of the package templates. To start customizing, copy
+the package templates:
+
+```bash
+mkdir -p templates
+cp -r vendor/byjg/gluo-core/templates/codegen templates/codegen
+```
+
+Delete the directory to go back to the package defaults.
 
 ### Template Types
 

@@ -29,9 +29,9 @@ graph TD
 
 ## BaseService
 
-Every service extends `RestReferenceArchitecture\Service\BaseService`, so you automatically inherit the same safeguards used by the sample `DummyService`/`DummyHexService` classes.
+Every service extends `ByJG\Gluo\Service\BaseService`, so you automatically inherit the same safeguards used by the sample `DummyService`/`DummyHexService` classes.
 
-```php title="src/Service/BaseService.php (excerpt)"
+```php title="ByJG\\Gluo\\Service\\BaseService (byjg/gluo-core, excerpt)"
 abstract class BaseService
 {
     public function __construct(protected BaseRepository $baseRepository)
@@ -185,7 +185,7 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 ```php
 <?php
 
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]
 public function getDummy(HttpResponse $response, HttpRequest $request): void
