@@ -5,7 +5,7 @@ namespace Test\Controller;
 use ByJG\Config\Config;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Psr7\Request;
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Util\FakeApiRequester;
 
 class Credentials
 {

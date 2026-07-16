@@ -3,6 +3,7 @@
 namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DatabaseExecutor;
+use ByJG\Gluo\Repository\BaseRepository;
 use ByJG\MicroOrm\Exception\InvalidArgumentException;
 use ByJG\MicroOrm\Exception\OrmModelInvalidException;
 use ByJG\MicroOrm\Query;

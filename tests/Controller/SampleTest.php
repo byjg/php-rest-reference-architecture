@@ -3,7 +3,7 @@
 namespace Test\Controller;
 
 
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Util\FakeApiRequester;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase

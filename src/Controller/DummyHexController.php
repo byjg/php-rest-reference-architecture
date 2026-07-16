@@ -19,9 +19,9 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
 use ReflectionException;
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
-use RestReferenceArchitecture\Attribute\RequireRole;
-use RestReferenceArchitecture\Attribute\ValidateRequest;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\RequireRole;
+use ByJG\Gluo\Attribute\ValidateRequest;
 use RestReferenceArchitecture\Model\User;
 use RestReferenceArchitecture\Service\DummyHexService;
 

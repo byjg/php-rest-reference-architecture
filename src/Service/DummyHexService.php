@@ -2,6 +2,7 @@
 
 namespace RestReferenceArchitecture\Service;
 
+use ByJG\Gluo\Service\BaseService;
 use RestReferenceArchitecture\Repository\DummyHexRepository;
 
 class DummyHexService extends BaseService
