@@ -23,7 +23,7 @@ The script searches for `setup.json` in the following locations (in priority ord
 Use the `SETUP_JSON` environment variable to specify a custom location:
 
 ```bash
-SETUP_JSON=/path/to/custom-setup.json composer -sdev create-project byjg/rest-reference-architecture my-project ^6.1
+SETUP_JSON=/path/to/custom-setup.json composer -sdev create-project byjg/gluo my-project ^6.1
 ```
 
 **Use cases:**
@@ -51,12 +51,12 @@ The script checks your home directory:
 
 **Linux/Mac:**
 ```bash
-~/.rest-reference-architecture/setup.json
+~/.gluo/setup.json
 ```
 
 **Windows:**
 ```
-C:\Users\YourName\.rest-reference-architecture\setup.json
+C:\Users\YourName\.gluo\setup.json
 ```
 
 **Use cases:**
@@ -72,8 +72,8 @@ Create your personal defaults once:
 
 ```bash
 # Linux/Mac
-mkdir -p ~/.rest-reference-architecture
-cat > ~/.rest-reference-architecture/setup.json << 'EOF'
+mkdir -p ~/.gluo
+cat > ~/.gluo/setup.json << 'EOF'
 {
   "git_user_name": "John Doe",
   "git_user_email": "john.doe@example.com",
@@ -83,8 +83,8 @@ EOF
 
 # Now create projects anywhere - they'll use your defaults
 cd ~/projects
-composer -sdev create-project byjg/rest-reference-architecture project1 ^6.1
-composer -sdev create-project byjg/rest-reference-architecture project2 ^6.1
+composer -sdev create-project byjg/gluo project1 ^6.1
+composer -sdev create-project byjg/gluo project2 ^6.1
 ```
 
 ### Example 2: Parent Directory (Quick Setup)
@@ -101,7 +101,7 @@ cat > setup.json << 'EOF'
 EOF
 
 # Create project in the same directory
-composer -sdev create-project byjg/rest-reference-architecture my-project ^6.1
+composer -sdev create-project byjg/gluo my-project ^6.1
 ```
 
 ### Example 3: Environment Variable (CI/CD)
@@ -118,7 +118,7 @@ cat > /etc/ci-configs/rest-setup.json << 'EOF'
 EOF
 
 # Use it with environment variable
-SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/rest-reference-architecture production-app ^6.1
+SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/gluo production-app ^6.1
 ```
 
 ## Configuration Options
@@ -159,7 +159,7 @@ When multiple `setup.json` files exist, the script uses the **first one found**:
 
 1. ✅ `SETUP_JSON` environment variable → **Highest priority**
 2. ✅ Parent directory `../setup.json`
-3. ✅ Home directory `~/.rest-reference-architecture/setup.json`
+3. ✅ Home directory `~/.gluo/setup.json`
 
 **Example:** If you have both a home directory config and use `SETUP_JSON`, the environment variable wins.
 

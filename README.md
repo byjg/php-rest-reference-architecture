@@ -19,7 +19,7 @@ This template does the wiring once, correctly, so you start on day one writing b
 
 ```bash
 # Create your project
-composer -sdev create-project byjg/rest-reference-architecture my-api ^6.1
+composer -sdev create-project byjg/gluo my-api ^6.1
 
 # Start containers
 cd my-api

@@ -53,11 +53,11 @@ class PostCreateScript
         $phpVersionMSimple = str_replace(".", "", $phpVersion);
 
         // ------------------------------------------------
-        //Replace composer name:
+        // Replace composer name (quote-exact so the byjg/gluo-core requirement is untouched):
         $contents = file_get_contents($workdir . '/composer.json');
         file_put_contents(
             $workdir . '/composer.json',
-            str_replace('byjg/rest-reference-architecture', $composerName, $contents)
+            str_replace('"byjg/gluo"', '"' . $composerName . '"', $contents)
         );
 
         // ------------------------------------------------
@@ -189,10 +189,10 @@ ENV;
                 // Replace reserved name
                 $contents = str_replace('RestReferenceArchitecture', $namespace, $contents);
 
-                // Replace reserved name
-                $contents = str_replace(
-                    'rest-reference-architecture',
-                    str_replace('/', '', $composerName),
+                // Replace the template package name, but never the framework dependency
+                $contents = preg_replace(
+                    '~byjg/gluo(?!-core)~',
+                    $composerName,
                     $contents
                 );
 
@@ -337,7 +337,7 @@ ENV;
             dirname($workdir) . '/setup.json',
 
             // 3. User's home directory
-            (getenv('HOME') ?: getenv('USERPROFILE')) . '/.rest-reference-architecture/setup.json',
+            (getenv('HOME') ?: getenv('USERPROFILE')) . '/.gluo/setup.json',
         ];
 
         foreach ($locations as $configFile) {

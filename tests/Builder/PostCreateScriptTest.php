@@ -130,8 +130,9 @@ class PostCreateScriptTest extends TestCase
         $this->applyTemplate(true);
 
         $composer = file_get_contents($this->workdir . '/composer.json');
-        $this->assertStringContainsString('"acme/shop"', $composer);
-        $this->assertStringNotContainsString('byjg/rest-reference-architecture', $composer);
+        $this->assertStringContainsString('"name": "acme/shop"', $composer);
+        $this->assertStringNotContainsString('"byjg/gluo"', $composer);
+        $this->assertStringContainsString('"byjg/gluo-core"', $composer);
     }
 
     public function testDockerfileVersionAndTimezone(): void

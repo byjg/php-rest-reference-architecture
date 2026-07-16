@@ -1,7 +1,7 @@
 {
   "version": "6.1",
-  "name": "byjg/rest-reference-architecture",
-  "description": "Production-ready PHP REST API boilerplate that lets you focus on building your business logic, not the infrastructure.",
+  "name": "byjg/gluo",
+  "description": "Gluo — production-ready PHP REST API framework starter. Create a project with `composer create-project byjg/gluo` and focus on your business logic, not the infrastructure.",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "license": "MIT",
@@ -16,7 +16,7 @@
     "ext-json": "*",
     "ext-openssl": "*",
     "ext-curl": "*",
-    "byjg/gluo": "dev-master",
+    "byjg/gluo-core": "dev-master",
     "byjg/config": "^6.0.x-dev",
     "byjg/anydataset-db": "^7.0",
     "byjg/micro-orm": "^7.0",
