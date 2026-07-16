@@ -15,6 +15,17 @@ class PostCreateScript
 {
     public function execute($workdir, $namespace, $composerName, $phpVersion, array $dbConfig, $timezone, $installExamples, $gitUserName, $gitUserEmail): void
     {
+        $this->applyTemplate($workdir, $namespace, $composerName, $phpVersion, $dbConfig, $timezone, $installExamples);
+        $this->finalize($gitUserName, $gitUserEmail);
+    }
+
+    /**
+     * Pure file transformation: rename namespace/composer name, adjust docker
+     * and config files, remove examples. No process side effects, so it can
+     * be tested against a copy of the project tree.
+     */
+    public function applyTemplate(string $workdir, string $namespace, string $composerName, string $phpVersion, array $dbConfig, string $timezone, bool $installExamples): void
+    {
         $devConnection = self::buildConnectionString($dbConfig, $dbConfig['dev_database']);
         $testConnection = self::buildConnectionString($dbConfig, $dbConfig['test_database']);
 
@@ -282,7 +293,14 @@ ENV;
 
             echo "Example files removed successfully.\n";
         }
+    }
 
+    /**
+     * Side effects after the template is applied: install dependencies,
+     * generate the OpenAPI docs and initialize the git repository.
+     */
+    protected function finalize(string $gitUserName, string $gitUserEmail): void
+    {
         // ------------------------------------------------
         // Configure git and initialize repository
         passthru("composer update");
