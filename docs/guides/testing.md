@@ -22,7 +22,7 @@ The reference architecture provides a complete testing framework that allows you
 
 | Component          | Purpose                  | Location                         |
 |--------------------|--------------------------|----------------------------------|
-| `FakeApiRequester` | In-process API testing   | `src/Util/FakeApiRequester.php`  |
+| `FakeApiRequester` | In-process API testing   | `ByJG\Gluo\Util\FakeApiRequester` (byjg/gluo-core)  |
 | `BaseApiTestCase`  | Base class for API tests | `tests/Controller/BaseApiTestCase.php` |
 | `Credentials`      | Test user credentials    | `tests/Controller/Credentials.php`     |
 
@@ -72,7 +72,7 @@ APP_ENV=test ./vendor/bin/phpunit --coverage-html coverage/
 
 The `FakeApiRequester` class enables in-process API testing without a web server.
 
-**Location**: `src/Util/FakeApiRequester.php`
+**Location**: `ByJG\Gluo\Util\FakeApiRequester` (byjg/gluo-core)
 
 `BaseApiTestCase` extends `PHPUnit\Framework\TestCase` and mixes in the `OpenApiValidation` trait, so every call to `sendRequest()` validates the result against `public/docs/openapi.json`. All routing happens in-memory via `FakeApiRequester`, so you don't need a running web server—only a configured database.
 
@@ -87,7 +87,7 @@ The `FakeApiRequester` class enables in-process API testing without a web server
 ### Basic Usage
 
 ```php
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Util\FakeApiRequester;
 
 $request = (new FakeApiRequester())
     ->withPsr7Request($this->getPsr7Request())
@@ -188,64 +188,33 @@ public function testPingResponse()
 
 ### BaseApiTestCase
 
-All API tests should extend `BaseApiTestCase`:
+All API tests should extend `Test\Controller\BaseApiTestCase`. The heavy
+lifting (schema loading, OpenAPI validation, database reset, PSR-7 request
+factory) lives in `ByJG\Gluo\Testing\BaseApiTestCase` (byjg/gluo-core);
+your local class only points it at your project:
 
 **Location**: `tests/Controller/BaseApiTestCase.php`
 
 ```php title="tests/Controller/BaseApiTestCase.php"
 namespace Test\Controller;
 
-use ByJG\ApiTools\Base\Schema;
-use ByJG\ApiTools\OpenApiValidation;
-use ByJG\Config\Config;
-use ByJG\DbMigration\Database\MySqlDatabase;
-use ByJG\DbMigration\Migration;
-use ByJG\Util\Uri;
-use ByJG\WebRequest\Psr7\Request;
-use Exception;
-use PHPUnit\Framework\TestCase;
+use ByJG\Gluo\Testing\BaseApiTestCase as GluoBaseApiTestCase;
 
-class BaseApiTestCase extends TestCase
+class BaseApiTestCase extends GluoBaseApiTestCase
 {
-    use OpenApiValidation;
-
-    protected static bool $databaseReset = false;
-    protected string $filePath = __DIR__ . '/../../public/docs/openapi.json';
-
-    protected function setUp(): void
+    protected function getOpenApiPath(): string
     {
-        $this->setSchema(Schema::getInstance(file_get_contents($this->filePath)));
-        $this->resetDb();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->setSchema(null);
-    }
-
-    public function getPsr7Request(): Request
-    {
-        $uri = Uri::getInstanceFromString()
-            ->withScheme(Config::get('API_SCHEMA'))
-            ->withHost(Config::get('API_SERVER'));
-
-        return Request::getInstance($uri);
-    }
-
-    protected function resetDb(): void
-    {
-        if (!self::$databaseReset) {
-            if (Config::definition()->getCurrentEnvironment() !== 'test') {
-                throw new Exception('This test can only be executed in test environment');
-            }
-            Migration::registerDatabase(MySqlDatabase::class);
-            $migration = new Migration(new Uri(Config::get('DBDRIVER_CONNECTION')), __DIR__ . '/../../db');
-            $migration->prepareEnvironment();
-            $migration->reset();
-            self::$databaseReset = true;
-        }
+        return __DIR__ . '/../../public/docs/openapi.json';
     }
 }
+```
+
+The package base class exposes overridable hooks:
+
+```php
+abstract protected function getOpenApiPath(): string;   // your openapi.json
+protected function getDatabaseClass(): string;           // default: MySqlDatabase::class
+protected function getMigrationsPath(): string;          // default: <project>/db
 ```
 
 ### What BaseApiTestCase Provides
@@ -268,7 +237,7 @@ $this->resetDb();
 
 namespace Test\Controller;
 
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Util\FakeApiRequester;
 
 class SampleTest extends BaseApiTestCase
 {

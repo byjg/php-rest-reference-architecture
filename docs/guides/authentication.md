@@ -159,7 +159,7 @@ See the caution above — never commit `credentials.env`.
 
 ### Available Endpoints
 
-`src/Controller/Login.php` provides:
+`src/Controller/LoginController.php` provides:
 
 | Endpoint                      | Description                                 |
 |-------------------------------|---------------------------------------------|
@@ -190,8 +190,8 @@ curl -X GET http://localhost:8080/sampleprotected/ping \
 ### Protect Endpoints
 
 ```php
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
-use RestReferenceArchitecture\Attribute\RequireRole;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 class MyProtectedRest
@@ -213,7 +213,7 @@ class MyProtectedRest
 ### Read JWT Claims
 
 ```php
-use RestReferenceArchitecture\Util\JwtContext;
+use ByJG\Gluo\Util\JwtContext;
 
 // JwtContext::setRequest() is called by #[RequireAuthenticated] and #[RequireRole]
 $userId   = JwtContext::getUserId();
@@ -225,6 +225,6 @@ Need the full payload? Access `HttpRequest::attribute('jwt.data')` directly, but
 
 ## Additional Resources
 
-- `src/Controller/Login.php` – Reference implementation for all endpoints.
-- `src/Util/JwtContext.php` – Helper used by controllers and tests.
+- `src/Controller/LoginController.php` – Reference implementation for all endpoints.
+- `ByJG\Gluo\Util\JwtContext` (byjg/gluo-core) – Helper used by controllers and tests.
 - `config/dev/02-security.php` – Central location for auth wiring.

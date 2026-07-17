@@ -7,7 +7,7 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\ObjectCopy;
 use Override;
 use RestReferenceArchitecture\Model\DummyActiveRecord;
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Util\FakeApiRequester;
 
 class DummyActiveRecordTest extends BaseApiTestCase
 {

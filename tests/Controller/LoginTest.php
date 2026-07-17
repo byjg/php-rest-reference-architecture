@@ -9,7 +9,7 @@ use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use RestReferenceArchitecture\Model\User;
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Util\FakeApiRequester;
 
 /**
  * Create a TestCase inherited from SwaggerTestCase

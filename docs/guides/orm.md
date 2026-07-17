@@ -36,7 +36,7 @@ Need UUID support? Use `#[TableMySqlUuidPKAttribute]` + `#[FieldUuidAttribute]` 
 
 ## 2. Repository Definition
 
-Repositories extend `RestReferenceArchitecture\Repository\BaseRepository`. Inject `ByJG\AnyDataset\Db\DatabaseExecutor` and hand it to `ByJG\MicroOrm\Repository`, pointing at your model class:
+Repositories extend `ByJG\Gluo\Repository\BaseRepository`. Inject `ByJG\AnyDataset\Db\DatabaseExecutor` and hand it to `ByJG\MicroOrm\Repository`, pointing at your model class:
 
 ```php
 <?php

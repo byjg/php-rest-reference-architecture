@@ -29,7 +29,7 @@ The `BaseRepository` class provides a foundation for data access with support fo
 - Transaction support
 - Custom query methods
 
-**Location**: `src/Repository/BaseRepository.php`
+**Location**: `ByJG\Gluo\Repository\BaseRepository` (byjg/gluo-core)
 
 ## BaseRepository Features
 
@@ -136,7 +136,7 @@ The `filter` query param expects JSON-encoded tuples when sent over HTTP. Valida
 
 The `listQuery()` method provides powerful filtering, pagination, and ordering capabilities:
 
-**Location**: `src/Repository/BaseRepository.php:109`
+**Location**: `ByJG\Gluo\Repository\BaseRepository` (byjg/gluo-core)
 
 ```php
 public function listQuery(
@@ -213,7 +213,7 @@ $query = $repository->listQuery(
 
 Query arbitrary tables dynamically without a mapper:
 
-**Location**: `src/Repository/BaseRepository.php:99`
+**Location**: `ByJG\Gluo\Repository\BaseRepository` (byjg/gluo-core)
 
 ```php
 public function listGeneric(

@@ -25,7 +25,7 @@ The reference architecture provides three timestamp traits that combine:
 - **ORM Functionality**: Automatic timestamp management from ByJG MicroOrm
 - **OpenAPI Documentation**: Automatic schema generation for timestamps
 
-**Location**: `src/Trait/`
+**Location**: `ByJG\Gluo\Trait\` (byjg/gluo-core)
 
 ### Available Traits
 
@@ -39,7 +39,7 @@ The reference architecture provides three timestamp traits that combine:
 
 Automatically sets the creation timestamp when a record is inserted.
 
-**Location**: `src/Trait/OaCreatedAt.php`
+**Location**: `ByJG\Gluo\Trait\OaCreatedAt` (byjg/gluo-core)
 
 ### Usage
 
@@ -49,7 +49,7 @@ Automatically sets the creation timestamp when a record is inserted.
 namespace RestReferenceArchitecture\Model;
 
 use ByJG\MicroOrm\Attributes\TableAttribute;
-use RestReferenceArchitecture\Trait\OaCreatedAt;
+use ByJG\Gluo\Trait\OaCreatedAt;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(required: ["id", "name"], type: "object")]
@@ -122,7 +122,7 @@ Product:
 
 Automatically updates the timestamp whenever a record is inserted or updated.
 
-**Location**: `src/Trait/OaUpdatedAt.php`
+**Location**: `ByJG\Gluo\Trait\OaUpdatedAt` (byjg/gluo-core)
 
 ### Usage
 
@@ -131,7 +131,7 @@ Automatically updates the timestamp whenever a record is inserted or updated.
 
 namespace RestReferenceArchitecture\Model;
 
-use RestReferenceArchitecture\Trait\OaUpdatedAt;
+use ByJG\Gluo\Trait\OaUpdatedAt;
 
 class Product
 {
@@ -181,7 +181,7 @@ echo $product->getUpdatedAt(); // "2024-01-15 10:30:47" (updated!)
 
 Provides soft delete functionality by marking records as deleted instead of removing them from the database.
 
-**Location**: `src/Trait/OaDeletedAt.php`
+**Location**: `ByJG\Gluo\Trait\OaDeletedAt` (byjg/gluo-core)
 
 ### Usage
 
@@ -190,7 +190,7 @@ Provides soft delete functionality by marking records as deleted instead of remo
 
 namespace RestReferenceArchitecture\Model;
 
-use RestReferenceArchitecture\Trait\OaDeletedAt;
+use ByJG\Gluo\Trait\OaDeletedAt;
 
 class Product
 {
@@ -286,9 +286,9 @@ namespace RestReferenceArchitecture\Model;
 use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 use OpenApi\Attributes as OA;
-use RestReferenceArchitecture\Trait\OaCreatedAt;
-use RestReferenceArchitecture\Trait\OaUpdatedAt;
-use RestReferenceArchitecture\Trait\OaDeletedAt;
+use ByJG\Gluo\Trait\OaCreatedAt;
+use ByJG\Gluo\Trait\OaUpdatedAt;
+use ByJG\Gluo\Trait\OaDeletedAt;
 
 #[OA\Schema(required: ["id", "name"], type: "object")]
 #[TableAttribute("products")]

@@ -7,8 +7,8 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\Serializer\ObjectCopy;
 use Override;
 use RestReferenceArchitecture\Model\DummyHex;
-use RestReferenceArchitecture\Repository\BaseRepository;
-use RestReferenceArchitecture\Util\FakeApiRequester;
+use ByJG\Gluo\Repository\BaseRepository;
+use ByJG\Gluo\Util\FakeApiRequester;
 
 class DummyHexTest extends BaseApiTestCase
 {

@@ -7,8 +7,8 @@ use ByJG\MicroOrm\Attributes\TableAttribute;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Trait\ActiveRecord;
 use OpenApi\Attributes as OA;
-use RestReferenceArchitecture\Trait\OaCreatedAt;
-use RestReferenceArchitecture\Trait\OaUpdatedAt;
+use ByJG\Gluo\Trait\OaCreatedAt;
+use ByJG\Gluo\Trait\OaUpdatedAt;
 use RuntimeException;
 
 

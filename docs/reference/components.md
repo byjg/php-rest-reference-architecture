@@ -4,11 +4,22 @@ sidebar_position: 440
 
 # PHP Components
 
+## The Gluo Layout
+
+Gluo is split into two packages:
+
+- **byjg/gluo** — the project starter. This is what you type in `composer create-project byjg/gluo my-api`. After creation the project is yours: the namespace is renamed, and the files in `src/`, `config/`, `db/` and `docker/` belong to you.
+- **byjg/gluo-core** — the framework core, installed in `vendor/`. It provides the base classes (`BaseLoginController`, `BaseRepository`, `BaseService`, `BaseUser`), the attributes (`RequireAuthenticated`, `RequireRole`, `ValidateRequest`), utilities (`JwtContext`, `OpenApiContext`, `FakeApiRequester`), the builder (migration, OpenAPI generation, code generator) and the test harness. Improvements arrive with a plain `composer update`.
+
+`byjg/gluo-core` is the glue ("gluo" is Esperanto for glue) that binds the byjg components into a REST architecture.
+
 ## Class Dependency
 
 ```mermaid
 graph LR;
-  byjg/rest-reference-architecture[<a href='https://opensource.byjg.com/docs/php/rest-reference-architecture' style='text-decoration:none'>byjg/rest-reference-architecture🔗</a>];
+  byjg/gluo[byjg/gluo — project starter];
+  byjg/gluo-core[byjg/gluo-core — framework core];
+  byjg/scriptify[<a href='https://opensource.byjg.com/docs/php/scriptify' style='text-decoration:none'>byjg/scriptify🔗</a>];
   byjg/config[<a href='https://opensource.byjg.com/docs/php/config' style='text-decoration:none'>byjg/config🔗</a>];
   byjg/anydataset-db[<a href='https://opensource.byjg.com/docs/php/anydataset-db' style='text-decoration:none'>byjg/anydataset-db🔗</a>];
   byjg/micro-orm[<a href='https://opensource.byjg.com/docs/php/micro-orm' style='text-decoration:none'>byjg/micro-orm🔗</a>];
@@ -17,30 +28,31 @@ graph LR;
   byjg/restserver[<a href='https://opensource.byjg.com/docs/php/restserver' style='text-decoration:none'>byjg/restserver🔗</a>];
   byjg/swagger-test[<a href='https://opensource.byjg.com/docs/php/swagger-test' style='text-decoration:none'>byjg/swagger-test🔗</a>];
   byjg/migration[<a href='https://opensource.byjg.com/docs/php/migration' style='text-decoration:none'>byjg/migration🔗</a>];
-  byjg/scriptify[<a href='https://opensource.byjg.com/docs/php/scriptify' style='text-decoration:none'>byjg/scriptify🔗</a>];
-  byjg/shortid[<a href='https://opensource.byjg.com/docs/php/shortid' style='text-decoration:none'>byjg/shortid🔗</a>];
   byjg/jinja-php[<a href='https://opensource.byjg.com/docs/php/jinja-php' style='text-decoration:none'>byjg/jinja-php🔗</a>];
-  byjg/anydataset[<a href='https://opensource.byjg.com/docs/php/anydataset' style='text-decoration:none'>byjg/anydataset🔗</a>];
+  byjg/cache-engine[<a href='https://opensource.byjg.com/docs/php/cache-engine' style='text-decoration:none'>byjg/cache-engine🔗</a>];
   byjg/serializer[<a href='https://opensource.byjg.com/docs/php/serializer' style='text-decoration:none'>byjg/serializer🔗</a>];
+  byjg/anydataset[<a href='https://opensource.byjg.com/docs/php/anydataset' style='text-decoration:none'>byjg/anydataset🔗</a>];
   byjg/xmlutil[<a href='https://opensource.byjg.com/docs/php/xmlutil' style='text-decoration:none'>byjg/xmlutil🔗</a>];
   byjg/uri[<a href='https://opensource.byjg.com/docs/php/uri' style='text-decoration:none'>byjg/uri🔗</a>];
-  byjg/cache-engine[<a href='https://opensource.byjg.com/docs/php/cache-engine' style='text-decoration:none'>byjg/cache-engine🔗</a>];
   byjg/jwt-wrapper[<a href='https://opensource.byjg.com/docs/php/jwt-wrapper' style='text-decoration:none'>byjg/jwt-wrapper🔗</a>];
   byjg/convert[<a href='https://opensource.byjg.com/docs/php/convert' style='text-decoration:none'>byjg/convert🔗</a>];
   byjg/webrequest[<a href='https://opensource.byjg.com/docs/php/webrequest' style='text-decoration:none'>byjg/webrequest🔗</a>];
   byjg/singleton-pattern[<a href='https://opensource.byjg.com/docs/php/singleton-pattern' style='text-decoration:none'>byjg/singleton-pattern🔗</a>];
 
-  byjg/rest-reference-architecture o--o byjg/config;
-  byjg/rest-reference-architecture o--o byjg/anydataset-db;
-  byjg/rest-reference-architecture o--o byjg/micro-orm;
-  byjg/rest-reference-architecture o--o byjg/authuser;
-  byjg/rest-reference-architecture o--o byjg/mailwrapper;
-  byjg/rest-reference-architecture o--o byjg/restserver;
-  byjg/rest-reference-architecture o--o byjg/swagger-test;
-  byjg/rest-reference-architecture o--o byjg/migration;
-  byjg/rest-reference-architecture o--o byjg/scriptify;
-  byjg/rest-reference-architecture o--o byjg/shortid;
-  byjg/rest-reference-architecture o--o byjg/jinja-php;
+  byjg/gluo o--o byjg/gluo-core;
+  byjg/gluo o--o byjg/scriptify;
+
+  byjg/gluo-core o--o byjg/config;
+  byjg/gluo-core o--o byjg/anydataset-db;
+  byjg/gluo-core o--o byjg/micro-orm;
+  byjg/gluo-core o--o byjg/authuser;
+  byjg/gluo-core o--o byjg/mailwrapper;
+  byjg/gluo-core o--o byjg/restserver;
+  byjg/gluo-core o--o byjg/swagger-test;
+  byjg/gluo-core o--o byjg/migration;
+  byjg/gluo-core o--o byjg/jinja-php;
+  byjg/gluo-core o--o byjg/cache-engine;
+  byjg/gluo-core o--o byjg/serializer;
 
   byjg/anydataset-db o--o byjg/anydataset;
   byjg/anydataset-db o--o byjg/uri;
@@ -77,16 +89,24 @@ graph LR;
   classDef highlight fill:#ffef96,stroke:#ff9900,stroke-width:3px;
   classDef main fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
 
-  class byjg/rest-reference-architecture main;
+  class byjg/gluo main;
+  class byjg/gluo-core highlight;
 ```
 
 ## Component Description
 
-This diagram shows the dependency relationships between the PHP components used in the REST Reference Architecture project.
+### Your project (byjg/gluo starter)
 
-### Direct Dependencies
+The starter keeps its own dependencies to a minimum:
 
-The project directly depends on the following byjg components:
+- **byjg/gluo-core** - The Gluo framework core (see below)
+- **byjg/scriptify** - Transform any PHP class into an executable script callable from the command line (used by `composer terminal`)
+
+Everything else arrives through `byjg/gluo-core`, so a framework upgrade is a single `composer update byjg/gluo-core`.
+
+### Framework core dependencies (byjg/gluo-core)
+
+The core binds these byjg components together:
 
 - **byjg/config** - A very basic and minimalist PSR-11 implementation for config management and dependency injection
 - **byjg/anydataset-db** - Relational database abstraction layer, part of the Anydataset project
@@ -96,19 +116,17 @@ The project directly depends on the following byjg components:
 - **byjg/restserver** - Create RESTful services with customizable output handlers and auto-generate routes from swagger.json
 - **byjg/swagger-test** - Tools for testing REST calls based on the OpenAPI specification using PHPUnit
 - **byjg/migration** - Framework-agnostic database migration tool using pure SQL commands
-- **byjg/scriptify** - Transform any PHP class into an executable script callable from the command line
-- **byjg/shortid** - Create short string IDs from numbers
-- **byjg/jinja-php** - Lightweight PHP implementation of the Jinja2 template engine
+- **byjg/jinja-php** - Lightweight PHP implementation of the Jinja2 template engine (powers the code generator templates)
+- **byjg/cache-engine** - PSR-6 and PSR-16 cache implementation
+- **byjg/serializer** - Serialization utilities for JSON, XML, and YAML
 
 ### Core Infrastructure Components
 
 These are the foundational components used by multiple dependencies:
 
 - **byjg/anydataset** - Agnostic data source abstraction layer
-- **byjg/serializer** - Serialization utilities for JSON, XML, and YAML
 - **byjg/xmlutil** - XML manipulation utilities
 - **byjg/uri** - URI manipulation and PSR-7 HTTP message support
-- **byjg/cache-engine** - PSR-6 and PSR-16 cache implementation
 - **byjg/jwt-wrapper** - JWT token handling wrapper
 - **byjg/webrequest** - PSR-18 HTTP client implementation
 - **byjg/convert** - Conversion utilities
@@ -117,8 +135,9 @@ These are the foundational components used by multiple dependencies:
 ## Dependency Legend
 
 - **o--o** - Required dependency (composer require)
-- **Main (green)** - The main project (REST Reference Architecture)
-- **Default (white)** - Standard dependencies
+- **Green** - Your project (the byjg/gluo starter)
+- **Yellow** - The Gluo framework core (updatable via composer)
+- **White** - Component dependencies
 
 ## External Dependencies
 

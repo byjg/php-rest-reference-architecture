@@ -7,7 +7,7 @@ use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\XmlUtil\XmlDocument;
 use PHPUnit\Framework\TestCase;
-use RestReferenceArchitecture\Util\OpenApiContext;
+use ByJG\Gluo\Util\OpenApiContext;
 
 class OpenApiContextTest extends TestCase
 {

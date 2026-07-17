@@ -1,7 +1,7 @@
 ---
 name: dev-guide
 description: >
-  Expert guide for working with the byjg/php-rest-reference-architecture project. Use this skill
+  Expert guide for working with the byjg/php-gluo project. Use this skill
   whenever the user is working on this project — including setting up the dev environment,
   creating new CRUD features, scaffolding with the code generator, modifying or fixing
   existing features, writing or updating tests, running migrations, and maintaining OpenAPI

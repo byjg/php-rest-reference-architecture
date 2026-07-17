@@ -33,56 +33,70 @@ The reference architecture uses JWT tokens for stateless authentication. Tokens 
 
 | Component              | Purpose                    | Location                         |
 |------------------------|----------------------------|----------------------------------|
-| `JwtContext`           | Token creation and parsing | `src/Util/JwtContext.php`        |
-| `Login` REST           | Login and token endpoints  | `src/Controller/Login.php`             |
-| `RequireAuthenticated` | Endpoint authentication    | ByJG\RestServer\Attribute       |
-| `RequireRole`          | Role-based authorization   | `src/Attribute/RequireRole.php` |
+| `JwtContext`           | Token creation and parsing | `ByJG\Gluo\Util\JwtContext` (byjg/gluo-core)        |
+| `LoginController`      | Login and token endpoints  | `src/Controller/LoginController.php` (contract) extending `ByJG\Gluo\Controller\BaseLoginController` (logic) |
+| `RequireAuthenticated` | Endpoint authentication    | `ByJG\Gluo\Attribute\RequireAuthenticated` (byjg/gluo-core) |
+| `RequireRole`          | Role-based authorization   | `ByJG\Gluo\Attribute\RequireRole` (byjg/gluo-core) |
 
 ## JwtContext Utility
 
 The `JwtContext` class provides methods for creating tokens and extracting user information.
 
-**Location**: `src/Util/JwtContext.php`
+**Location**: `ByJG\Gluo\Util\JwtContext` (byjg/gluo-core)
 
 ### Available Methods
 
 ```php
-// Create a UserToken (token + claims) from a User instance or login string
-JwtContext::createUserMetadata(User|string $user, string $password = ""): UserToken
+// Create a UserToken (token + claims) from a UserModel instance or login string
+JwtContext::createUserMetadata(UserModel|string $user, string $password = ""): ?UserToken
 
 // Create JWT token with custom data
 JwtContext::createToken(array $properties): string
 
-// Parse JWT from request (called automatically)
-JwtContext::parseJwt(HttpRequest $request): void
+// Store the request (called automatically by RequireAuthenticated/RequireRole)
+JwtContext::setRequest(HttpRequest $request): void
 
 // Extract user information from token
 JwtContext::getUserId(): ?string
 JwtContext::getRole(): ?string
 JwtContext::getName(): ?string
+JwtContext::getUser(): UserModel
+
+// Clear the stored request/user (long-running workers, test setUp)
+JwtContext::reset(): void
+```
+
+### Customization Hooks
+
+`JwtContext` is designed to be subclassed. Override these `protected static` methods:
+
+```php
+protected static function customTokenFields(): array  // extra claims, default []
+protected static function tokenExpiry(): int          // seconds, default 3600
+protected static function defaultRole(): string       // role when unset, default 'user'
 ```
 
 ## Login Flow
 
 ### Login Endpoint
 
-**Location**: `src/Controller/Login.php:59`
+**Location**: `src/Controller/LoginController.php` (contract) + `ByJG\Gluo\Controller\BaseLoginController` (logic)
+
+Your controller only declares the OpenAPI contract and delegates to the framework:
 
 ```php
 #[OA\Post(path: "/login", tags: ["Login"])]
 #[ValidateRequest]
-public function post(HttpResponse $response, HttpRequest $request)
+#[Override]
+public function post(HttpResponse $response, HttpRequest $request): void
 {
-    $json = ValidateRequest::getPayload();
-
-    // AuthUser validates credentials and returns a token + claims
-    $userToken = JwtContext::createUserMetadata($json["username"], $json["password"]);
-
-    $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
-    $response->write(['token' => $userToken->token]);
-    $response->write(['data' => $userToken->data]);
+    parent::post($response, $request);
 }
 ```
+
+The parent (`BaseLoginController::post`) validates the credentials through
+AuthUser via `JwtContext::createUserMetadata()` and writes `token` + `data`
+to the response. Improvements to this logic arrive with `composer update`.
 
 ### Client Login Request
 
@@ -120,38 +134,25 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### Default JWT Payload
 
-**Location**: `src/Util/JwtContext.php:24`
+**Location**: `ByJG\Gluo\Util\JwtContext` (byjg/gluo-core)
+
+The default token contains the fields below. `UserToken::$data` is what ends up
+inside the JWT:
 
 ```php
-public static function createUserMetadata(User|string $user, $password = ""): UserToken
-{
-    $usersService = Config::get(UsersService::class);
-    $jwtWrapper = Config::get(JwtWrapper::class);
-    $expires = 3600; // 1 hour access token
-    $tokenFields = [
+$tokenFields = array_merge(
+    [
         UserField::Userid,
         UserField::Name,
-        UserField::Role,
-    ];
-
-    return empty($password)
-        ? $usersService->createInsecureAuthToken(
-            login: $user,
-            jwtWrapper: $jwtWrapper,
-            expires: $expires,
-            tokenUserFields: $tokenFields
-        )
-        : $usersService->createAuthToken(
-            login: $user,
-            password: $password,
-            jwtWrapper: $jwtWrapper,
-            expires: $expires,
-            tokenUserFields: $tokenFields
-        );
-}
+        UserField::Role->value => static::defaultRole(),  // 'user' when the role is empty
+    ],
+    static::customTokenFields()   // [] by default — your subclass adds claims here
+);
 ```
 
-`UserToken::$data` is what ends up inside the JWT. Add or remove values by changing the `$tokenFields` array.
+You never edit this code — it lives in `vendor/`. To change the payload,
+subclass `JwtContext` and override `customTokenFields()` (see
+[Custom JWT Claims](#custom-jwt-claims) below).
 
 ### Decoded Token Example
 
@@ -177,7 +178,8 @@ public static function createUserMetadata(User|string $user, $password = ""): Us
 
 ### Adding Custom Claims
 
-Extend `JwtContext` to add custom claims:
+Subclass `JwtContext` and override the hooks — no need to copy the token
+creation logic:
 
 ```php
 <?php
@@ -185,43 +187,24 @@ Extend `JwtContext` to add custom claims:
 namespace RestReferenceArchitecture\Util;
 
 use ByJG\Authenticate\Enum\UserField;
-use ByJG\Authenticate\Model\UserToken;
-use ByJG\Authenticate\Service\UsersService;
-use ByJG\Config\Config;
-use ByJG\JwtWrapper\JwtWrapper;
+use ByJG\Gluo\Util\JwtContext;
 
 class CustomJwtContext extends JwtContext
 {
-    public static function createUserMetadata(User|string $user, string $password = ""): UserToken
+    protected static function customTokenFields(): array
     {
-        $usersService = Config::get(UsersService::class);
-        $jwtWrapper = Config::get(JwtWrapper::class);
-        $expires = 3600;
-        $tokenFields = [
-            UserField::Userid,
-            UserField::Name,
-            UserField::Role,
+        return [
             UserField::Email,      // built-in extra claim
             'department',          // custom property (must exist in your model/properties)
         ];
-
-        return empty($password)
-            ? $usersService->createInsecureAuthToken(
-                login: $user,
-                jwtWrapper: $jwtWrapper,
-                expires: $expires,
-                tokenUserFields: $tokenFields
-            )
-            : $usersService->createAuthToken(
-                login: $user,
-                password: $password,
-                jwtWrapper: $jwtWrapper,
-                expires: $expires,
-                tokenUserFields: $tokenFields
-            );
     }
 
-    // Add getter methods
+    protected static function tokenExpiry(): int
+    {
+        return 3600; // 1 hour (this is already the default)
+    }
+
+    // Add getter methods for your claims
     public static function getEmail(): ?string
     {
         return self::getRequestParam("email");
@@ -245,21 +228,34 @@ class CustomJwtContext extends JwtContext
 }
 ```
 
-This approach copies the default implementation so you can tweak the `$tokenFields` array before AuthUser generates the token. Use `UserField` enum values for built-in columns (userid, name, email, etc.) and literal strings for custom fields exposed by your `User` model or `users_property` table.
+Use `UserField` enum values for built-in columns (userid, name, email, etc.) and literal strings for custom fields exposed by your `User` model or `users_property` table.
 
-### Update DI Configuration
+### Wire It into the Login Flow
 
-Register your custom class in `config/dev/02-security.php` (or the equivalent file for each environment):
+`BaseLoginController` asks for the JwtContext class through a hook. Override it
+in your `src/Controller/LoginController.php`:
 
 ```php
-use ByJG\Config\DependencyInjection as DI;
+use ByJG\Gluo\Util\JwtContext;
+use Override;
 use RestReferenceArchitecture\Util\CustomJwtContext;
-use RestReferenceArchitecture\Util\JwtContext;
 
-return [
-    JwtContext::class => DI::bind(CustomJwtContext::class)->toSingleton(),
-];
+class LoginController extends BaseLoginController
+{
+    /**
+     * @return class-string<JwtContext>
+     */
+    #[Override]
+    protected function getJwtContextClass(): string
+    {
+        return CustomJwtContext::class;
+    }
+
+    // ... OA-annotated endpoint stubs ...
+}
 ```
+
+Both `/login` and `/refreshtoken` now issue tokens with your custom claims.
 
 ### Using Custom Claims
 
@@ -287,30 +283,24 @@ public function getMyData(HttpResponse $response, HttpRequest $request): void
 
 ### Refresh Token Endpoint
 
-**Location**: `src/Controller/Login.php:77`
+**Location**: `src/Controller/LoginController.php` (contract) + `ByJG\Gluo\Controller\BaseLoginController` (logic)
+
+Like `/login`, your controller declares the contract and delegates:
 
 ```php
 #[OA\Post(path: "/refreshtoken", tags: ["Login"])]
 #[RequireAuthenticated]
-public function refreshToken(HttpResponse $response, HttpRequest $request)
+#[Override]
+public function refreshToken(HttpResponse $response, HttpRequest $request): void
 {
-    $diff = ($request->attributeString("jwt.exp") - time()) / 60;
-
-    if ($diff > 5) {
-        throw new Error401Exception("You only can refresh the token 5 minutes before expire");
-    }
-
-    /** @var UsersService $usersService */
-    $usersService = Config::get(UsersService::class);
-    $user = $usersService->getById(JwtContext::getUserId());
-
-    $userToken = JwtContext::createUserMetadata($user);
-
-    $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
-    $response->write(['token' => $userToken->token]);
-    $response->write(['data' => $userToken->data]);
+    parent::refreshToken($response, $request);
 }
 ```
+
+`BaseLoginController::refreshToken` only allows the refresh in the final
+5 minutes before expiration, reloads the user, and issues a fresh token
+with the same claim set (including your custom claims, if you overrode
+`getJwtContextClass()`).
 
 ### Client Refresh Request
 
@@ -372,7 +362,7 @@ scheduleRefresh();
 ### Require Authentication
 
 ```php
-use RestReferenceArchitecture\Attribute\RequireAuthenticated;
+use ByJG\Gluo\Attribute\RequireAuthenticated;
 
 #[OA\Get(path: "/profile", tags: ["User"])]
 #[RequireAuthenticated]
@@ -392,7 +382,7 @@ public function getProfile(HttpResponse $response, HttpRequest $request): void
 ### Require Specific Role
 
 ```php
-use RestReferenceArchitecture\Attribute\RequireRole;
+use ByJG\Gluo\Attribute\RequireRole;
 use RestReferenceArchitecture\Model\User;
 
 #[OA\Delete(path: "/users/{id}", tags: ["Admin"])]
@@ -506,7 +496,7 @@ class ProductService extends BaseService
 
 ### Default Expiration
 
-**Location**: `src/Util/JwtContext.php:56`
+**Location**: `ByJG\Gluo\Util\JwtContext` (byjg/gluo-core)
 
 ```php
 public static function createToken(array $properties = []): mixed
@@ -676,18 +666,22 @@ class RequireValidToken extends RequireAuthenticated
 
 Encourage clients to refresh tokens:
 
+Since your `LoginController` owns the endpoint, you can replace the response
+shape instead of delegating to the parent:
+
 ```php
-class Login
+class LoginController extends BaseLoginController
 {
-    public function post(HttpResponse $response, HttpRequest $request)
+    #[Override]
+    public function post(HttpResponse $response, HttpRequest $request): void
     {
         $payload = ValidateRequest::getPayload();
         $userToken = JwtContext::createUserMetadata($payload['username'], $payload['password']);
 
         $response->write([
             'token' => $userToken->token,
-            'expires_in' => 60 * 60 * 24 * 7, // 7 days
-            'refresh_after' => 60 * 60 * 24 * 3, // Suggest refresh after 3 days
+            'expires_in' => 60 * 60, // 1 hour (JwtContext default)
+            'refresh_after' => 55 * 60, // Suggest refresh in the last 5 minutes
             'data' => $userToken->data
         ]);
     }
@@ -719,7 +713,7 @@ public function deleteAccount(HttpResponse $response, HttpRequest $request): voi
 ### 8. Rate Limit Authentication Endpoints
 
 ```php
-use RestReferenceArchitecture\Attribute\RateLimit;
+use RestReferenceArchitecture\Attribute\RateLimit; // your custom attribute (not part of gluo-core)
 
 #[OA\Post(path: "/login", tags: ["Login"])]
 #[RateLimit(maxRequests: 5, windowSeconds: 60)]  // 5 attempts per minute

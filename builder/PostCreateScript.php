@@ -15,6 +15,17 @@ class PostCreateScript
 {
     public function execute($workdir, $namespace, $composerName, $phpVersion, array $dbConfig, $timezone, $installExamples, $gitUserName, $gitUserEmail): void
     {
+        $this->applyTemplate($workdir, $namespace, $composerName, $phpVersion, $dbConfig, $timezone, $installExamples);
+        $this->finalize($gitUserName, $gitUserEmail);
+    }
+
+    /**
+     * Pure file transformation: rename namespace/composer name, adjust docker
+     * and config files, remove examples. No process side effects, so it can
+     * be tested against a copy of the project tree.
+     */
+    public function applyTemplate(string $workdir, string $namespace, string $composerName, string $phpVersion, array $dbConfig, string $timezone, bool $installExamples): void
+    {
         $devConnection = self::buildConnectionString($dbConfig, $dbConfig['dev_database']);
         $testConnection = self::buildConnectionString($dbConfig, $dbConfig['test_database']);
 
@@ -42,11 +53,11 @@ class PostCreateScript
         $phpVersionMSimple = str_replace(".", "", $phpVersion);
 
         // ------------------------------------------------
-        //Replace composer name:
+        // Replace composer name (quote-exact so the byjg/gluo-core requirement is untouched):
         $contents = file_get_contents($workdir . '/composer.json');
         file_put_contents(
             $workdir . '/composer.json',
-            str_replace('byjg/rest-reference-architecture', $composerName, $contents)
+            str_replace('"byjg/gluo"', '"' . $composerName . '"', $contents)
         );
 
         // ------------------------------------------------
@@ -178,10 +189,10 @@ ENV;
                 // Replace reserved name
                 $contents = str_replace('RestReferenceArchitecture', $namespace, $contents);
 
-                // Replace reserved name
-                $contents = str_replace(
-                    'rest-reference-architecture',
-                    str_replace('/', '', $composerName),
+                // Replace the template package name, but never the framework dependency
+                $contents = preg_replace(
+                    '~byjg/gluo(?!-core)~',
+                    $composerName,
                     $contents
                 );
 
@@ -194,12 +205,26 @@ ENV;
         }
 
         // ------------------------------------------------
-        // Remove phpunit.yml workflow (it's for the reference architecture repo only)
-        $phpunitWorkflowFile = "$workdir/.github/workflows/phpunit.yml";
-        if (file_exists($phpunitWorkflowFile)) {
-            unlink($phpunitWorkflowFile);
-            echo "Removed .github/workflows/phpunit.yml\n";
+        // Remove the template machinery (it's for the reference architecture repo only):
+        // its CI workflows, this script, and its test. Leaving them in the generated
+        // project would ship self-modified (broken) code the user never runs.
+        $templateOnlyFiles = [
+            '.github/workflows/phpunit.yml',
+            '.github/workflows/create-project.yml',
+            'builder/PostCreateScript.php',
+            'tests/Builder/PostCreateScriptTest.php',
+        ];
+        foreach ($templateOnlyFiles as $file) {
+            if (file_exists("$workdir/$file")) {
+                unlink("$workdir/$file");
+                echo "Removed $file\n";
+            }
         }
+
+        // Drop the create-project hook from composer.json (its class no longer exists)
+        $contents = file_get_contents($workdir . '/composer.json');
+        $contents = preg_replace('/^\s*"post-create-project-cmd":.*\n/m', '', $contents);
+        file_put_contents($workdir . '/composer.json', $contents);
 
         // ------------------------------------------------
         // Remove example files if not installing examples
@@ -282,7 +307,14 @@ ENV;
 
             echo "Example files removed successfully.\n";
         }
+    }
 
+    /**
+     * Side effects after the template is applied: install dependencies,
+     * generate the OpenAPI docs and initialize the git repository.
+     */
+    protected function finalize(string $gitUserName, string $gitUserEmail): void
+    {
         // ------------------------------------------------
         // Configure git and initialize repository
         passthru("composer update");
@@ -319,7 +351,7 @@ ENV;
             dirname($workdir) . '/setup.json',
 
             // 3. User's home directory
-            (getenv('HOME') ?: getenv('USERPROFILE')) . '/.rest-reference-architecture/setup.json',
+            (getenv('HOME') ?: getenv('USERPROFILE')) . '/.gluo/setup.json',
         ];
 
         foreach ($locations as $configFile) {
