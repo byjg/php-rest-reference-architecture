@@ -265,11 +265,11 @@ use Test\Controller\Credentials;
 
 // Admin user
 $adminCreds = Credentials::getAdminUser();
-// Returns: ['username' => 'admin', 'password' => 'admin']
+// Returns: ['username' => 'admin@example.com', 'password' => '!P4ssw0rdstr!']
 
 // Regular user
 $userCreds = Credentials::getRegularUser();
-// Returns: ['username' => 'user', 'password' => 'user']
+// Returns: ['username' => 'user@example.com', 'password' => '!P4ssw0rdstr!']
 
 // Login request
 $loginRequest = Credentials::requestLogin(Credentials::getAdminUser());
@@ -300,7 +300,7 @@ public function testGetUnauthorized()
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
         ->withPath('/dummy/1')
-        ->assertResponseCode(401);
+        ->expectStatus(401);
 
     $this->sendRequest($request);
 }
@@ -340,7 +340,7 @@ public function testExpiredToken()
         ->withMethod('GET')
         ->withPath('/products')
         ->withRequestHeader(['Authorization' => "Bearer {$expiredToken}"])
-        ->assertResponseCode(401);
+        ->expectStatus(401);
 
     $this->sendRequest($request);
 }
@@ -368,7 +368,7 @@ public function testInsufficientPrivileges()
         ->withMethod('DELETE')
         ->withPath('/products/1')
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(403);
+        ->expectStatus(403);
 
     $this->sendRequest($request);
 }
@@ -398,7 +398,7 @@ public function testFullCrud()
         ->withPath('/dummy')
         ->withRequestBody(json_encode(['field' => 'test value']))
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(200);
+        ->expectStatus(200);
 
     $createResponse = $this->sendRequest($createRequest);
     $created = json_decode($createResponse->getBody()->getContents(), true);
@@ -411,7 +411,7 @@ public function testFullCrud()
         ->withMethod('GET')
         ->withPath("/dummy/{$id}")
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(200);
+        ->expectStatus(200);
 
     $getResponse = $this->sendRequest($getRequest);
     $retrieved = json_decode($getResponse->getBody()->getContents(), true);
@@ -429,7 +429,7 @@ public function testFullCrud()
         ->withPath('/dummy')
         ->withRequestBody(json_encode($retrieved))
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(200);
+        ->expectStatus(200);
 
     $this->sendRequest($updateRequest);
 
@@ -440,7 +440,7 @@ public function testFullCrud()
         ->withMethod('GET')
         ->withPath("/dummy/{$id}")
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(200);
+        ->expectStatus(200);
 
     $verifyResponse = $this->sendRequest($verifyRequest);
     $verified = json_decode($verifyResponse->getBody()->getContents(), true);
@@ -465,7 +465,7 @@ public function testList()
         ->withMethod('GET')
         ->withPath('/dummy?page=0&size=20')
         ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
-        ->assertResponseCode(200);
+        ->expectStatus(200);
 
     $response = $this->sendRequest($request);
     $list = json_decode($response->getBody()->getContents(), true);
@@ -615,7 +615,7 @@ public function testCreateProduct()
         ->withPath('/products')
         ->withRequestBody(json_encode($this->getSampleData(true)))
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
-        ->assertResponseCode(200);
+        ->expectStatus(200);
 
     $response = $this->sendRequest($request);
 

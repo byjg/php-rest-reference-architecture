@@ -42,24 +42,30 @@ composer run migrate -- --env=dev update
 Expected output:
 ```text
 > Builder\Scripts::migrate
-> Command: update
-Doing migrate, 2
+> Environment: dev
+> Database: mysql://root:****@mysql-container/localdev
+
+Updating to version latest...
+Migration completed successfully.
 ```
 
 To rollback changes:
 
 ```shell
-APP_ENV=dev composer run migrate -- update --up-to=1
+APP_ENV=dev composer run migrate -- update --version=1
 # OR
-composer run migrate -- --env=dev update --up-to=1
+composer run migrate -- --env=dev update --version=1
 ```
 
 The result should be:
 
 ```text
 > Builder\Scripts::migrate
-> Command: update
-Doing migrate, 1
+> Environment: dev
+> Database: mysql://root:****@mysql-container/localdev
+
+Updating to version 1...
+Migration completed successfully.
 ```
 
 Remember to run the migrating update again to apply the changes.
@@ -83,8 +89,8 @@ This creates:
 - `./src/Model/ExampleCrud.php` - Model class
 - `./src/Repository/ExampleCrudRepository.php` - Repository class
 - `./src/Service/ExampleCrudService.php` - Service class
-- `./src/Controller/ExampleCrudRest.php` - REST controller
-- `./tests/Controller/ExampleCrudTest.php` - Functional tests
+- `./src/Controller/ExampleCrudController.php` - REST controller
+- `./tests/Rest/ExampleCrudTest.php` - Functional tests
 
 :::tip Automatic Configuration
 The repository and service are automatically registered in:
@@ -98,8 +104,8 @@ No manual configuration needed!
 To generate ActiveRecord pattern instead of Repository pattern:
 
 ```shell
-APP_ENV=dev composer run codegen -- --table example_crud --save activerecord
-# OR: composer run codegen -- --env=dev --table example_crud --save activerecord
+APP_ENV=dev composer run codegen -- --table example_crud all --activerecord --save
+# OR: composer run codegen -- --env=dev --table example_crud all --activerecord --save
 ```
 
 This generates a simpler architecture with the model containing data access methods.
@@ -108,7 +114,7 @@ See [Code Generator Documentation](../reference/code-generator.md) for details.
 
 ## Run the Tests
 
-The automatically generated test is located at `tests/Controller/ExampleCrudTest.php`.
+The automatically generated test is located at `tests/Rest/ExampleCrudTest.php`.
 
 Run it:
 
@@ -124,7 +130,7 @@ Initial tests **_will fail_** because we need to:
 composer run openapi
 ```
 
-2. Fix the test data by updating `tests/Controller/ExampleCrudTest.php`:
+2. Fix the test data by updating `tests/Rest/ExampleCrudTest.php`:
 
  
 Locate:

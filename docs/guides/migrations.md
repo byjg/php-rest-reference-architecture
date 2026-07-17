@@ -54,7 +54,7 @@ APP_ENV=dev composer migrate -- reset
 composer migrate -- --env=dev reset
 
 # Reset and migrate to specific version
-composer migrate -- --env=dev reset --version 5
+composer migrate -- --env=dev reset --version=5
 ```
 
 :::warning
@@ -70,7 +70,7 @@ You can update the database using the command:
 APP_ENV=dev composer migrate -- up
 
 # Migrate to specific version
-composer migrate -- --env=dev update --version 5
+composer migrate -- --env=dev update --version=5
 
 # Migrate with verbose output
 APP_ENV=dev composer migrate -- up -vv
@@ -84,10 +84,10 @@ You can rollback the database to a previous version:
 
 ```bash
 # Rollback to version 3
-APP_ENV=dev composer migrate -- down --version 3
+APP_ENV=dev composer migrate -- down --version=3
 
 # Rollback completely (to version 0)
-composer migrate -- --env=dev down --version 0
+composer migrate -- --env=dev down --version=0
 ```
 
 ## Create a New Migration Version

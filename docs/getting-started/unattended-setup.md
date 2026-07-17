@@ -23,7 +23,7 @@ The script searches for `setup.json` in the following locations (in priority ord
 Use the `SETUP_JSON` environment variable to specify a custom location:
 
 ```bash
-SETUP_JSON=/path/to/custom-setup.json composer -sdev create-project byjg/gluo my-project ^6.1
+SETUP_JSON=/path/to/custom-setup.json composer create-project byjg/gluo my-project ^7.0
 ```
 
 **Use cases:**
@@ -83,8 +83,8 @@ EOF
 
 # Now create projects anywhere - they'll use your defaults
 cd ~/projects
-composer -sdev create-project byjg/gluo project1 ^6.1
-composer -sdev create-project byjg/gluo project2 ^6.1
+composer create-project byjg/gluo project1 ^7.0
+composer create-project byjg/gluo project2 ^7.0
 ```
 
 ### Example 2: Parent Directory (Quick Setup)
@@ -101,7 +101,7 @@ cat > setup.json << 'EOF'
 EOF
 
 # Create project in the same directory
-composer -sdev create-project byjg/gluo my-project ^6.1
+composer create-project byjg/gluo my-project ^7.0
 ```
 
 ### Example 3: Environment Variable (CI/CD)
@@ -118,7 +118,7 @@ cat > /etc/ci-configs/rest-setup.json << 'EOF'
 EOF
 
 # Use it with environment variable
-SETUP_JSON=/etc/ci-configs/rest-setup.json composer -sdev create-project byjg/gluo production-app ^6.1
+SETUP_JSON=/etc/ci-configs/rest-setup.json composer create-project byjg/gluo production-app ^7.0
 ```
 
 ## Configuration Options

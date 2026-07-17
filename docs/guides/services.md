@@ -572,7 +572,7 @@ class OrderService extends BaseService
 }
 ```
 
-Register in `config/05-services/01-services.php`:
+Register in `config/<env>/05-services.php`:
 
 ```php
 use RestReferenceArchitecture\Service\OrderService;

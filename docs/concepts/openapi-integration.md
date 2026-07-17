@@ -15,9 +15,9 @@ This document explains what OpenAPI is, how the reference architecture uses it, 
 - **Swagger UI** – An interactive browser UI is served at `http://localhost:8080/docs/` so you can explore and test endpoints without a separate tool.
 - **Contract testing** – `OpenApiValidation` (via `ByJG\ApiTools`) asserts that every test response conforms to the declared schema.
 
-## How swagger-php Scans `src/`
+## How swagger-php Scans Your Code
 
-The project uses [`zircote/swagger-php`](https://zircote.github.io/swagger-php/guide/) to scan PHP attribute annotations in `src/` and produce `public/docs/openapi.json`.
+The project uses [`zircote/swagger-php`](https://zircote.github.io/swagger-php/guide/) to scan PHP attribute annotations and produce `public/docs/openapi.json`. It scans your `src/` directory plus the gluo-core `Trait/` directory (so the `OaCreatedAt`/`OaUpdatedAt`/`OaDeletedAt` properties appear in your schemas).
 
 Run the generator whenever you add or change annotations:
 
@@ -25,7 +25,7 @@ Run the generator whenever you add or change annotations:
 APP_ENV=dev composer run openapi
 ```
 
-The composer script invokes `swagger-php` with the `src/` directory as the scan target. The output is written to `public/docs/openapi.json`.
+The composer script invokes `swagger-php` with those scan paths (see `getOpenApiScanPaths()` in `ByJG\Gluo\Builder\BaseScripts`). The output is written to `public/docs/openapi.json`.
 
 ## The Generated File
 

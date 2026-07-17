@@ -348,8 +348,8 @@ async function refreshToken() {
 }
 
 function scheduleRefresh() {
-    // Refresh 1 hour before expiration (token valid for 7 days)
-    const refreshIn = (6 * 24 * 60 * 60 * 1000); // 6 days in ms
+    // Refresh shortly before expiration (login tokens last 1 hour by default — see tokenExpiry())
+    const refreshIn = (55 * 60 * 1000); // 55 minutes in ms
     refreshTimer = setTimeout(refreshToken, refreshIn);
 }
 

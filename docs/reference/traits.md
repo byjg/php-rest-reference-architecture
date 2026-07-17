@@ -211,9 +211,6 @@ public function getDeletedAt(): ?string
 
 // Setter
 public function setDeletedAt(?string $value): static
-
-// Check if deleted
-public function isDeleted(): bool
 ```
 
 ### Behavior
@@ -221,18 +218,17 @@ public function isDeleted(): bool
 ```php
 $product = $repository->get($id);
 echo $product->getDeletedAt(); // null (not deleted)
-echo $product->isDeleted(); // false
 
 // Soft delete
 $product->setDeletedAt(date('Y-m-d H:i:s'));
 $repository->save($product);
 
-echo $product->isDeleted(); // true
+echo $product->getDeletedAt() !== null; // true (deleted)
 
 // Restore
 $product->setDeletedAt(null);
 $repository->save($product);
-echo $product->isDeleted(); // false
+echo $product->getDeletedAt() !== null; // false (restored)
 ```
 
 ### Service Layer Integration
@@ -339,7 +335,6 @@ $repository->save($product);
 echo $product->getCreatedAt(); // "2024-01-15 10:30:45"
 echo $product->getUpdatedAt(); // "2024-01-15 10:30:49" (updated by save)
 echo $product->getDeletedAt(); // "2024-01-15 10:30:49" (marked deleted)
-echo $product->isDeleted();    // true
 ```
 
 ## Database Setup
@@ -627,7 +622,7 @@ class Product
 
 **Problem**: Timestamps in wrong timezone
 
-**Solution**: Set timezone in `config/02-security/01-timezone.php`:
+**Solution**: Set timezone in `config/<env>/02-security.php`:
 
 ```php
 return [

@@ -556,7 +556,7 @@ public function processBefore(HttpResponse $response, HttpRequest $request): voi
 
 ### Global Error Handler
 
-Configure global error handling in `config/03-api/01-rest.php`:
+Configure global error handling in `config/<env>/03-api.php`:
 
 ```php
 use ByJG\RestServer\ErrorHandler\ErrorHandler;

@@ -38,7 +38,7 @@ Delete the directory to go back to the package defaults.
 
 | Template                  | Generates           | Pattern                   |
 |---------------------------|---------------------|---------------------------|
-| `model.php.jinja`         | Model class         | Repository & ActiveRecord |
+| `model.php.jinja`         | Model class         | Repository & ActiveRecord (the `activerecord` variable switches the trait) |
 | `repository.php.jinja`    | Repository class    | Repository only           |
 | `service.php.jinja`       | Service class       | Repository only           |
 | `rest.php.jinja`          | REST controller     | Repository pattern        |
@@ -60,30 +60,54 @@ templates/
 
 ## Available Variables
 
+These are the variables produced by the generator (`BaseScripts::buildCodegenData()`)
+and available in every template.
+
 ### Common Variables
 
 ```jinja
-{{ namespace }}              # PHP namespace (e.g., RestReferenceArchitecture\Model)
-{{ class_name }}             # Class name (e.g., Product)
-{{ table_name }}             # Database table name (e.g., products)
-{{ primary_key }}            # Primary key field name (e.g., id)
-{{ fields }}                 # Array of field definitions
-{{ is_activerecord }}        # Boolean: true if ActiveRecord pattern
+{{ namespace }}          # Project namespace (e.g., MyRest)
+{{ className }}          # PascalCase class name (e.g., ProductItem)
+{{ tableName }}          # Database table name (e.g., product_item)
+{{ varTableName }}       # camelCase variable name (e.g., productItem)
+{{ restPath }}           # REST route path (e.g., product/item)
+{{ restTag }}            # OpenAPI tag (e.g., Product)
+{{ fields }}             # Array of field definitions (see below)
+{{ primaryKeys }}        # Array of primary key column names
+{{ nullableFields }}     # camelCase property names of nullable, non-PK columns
+{{ nonNullableFields }}  # camelCase property names of required columns
+{{ indexes }}            # Table indexes (each with camelColumnName)
+{{ autoIncrement }}      # "yes" when the PK auto-increments, "no" otherwise
+{{ activerecord }}       # True in ActiveRecord mode
+{{ hasCreatedAt }}       # True when the table has a created_at column
+{{ hasUpdatedAt }}       # True when the table has an updated_at column
+{{ hasDeletedAt }}       # True when the table has a deleted_at column
 ```
 
 ### Field Variables
 
-Each field in `{{ fields }}` contains:
+Each field in `{{ fields }}` mirrors the MySQL `EXPLAIN` output plus derived keys:
 
 ```jinja
-{{ field.name }}             # Field name (e.g., name, price)
-{{ field.type }}             # PHP type (string, int, float, bool)
-{{ field.db_type }}          # Database type (VARCHAR, INT, DECIMAL, etc.)
-{{ field.nullable }}         # Boolean: true if NULL allowed
-{{ field.length }}           # Field length (for VARCHAR, etc.)
-{{ field.default }}          # Default value
-{{ field.isPrimary }}        # Boolean: true if primary key
-{{ field.isAutoIncrement }}  # Boolean: true if auto-increment
+{{ field.field }}           # Raw column name (e.g., is_active)
+{{ field.property }}        # camelCase property name (e.g., isActive)
+{{ field.type }}            # Raw database type (e.g., varchar(120), tinyint(1))
+{{ field.php_type }}        # PHP type (string, int, float)
+{{ field.openapi_type }}    # OpenAPI type (string, integer, number)
+{{ field.openapi_format }}  # OpenAPI format (string, int32, int64, double, date-time)
+{{ field.null }}            # "YES" when NULL allowed, "NO" otherwise
+{{ field.key }}             # "PRI" for primary key columns
+{{ field.default }}         # Default value (or null)
+{{ field.extra }}           # e.g., auto_increment
+```
+
+Common tests, as used by the package templates themselves:
+
+```jinja
+{% if field.null == "YES" %}nullable: true{% endif %}
+{% if field.key == "PRI" %}primaryKey: true{% endif %}
+{% if 'auto_increment' in field.extra %}...{% endif %}
+{% if 'binary' in field.type %}...UUID handling...{% endif %}
 ```
 
 ## Customizing Templates
@@ -97,14 +121,13 @@ Edit `templates/codegen/model.php.jinja`:
 
 /**
  * Auto-generated Model
- * Generated: {{ "now"|date("Y-m-d H:i:s") }}
- * Table: {{ table_name }}
+ * Table: {{ tableName }}
  * Do not edit manually!
  */
 
-namespace {{ namespace }};
+namespace {{ namespace }}\Model;
 
-// Controller of template...
+// rest of template...
 ```
 
 ### Example: Adding Custom Methods
@@ -114,7 +137,7 @@ Add custom methods to `templates/codegen/model.php.jinja`:
 ```jinja
 // ... existing getters/setters ...
 
-{% if not is_activerecord %}
+{% if not activerecord %}
     /**
      * Custom validation method
      */
@@ -131,7 +154,7 @@ Add custom methods to `templates/codegen/model.php.jinja`:
     {
         return [
         {% for field in fields %}
-            '{{ field.name }}' => $this->{{ field.name }},
+            '{{ field.property }}' => $this->{{ field.property }},
         {% endfor %}
         ];
     }
@@ -146,15 +169,12 @@ Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
 // ... existing CRUD methods ...
 
     /**
-     * Search {{ class_name }}
+     * Search {{ className }}
      */
-    // At the top of the template file add:
-    // use ByJG\\RestServer\\Attribute\\RequireAuthenticated;
-
     #[OA\Get(
-        path: "/{{ table_name }}/search",
+        path: "/{{ restPath }}/search",
         security: [["jwt-token" => []]],
-        tags: ["{{ class_name }}"]
+        tags: ["{{ restTag }}"]
     )]
     #[OA\Parameter(
         name: "q",
@@ -163,10 +183,10 @@ Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
         schema: new OA\Schema(type: "string")
     )]
     #[RequireAuthenticated]
-    public function search{{ class_name }}(HttpResponse $response, HttpRequest $request): void
+    public function search{{ className }}(HttpResponse $response, HttpRequest $request): void
     {
         $searchTerm = $request->query('q');
-        $service = Config::get({{ class_name }}Service::class);
+        $service = Config::get({{ className }}Service::class);
 
         // Implement search logic
         $results = $service->search($searchTerm);
@@ -183,22 +203,22 @@ Create `templates/codegen/dto.php.jinja` for Data Transfer Objects:
 ```jinja
 <?php
 
-namespace {{ namespace }};
+namespace {{ namespace }}\DTO;
 
 /**
- * {{ class_name }} Data Transfer Object
+ * {{ className }} Data Transfer Object
  */
-class {{ class_name }}DTO
+class {{ className }}DTO
 {
 {% for field in fields %}
-    public {{ field.type }}{% if field.nullable %}|null{% endif %} ${{ field.name }}{% if field.nullable %} = null{% endif %};
+    public {{ field.php_type }}|null ${{ field.property }} = null;
 {% endfor %}
 
-    public static function fromModel({{ class_name }} $model): self
+    public static function fromModel(\{{ namespace }}\Model\{{ className }} $model): self
     {
         $dto = new self();
 {% for field in fields %}
-        $dto->{{ field.name }} = $model->get{{ field.name|capitalize }}();
+        $dto->{{ field.property }} = $model->get{{ field.property | capitalize }}();
 {% endfor %}
         return $dto;
     }
@@ -207,28 +227,25 @@ class {{ class_name }}DTO
     {
         return [
 {% for field in fields %}
-            '{{ field.name }}' => $this->{{ field.name }},
+            '{{ field.property }}' => $this->{{ field.property }},
 {% endfor %}
         ];
     }
 }
 ```
 
-### Register Custom Template
+### Render Custom Templates
 
-Modify `builder/Scripts.php` to use your custom template:
+The rendering seams live in `ByJG\Gluo\Builder\BaseScripts` — your project's
+`builder/Scripts.php` extends it. Use `renderCodegenTemplate()` (it already
+resolves the local `templates/codegen/` override) from a custom entry point:
 
 ```php
-protected function generateDTO(string $tableName, array $fields): void
+// builder/Scripts.php
+public function generateDto(string $table, array $data): void
 {
-    $template = $this->jinja->render('dto.php.jinja', [
-        'namespace' => 'RestReferenceArchitecture\\DTO',
-        'class_name' => $this->getClassName($tableName),
-        'fields' => $fields
-    ]);
-
-    $filename = "src/DTO/{$this->getClassName($tableName)}DTO.php";
-    file_put_contents($filename, $template);
+    $code = $this->renderCodegenTemplate('dto.php', $data);
+    file_put_contents($this->workdir . "/src/DTO/{$data['className']}DTO.php", $code);
 }
 ```
 
@@ -238,35 +255,35 @@ protected function generateDTO(string $tableName, array $fields): void
 
 ```jinja
 {% for field in fields %}
-    {% if field.type == 'string' %}
+    {% if field.php_type == 'string' %}
     /**
-     * @param {{ field.type }}{% if field.nullable %}|null{% endif %} ${{ field.name }}
+     * @param {{ field.php_type }}|null ${{ field.property }}
      * @return $this
      */
-    public function set{{ field.name|capitalize }}({% if field.nullable %}?{% endif %}{{ field.type }} ${{ field.name }}): static
+    public function set{{ field.property | capitalize }}({{ field.php_type }}|null ${{ field.property }}): static
     {
         // Trim strings
-        $this->{{ field.name }} = ${{ field.name }} !== null ? trim(${{ field.name }}) : null;
+        $this->{{ field.property }} = ${{ field.property }} !== null ? trim(${{ field.property }}) : null;
         return $this;
     }
-    {% elif field.type == 'int' or field.type == 'float' %}
+    {% elif field.php_type == 'int' or field.php_type == 'float' %}
     /**
-     * @param {{ field.type }}{% if field.nullable %}|null{% endif %} ${{ field.name }}
+     * @param {{ field.php_type }}|null ${{ field.property }}
      * @return $this
      */
-    public function set{{ field.name|capitalize }}({% if field.nullable %}?{% endif %}{{ field.type }} ${{ field.name }}): static
+    public function set{{ field.property | capitalize }}({{ field.php_type }}|null ${{ field.property }}): static
     {
         // Validate positive numbers
-        if (${{ field.name }} !== null && ${{ field.name }} < 0) {
-            throw new \InvalidArgumentException('{{ field.name }} must be positive');
+        if (${{ field.property }} !== null && ${{ field.property }} < 0) {
+            throw new \InvalidArgumentException('{{ field.property }} must be positive');
         }
-        $this->{{ field.name }} = ${{ field.name }};
+        $this->{{ field.property }} = ${{ field.property }};
         return $this;
     }
     {% else %}
-    public function set{{ field.name|capitalize }}({% if field.nullable %}?{% endif %}{{ field.type }} ${{ field.name }}): static
+    public function set{{ field.property | capitalize }}({{ field.php_type }}|null ${{ field.property }}): static
     {
-        $this->{{ field.name }} = ${{ field.name }};
+        $this->{{ field.property }} = ${{ field.property }};
         return $this;
     }
     {% endif %}
@@ -275,26 +292,19 @@ protected function generateDTO(string $tableName, array $fields): void
 
 ### Adding Timestamp Traits Based on Fields
 
+The generator already detects the timestamp columns for you — use the switches directly
+(this is exactly what the package `model.php.jinja` does):
+
 ```jinja
-{% set has_created_at = false %}
-{% set has_updated_at = false %}
-{% set has_deleted_at = false %}
-
-{% for field in fields %}
-    {% if field.name == 'created_at' %}{% set has_created_at = true %}{% endif %}
-    {% if field.name == 'updated_at' %}{% set has_updated_at = true %}{% endif %}
-    {% if field.name == 'deleted_at' %}{% set has_deleted_at = true %}{% endif %}
-{% endfor %}
-
-class {{ class_name }}
+class {{ className }}
 {
-{% if has_created_at %}
+{% if hasCreatedAt %}
     use OaCreatedAt;
 {% endif %}
-{% if has_updated_at %}
+{% if hasUpdatedAt %}
     use OaUpdatedAt;
 {% endif %}
-{% if has_deleted_at %}
+{% if hasDeletedAt %}
     use OaDeletedAt;
 {% endif %}
 
@@ -306,29 +316,29 @@ class {{ class_name }}
 
 ```jinja
     /**
-     * Create a new {{ class_name }}
+     * Create a new {{ className }}
      */
     #[OA\Post(
-        path: "/{{ table_name }}",
-        summary: "Create new {{ class_name }}",
-        description: "Creates a new {{ class_name }} record with the provided data",
+        path: "/{{ restPath }}",
+        summary: "Create new {{ className }}",
+        description: "Creates a new {{ className }} record with the provided data",
         security: [["jwt-token" => []]],
-        tags: ["{{ class_name }}"]
+        tags: ["{{ restTag }}"]
     )]
     #[OA\RequestBody(
-        description: "{{ class_name }} data",
+        description: "{{ className }} data",
         required: true,
         content: new OA\JsonContent(
-            required: [{% for field in fields %}{% if not field.nullable and not field.isAutoIncrement %}"{{ field.name }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}],
+            required: [{% for field in fields %}{% if field.null == "NO" and 'auto_increment' not in field.extra %}"{{ field.property }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}],
             properties: [
 {% for field in fields %}
-    {% if not field.isPrimary or not field.isAutoIncrement %}
+    {% if field.key != "PRI" %}
                 new OA\Property(
-                    property: "{{ field.name }}",
-                    type: "{{ field.type }}",
-                    {% if field.db_type == 'VARCHAR' %}format: "string",{% endif %}
-                    {% if field.nullable %}nullable: true,{% endif %}
-                    description: "The {{ field.name }} field"
+                    property: "{{ field.property }}",
+                    type: "{{ field.openapi_type }}",
+                    format: "{{ field.openapi_format }}",
+                    {% if field.null == "YES" %}nullable: true,{% endif %}
+                    description: "The {{ field.property }} field"
                 ){% if not loop.last %},{% endif %}
     {% endif %}
 {% endfor %}
@@ -344,13 +354,13 @@ class {{ class_name }}
 ```jinja
 {# Good - Clear and readable #}
 {% for field in fields %}
-    {% if not field.isPrimary %}
-    protected {{ field.type }} ${{ field.name }};
+    {% if field.key != "PRI" %}
+    protected {{ field.php_type }} ${{ field.property }};
     {% endif %}
 {% endfor %}
 
 {# Bad - Complex nested logic #}
-{% for field in fields %}{% if not field.isPrimary %}protected {{ field.type }} ${{ field.name }};{% endif %}{% endfor %}
+{% for field in fields %}{% if field.key != "PRI" %}protected {{ field.php_type }} ${{ field.property }};{% endif %}{% endfor %}
 ```
 
 ### 2. Use Comments in Templates
@@ -358,12 +368,12 @@ class {{ class_name }}
 ```jinja
 {# Generate getters and setters for all non-primary fields #}
 {% for field in fields %}
-    {% if not field.isPrimary %}
+    {% if field.key != "PRI" %}
         {# Getter #}
-        public function get{{ field.name|capitalize }}() { }
+        public function get{{ field.property | capitalize }}() { }
 
         {# Setter #}
-        public function set{{ field.name|capitalize }}($value) { }
+        public function set{{ field.property | capitalize }}($value) { }
     {% endif %}
 {% endfor %}
 ```
@@ -372,16 +382,16 @@ class {{ class_name }}
 
 ```jinja
 {# Always use proper indentation #}
-class {{ class_name }}
+class {{ className }}
 {
     {% for field in fields %}
-    protected {{ field.type }} ${{ field.name }};
+    protected {{ field.php_type }} ${{ field.property }};
     {% endfor %}
 
     {% for field in fields %}
-    public function get{{ field.name|capitalize }}()
+    public function get{{ field.property | capitalize }}()
     {
-        return $this->{{ field.name }};
+        return $this->{{ field.property }};
     }
     {% endfor %}
 }
@@ -397,7 +407,7 @@ composer codegen -- --env=dev --table=test_table all --save
 
 # Review generated code
 cat src/Model/TestTable.php
-cat src/Controller/TestTableRest.php
+cat src/Controller/TestTableController.php
 
 # Run tests
 composer test

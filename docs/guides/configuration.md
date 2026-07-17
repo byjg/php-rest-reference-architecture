@@ -5,13 +5,13 @@ title: Configuration
 
 # Configuration Deep Dive
 
-Advanced configuration topics including environment inheritance, layered configs, credentials management, and multi-environment setup.
+Advanced configuration topics including environment inheritance, config loading, credentials management, and multi-environment setup.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Environment Hierarchy](#environment-hierarchy)
-- [Configuration Layers](#configuration-layers)
+- [Configuration Files](#configuration-files)
 - [Environment-Specific Configs](#environment-specific-configs)
 - [Credentials Management](#credentials-management)
 - [Configuration Bootstrap](#configuration-bootstrap)
@@ -19,396 +19,238 @@ Advanced configuration topics including environment inheritance, layered configs
 
 ## Overview
 
-The reference architecture uses a sophisticated configuration system with:
+Configuration is powered by [byjg/config](https://github.com/byjg/config):
 
-- **Environment Inheritance**: dev → test, dev → staging → prod
-- **Layered Configuration**: Infrastructure → Security → API → Business → External
-- **Automatic Loading**: Numbered files loaded in order
-- **Environment Variables**: Support for `.env` files and environment variables
+- **Environment Inheritance**: test and staging inherit from dev; prod inherits from staging
+- **Flat, numbered files**: `config/{env}/01-infrastructure.php` … `06-external.php`, loaded in filename order
+- **`.env` params**: each environment has a `credentials.env`; `config/.env` provides local machine overrides
+- **Caching**: staging and prod cache the resolved container between requests
 
 **Location**: `config/`
 
 ## Environment Hierarchy
 
-### Environment Structure
-
-**Location**: `config/ConfigBootstrap.php:21`
+The environments and their inheritance are defined in
+`ByJG\Gluo\Config\BaseConfigBootstrap` (byjg/gluo-core). Your project's
+`config/ConfigBootstrap.php` just extends it:
 
 ```
 Development (dev)
-├── Test (test)         # Inherits from dev
-└── Staging (staging)   # Inherits from dev
-    └── Production (prod)  # Inherits from staging
+├── Test (test)            # Inherits from dev
+└── Staging (staging)      # Inherits from dev, cached
+    └── Production (prod)  # Inherits from staging (then dev), cached
 ```
 
 ### How Inheritance Works
 
+This is the actual definition in gluo-core:
+
 ```php
-// config/ConfigBootstrap.php
-Config::definition()
-    ->addEnvironment('dev')       // Base development environment
-    ->addEnvironment('test', 'dev')   // Test inherits from dev
-    ->addEnvironment('staging', 'dev') // Staging inherits from dev
-    ->addEnvironment('prod', 'staging'); // Prod inherits from staging
+// ByJG\Gluo\Config\BaseConfigBootstrap (vendor/byjg/gluo-core)
+$dev = Environment::create('dev');
+$test = Environment::create('test')
+    ->inheritFrom($dev);
+$staging = Environment::create('staging')
+    ->inheritFrom($dev)
+    ->withCache(new FileSystemCacheEngine());
+$prod = Environment::create('prod')
+    ->inheritFrom($staging, $dev)
+    ->withCache(new FileSystemCacheEngine());
 ```
+
+An environment only needs to define what differs from its parent: a key defined in
+`config/prod/` overrides the same key inherited from `staging`/`dev`.
 
 ### Inheritance Example
 
 ```
 config/
 ├── dev/
-│   └── 01-infrastructure/
-│       └── 01-database.php     # Database: localhost
+│   └── credentials.env      # DBDRIVER_CONNECTION=mysql://...@mysql-container/localdev
 ├── staging/
-│   └── 01-infrastructure/
-│       └── 01-database.php     # Override: staging-db.example.com
+│   └── credentials.env      # Override: staging database and secrets
 └── prod/
-    └── 01-infrastructure/
-        └── 01-database.php     # Override: prod-db.example.com
+    └── credentials.env      # Override: production database and secrets
 ```
 
 **Result**:
-- `dev` uses `localhost`
-- `test` inherits `localhost` from `dev`
-- `staging` overrides with `staging-db.example.com`
-- `prod` inherits `staging-db.example.com` and overrides with `prod-db.example.com`
+- `dev` uses its own connection
+- `test` inherits everything from `dev` it does not override
+- `staging` overrides the connection; everything else falls back to `dev`
+- `prod` starts from `staging` and overrides what differs
 
-## Configuration Layers
+## Configuration Files
 
-Configuration files are numbered to control loading order:
-
-### Layer Structure
+Each environment directory contains flat, numbered PHP files — the numbering controls
+load order, and later definitions win:
 
 ```
 config/
+├── ConfigBootstrap.php       # Bootstrap (extends gluo-core BaseConfigBootstrap)
+├── .env                      # Local machine overrides (gitignored; see .env.sample)
 └── {environment}/
-    ├── 01-infrastructure/    # Database, cache, storage
-    ├── 02-security/          # JWT, auth, permissions
-    ├── 03-api/               # REST server, OpenAPI, routes
-    ├── 04-repositories/      # Data access layer
-    ├── 05-services/          # Business logic layer
-    └── 06-external/          # Third-party APIs, mail
+    ├── credentials.env       # Connection strings, JWT secret, mail, CORS
+    ├── 01-infrastructure.php # Database, cache, logging, ORM init
+    ├── 02-security.php       # JWT, password policy, users service
+    ├── 03-api.php            # Route list, middleware, HTTP handler
+    ├── 04-repositories.php   # Repository DI bindings
+    ├── 05-services.php       # Service DI bindings
+    └── 06-external.php       # Mail and other external services
 ```
 
-### Loading Order
-
-Files are loaded in this order:
-1. **Infrastructure Layer** (01-xxx)
-2. **Security Layer** (02-xxx)
-3. **API Layer** (03-xxx)
-4. **Repository Layer** (04-xxx)
-5. **Service Layer** (05-xxx)
-6. **External Services Layer** (06-xxx)
-
-Within each layer, files are loaded alphabetically.
+byjg/config loads, for the active environment (and its parents): every `*.php` file
+(DI bindings and params), every `*.env` file (plain params), and finally `config/.env`
+for local overrides.
 
 ## Environment-Specific Configs
 
-### Development Environment
+Values that vary per environment live in each environment's `credentials.env` and are
+consumed in the PHP config files via `Param::get()`:
 
-```php title="config/dev/01-infrastructure/01-database.php"
+```ini title="config/dev/credentials.env"
+DBDRIVER_CONNECTION=mysql://root:mysqlp455w0rd@mysql-container/localdev
+JWT_SECRET=ZGV2LS1qd3Qtc2VjcmV0...
+CORS_SERVERS=.*
+```
+
+```php title="config/dev/01-infrastructure.php (excerpt)"
+use ByJG\AnyDataset\Db\Factory;
+use ByJG\Config\DependencyInjection as DI;
+use ByJG\Config\Param;
+
 return [
-    'DBDRIVER_CONNECTION' => fn() => 'mysql://root:password@localhost/myapp_dev'
+    DbDriverInterface::class => DI::bind(Factory::class)
+        ->withFactoryMethod("getDbRelationalInstance", [Param::get('DBDRIVER_CONNECTION')])
+        ->toSingleton(),
 ];
 ```
 
-### Test Environment
+To change the database in another environment, override only the key:
 
-```php title="config/test/01-infrastructure/01-database.php"
-return [
-    // Override for test database
-    'DBDRIVER_CONNECTION' => fn() => 'mysql://root:password@localhost/myapp_test'
-];
+```ini title="config/prod/credentials.env"
+DBDRIVER_CONNECTION=mysql://produser:secret@db.internal/myapp
 ```
 
-### Production Environment
+### Reading OS Environment Variables
 
-```php title="config/prod/01-infrastructure/01-database.php"
-return [
-    // Use environment variable
-    'DBDRIVER_CONNECTION' => fn() => getenv('DATABASE_URL')
-];
-```
-
-### Conditional Configuration
-
-```php
-// config/dev/01-infrastructure/02-cache.php
-use ByJG\Config\Config;
-
-return [
-    'cache' => function() {
-        if (Config::get('environment') === 'dev') {
-            // No cache in development
-            return new NullCache();
-        }
-
-        // Redis cache in other environments
-        return new RedisCache(Config::get('redis.connection'));
-    }
-];
-```
+To pull values from the operating-system environment (Docker/Kubernetes secrets),
+register them in your bootstrap (see below) with `withOSEnvironment()`. The default
+bootstrap already exposes `TAG_VERSION` and `TAG_COMMIT`.
 
 ## Credentials Management
 
-### Using .env Files
+### Per-environment `credentials.env`
 
-**File**: `.env` (not committed to git)
+Each environment ships a `credentials.env` with its connection strings and `JWT_SECRET`.
+`composer create-project` regenerates a **unique JWT secret for every environment**.
 
-:::caution Keep `.env` out of version control
-This file contains secrets — it is (and should remain) listed in `.gitignore`.
+### Local overrides: `config/.env`
+
+**File**: `config/.env` (not committed — it is in `.gitignore`; a documented example
+lives in `config/.env.sample`)
+
+Use it for developer-machine specifics you don't want in version control:
+
+```ini title="config/.env"
+# Override database connection for local development
+DBDRIVER_CONNECTION=mysql://root:secret@127.0.0.1/localdev
+
+# Override JWT secret for local testing
+JWT_SECRET=local-dev-secret-key
+```
+
+:::caution Keep secrets out of version control
+Real production secrets belong in OS environment variables (via `withOSEnvironment()`)
+or in a secrets manager — not committed to `credentials.env`.
 :::
 
-```ini title=".env"
-# Database
-DATABASE_URL=mysql://user:pass@localhost/myapp
+## Configuration Bootstrap
 
-# JWT
-JWT_SECRET=OFbOmC2VxlgQHNrBLa/wyj7/fFkgPnLpckbXMVuIU7Sqb3RTztNx3xzEYaoeA31JUpvBjkD7FRKBFGQ0+fnTig==
+**File**: `config/ConfigBootstrap.php`
 
-# External APIs
-STRIPE_KEY=sk_live_xxxxxxxxxxxx
-SENDGRID_API_KEY=SG.xxxxxxxxxxxx
-
-# AWS
-AWS_ACCESS_KEY=AKIAXXXXXXXXXXXXXXXX
-AWS_SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-### Loading .env in Config
-
-**File**: `config/dev/01-infrastructure/00-env.php`
-
-```php
-// Load .env file
-$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../../..');
-$dotenv->load();
-
-return [
-    'DATABASE_URL' => fn() => $_ENV['DATABASE_URL'],
-    'JWT_SECRET' => fn() => $_ENV['JWT_SECRET'],
-    'STRIPE_KEY' => fn() => $_ENV['STRIPE_KEY']
-];
-```
-
-### Credentials File (Alternative)
-
-**File**: `config/credentials.php` (not committed to git)
+The project bootstrap is intentionally tiny — the environment set, inheritance, and
+caching live in gluo-core, and improvements arrive with `composer update`:
 
 ```php
 <?php
 
-return [
-    'dev' => [
-        'database' => 'mysql://root:pass@localhost/myapp_dev',
-        'jwt_secret' => 'dev-secret-key',
-    ],
-    'prod' => [
-        'database' => getenv('DATABASE_URL'),
-        'jwt_secret' => getenv('JWT_SECRET'),
-    ]
-];
+use ByJG\Gluo\Config\BaseConfigBootstrap;
+
+return new class extends BaseConfigBootstrap {
+};
 ```
 
-**File**: `config/dev/01-infrastructure/01-database.php`
+### Customizing the Definition
+
+Override `configureDefinition()` to add OS environment variables, extra config
+directories, or custom environments:
 
 ```php
-$credentials = require __DIR__ . '/../../credentials.php';
-$env = Config::definition()->getCurrentEnvironment();
+return new class extends BaseConfigBootstrap {
+    #[\Override]
+    protected function configureDefinition(Definition $definition): void
+    {
+        parent::configureDefinition($definition); // keeps TAG_VERSION / TAG_COMMIT
 
-return [
-    'DBDRIVER_CONNECTION' => fn() => $credentials[$env]['database']
-];
-```
-
-### Gitignore Setup
-
-```gitignore
-# .gitignore
-.env
-.env.*
-config/credentials.php
-config/*/credentials.php
-```
-
-## Configuration Bootstrap
-
-### Bootstrap Process
-
-**File**: `config/ConfigBootstrap.php`
-
-```php
-public static function init(?string $environment = null): void
-{
-    // 1. Create config definition
-    Config::definition()
-        ->addEnvironment('dev')
-        ->addEnvironment('test', 'dev')
-        ->addEnvironment('staging', 'dev')
-        ->addEnvironment('prod', 'staging');
-
-    // 2. Set current environment
-    Config::definition()->setCurrentEnvironment($environment);
-
-    // 3. Load configuration files
-    $configDir = __DIR__ . '/' . $environment;
-
-    // Files loaded in order:
-    // - 01-infrastructure/
-    // - 02-security/
-    // - 03-api/
-    // - 04-repositories/
-    // - 05-services/
-    // - 06-external/
-
-    // 4. Register with dependency injection
-    foreach ($configFiles as $file) {
-        $configs = require $file;
-        foreach ($configs as $key => $value) {
-            Config::bind($key, $value);
-        }
+        // Expose more OS environment variables as params
+        $definition->withOSEnvironment(['DATABASE_URL', 'REDIS_HOST']);
     }
-}
-```
-
-### Custom Bootstrap
-
-Create environment-specific bootstrap:
-
-**File**: `config/prod/00-bootstrap.php`
-
-```php
-// Production-specific initialization
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
-ini_set('display_errors', '0');
-ini_set('log_errors', '1');
-ini_set('error_log', '/var/log/php/error.log');
-
-// Set timezone
-date_default_timezone_set('UTC');
-
-// Enable OpCache
-if (function_exists('opcache_reset')) {
-    opcache_reset();
-}
-
-return [];
+};
 ```
 
 ## Best Practices
 
-### 1. Use Environment Variables for Secrets
+### 1. Use OS Environment Variables for Production Secrets
 
 ```php
-// Good - Environment variable
-return [
-    'JWT_SECRET' => fn() => getenv('JWT_SECRET')
-];
+// Good - registered OS variable, injected by the platform
+$definition->withOSEnvironment(['DATABASE_URL', 'JWT_SECRET']);
 
-// Bad - Hardcoded secret
-return [
-    'JWT_SECRET' => fn() => 'my-secret-key-123'
-];
+// Bad - production secret committed in credentials.env
 ```
 
-### 2. Layer Configuration Properly
+### 2. Override Only What Differs
 
-```php
-// Good - Layered by concern
-config/dev/01-infrastructure/01-database.php
-config/dev/02-security/01-jwt.php
-config/dev/03-api/01-rest.php
+Rely on inheritance: keep the complete configuration in `dev`, and let `test`,
+`staging`, and `prod` define only their deltas. Small environment dirs are a
+feature, not an omission.
 
-// Bad - Mixed concerns
-config/dev/app.php  // Everything in one file
-```
-
-### 3. Use Closures for Lazy Loading
-
-```php
-// Good - Lazy loaded
-return [
-    'database' => fn() => new DatabaseExecutor(Config::get('DBDRIVER_CONNECTION'))
-];
-
-// Bad - Eager loaded
-return [
-    'database' => new DatabaseExecutor(getenv('DATABASE_URL'))
-];
-```
-
-### 4. Document Configuration Options
-
-```php
-/**
- * Database Configuration
- *
- * DBDRIVER_CONNECTION: Database connection string
- * Format: <schema>://user:pass@host/database
- * Example: mysql://root:password@localhost/myapp
- */
-return [
-    'DBDRIVER_CONNECTION' => fn() => getenv('DATABASE_URL')
-        ?? 'mysql://root:password@localhost/myapp_dev'
-];
-```
-
-### 5. Validate Required Config
+### 3. Use `Param::get()` for Values, `DI::bind()` for Services
 
 ```php
 return [
-    'JWT_SECRET' => function() {
-        $secret = getenv('JWT_SECRET');
+    // A value resolved at injection time
+    DbDriverInterface::class => DI::bind(Factory::class)
+        ->withFactoryMethod("getDbRelationalInstance", [Param::get('DBDRIVER_CONNECTION')])
+        ->toSingleton(),
 
-        if (empty($secret)) {
-            throw new \RuntimeException('JWT_SECRET environment variable is required');
-        }
-
-        if (strlen(base64_decode($secret)) < 64) {
-            throw new \RuntimeException('JWT_SECRET must be a base64-encoded string that decodes to at least 64 bytes.);
-        }
-
-        return $secret;
-    }
+    // A service with injected constructor
+    DatabaseExecutor::class => DI::bind(DatabaseExecutor::class)
+        ->withInjectedConstructor()
+        ->toSingleton(),
 ];
 ```
 
-### 6. Separate Public from Private Config
+### 4. Keep the Layer Numbering
 
 ```
-config/
-├── dev/
-│   ├── 01-infrastructure/
-│   │   ├── 01-database.php      # Public (committed)
-│   │   └── 01-database-credentials.php  # Private (ignored)
+# Good - layered by concern, loaded in order
+config/dev/01-infrastructure.php
+config/dev/02-security.php
+config/dev/03-api.php
+
+# Bad - everything in one file
+config/dev/app.php
 ```
 
-### 7. Use Defaults with Fallbacks
+Later files can reference bindings from earlier ones — repositories (04) build on the
+database (01), services (05) build on repositories.
 
-```php
-return [
-    'cache_ttl' => fn() => (int)(getenv('CACHE_TTL') ?: 3600),
-    'api_timeout' => fn() => (int)(getenv('API_TIMEOUT') ?: 30),
-    'max_upload_size' => fn() => getenv('MAX_UPLOAD_SIZE') ?: '10M'
-];
-```
+### 5. Environment-Specific Caching
 
-### 8. Environment-Specific Caching
-
-```php
-// config/dev/01-infrastructure/02-cache.php
-return [
-    'cache' => fn() => new NullCache()  // No caching in dev
-];
-
-// config/prod/01-infrastructure/02-cache.php
-return [
-    'cache' => fn() => new RedisCache([
-        'host' => getenv('REDIS_HOST'),
-        'port' => getenv('REDIS_PORT')
-    ])
-];
-```
+`staging` and `prod` already cache the resolved definition with
+`FileSystemCacheEngine` (see `BaseConfigBootstrap`). After changing config in those
+environments, clear the cached container (the cache lives in the system temp dir).
 
 ## Related Documentation
 

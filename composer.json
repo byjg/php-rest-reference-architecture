@@ -1,5 +1,5 @@
 {
-  "version": "6.1",
+  "version": "7.0",
   "name": "byjg/gluo",
   "description": "Gluo — production-ready PHP REST API framework starter. Create a project with `composer create-project byjg/gluo` and focus on your business logic, not the infrastructure.",
   "minimum-stability": "dev",

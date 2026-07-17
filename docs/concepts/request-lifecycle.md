@@ -70,7 +70,7 @@ PHP attribute annotations on the target controller method are evaluated in this 
 
 1. **`#[RequireAuthenticated]`** – Throws `Error401Exception` if no valid token was found by JwtMiddleware.
 2. **`#[RequireRole]`** – Throws `Error403Exception` if the authenticated user's role does not match the required role.
-3. **`#[ValidateRequest]`** – Validates the request body against the OpenAPI schema. Throws `Error422Exception` on schema violations. On success, the validated payload is available via `ValidateRequest::getPayload()`.
+3. **`#[ValidateRequest]`** – Validates the request body against the OpenAPI schema. Throws `Error400Exception` on schema violations. On success, the validated payload is available via `ValidateRequest::getPayload()`.
 
 ### 6. Controller Method Execution
 

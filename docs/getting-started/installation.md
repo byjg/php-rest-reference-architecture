@@ -40,11 +40,11 @@ Choose one of the following installation methods:
 ```shell script
 # Standard installation
 mkdir ~/tutorial
-composer -sdev create-project byjg/gluo ~/tutorial ^6.1
+composer create-project byjg/gluo ~/tutorial ^7.0
 
 # OR Latest development version
 mkdir ~/tutorial
-composer -sdev create-project byjg/gluo ~/tutorial master
+composer create-project byjg/gluo ~/tutorial dev-master
 ```
 
 ### Alternative: `shellscript.download`
@@ -67,7 +67,7 @@ load.sh php-rest-api -- my-api \
   --name=mycompany/my-api \
   --mysql-uri=mysql://root:secret@mysql-container/mydb \
   --install-examples=n \
-  --version="^6.1" \
+  --version="^7.0" \
   --php-version=8.4 \
   --timezone=America/New_York
 ```
@@ -92,6 +92,8 @@ The installation will prompt you for configuration details:
 ========================================================
 
 Project Directory: ~/tutorial
+Git user name [Your Name]:
+Git user email [your.email@example.com]:
 PHP Version [8.4]: 8.4
 Project namespace [MyRest]: Tutorial
 Composer name [me/myrest]:
@@ -151,9 +153,11 @@ APP_ENV=dev composer run migrate -- reset --yes
 Expected output:
 ```text
 > Builder\Scripts::migrate
-> Command: reset
-Doing reset, 0
-Doing migrate, 1
+> Environment: dev
+> Database: mysql://root:****@mysql-container/localdev
+
+Resetting database...
+Database reset successfully.
 ```
 
 ## Verify Installation

@@ -78,8 +78,8 @@ This creates:
 - `src/Model/Users.php`
 - `src/Repository/UsersRepository.php`
 - `src/Service/UsersService.php`
-- `src/Controller/UsersRest.php`
-- `tests/Controller/UsersTest.php`
+- `src/Controller/UsersController.php`
+- `tests/Rest/UsersTest.php`
 - Automatically adds DI bindings to `config/dev/04-repositories.php` and `config/dev/05-services.php`
 
 Generate only specific components:
@@ -102,8 +102,8 @@ composer codegen -- --env=test --table=users all --activerecord --save
 
 This creates:
 - `src/Model/Users.php` (with ActiveRecord trait)
-- `src/Controller/UsersRest.php`
-- `tests/Controller/UsersTest.php`
+- `src/Controller/UsersController.php`
+- `tests/Rest/UsersTest.php`
 
 Generate only the model:
 
@@ -171,15 +171,20 @@ Repository Pattern:
 - `test.php.jinja` - Test class template
 
 ActiveRecord Pattern:
-- `modelactiverecord.php.jinja` - Model class with ActiveRecord trait template
+- `model.php.jinja` - Same model template; the `activerecord` variable switches it to the ActiveRecord trait
 - `restactiverecord.php.jinja` - REST controller for ActiveRecord template
 - Uses the same `test.php.jinja` template as a Repository pattern
 
-**Template variables available:**
+**Template variables available** (see [Template Customization](../guides/templates.md) for the full field-level reference):
 - `className` - PascalCase class name (e.g., `UserProfile`)
 - `tableName` - Original table name (e.g., `user_profile`)
+- `varTableName` - camelCase variable name (e.g., `userProfile`)
+- `restPath` / `restTag` - REST route path (e.g., `user/profile`) and OpenAPI tag
 - `namespace` - Project namespace
-- `fields` - Array of table columns with types
-- `primaryKeys` - Array of primary key fields
-- `nullableFields` - Array of nullable fields
-- `nonNullableFields` - Array of non-nullable, non-PK fields
+- `fields` - Array of table columns (keys: `field`, `property`, `type`, `php_type`, `openapi_type`, `openapi_format`, `null`, `key`, `default`, `extra`)
+- `primaryKeys` - Array of primary key column names
+- `nullableFields` / `nonNullableFields` - camelCase property lists
+- `indexes` - Table indexes (with `camelColumnName`)
+- `autoIncrement` - `"yes"` when the PK auto-increments
+- `activerecord` - True in ActiveRecord mode
+- `hasCreatedAt` / `hasUpdatedAt` / `hasDeletedAt` - Timestamp-trait switches

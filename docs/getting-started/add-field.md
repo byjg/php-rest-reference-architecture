@@ -79,11 +79,11 @@ Similarly, no changes needed in the `Service` class. The `BaseService` methods a
 
 We just need to allow the rest to receive the new field. If we don't do it, the API will throw an error.
 
-Open the file: `src/Controller/ExampleCrudRest.php` and add the attribute `status` to method `postExampleCrud()`:
+Open the file: `src/Controller/ExampleCrudController.php` and add the attribute `status` to method `postExampleCrud()`:
 
 ```php
 #[OA\RequestBody(
-        description: "The object DummyHex to be created",
+        description: "The object ExampleCrud to be created",
         required: true,
         content: new OA\JsonContent(
             required: [ "name" ],
@@ -102,7 +102,7 @@ Open the file: `src/Controller/ExampleCrudRest.php` and add the attribute `statu
 ## Updating the Tests
 
 We only need to update the `getSampleData()` method to include the new field.
-Open the file: `tests/Controller/ExampleCrudTest.php`
+Open the file: `tests/Rest/ExampleCrudTest.php`
 
 ```php
 protected function getSampleData($array = false)

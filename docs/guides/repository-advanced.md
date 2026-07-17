@@ -108,7 +108,7 @@ $repository->list(page: 0, size: 20, filter: $filter);
 
 ### Passing query params from a REST controller
 
-`DummyRest` exposes `orderBy` and `filter` as optional query string parameters and passes them directly to the service (which forwards them to the repository):
+`DummyController` exposes `orderBy` and `filter` as optional query string parameters and passes them directly to the service (which forwards them to the repository):
 
 ```php
 #[OA\Parameter(name: "orderBy", in: "query", required: false, schema: new OA\Schema(type: "string"))]
@@ -450,7 +450,7 @@ class DummyRepository extends BaseRepository
 
 Add static query methods directly to your model:
 
-**Location**: `src/Model/DummyActiveRecord.php:109`
+**Location**: `src/Model/DummyActiveRecord.php:117`
 
 ```php
 class DummyActiveRecord

@@ -85,7 +85,7 @@ class ProductService extends BaseService
 }
 
 // REST Controller
-class ProductRest
+class ProductController
 {
     public function listProducts(HttpResponse $response, HttpRequest $request) {
         $service = Config::get(ProductService::class);
@@ -151,7 +151,7 @@ class Product
 }
 
 // REST Controller
-class ProductRest
+class ProductController
 {
     public function getProduct(HttpResponse $response, HttpRequest $request) {
         $id = $request->attribute('id');
@@ -219,7 +219,7 @@ class ProductService extends BaseService
 }
 
 // Step 3: Update REST Controller
-class ProductRest
+class ProductController
 {
     public function listProducts(HttpResponse $response, HttpRequest $request)
     {
