@@ -1,4 +1,4 @@
-# PHP REST Reference Architecture
+# Gluo — PHP REST API Starter
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-gluo/actions/workflows/build-app-image.yml/badge.svg?branch=master)](https://github.com/byjg/php-gluo/actions/workflows/build-app-image.yml)
@@ -7,19 +7,22 @@
 [![GitHub license](https://img.shields.io/github/license/byjg/php-gluo.svg)](https://opensource.byjg.com/license/)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-gluo.svg)](https://github.com/byjg/php-gluo/releases)
 
-**Production-ready PHP REST API boilerplate** that lets you focus on building your business logic, not the infrastructure.
+**Gluo** (Esperanto for *glue*) is a **production-ready PHP REST API starter**: create a project you fully own, powered by an updatable framework core — so you focus on business logic, not infrastructure.
 
 ## Why Use This?
 
 Every new REST API needs the same boilerplate: authentication, migrations, an ORM, OpenAPI docs, a test harness, and a DI container. Setting all of that up correctly takes days — and it's not the work your users care about.
 
-This template does the wiring once, correctly, so you start on day one writing business logic instead of plumbing. And because it's a **template you own** — not a framework you depend on — you can change, remove, or replace any part of it without asking permission.
+Gluo splits the problem the right way:
+
+- **Your project** (`composer create-project byjg/gluo`) — controllers, models, config, migrations, Docker files. Generated once, renamed to your namespace, fully yours: change, remove, or replace anything.
+- **The framework core** ([`byjg/gluo-core`](https://github.com/byjg/php-gluo-core)) — base classes, auth flow, attributes, code generator, and test harness live in `vendor/` and improve with a plain `composer update`. No copy-paste to stay current.
 
 ## Quick Start
 
 ```bash
 # Create your project
-composer -sdev create-project byjg/gluo my-api ^6.1
+composer create-project byjg/gluo my-api ^7.0
 
 # Start containers
 cd my-api
@@ -38,7 +41,7 @@ curl http://localhost:8080/sample/ping
 
 ```mermaid
 mindmap
-  (("Reference Architecture"))
+  (("Gluo"))
     ("PSR Standards")
       ("WebRequests")
       ("Container & Dependency Injection")
@@ -65,6 +68,7 @@ mindmap
 - 🗄️ **Database migrations** — versioned up/down SQL migrations with a one-command runner and ORM integration
 - 🧪 **In-process testing** — `FakeApiRequester` runs the full API stack inside PHPUnit, no web server needed
 - 🐳 **Docker ready** — MySQL, PHP-FPM, and Nginx pre-configured; `docker compose up -d` and you're running
+- 🔄 **Updatable core** — framework fixes and features arrive with `composer update byjg/gluo-core`; your code stays untouched
 - ⚙️ **PSR standards** — PSR-7 (HTTP messages), PSR-11 (container), PSR-6/16 (cache)
 
 ```bash
@@ -75,7 +79,7 @@ composer codegen -- --env=dev --table=products all --save
 ## Documentation
 
 ### Getting Started
-1. **[Installation & Setup](docs/getting-started/installation.md)** – Install the template, configure environments, and review prerequisites.
+1. **[Installation & Setup](docs/getting-started/installation.md)** – Install the starter, configure environments, and review prerequisites.
 2. **[Create Your First Table](docs/getting-started/first-table.md)** – Define your first migration and schema.
 3. **[Add Fields](docs/getting-started/add-field.md)** – Safely evolve existing tables.
 4. **[Create REST Endpoints](docs/getting-started/first-endpoint.md)** – Generate REST handlers from your tables.
@@ -163,13 +167,13 @@ You just created a complete CRUD API with:
 - 💡 **[Request Features](https://github.com/byjg/php-gluo/issues)**
 - 🌐 **[ByJG Open Source](http://opensource.byjg.com)**
 
-## Not a Framework
+## Your Code vs. the Framework
 
-This is a **template**, not a framework. You own the code:
-- ✅ Full control over every file
-- ✅ No vendor lock-in
-- ✅ Customize anything you need
-- ✅ Remove what you don't need
+The starter generates a project that is fully yours — `src/`, `config/`, `db/`, `docker/`:
+- ✅ Full control over every file the generator gave you
+- ✅ Base classes are thin extension points (`BaseLoginController`, `BaseRepository`, `BaseService`, …) — override what you need
+- ✅ Framework improvements arrive via `composer update byjg/gluo-core`
+- ✅ Remove what you don't need — auth, examples, and patterns are all optional
 
 ## License
 
