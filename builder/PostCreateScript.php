@@ -205,12 +205,26 @@ ENV;
         }
 
         // ------------------------------------------------
-        // Remove phpunit.yml workflow (it's for the reference architecture repo only)
-        $phpunitWorkflowFile = "$workdir/.github/workflows/phpunit.yml";
-        if (file_exists($phpunitWorkflowFile)) {
-            unlink($phpunitWorkflowFile);
-            echo "Removed .github/workflows/phpunit.yml\n";
+        // Remove the template machinery (it's for the reference architecture repo only):
+        // its CI workflows, this script, and its test. Leaving them in the generated
+        // project would ship self-modified (broken) code the user never runs.
+        $templateOnlyFiles = [
+            '.github/workflows/phpunit.yml',
+            '.github/workflows/create-project.yml',
+            'builder/PostCreateScript.php',
+            'tests/Builder/PostCreateScriptTest.php',
+        ];
+        foreach ($templateOnlyFiles as $file) {
+            if (file_exists("$workdir/$file")) {
+                unlink("$workdir/$file");
+                echo "Removed $file\n";
+            }
         }
+
+        // Drop the create-project hook from composer.json (its class no longer exists)
+        $contents = file_get_contents($workdir . '/composer.json');
+        $contents = preg_replace('/^\s*"post-create-project-cmd":.*\n/m', '', $contents);
+        file_put_contents($workdir . '/composer.json', $contents);
 
         // ------------------------------------------------
         // Remove example files if not installing examples

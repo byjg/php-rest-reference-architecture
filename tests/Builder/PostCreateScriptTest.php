@@ -26,6 +26,7 @@ class PostCreateScriptTest extends TestCase
         'builder',
         'db',
         'templates',
+        'tests',
         '.github',
     ];
 
@@ -188,13 +189,27 @@ class PostCreateScriptTest extends TestCase
         $this->assertStringContainsString('mysql://root:secret123@127.0.0.1/shopdev', $sample);
     }
 
-    public function testPhpunitWorkflowRemoved(): void
+    public function testTemplateMachineryRemoved(): void
     {
-        $this->assertFileExists($this->workdir . '/.github/workflows/phpunit.yml');
+        $templateOnlyFiles = [
+            '.github/workflows/phpunit.yml',
+            '.github/workflows/create-project.yml',
+            'builder/PostCreateScript.php',
+            'tests/Builder/PostCreateScriptTest.php',
+        ];
+        foreach ($templateOnlyFiles as $file) {
+            $this->assertFileExists($this->workdir . '/' . $file);
+        }
 
         $this->applyTemplate(true);
 
-        $this->assertFileDoesNotExist($this->workdir . '/.github/workflows/phpunit.yml');
+        foreach ($templateOnlyFiles as $file) {
+            $this->assertFileDoesNotExist($this->workdir . '/' . $file);
+        }
+
+        $composer = file_get_contents($this->workdir . '/composer.json');
+        $this->assertStringNotContainsString('post-create-project-cmd', $composer);
+        $this->assertNotNull(json_decode($composer), 'composer.json must remain valid JSON');
     }
 
     public function testExamplesKeptWhenRequested(): void

@@ -1,0 +1,87 @@
+name: Create Project
+
+# End-to-end test of `composer create-project byjg/gluo`: creates a project
+# from the current commit (unattended setup.json mode), which resolves
+# byjg/gluo-core and every other dependency from Packagist — the only test
+# able to catch dependency-resolution problems the local suite can't see.
+#
+# This workflow belongs to the reference repository only: PostCreateScript
+# removes it (together with itself) from generated projects.
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*.*.*"
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  CreateProject:
+    runs-on: 'ubuntu-latest'
+    container:
+      image: 'byjg/php:8.5-cli'
+      options: --user root --privileged
+
+    services:
+      mysql-container:
+        image: mysql:8.0.20
+        env:
+          MYSQL_ROOT_PASSWORD: mysqlp455w0rd
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+        ports:
+          - "3306:3306"
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=20s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Prepare source branch for create-project
+        run: |
+          git config --global --add safe.directory '*'
+          git branch -f ci-under-test HEAD
+
+      - name: Write unattended setup.json
+        run: |
+          cat > /tmp/setup.json <<'EOF'
+          {
+            "git_user_name": "CI",
+            "git_user_email": "ci@example.com",
+            "php_version": "8.5",
+            "namespace": "AcmeShop",
+            "composer_name": "acme/shop",
+            "timezone": "UTC",
+            "install_examples": true,
+            "db_schema": "mysql",
+            "db_host": "mysql-container",
+            "db_user": "root",
+            "db_password": "mysqlp455w0rd",
+            "db_name_dev": "localdev",
+            "db_name_test": "localtest"
+          }
+          EOF
+
+      - name: composer create-project
+        env:
+          SETUP_JSON: /tmp/setup.json
+        run: >
+          composer create-project byjg/gluo:dev-ci-under-test /tmp/my-api
+          --repository="{\"type\":\"vcs\",\"url\":\"file://$GITHUB_WORKSPACE\"}"
+          --stability=dev
+          --no-interaction
+
+      - name: Psalm on the generated project
+        working-directory: /tmp/my-api
+        run: ./vendor/bin/psalm
+
+      - name: PHPUnit on the generated project
+        working-directory: /tmp/my-api
+        run: ./vendor/bin/phpunit
