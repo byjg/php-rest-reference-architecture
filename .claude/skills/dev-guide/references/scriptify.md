@@ -3,7 +3,7 @@
 `byjg/scriptify` turns any `ClassName::methodName` into a runnable command, cron job, or
 background service — no CLI framework required in your own classes.
 
-Not installed by default: `composer require "byjg/scriptify"`
+Already a direct dependency of this project (`byjg/scriptify` in composer.json — it powers `composer terminal`).
 
 ---
 

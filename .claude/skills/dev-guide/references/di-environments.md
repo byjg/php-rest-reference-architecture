@@ -64,7 +64,7 @@ Plain text, one entry per line. Useful for non-secret config values you want in 
 in `.env` style.
 
 ```ini
-# config/dev/config.env
+# config/dev/credentials.env
 APP_NAME=MyApp
 LOG_LEVEL=debug
 ```
@@ -131,33 +131,32 @@ manually in application code.
 
 ## ConfigBootstrap.php — defining environments
 
+The project file is a thin subclass — environments, inheritance, and caching live in
+`ByJG\Gluo\Config\BaseConfigBootstrap` (byjg/gluo-core):
+
 ```php
 <?php
 // config/ConfigBootstrap.php
-use ByJG\Config\Definition;
-use ByJG\Config\Environment;
-use ByJG\Cache\Psr16\FileSystemCacheEngine;
+use ByJG\Gluo\Config\BaseConfigBootstrap;
 
-return (new Definition())
-    ->addEnvironment(
-        (new Environment('dev'))
-            ->withOSEnvironment(['TAG_VERSION', 'TAG_COMMIT'])
-    )
-    ->addEnvironment(
-        (new Environment('test'))
-            ->inheritFrom(new Environment('dev'))
-    )
-    ->addEnvironment(
-        (new Environment('staging'))
-            ->inheritFrom(new Environment('dev'))
-            ->withCache(new FileSystemCacheEngine('/tmp/config-cache'), 'config')
-    )
-    ->addEnvironment(
-        (new Environment('prod'))
-            ->inheritFrom(new Environment('staging'))
-            ->withCache(new FileSystemCacheEngine('/tmp/config-cache'), 'config')
-    );
+return new class extends BaseConfigBootstrap {
+};
 ```
+
+The gluo base defines (see vendor/byjg/gluo-core/src/Config/BaseConfigBootstrap.php):
+
+```php
+$dev = Environment::create('dev');
+$test = Environment::create('test')->inheritFrom($dev);
+$staging = Environment::create('staging')->inheritFrom($dev)
+    ->withCache(new FileSystemCacheEngine());
+$prod = Environment::create('prod')->inheritFrom($staging, $dev)
+    ->withCache(new FileSystemCacheEngine());
+```
+
+Override `configureDefinition(Definition $definition)` in your anonymous subclass to add
+OS environment variables (`$definition->withOSEnvironment([...])` — the default exposes
+`TAG_VERSION` and `TAG_COMMIT`), extra config directories, or custom environments.
 
 ### Environment options
 

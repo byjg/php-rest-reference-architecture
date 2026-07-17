@@ -159,17 +159,29 @@ class WelcomeTest extends BaseApiTestCase
 }
 ```
 
-If you need to assert the email content itself, inject `FakeSenderWrapper` directly and
-inspect the last envelope it received:
+If you need to assert the email content itself, `FakeSenderWrapper` does not capture
+envelopes (its `send()` just returns success) — subclass it in your test:
 
 ```php
+use ByJG\Mail\Envelope;
+use ByJG\Mail\SendResult;
 use ByJG\Mail\Wrapper\FakeSenderWrapper;
 
-$fake = new FakeSenderWrapper();
+class CapturingSenderWrapper extends FakeSenderWrapper
+{
+    public ?Envelope $lastEnvelope = null;
+
+    public function send(Envelope $envelope): SendResult
+    {
+        $this->lastEnvelope = $envelope;
+        return parent::send($envelope);
+    }
+}
+
+$fake = new CapturingSenderWrapper();
 // Bind it manually for the test and call the code under test...
-$last = $fake->getLastEnvelope();         // Envelope|null
-$this->assertStringContainsString('Jane', $last->getBody());
-$this->assertEquals('jane@example.com', $last->getTo()[0]);
+$this->assertStringContainsString('Jane', $fake->lastEnvelope->getBody());
+$this->assertEquals('jane@example.com', $fake->lastEnvelope->getTo()[0]);
 ```
 
 ---

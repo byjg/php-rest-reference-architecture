@@ -108,7 +108,7 @@ controller is needed.
 #[RequireAuthenticated]
 public function getProduct(HttpResponse $response, HttpRequest $request): void
 {
-    $product = Config::get(ProductService::class)->getOrFail($request->param('id'));
+    $product = Config::get(ProductService::class)->getOrFail($request->attribute('id'));
     $response->write($product);
     // Accept: application/json → {"id":1,"name":"Widget"}
     // Accept: application/xml  → <root><id>1</id><name>Widget</name></root>

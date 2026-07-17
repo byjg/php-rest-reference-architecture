@@ -45,8 +45,8 @@ PHP Attribute Chain    ← run BEFORE the controller method:
 Controller method      ← receives (HttpResponse $response, HttpRequest $request)
     │   Config::get(ProductService::class)   ← PSR-11 DI container lookup
     │   ValidateRequest::getPayload()        ← validated, null-stripped array
-    │   $request->param('id')               ← path param OR jwt.data sub-key
-    │   $request->get('page')               ← query string param
+    │   $request->attribute('id')            ← path param OR jwt.data sub-key
+    │   $request->query('page')               ← query string param
     │
     ▼
 Service                ← business logic; wraps repository (Repository pattern)
@@ -107,9 +107,10 @@ src/
 ├── Service/        # Business logic — wraps repositories (Repository pattern only)
 ├── Repository/     # Data access — queries and persistence
 ├── Model/          # Database models with ORM + OpenAPI attributes
-├── Attribute/     # Custom PHP attributes (auth, validation middleware)
-├── Trait/          # Shared traits (timestamps, soft-delete)
 └── OpenApiSpec.php # Root OpenAPI spec definition
+
+# Attributes (RequireAuthenticated, ...), traits (OaCreatedAt, ...), base
+# classes and utilities live in the byjg/gluo-core package (ByJG\Gluo\*).
 
 config/{env}/
 ├── 01-infrastructure.php  # DB, cache, logging, ORM init
@@ -136,13 +137,13 @@ db/
 `Controller → Service → Repository → Model`
 - Use when: complex business logic, validation, multiple repos, team projects
 - Files: Model + Repository + Service + Controller (4 files + DI registrations + tests)
-- Reference: `src/Controller/DummyRest.php`, `src/Repository/DummyRepository.php`
+- Reference: `src/Controller/DummyController.php`, `src/Repository/DummyRepository.php`
 
 ### ActiveRecord Pattern (fewer layers, simpler)
 `Controller → Model (handles its own persistence)`
 - Use when: simple CRUD, prototyping, admin panels
 - Files: Model + Controller (2 files + no DI registrations needed + tests)
-- Reference: `src/Controller/DummyActiveRecordRest.php`, `src/Model/DummyActiveRecord.php`
+- Reference: `src/Controller/DummyActiveRecordController.php`, `src/Model/DummyActiveRecord.php`
 
 ---
 
@@ -278,7 +279,7 @@ Repeat for `config/test/` (required for tests to work).
 #### 6. REST Controller
 
 ```php
-class ProductRest
+class ProductController
 {
     #[OA\Get(path: "/product/{id}", security: [["jwt-token" => []]], tags: ["product"])]
     #[OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))]
@@ -290,7 +291,7 @@ class ProductRest
     public function getProduct(HttpResponse $response, HttpRequest $request): void
     {
         $service = Config::get(ProductService::class);
-        $result = $service->getOrFail($request->param('id'));
+        $result = $service->getOrFail($request->attribute('id'));
         $response->write($result);
     }
 
@@ -310,8 +311,8 @@ class ProductRest
 ```
 
 **Request helpers:**
-- `$request->param('id')` — path param (e.g. `{id}`) or JWT decoded claim (e.g. `$request->param('jwt.data')`)
-- `$request->get('page')` — query string param
+- `$request->attribute('id')` — path param (e.g. `{id}`) or JWT decoded claim (e.g. `$request->attribute('jwt.data')`)
+- `$request->query('page')` — query string param
 - `ValidateRequest::getPayload()` — validated request body (array for JSON)
 
 **Security attributes:**
@@ -416,7 +417,7 @@ JWT is decoded by `JwtMiddleware` and stored as request params. Access it in any
 `#[RequireAuthenticated]` or `#[RequireRole]` protected method:
 
 ```php
-use RestReferenceArchitecture\Util\JwtContext;
+use ByJG\Gluo\Util\JwtContext;
 
 $userId = JwtContext::getUserId();   // JWT "userid" claim
 $role   = JwtContext::getRole();     // JWT "role" claim
@@ -425,7 +426,7 @@ $name   = JwtContext::getName();     // JWT "name" claim
 
 **Role constants:** `User::ROLE_ADMIN`, `User::ROLE_USER`
 
-**Login flow** (implemented in `src/Controller/Login.php`):
+**Login flow** (implemented in `src/Controller/LoginController.php`):
 1. `POST /login` with `{username, password}` → `JwtContext::createUserMetadata()` validates via `UsersService`
 2. Returns `{token, data: {userid, name, role}}`
 3. Client sends `Authorization: Bearer <token>` on subsequent requests

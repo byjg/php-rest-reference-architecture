@@ -194,50 +194,60 @@ protected string|null $password = null;
 
 ## JWT payload
 
-The JWT is built in `src/Util/JwtContext.php`. Default payload: `userid`, `name`, `role`.
+The JWT is built by `ByJG\Gluo\Util\JwtContext` (byjg/gluo-core). Default payload: `userid`, `name`, `role`.
 
-### Adding standard fields
+### Adding fields to the token
 
-Edit the `$tokenFields` array in `JwtContext::createUserMetadata()`:
+Subclass `JwtContext` and override its hooks (`customTokenFields()`, `tokenExpiry()`, `defaultRole()`):
 
 ```php
-$tokenFields = [
-    UserField::Userid,
-    UserField::Name,
-    UserField::Email,                        // add email
-    UserField::Role->value => User::ROLE_USER,
-];
+namespace RestReferenceArchitecture\Util;
+
+use ByJG\Authenticate\Enum\UserField;
+use ByJG\Gluo\Util\JwtContext;
+
+class CustomJwtContext extends JwtContext
+{
+    protected static function customTokenFields(): array
+    {
+        return [
+            UserField::Email,   // built-in extra claim
+            'department',       // custom property (must exist in your model/properties)
+        ];
+    }
+
+    protected static function tokenExpiry(): int
+    {
+        return 7200; // seconds (default 3600)
+    }
+}
 ```
 
-### Adding custom/property data to the token
+Then point the login controller at it:
 
 ```php
-$user = $svc->getByLogin($login);            // fully loaded
-$department = $user->get('department');       // property already available
-
-$userToken = $usersService->createAuthToken(
-    login: $login,
-    password: $password,
-    jwtWrapper: $jwtWrapper,
-    expires: $expires,
-    tokenUserFields: $tokenFields,
-    updateTokenInfo: ['department' => $department],
-);
+// src/Controller/LoginController.php
+protected function getJwtContextClass(): string
+{
+    return CustomJwtContext::class;
+}
 ```
 
 ### Reading custom JWT claims in a controller
 
 ```php
-use RestReferenceArchitecture\Util\JwtContext;
+use ByJG\Gluo\Util\JwtContext;
 
 $userId     = JwtContext::getUserId();   // UserField::Userid
 $role       = JwtContext::getRole();     // UserField::Role
 $name       = JwtContext::getName();     // UserField::Name
 
-// Custom fields added via updateTokenInfo:
-$jwtData    = $request->param('jwt.data');
+// Custom fields added via customTokenFields():
+$jwtData    = $request->attribute('jwt.data');
 $department = $jwtData['department'] ?? null;
 ```
+
+See `docs/guides/jwt-advanced.md` for the full customization guide.
 
 ---
 

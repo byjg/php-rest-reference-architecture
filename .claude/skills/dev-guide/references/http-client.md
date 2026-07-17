@@ -181,10 +181,10 @@ $errors  = [];
 
 $parallel = new HttpClientParallel(
     HttpClient::getInstance(),
-    onSuccess: function ($response, $id) use (&$results) {
+    defaultOnSuccess: function ($response, $id) use (&$results) {
         $results[$id] = ParseBody::parse($response);
     },
-    onError: function ($error, $id) use (&$errors) {
+    defaultOnError: function ($error, $id) use (&$errors) {
         $errors[$id] = $error;
     }
 );

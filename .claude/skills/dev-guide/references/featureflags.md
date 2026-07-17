@@ -1,4 +1,4 @@
-# Feature Flags: byjg/php-feature-flag
+# Feature Flags: byjg/featureflag
 
 Lightweight in-memory feature flag system. The preferred approach is PHP attributes —
 annotate methods directly and let the dispatcher call only the ones whose flag is active.

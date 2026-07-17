@@ -144,7 +144,7 @@ use ByJG\MessageQueueClient\ConsumerClientTrait;
 use ByJG\MessageQueueClient\Connector\ConnectorInterface;
 use ByJG\MessageQueueClient\Connector\Pipe;
 use ByJG\MessageQueueClient\Message;
-use ByJG\Util\Psr11;
+use ByJG\Config\Config;
 use Psr\Log\LoggerInterface;
 
 abstract class QueueHandlerBase implements ConsumerClientInterface
@@ -155,12 +155,12 @@ abstract class QueueHandlerBase implements ConsumerClientInterface
 
     public function getConnector(): ConnectorInterface
     {
-        return Psr11::container()->get(ConnectorInterface::class);
+        return Config::container()->get(ConnectorInterface::class);
     }
 
     public function getLogger(): LoggerInterface
     {
-        return Psr11::container()->get(LoggerInterface::class);
+        return Config::container()->get(LoggerInterface::class);
     }
 
     public function getLogOutputStart(Message $message): string
@@ -193,20 +193,20 @@ namespace App\Queue;
 
 use ByJG\MessageQueueClient\Connector\Pipe;
 use ByJG\MessageQueueClient\Message;
-use ByJG\Util\Psr11;
+use ByJG\Config\Config;
 
 class EmailTransactionalConsumer extends QueueHandlerBase
 {
     public function getPipe(): Pipe
     {
-        return Psr11::container()->get('EMAIL_TRANSACTIONAL_QUEUE');
+        return Config::container()->get('EMAIL_TRANSACTIONAL_QUEUE');
     }
 
     public function processMessage(Message $message): void
     {
         $data = json_decode($message->getBody(), true);
         // send the email — throw on failure (ConsumerClientTrait catches and NACKs)
-        $mailer = Psr11::container()->get(MailWrapperInterface::class);
+        $mailer = Config::container()->get(MailWrapperInterface::class);
         $mailer->send(/* ... */);
     }
 }

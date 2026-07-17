@@ -119,7 +119,7 @@ $row->toArray();                        // all fields as associative array
 
 ```php
 // Hydrate into typed objects (uses ObjectCopy internally)
-$products = $ds->getIterator()->toEntities(Product::class);
+$products = $ds->getIterator()->toEntities();
 // returns Product[]
 ```
 
@@ -376,7 +376,7 @@ $expensive = $fakeData->getIterator($filter)->toArray();
 // [['id'=>2,'name'=>'Gadget','price'=>24.99]]
 
 // Hydrate into entities
-$products = $fakeData->getIterator()->toEntities(Product::class);
+$products = $fakeData->getIterator()->toEntities();
 ```
 
 ---
