@@ -51,6 +51,9 @@ class PostCreateScriptTest extends TestCase
 
     protected function tearDown(): void
     {
+        if (!isset($this->workdir)) {
+            return; // setUp skipped before creating the workdir
+        }
         shell_exec('rm -rf ' . escapeshellarg($this->workdir));
     }
 
