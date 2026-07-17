@@ -41,8 +41,8 @@ Delete the directory to go back to the package defaults.
 | `model.php.jinja`         | Model class         | Repository & ActiveRecord (the `activerecord` variable switches the trait) |
 | `repository.php.jinja`    | Repository class    | Repository only           |
 | `service.php.jinja`       | Service class       | Repository only           |
-| `rest.php.jinja`          | REST controller     | Repository pattern        |
-| `restactiverecord.php.jinja` | REST controller | ActiveRecord pattern      |
+| `controller.php.jinja`    | REST controller     | Repository pattern        |
+| `controlleractiverecord.php.jinja` | REST controller | ActiveRecord pattern |
 | `test.php.jinja`          | Test class          | Both patterns             |
 
 ## Template Structure
@@ -50,12 +50,12 @@ Delete the directory to go back to the package defaults.
 ```
 templates/
 └── codegen/
-    ├── model.php.jinja             # Model class
-    ├── repository.php.jinja        # Repository class
-    ├── service.php.jinja           # Service class
-    ├── rest.php.jinja              # Repository REST controller
-    ├── restactiverecord.php.jinja  # ActiveRecord REST controller
-    └── test.php.jinja              # Test class
+    ├── model.php.jinja                  # Model class
+    ├── repository.php.jinja             # Repository class
+    ├── service.php.jinja                # Service class
+    ├── controller.php.jinja             # Repository REST controller
+    ├── controlleractiverecord.php.jinja # ActiveRecord REST controller
+    └── test.php.jinja                   # Test class
 ```
 
 ## Available Variables
@@ -163,7 +163,7 @@ Add custom methods to `templates/codegen/model.php.jinja`:
 
 ### Example: Customizing REST Endpoints
 
-Edit `templates/codegen/rest.php.jinja` to add custom endpoints:
+Edit `templates/codegen/controller.php.jinja` to add custom endpoints:
 
 ```jinja
 // ... existing CRUD methods ...

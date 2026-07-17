@@ -51,7 +51,7 @@ You can specify the environment in two ways:
 | `model`                | Generate Model           | ✓                  | ✓ (with ActiveRecord trait) |
 | `repo` or `repository` | Generate Repository      | ✓                  | ✗ Not applicable            |
 | `service`              | Generate Service         | ✓                  | ✗ Not applicable            |
-| `rest`                 | Generate REST controller | ✓                  | ✓                           |
+| `controller`           | Generate REST controller | ✓                  | ✓                           |
 | `test`                 | Generate Test            | ✓                  | ✓                           |
 
 ### Options
@@ -85,7 +85,7 @@ This creates:
 Generate only specific components:
 
 ```bash
-APP_ENV=dev composer codegen -- --table=products model rest --save
+APP_ENV=dev composer codegen -- --table=products model controller --save
 ```
 
 ### ActiveRecord Pattern
@@ -116,7 +116,7 @@ APP_ENV=test composer codegen -- --table=products model --activerecord --save
 Preview the generated REST controller without saving to disk:
 
 ```bash
-APP_ENV=dev composer codegen -- --table=orders rest
+APP_ENV=dev composer codegen -- --table=orders controller
 composer codegen -- --env=dev --table=orders all --activerecord
 ```
 
@@ -167,12 +167,12 @@ Repository Pattern:
 - `model.php.jinja` - Model class template
 - `repository.php.jinja` - Repository class template
 - `service.php.jinja` - Service class template
-- `rest.php.jinja` - REST controller template
+- `controller.php.jinja` - REST controller template
 - `test.php.jinja` - Test class template
 
 ActiveRecord Pattern:
 - `model.php.jinja` - Same model template; the `activerecord` variable switches it to the ActiveRecord trait
-- `restactiverecord.php.jinja` - REST controller for ActiveRecord template
+- `controlleractiverecord.php.jinja` - REST controller for ActiveRecord template
 - Uses the same `test.php.jinja` template as a Repository pattern
 
 **Template variables available** (see [Template Customization](../guides/templates.md) for the full field-level reference):

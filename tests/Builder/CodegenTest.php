@@ -47,7 +47,7 @@ class CodegenTest extends BaseApiTestCase
 
     public function testGenerateActiveRecordPattern(): void
     {
-        $output = $this->runCodegen(['model', 'rest', '--activerecord']);
+        $output = $this->runCodegen(['model', 'controller', '--activerecord']);
 
         $this->assertStringContainsString('use ByJG\MicroOrm\Trait\ActiveRecord;', $output);
         $this->assertStringContainsString('use ByJG\Gluo\Attribute\RequireAuthenticated;', $output);
@@ -73,7 +73,7 @@ class CodegenTest extends BaseApiTestCase
 
             ob_start();
             try {
-                $scripts->runCodeGenerator(['--env=test', '--table=dummy', 'model', 'rest', 'test', '--save']);
+                $scripts->runCodeGenerator(['--env=test', '--table=dummy', 'model', 'controller', 'test', '--save']);
             } finally {
                 ob_end_clean();
             }
