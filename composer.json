@@ -5,18 +5,12 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "license": "MIT",
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../php-arx"
-    }
-  ],
   "require": {
     "php": ">=8.3 <8.6",
     "ext-json": "*",
     "ext-openssl": "*",
     "ext-curl": "*",
-    "byjg/gluo-core": "dev-master",
+    "byjg/gluo-core": "^7.0",
     "byjg/scriptify": "^6.0"
   },
   "require-dev": {
