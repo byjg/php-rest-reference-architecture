@@ -32,9 +32,18 @@ class PostCreateScriptTest extends TestCase
 
     protected function setUp(): void
     {
+        $projectRoot = realpath(__DIR__ . '/../..');
+        foreach (self::COPY_ITEMS as $item) {
+            if (!file_exists("$projectRoot/$item")) {
+                // The app image (build-app-image workflow) ships only the runtime subset
+                // of the repo; these tests need the full checkout and run in phpunit.yml
+                // and, end-to-end, in the create-project workflow.
+                $this->markTestSkipped("Template tree incomplete ($item missing) — requires the full repository checkout.");
+            }
+        }
+
         $this->workdir = sys_get_temp_dir() . '/create-project-' . uniqid();
         mkdir($this->workdir, 0755, true);
-        $projectRoot = realpath(__DIR__ . '/../..');
         foreach (self::COPY_ITEMS as $item) {
             $this->copyRecursive("$projectRoot/$item", "$this->workdir/$item");
         }
