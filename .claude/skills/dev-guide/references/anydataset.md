@@ -73,7 +73,7 @@ foreach ($ds->getIterator() as $row) {
 
 // Terminal helpers
 $all   = $ds->getIterator()->toArray();    // [['id'=>1,'name'=>'Alice',...], ...]
-$first = $ds->getIterator()->first();      // Row|null
+$first = $ds->getIterator()->first();      // underlying entity|null (array here — see toEntities)
 ```
 
 ### Filter with IteratorFilter
@@ -115,12 +115,23 @@ $row->unset('field');                   // remove field
 $row->toArray();                        // all fields as associative array
 ```
 
-### Convert to entities
+### `toEntities()` — what it really returns
+
+`toEntities()` does NOT hydrate: it returns each row's *underlying entity* — whatever
+the row was created from. For an array-backed dataset (like `AnyDataset` above) that is
+just the associative array, same as `toArray()`. It pays off with object-backed
+iterators: micro-orm's `Repository` builds rows around your model instances, so there
+`->toEntities()` returns `Product[]`.
 
 ```php
-// Hydrate into typed objects (uses ObjectCopy internally)
-$products = $ds->getIterator()->toEntities();
-// returns Product[]
+// Array-backed: entities ARE arrays
+$rows = $ds->getIterator()->toEntities();   // [['id'=>1,...], ['id'=>2,...]]
+
+// To hydrate arrays into typed models, use ObjectCopy explicitly:
+foreach ($ds->getIterator() as $row) {
+    $product = new Product();
+    ObjectCopy::copy($row->toArray(), $product);
+}
 ```
 
 ---
@@ -375,8 +386,13 @@ $filter->and('price', Relation::GREATER_THAN, 10.0);
 $expensive = $fakeData->getIterator($filter)->toArray();
 // [['id'=>2,'name'=>'Gadget','price'=>24.99]]
 
-// Hydrate into entities
-$products = $fakeData->getIterator()->toEntities();
+// Hydrate rows into models (array-backed rows have no entity class — copy explicitly)
+$products = [];
+foreach ($fakeData->getIterator() as $row) {
+    $product = new Product();
+    ObjectCopy::copy($row->toArray(), $product);
+    $products[] = $product;
+}
 ```
 
 ---
@@ -436,9 +452,9 @@ foreach ($ds->getIterator() as $row) {
 | Add a row | `$ds->appendRow(['key' => 'val'])` |
 | Iterate all rows | `foreach ($ds->getIterator() as $row)` |
 | Filter rows | `$ds->getIterator(new IteratorFilter()->and(...))` |
-| First match | `->first()` / `->firstOrFail()` |
+| First match | `->first()` / `->firstOrFail()` — returns the underlying entity |
 | Rows as arrays | `->toArray()` |
-| Rows as entities | `->toEntities(MyClass::class)` |
+| Underlying entities | `->toEntities()` — source objects; plain arrays for array-backed rows |
 | Read XML | `new XmlDataset($xml, 'rowTag', ['field' => 'xpath'])` |
 | Read JSON | `new JsonDataset($json)->getIterator('/path/to/array')` |
 | Read CSV | `TextFileDataset::getInstance($path)->withFieldParser(CSVFILE_COMMA)` |
