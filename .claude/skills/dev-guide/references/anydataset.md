@@ -139,10 +139,16 @@ $ds->getIterator()->first();       // Product(1, 'Widget')
 // Array-backed rows have no entity class — entities ARE the arrays:
 $rows = (new AnyDataset([['id' => 1]]))->getIterator()->toEntities();  // [['id'=>1]]
 
-// To hydrate array-backed rows into typed models, use ObjectCopy explicitly:
-foreach ($ds->getIterator() as $row) {
-    $product = new Product();
-    ObjectCopy::copy($row->toArray(), $product);
+// Hydrating with toEntities(): objects pass through as-is; only
+// array entities need an ObjectCopy into the model:
+$products = [];
+foreach ($ds->getIterator()->toEntities() as $entity) {
+    if (is_array($entity)) {
+        $product = new Product();
+        ObjectCopy::copy($entity, $product);
+        $entity = $product;
+    }
+    $products[] = $entity;   // Product either way
 }
 ```
 
@@ -398,11 +404,11 @@ $filter->and('price', Relation::GREATER_THAN, 10.0);
 $expensive = $fakeData->getIterator($filter)->toArray();
 // [['id'=>2,'name'=>'Gadget','price'=>24.99]]
 
-// Hydrate rows into models (array-backed rows have no entity class — copy explicitly)
+// Hydrate rows into models
 $products = [];
-foreach ($fakeData->getIterator() as $row) {
+foreach ($fakeData->getIterator()->toArray() as $data) {
     $product = new Product();
-    ObjectCopy::copy($row->toArray(), $product);
+    ObjectCopy::copy($data, $product);
     $products[] = $product;
 }
 ```
