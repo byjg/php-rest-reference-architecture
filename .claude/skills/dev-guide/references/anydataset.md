@@ -123,11 +123,23 @@ just the associative array, same as `toArray()`. It pays off with object-backed
 iterators: micro-orm's `Repository` builds rows around your model instances, so there
 `->toEntities()` returns `Product[]`.
 
-```php
-// Array-backed: entities ARE arrays
-$rows = $ds->getIterator()->toEntities();   // [['id'=>1,...], ['id'=>2,...]]
+Rows are **object-backed** when you append objects — `appendRow()` accepts
+`array|object`. Then the two terminals are symmetric: `toArray()` serializes each
+entity to an associative array, `toEntities()` returns the original instances.
 
-// To hydrate arrays into typed models, use ObjectCopy explicitly:
+```php
+$ds = new AnyDataset();
+$ds->appendRow(new Product(1, 'Widget'));
+$ds->appendRow(new Product(2, 'Gadget'));
+
+$ds->getIterator()->toArray();     // [['id'=>1,'name'=>'Widget'], ...]  (serialized)
+$ds->getIterator()->toEntities();  // [Product, Product]  (the same instances)
+$ds->getIterator()->first();       // Product(1, 'Widget')
+
+// Array-backed rows have no entity class — entities ARE the arrays:
+$rows = (new AnyDataset([['id' => 1]]))->getIterator()->toEntities();  // [['id'=>1]]
+
+// To hydrate array-backed rows into typed models, use ObjectCopy explicitly:
 foreach ($ds->getIterator() as $row) {
     $product = new Product();
     ObjectCopy::copy($row->toArray(), $product);
