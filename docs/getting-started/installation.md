@@ -59,10 +59,10 @@ After the loader is installed, run the dedicated script:
 
 ```bash
 # Minimal install
-load.sh php-rest-api -- my-api --namespace=MyApp --name=mycompany/my-api
+load.sh byjg-gluo -- my-api --namespace=MyApp --name=mycompany/my-api
 
 # Fully customised
-load.sh php-rest-api -- my-api \
+load.sh byjg-gluo -- my-api \
   --namespace=MyApp \
   --name=mycompany/my-api \
   --mysql-uri=mysql://root:secret@mysql-container/mydb \
@@ -75,7 +75,7 @@ load.sh php-rest-api -- my-api \
 The script:
 - Generates a temporary `setup.json` (one directory above the target folder) with all answers.
 - Runs `composer create-project byjg/gluo ...` using those values.
-- Cleans up `setup.json` after success and is safe to re-run (it recreates the project folder).
+- Cleans up `setup.json` after success. If the target folder already exists, the script refuses to run (safety measure) — remove the folder first to re-run.
 
 Required flags: the target folder, `--namespace`, and `--name`. Everything else is optional (defaults match the interactive installer). 
 Ensure Composer exists locally or combine it with `load.sh php-docker` first.
