@@ -1,11 +1,11 @@
 # PHP REST Reference Architecture
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
-[![Build Status](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml/badge.svg?branch=master)](https://github.com/byjg/php-rest-reference-architecture/actions/workflows/build-app-image.yml)
+[![Build Status](https://github.com/byjg/php-gluo/actions/workflows/build-app-image.yml/badge.svg?branch=master)](https://github.com/byjg/php-gluo/actions/workflows/build-app-image.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
-[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-rest-reference-architecture)
-[![GitHub license](https://img.shields.io/github/license/byjg/php-rest-reference-architecture.svg)](https://opensource.byjg.com/license/)
-[![GitHub release](https://img.shields.io/github/release/byjg/php-rest-reference-architecture.svg)](https://github.com/byjg/php-rest-reference-architecture/releases)
+[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-gluo)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-gluo.svg)](https://opensource.byjg.com/license/)
+[![GitHub release](https://img.shields.io/github/release/byjg/php-gluo.svg)](https://github.com/byjg/php-gluo/releases)
 
 **Production-ready PHP REST API boilerplate** that lets you focus on building your business logic, not the infrastructure.
 
@@ -159,8 +159,8 @@ You just created a complete CRUD API with:
 ## Support & Community
 
 - 📖 **[Full Documentation](docs/getting-started/installation.md)**
-- 🐛 **[Report Issues](https://github.com/byjg/php-rest-reference-architecture/issues)**
-- 💡 **[Request Features](https://github.com/byjg/php-rest-reference-architecture/issues)**
+- 🐛 **[Report Issues](https://github.com/byjg/php-gluo/issues)**
+- 💡 **[Request Features](https://github.com/byjg/php-gluo/issues)**
 - 🌐 **[ByJG Open Source](http://opensource.byjg.com)**
 
 ## Not a Framework
