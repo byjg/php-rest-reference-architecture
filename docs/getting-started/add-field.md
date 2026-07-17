@@ -102,7 +102,7 @@ Open the file: `src/Controller/ExampleCrudController.php` and add the attribute 
 ## Updating the Tests
 
 We only need to update the `getSampleData()` method to include the new field.
-Open the file: `tests/Rest/ExampleCrudTest.php`
+Open the file: `tests/Controller/ExampleCrudTest.php`
 
 ```php
 protected function getSampleData($array = false)

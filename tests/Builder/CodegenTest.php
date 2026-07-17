@@ -54,4 +54,39 @@ class CodegenTest extends BaseApiTestCase
         // ActiveRecord pattern must not generate repository/service imports
         $this->assertStringNotContainsString('use ByJG\Gluo\Service\BaseService;', $output);
     }
+
+    public function testSaveWritesFilesToProjectLayout(): void
+    {
+        $workdir = sys_get_temp_dir() . '/gluo-codegen-save-' . uniqid();
+        foreach (['src/Model', 'src/Repository', 'src/Service', 'src/Controller', 'tests/Controller'] as $dir) {
+            mkdir("$workdir/$dir", 0755, true);
+        }
+
+        try {
+            $scripts = new class extends Scripts {
+                public function useWorkdir(string $dir): void
+                {
+                    $this->workdir = $dir;
+                }
+            };
+            $scripts->useWorkdir($workdir);
+
+            ob_start();
+            try {
+                $scripts->runCodeGenerator(['--env=test', '--table=dummy', 'model', 'rest', 'test', '--save']);
+            } finally {
+                ob_end_clean();
+            }
+
+            $this->assertFileExists("$workdir/src/Model/Dummy.php");
+            $this->assertFileExists("$workdir/src/Controller/DummyController.php");
+            $this->assertFileExists("$workdir/tests/Controller/DummyTest.php");
+
+            $test = file_get_contents("$workdir/tests/Controller/DummyTest.php");
+            $this->assertStringContainsString('namespace Test\Controller;', $test);
+            $this->assertStringContainsString('class DummyTest', $test);
+        } finally {
+            shell_exec('rm -rf ' . escapeshellarg($workdir));
+        }
+    }
 }

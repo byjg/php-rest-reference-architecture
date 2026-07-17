@@ -79,7 +79,7 @@ This creates:
 - `src/Repository/UsersRepository.php`
 - `src/Service/UsersService.php`
 - `src/Controller/UsersController.php`
-- `tests/Rest/UsersTest.php`
+- `tests/Controller/UsersTest.php`
 - Automatically adds DI bindings to `config/dev/04-repositories.php` and `config/dev/05-services.php`
 
 Generate only specific components:
@@ -103,7 +103,7 @@ composer codegen -- --env=test --table=users all --activerecord --save
 This creates:
 - `src/Model/Users.php` (with ActiveRecord trait)
 - `src/Controller/UsersController.php`
-- `tests/Rest/UsersTest.php`
+- `tests/Controller/UsersTest.php`
 
 Generate only the model:
 
