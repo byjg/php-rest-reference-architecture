@@ -19,7 +19,8 @@ leaving a pure API project.
 ```
 html/
 ├── package.json  vite.config.js  tailwind.config.js
-├── .env.example                     # VITE_API_BASE_URL
+├── .env.example                     # VITE_API_BASE_URL (build-time)
+├── public/config.js                 # runtime API_BASE_URL (replaced in-container)
 └── src/
     ├── lib/api.js                   # fetch wrapper: JWT storage + auto-refresh
     ├── context/AuthContext.jsx      # auth state (sessionStorage)
@@ -45,6 +46,31 @@ npm run dev               # Vite dev server on http://localhost:3000
 The API's dev CORS allowlist (`CORS_SERVERS` in `api/config/dev/credentials.env`) already
 permits the Vite origin. In **production**, set `CORS_SERVERS` to the exact origin the SPA
 is served from.
+
+## Configuring the API URL
+
+There are two ways to tell the SPA where the API lives, for two different moments:
+
+| | Where | When | Used by |
+|---|---|---|---|
+| `VITE_API_BASE_URL` | `html/.env` | **build** (baked into the bundle) | `npm run dev`, `npm run build` |
+| `API_BASE_URL` | container env | **container start** (written to `/config.js`) | the Docker image |
+
+The Docker image (`docker/Dockerfile-html`) is built **once** and configured **per
+environment**. Its entrypoint (`docker/static-html-entrypoint.sh`) writes the
+`API_BASE_URL` environment variable into `/static/config.js` before the static server
+starts; `index.html` loads that `/config.js` before the app boots, and `src/lib/api.js`
+prefers it over the build-time value. So the same image can point at any API host without
+rebuilding:
+
+```bash
+docker run -e API_BASE_URL=https://api.example.com -p 7080:8080 gluo-html:dev
+```
+
+In `docker-compose.yml` the `html` service sets `API_BASE_URL: http://localhost:8080` (the
+host-reachable API). Leave `API_BASE_URL` empty to serve the API from the **same origin**
+as the SPA (e.g. behind one reverse proxy). Resolution order in `src/lib/api.js`:
+runtime `/config.js` → build-time `VITE_API_BASE_URL` → `http://localhost:8080`.
 
 ## How auth works
 

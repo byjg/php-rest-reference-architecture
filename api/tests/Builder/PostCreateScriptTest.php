@@ -273,6 +273,8 @@ class PostCreateScriptTest extends TestCase
 
         $this->assertDirectoryExists($this->workdir . '/html');
         $this->assertFileExists($this->workdir . '/docker/Dockerfile-html');
+        $this->assertFileExists($this->workdir . '/docker/static-html-entrypoint.sh');
+        $this->assertFileExists($this->workdir . '/html/public/config.js');
         $compose = file_get_contents($this->workdir . '/docker-compose.yml');
         $this->assertStringContainsString('gluo-html', $compose);
     }
@@ -286,6 +288,7 @@ class PostCreateScriptTest extends TestCase
 
         $this->assertDirectoryDoesNotExist($this->workdir . '/html');
         $this->assertFileDoesNotExist($this->workdir . '/docker/Dockerfile-html');
+        $this->assertFileDoesNotExist($this->workdir . '/docker/static-html-entrypoint.sh');
         $compose = file_get_contents($this->workdir . '/docker-compose.yml');
         $this->assertStringNotContainsString('gluo-html', $compose);
         $this->assertStringNotContainsString('Dockerfile-html', $compose);

@@ -343,7 +343,7 @@ ENV;
                 self::removeDir("$workdir/html");
                 echo "  Removed: html/\n";
             }
-            foreach (['docker/Dockerfile-html', 'docs/guides/frontend.md'] as $file) {
+            foreach (['docker/Dockerfile-html', 'docker/static-html-entrypoint.sh', 'docs/guides/frontend.md'] as $file) {
                 if (file_exists("$workdir/$file")) {
                     unlink("$workdir/$file");
                     echo "  Removed: $file\n";

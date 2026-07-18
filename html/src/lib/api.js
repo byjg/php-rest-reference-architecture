@@ -1,4 +1,17 @@
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
+// Resolve the API base URL. Runtime config (window.__GLUO_CONFIG__.API_BASE_URL,
+// injected by /config.js at container start) wins so one built image can target
+// any API host; if it is absent we fall back to the build-time VITE_API_BASE_URL
+// (.env), then to the local docker-compose default. An explicit empty string in
+// the runtime config means "same origin as the page".
+function resolveBaseUrl() {
+  const runtime = typeof window !== 'undefined' ? window.__GLUO_CONFIG__ : undefined;
+  if (runtime && Object.prototype.hasOwnProperty.call(runtime, 'API_BASE_URL')) {
+    return String(runtime.API_BASE_URL);
+  }
+  return import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
+}
+
+export const BASE_URL = resolveBaseUrl();
 
 function decodeJwtPayload(t) {
   try {
