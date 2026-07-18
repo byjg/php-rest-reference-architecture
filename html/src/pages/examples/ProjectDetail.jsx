@@ -73,12 +73,12 @@ export default function ProjectDetail() {
     }
   }, [loadNotes, loadProject, loadTasks]);
 
-  // task uuid -> that task's notes
+  // task id -> that task's notes
   const notesByTask = useMemo(() => {
     const map = {};
     notes.forEach((note) => {
-      if (!note.taskUuid) return;
-      (map[note.taskUuid] ||= []).push(note);
+      if (!note.taskId) return;
+      (map[note.taskId] ||= []).push(note);
     });
     return map;
   }, [notes]);
@@ -94,8 +94,8 @@ export default function ProjectDetail() {
     return tasks.filter((task) => {
       const title = task.title?.toLowerCase() || '';
       const status = task.status?.toLowerCase() || '';
-      const uuid = task.uuid?.toLowerCase() || '';
-      return title.includes(needle) || status.includes(needle) || uuid.includes(needle);
+      const id = task.id?.toLowerCase() || '';
+      return title.includes(needle) || status.includes(needle) || id.includes(needle);
     });
   }, [tasks, query]);
 
@@ -258,16 +258,16 @@ export default function ProjectDetail() {
                         <StatusBadge status={task.status} />
                       </td>
                       <td className="max-w-48 truncate whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-500">
-                        {task.uuid || task.id}
+                        {task.id}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-right">
                         <div className="inline-flex gap-2">
                           <Button type="button" variant="outline" className="px-3 py-1.5" onClick={() => setNotesTask(task)}>
                             <StickyNote size={14} />
                             Notes
-                            {(notesByTask[task.uuid]?.length ?? 0) > 0 && (
+                            {(notesByTask[task.id]?.length ?? 0) > 0 && (
                               <span className="ml-1 rounded-full bg-brand/10 px-1.5 text-xs font-semibold text-brand">
-                                {notesByTask[task.uuid].length}
+                                {notesByTask[task.id].length}
                               </span>
                             )}
                           </Button>
@@ -298,7 +298,7 @@ export default function ProjectDetail() {
         }
       >
         {notesTask && (
-          <TaskNotes task={notesTask} notes={notesByTask[notesTask.uuid] || []} onChanged={loadNotes} />
+          <TaskNotes task={notesTask} notes={notesByTask[notesTask.id] || []} onChanged={loadNotes} />
         )}
       </Modal>
 

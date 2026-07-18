@@ -28,13 +28,6 @@ class Task
     protected string|LiteralInterface|null $id = null;
 
     /**
-     * @var string|null
-     */
-    #[OA\Property(type: "string", format: "string", nullable: true)]
-    #[FieldAttribute(fieldName: "uuid", syncWithDb: false)]
-    protected string|null $uuid = null;
-
-    /**
      * @var int|null
      */
     #[OA\Property(type: "integer", format: "int32")]
@@ -75,25 +68,6 @@ class Task
             $id = new HexUuidLiteral($id);
         }
         $this->id = $id;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getUuid(): string|null
-    {
-        return $this->uuid;
-    }
-
-    /**
-     * @param string|null $uuid
-     * @return $this
-     */
-    public function setUuid(string|null $uuid): static
-    {
-        
-        $this->uuid = $uuid;
         return $this;
     }
 

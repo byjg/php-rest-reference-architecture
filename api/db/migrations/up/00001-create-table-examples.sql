@@ -13,33 +13,42 @@ create index ix_project_name on project(name);
 insert into project (name, description) values ('Sample Project', 'A demo project');
 insert into project (name, description) values ('Website Redesign', 'Q3 marketing site');
 
--- Repository pattern, UUID (binary) primary key with a virtual formatted uuid column
+-- Repository pattern, UUID (binary) primary key. The `id` field round-trips as a
+-- formatted UUID string through the FieldUuidAttribute select/update mappers.
 create table task (
     id binary(16) DEFAULT (uuid_to_bin(uuid())) PRIMARY KEY NOT NULL,
-    `uuid` varchar(36) GENERATED ALWAYS AS (insert(insert(insert(insert(hex(`id`),9,0,'-'),14,0,'-'),19,0,'-'),24,0,'-')) VIRTUAL,
     project_id INTEGER not null,
     title varchar(150) not null,
     status varchar(20) not null default 'open',
     constraint fk_task_project foreign key (project_id) references project(id)
 ) ENGINE=InnoDB;
 
--- Give the first task a fixed UUID so the seed note below can attach to it.
+-- Give the first task a fixed UUID so the seed note below can reference it.
 insert into task (id, project_id, title, status)
     values (uuid_to_bin('11111111-2222-3333-4444-555555555555'), 1, 'Set up repository', 'done');
 insert into task (project_id, title, status) values (1, 'Write first endpoint', 'open');
 
--- ActiveRecord pattern, attached to a task by its uuid (soft reference)
+-- ActiveRecord pattern, with a real binary(16) foreign key to task, soft-delete
+-- (deleted_at via the OaDeletedAt trait), and timestamps.
+--
+-- `body_length` is a real MySQL VIRTUAL GENERATED column: the DB computes it from
+-- `body` on every read and it is never written by the app. It must be deterministic
+-- (char_length), which is why "days since created" cannot be a generated column
+-- (NOW() is non-deterministic and rejected here) and is computed in the model instead.
 create table note (
     id int auto_increment not null,
-    task_uuid varchar(36) null,
+    task_id binary(16) not null,
     body varchar(500) not null,
+    body_length int generated always as (char_length(body)) virtual,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    constraint pk_note primary key (id)
+    deleted_at DATETIME NULL,
+    constraint pk_note primary key (id),
+    constraint fk_note_task foreign key (task_id) references task(id)
 ) ENGINE=InnoDB;
 
-create index ix_note_task on note(task_uuid);
+create index ix_note_task on note(task_id);
 
--- Seed note attached to the fixed-UUID task above (matches task.uuid formatting).
-insert into note (task_uuid, body)
-    values ('11111111-2222-3333-4444-555555555555', 'Kickoff note for the first task');
+-- Seed note referencing the fixed-UUID task above.
+insert into note (task_id, body)
+    values (uuid_to_bin('11111111-2222-3333-4444-555555555555'), 'Kickoff note for the first task');

@@ -19,11 +19,14 @@ class NoteTest extends BaseApiTestCase
     /**
      * @return Note|array
      */
+    /** The fixed-UUID task seeded by the example migration. */
+    private const SEED_TASK_UUID = '11111111-2222-3333-4444-555555555555';
+
     protected function getSampleData($array = false)
     {
         $sample = [
 
-            'taskUuid' => 'taskUuid',
+            'taskId' => self::SEED_TASK_UUID,
             'body' => 'body',
         ];
 
@@ -200,5 +203,66 @@ class NoteTest extends BaseApiTestCase
             ])
         ;
         $this->sendRequest($request);
+    }
+
+    public function testGetReturnsComputedDaysField()
+    {
+        $token = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true)['token'];
+
+        // The seed note (id 1) was created "today", so days should be >= 0.
+        $body = $this->sendRequest(
+            (new FakeApiRequester())
+                ->withPsr7Request($this->getPsr7Request())
+                ->withMethod('GET')
+                ->withPath('/note/1')
+                ->withRequestHeader(['Authorization' => "Bearer $token"])
+                ->expectStatus(200)
+        );
+        $note = json_decode($body->getBody()->getContents(), true);
+        $this->assertArrayHasKey('days', $note);
+        $this->assertIsInt($note['days']);
+        $this->assertGreaterThanOrEqual(0, $note['days']);
+
+        // body_length is a real DB VIRTUAL GENERATED column (char_length(body)).
+        $this->assertArrayHasKey('bodyLength', $note);
+        $this->assertSame(mb_strlen($note['body']), $note['bodyLength']);
+    }
+
+    public function testSoftDelete()
+    {
+        $token = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true)['token'];
+
+        // Create a note.
+        $created = json_decode($this->sendRequest(
+            (new FakeApiRequester())
+                ->withPsr7Request($this->getPsr7Request())
+                ->withMethod('POST')
+                ->withPath('/note')
+                ->withRequestBody(json_encode($this->getSampleData(true)))
+                ->withRequestHeader(['Authorization' => "Bearer $token"])
+                ->expectStatus(200)
+        )->getBody()->getContents(), true);
+        $id = $created['id'];
+
+        // Delete it (soft delete via the OaDeletedAt trait).
+        $this->sendRequest(
+            (new FakeApiRequester())
+                ->withPsr7Request($this->getPsr7Request())
+                ->withMethod('DELETE')
+                ->withPath("/note/$id")
+                ->withRequestHeader(['Authorization' => "Bearer $token"])
+                ->expectStatus(200)
+        );
+
+        // It is now hidden from the API (get returns 404)...
+        $this->expectException(\ByJG\RestServer\Exception\Error404Exception::class);
+        $this->sendRequest(
+            (new FakeApiRequester())
+                ->withPsr7Request($this->getPsr7Request())
+                ->withMethod('GET')
+                ->withPath("/note/$id")
+                ->withRequestHeader(['Authorization' => "Bearer $token"])
+                ->expectStatus(404)
+        );
     }
 }

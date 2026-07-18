@@ -153,10 +153,10 @@ class NoteController
         description: "The object Note to be created",
         required: true,
         content: new OA\JsonContent(
-            required: [ "body" ],
+            required: [ "taskId", "body" ],
             properties: [
 
-                new OA\Property(property: "taskUuid", type: "string", format: "string", nullable: true),
+                new OA\Property(property: "taskId", type: "string", format: "string"),
                 new OA\Property(property: "body", type: "string", format: "string"),
             ]
         )
@@ -249,6 +249,50 @@ class NoteController
         // Update model with payload using fill() method
         $model->fill($payload);
         $model->save();
+    }
+
+    /**
+     * Soft-delete a Note. Because the model uses the OaDeletedAt trait, delete()
+     * sets deleted_at instead of removing the row, and the record then disappears
+     * from get()/all() while remaining in the table.
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @return void
+     * @throws Error404Exception
+     */
+    #[OA\Delete(
+        path: "/note/{id}",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["Note"]
+    )]
+    #[OA\Parameter(
+        name: "id",
+        in: "path",
+        required: true,
+        schema: new OA\Schema(type: "integer", format: "int32")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Nothing to return"
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    #[RequireRole(User::ROLE_ADMIN)]
+    public function deleteNote(HttpResponse $response, HttpRequest $request): void
+    {
+        $model = Note::get($request->attribute('id'));
+
+        if (is_null($model)) {
+            throw new Error404Exception("Note not found");
+        }
+
+        $model->delete();
     }
 
 }

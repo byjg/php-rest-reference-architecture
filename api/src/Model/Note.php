@@ -10,17 +10,18 @@ use ByJG\MicroOrm\Literal\LiteralInterface;
 use ByJG\MicroOrm\Literal\HexUuidLiteral;
 use ByJG\MicroOrm\Query;
 use ByJG\MicroOrm\Trait\ActiveRecord;
-use RuntimeException;
 use OpenApi\Attributes as OA;
 use ByJG\Gluo\Trait\OaCreatedAt;
 use ByJG\Gluo\Trait\OaUpdatedAt;
+use ByJG\Gluo\Trait\OaDeletedAt;
+use RuntimeException;
 
 
 /**
  * Class Note
  * @package RestReferenceArchitecture\Model
  */
-#[OA\Schema(required: ["id", "body"], type: "object", xml: new OA\Xml(name: "Note"))]
+#[OA\Schema(required: ["id", "taskId", "body"], type: "object", xml: new OA\Xml(name: "Note"))]
 #[TableAttribute("note")]
 class Note
 {
@@ -30,6 +31,7 @@ class Note
     // Add timestamp traits for automatic timestamp handling
     use OaCreatedAt;
     use OaUpdatedAt;
+    use OaDeletedAt;
 
 
     /**
@@ -40,11 +42,11 @@ class Note
     protected int|null $id = null;
 
     /**
-     * @var string|null
+     * @var string|LiteralInterface|null
      */
-    #[OA\Property(type: "string", format: "string", nullable: true)]
-    #[FieldAttribute(fieldName: "task_uuid")]
-    protected string|null $taskUuid = null;
+    #[OA\Property(type: "string", format: "string")]
+    #[FieldUuidAttribute(fieldName: "task_id")]
+    protected string|LiteralInterface|null $taskId = null;
 
     /**
      * @var string|null
@@ -52,6 +54,30 @@ class Note
     #[OA\Property(type: "string", format: "string")]
     #[FieldAttribute(fieldName: "body")]
     protected string|null $body = null;
+
+    /**
+     * Read-only DB VIRTUAL GENERATED column: the database computes char_length(body)
+     * on every read. Mapped with syncWithDb:false so the app never tries to write it.
+     * This is the canonical "computed in the database" example.
+     *
+     * @var int|null
+     */
+    #[OA\Property(type: "integer", format: "int32", nullable: true)]
+    #[FieldAttribute(fieldName: "body_length", syncWithDb: false)]
+    protected int|null $bodyLength = null;
+
+    /**
+     * Read-only computed field: whole days elapsed since the note was created.
+     * Unlike bodyLength, this canNOT be a DB generated column (it depends on NOW(),
+     * which MySQL rejects in a generated expression), so getDays() derives it in PHP
+     * from `created_at`. The FieldAttribute(syncWithDb:false) only keeps it out of
+     * writes; the value itself is produced by the getter, not hydrated from a column.
+     *
+     * @var int|null
+     */
+    #[OA\Property(type: "integer", format: "int32", nullable: true)]
+    #[FieldAttribute(fieldName: "created_at", syncWithDb: false)]
+    protected int|null $days = null;
 
 
 
@@ -75,21 +101,23 @@ class Note
     }
 
     /**
-     * @return string|null
+     * @return string|LiteralInterface|null
      */
-    public function getTaskUuid(): string|null
+    public function getTaskId(): string|LiteralInterface|null
     {
-        return $this->taskUuid;
+        return $this->taskId;
     }
 
     /**
-     * @param string|null $taskUuid
+     * @param string|LiteralInterface|null $taskId
      * @return $this
      */
-    public function setTaskUuid(string|null $taskUuid): static
+    public function setTaskId(string|LiteralInterface|null $taskId): static
     {
-        
-        $this->taskUuid = $taskUuid;
+        if ($taskId instanceof LiteralInterface) {
+            $taskId = new HexUuidLiteral($taskId);
+        }
+        $this->taskId = $taskId;
         return $this;
     }
 
@@ -107,25 +135,60 @@ class Note
      */
     public function setBody(string|null $body): static
     {
-        
+
         $this->body = $body;
         return $this;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getBodyLength(): int|null
+    {
+        return $this->bodyLength;
+    }
+
+    /**
+     * Setter used only for hydration from the DB (the value is a generated column,
+     * never written back). ObjectCopy needs it to populate the property.
+     *
+     * @param int|null $bodyLength
+     * @return $this
+     */
+    public function setBodyLength(int|null $bodyLength): static
+    {
+        $this->bodyLength = $bodyLength;
+        return $this;
+    }
+
+    /**
+     * Whole days between created_at and now (computed in PHP, read-only).
+     *
+     * @return int|null
+     */
+    public function getDays(): int|null
+    {
+        if (empty($this->createdAt)) {
+            return null;
+        }
+        $timestamp = strtotime($this->createdAt);
+        return $timestamp === false ? null : (int)floor((time() - $timestamp) / 86400);
     }
 
 
 
     /**
-     * @param mixed $taskUuid
+     * @param mixed $taskId
      * @return null|Note[]
      */
-    public static function getByTaskUuid($taskUuid): ?array
+    public static function getByTaskId($taskId): ?array
     {
         if (self::$repository === null) {
             throw new RuntimeException("Repository not initialized");
         }
         $query = Query::getInstance()
             ->table(self::$repository->getMapper()->getTable(), 'alias')
-            ->where('alias.task_uuid = :value', ['value' => $taskUuid]);
+            ->where('alias.task_id = :value', ['value' => $taskId]);
         return self::query($query);
     }
 

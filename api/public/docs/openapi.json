@@ -353,6 +353,44 @@
                         "jwt-token": []
                     }
                 ]
+            },
+            "delete": {
+                "tags": [
+                    "Note"
+                ],
+                "summary": "Soft-delete a Note. Because the model uses the OaDeletedAt trait, delete()\nsets deleted_at instead of removing the row, and the record then disappears\nfrom get()/all() while remaining in the table.",
+                "operationId": "DELETE::/note/{id}::RestReferenceArchitecture\\Controller\\NoteController::deleteNote",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Nothing to return"
+                    },
+                    "401": {
+                        "description": "Not Authorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt-token": []
+                    }
+                ]
             }
         },
         "/note": {
@@ -482,13 +520,13 @@
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "taskId",
                                     "body"
                                 ],
                                 "properties": {
-                                    "taskUuid": {
+                                    "taskId": {
                                         "type": "string",
-                                        "format": "string",
-                                        "nullable": true
+                                        "format": "string"
                                     },
                                     "body": {
                                         "type": "string",
@@ -1265,6 +1303,7 @@
                 "description": "Class Note",
                 "required": [
                     "id",
+                    "taskId",
                     "body"
                 ],
                 "properties": {
@@ -1278,18 +1317,34 @@
                         "format": "date-time",
                         "nullable": true
                     },
+                    "deletedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
                     "id": {
                         "type": "integer",
                         "format": "int32"
                     },
-                    "taskUuid": {
+                    "taskId": {
                         "type": "string",
-                        "format": "string",
-                        "nullable": true
+                        "format": "string"
                     },
                     "body": {
                         "type": "string",
                         "format": "string"
+                    },
+                    "bodyLength": {
+                        "description": "Read-only DB VIRTUAL GENERATED column: the database computes char_length(body)\non every read. Mapped with syncWithDb:false so the app never tries to write it.\nThis is the canonical \"computed in the database\" example.",
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "days": {
+                        "description": "Read-only computed field: whole days elapsed since the note was created.\nUnlike bodyLength, this canNOT be a DB generated column (it depends on NOW(),\nwhich MySQL rejects in a generated expression), so getDays() derives it in PHP\nfrom `created_at`. The FieldAttribute(syncWithDb:false) only keeps it out of\nwrites; the value itself is produced by the getter, not hydrated from a column.",
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
                     }
                 },
                 "type": "object",
@@ -1336,11 +1391,6 @@
                         "type": "string",
                         "format": "string"
                     },
-                    "uuid": {
-                        "type": "string",
-                        "format": "string",
-                        "nullable": true
-                    },
                     "projectId": {
                         "type": "integer",
                         "format": "int32"
@@ -1370,6 +1420,11 @@
                         "nullable": true
                     },
                     "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "deletedAt": {
                         "type": "string",
                         "format": "date-time",
                         "nullable": true

@@ -4,7 +4,7 @@ import { Alert, Button, Input } from '@/components/ui';
 
 /**
  * ActiveRecord example, scoped to a single task: lists that task's notes
- * (note.task_uuid === task.uuid) and adds new ones. Rendered inside a modal
+ * (note.taskId === task.id) and adds new ones. Rendered inside a modal
  * so notes are managed in the context of the task they belong to.
  */
 export default function TaskNotes({ task, notes, onChanged }) {
@@ -17,7 +17,7 @@ export default function TaskNotes({ task, notes, onChanged }) {
     setError('');
     setSaving(true);
     try {
-      await api.postJson('/note', { taskUuid: task.uuid, body: body.trim() });
+      await api.postJson('/note', { taskId: task.id, body: body.trim() });
       setBody('');
       await onChanged();
     } catch (err) {
