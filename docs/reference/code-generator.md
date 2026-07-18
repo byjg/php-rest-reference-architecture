@@ -62,53 +62,55 @@ You can specify the environment in two ways:
 
 ## Examples
 
+The commands below run from the repository root — the root `composer` proxies `codegen` into the `api/` project. (Running them from inside `api/` works too.) Generated files land under `api/`.
+
 ### Repository Pattern (Default)
 
-Generate all components for the 'users' table using the Repository pattern:
+Generate all components for the `project` table using the Repository pattern:
 
 ```bash
 # Using APP_ENV
-APP_ENV=dev composer codegen -- --table=users all --save
+APP_ENV=dev composer codegen -- --table=project all --save
 
 # Using --env parameter
-composer codegen -- --env=dev --table=users all --save
+composer codegen -- --env=dev --table=project all --save
 ```
 
 This creates:
-- `src/Model/Users.php`
-- `src/Repository/UsersRepository.php`
-- `src/Service/UsersService.php`
-- `src/Controller/UsersController.php`
-- `tests/Controller/UsersTest.php`
-- Automatically adds DI bindings to `config/dev/04-repositories.php` and `config/dev/05-services.php`
+- `api/src/Model/Project.php`
+- `api/src/Repository/ProjectRepository.php`
+- `api/src/Service/ProjectService.php`
+- `api/src/Controller/ProjectController.php`
+- `api/tests/Controller/ProjectTest.php`
+- Automatically adds DI bindings to `api/config/dev/04-repositories.php` and `api/config/dev/05-services.php`
 
 Generate only specific components:
 
 ```bash
-APP_ENV=dev composer codegen -- --table=products model controller --save
+APP_ENV=dev composer codegen -- --table=project model controller --save
 ```
 
 ### ActiveRecord Pattern
 
-Generate all components for the 'users' table using the ActiveRecord pattern:
+Generate all components for the `note` table using the ActiveRecord pattern:
 
 ```bash
 # Using APP_ENV
-APP_ENV=test composer codegen -- --table=users all --activerecord --save
+APP_ENV=test composer codegen -- --table=note all --activerecord --save
 
 # Using --env parameter
-composer codegen -- --env=test --table=users all --activerecord --save
+composer codegen -- --env=test --table=note all --activerecord --save
 ```
 
 This creates:
-- `src/Model/Users.php` (with ActiveRecord trait)
-- `src/Controller/UsersController.php`
-- `tests/Controller/UsersTest.php`
+- `api/src/Model/Note.php` (with ActiveRecord trait)
+- `api/src/Controller/NoteController.php`
+- `api/tests/Controller/NoteTest.php`
 
 Generate only the model:
 
 ```bash
-APP_ENV=test composer codegen -- --table=products model --activerecord --save
+APP_ENV=test composer codegen -- --table=note model --activerecord --save
 ```
 
 ### Preview Without Saving
@@ -116,16 +118,16 @@ APP_ENV=test composer codegen -- --table=products model --activerecord --save
 Preview the generated REST controller without saving to disk:
 
 ```bash
-APP_ENV=dev composer codegen -- --table=orders controller
-composer codegen -- --env=dev --table=orders all --activerecord
+APP_ENV=dev composer codegen -- --table=project controller
+composer codegen -- --env=dev --table=note all --activerecord
 ```
 
 ## Automatic Configuration
 
 :::tip Automatic DI Bindings (Repository Pattern Only)
 When using `--save` with the **Repository pattern**, repository and service bindings are automatically added to the configuration files:
-- Repositories → `config/dev/04-repositories.php`
-- Services → `config/dev/05-services.php`
+- Repositories → `api/config/dev/04-repositories.php`
+- Services → `api/config/dev/05-services.php`
 
 No manual configuration needed!
 
@@ -134,10 +136,10 @@ No manual configuration needed!
 
 Example output:
 ```
-Processing Repository for table users...
-File saved in src/Repository/UsersRepository.php
-Added use statement for UsersRepository to 04-repositories.php
-Added DI binding for UsersRepository to 04-repositories.php
+Processing Repository for table project...
+File saved in src/Repository/ProjectRepository.php
+Added use statement for ProjectRepository to 04-repositories.php
+Added DI binding for ProjectRepository to 04-repositories.php
 ```
 
 ## Important Notes
@@ -154,11 +156,11 @@ After generating REST controllers, remember to:
 
 ## Customizing Templates
 
-You can modify existing templates or create your own. The default templates ship inside **byjg/gluo-core** (`vendor/byjg/gluo-core/templates/codegen/`) and use the [Jinja template engine for PHP](https://github.com/byjg/jinja_php). To customize, copy them into your project — a local `templates/codegen/` directory takes precedence over the package templates:
+You can modify existing templates or create your own. The default templates ship inside **byjg/gluo-core** (`api/vendor/byjg/gluo-core/templates/codegen/`) and use the [Jinja template engine for PHP](https://github.com/byjg/jinja_php). To customize, copy them into your project — a local `api/templates/codegen/` directory takes precedence over the package templates:
 
 ```bash
-mkdir -p templates
-cp -r vendor/byjg/gluo-core/templates/codegen templates/codegen
+mkdir -p api/templates/codegen
+cp -r api/vendor/byjg/gluo-core/templates/codegen/* api/templates/codegen/
 ```
 
 **Available templates:**

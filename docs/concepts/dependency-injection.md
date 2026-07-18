@@ -9,7 +9,7 @@ The project uses the [PSR-11](https://www.php-fig.org/psr/psr-11/) container to 
 
 ## Configuration Structure
 
-The configuration is organized by environment in the `config/{environment}/` folders. Each environment can have:
+The configuration is organized by environment in the `api/config/{environment}/` folders. Each environment can have:
 
 - **credentials.env** - Environment variables (database connections, API keys, JWT secrets, etc.)
 - **Numbered PHP files** - Dependency injection bindings organized by layer:
@@ -24,7 +24,7 @@ You must set the `APP_ENV` environment variable to specify which environment to 
 
 ### Example: credentials.env
 
-```env title="config/dev/credentials.env"
+```env title="api/config/dev/credentials.env"
 WEB_SERVER=localhost
 DASH_SERVER=localhost
 WEB_SCHEMA=http
@@ -38,7 +38,7 @@ CORS_SERVERS=.*
 
 ### Example: 01-infrastructure.php
 
-```php title="config/dev/01-infrastructure.php"
+```php title="api/config/dev/01-infrastructure.php"
 <?php
 
 use ByJG\Cache\Psr16\BaseCacheEngine;
@@ -67,7 +67,7 @@ Config::get('WEB_SERVER');
 
 ## Environment Hierarchy
 
-The available environments are defined in the `config/ConfigBootstrap.php` file.
+The environments and their inheritance are defined in `ByJG\Gluo\Config\BaseConfigBootstrap` (byjg/gluo-core); the project's `api/config/ConfigBootstrap.php` just extends it.
 
 The project has four environments with the following inheritance hierarchy:
 
@@ -94,37 +94,33 @@ graph TD
 - **prod** inherits from **staging** and **dev** (with caching enabled)
 
 Child environments override parent configurations. For example:
-- `config/dev/credentials.env` defines base database connection
-- `config/prod/credentials.env` overrides with production database connection
-- `config/prod/01-infrastructure.php` overrides to use FileSystemCache instead of NoCache
+- `api/config/dev/credentials.env` defines base database connection
+- `api/config/prod/credentials.env` overrides with production database connection
+- `api/config/prod/01-infrastructure.php` overrides to use FileSystemCache instead of NoCache
 
-You can modify the environment hierarchy in `config/ConfigBootstrap.php`:
+The project bootstrap in `api/config/ConfigBootstrap.php` is intentionally tiny — the
+environment set, inheritance and caching live in gluo-core, so improvements arrive with
+`composer update`:
 
 ```php
 <?php
 
-use ByJG\Cache\Psr16\FileSystemCacheEngine;
-use ByJG\Config\ConfigInitializeInterface;
-use ByJG\Config\Definition;
-use ByJG\Config\Environment;
+use ByJG\Gluo\Config\BaseConfigBootstrap;
 
-return new class implements ConfigInitializeInterface {
-    public function loadDefinition(?string $env = null): Definition
+return new class extends BaseConfigBootstrap {
+};
+```
+
+To register more OS environment variables, add config directories, or define extra
+environments, override `configureDefinition()`:
+
+```php
+return new class extends BaseConfigBootstrap {
+    #[\Override]
+    protected function configureDefinition(Definition $definition): void
     {
-        $dev = Environment::create('dev');
-        $test = Environment::create('test')->inheritFrom($dev);
-        $staging = Environment::create('staging')->inheritFrom($dev)->withCache(new FileSystemCacheEngine());
-        $prod = Environment::create('prod')->inheritFrom($staging, $dev)->withCache(new FileSystemCacheEngine());
-
-        return (new Definition())
-            ->addEnvironment($dev)
-            ->addEnvironment($test)
-            ->addEnvironment($staging)
-            ->addEnvironment($prod)
-            ->withOSEnvironment([
-                'TAG_VERSION',
-                'TAG_COMMIT',
-            ]);
+        parent::configureDefinition($definition); // keeps TAG_VERSION / TAG_COMMIT
+        $definition->withOSEnvironment(['DATABASE_URL', 'REDIS_HOST']);
     }
 };
 ```
@@ -141,7 +137,7 @@ Dependency Injection (DI) decouples your code from specific implementations, mak
 
 You might want caching enabled in production but disabled in development for easier debugging.
 
-**Development** - `config/dev/01-infrastructure.php`:
+**Development** - `api/config/dev/01-infrastructure.php`:
 
 ```php
 <?php
@@ -156,7 +152,7 @@ return [
 ];
 ```
 
-**Production** - `config/prod/01-infrastructure.php`:
+**Production** - `api/config/prod/01-infrastructure.php`:
 
 ```php
 <?php
@@ -192,7 +188,7 @@ The application automatically returns the correct implementation based on the `A
 ### Constructor Injection (`withInjectedConstructor`)
 
 ```php
-DummyService::class => DI::bind(DummyService::class)
+ProjectService::class => DI::bind(ProjectService::class)
     ->withInjectedConstructor()
     ->toSingleton(),
 ```

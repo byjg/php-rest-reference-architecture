@@ -23,26 +23,27 @@ The reference architecture provides a complete testing framework that allows you
 | Component          | Purpose                  | Location                         |
 |--------------------|--------------------------|----------------------------------|
 | `FakeApiRequester` | In-process API testing   | `ByJG\Gluo\Util\FakeApiRequester` (byjg/gluo-core)  |
-| `BaseApiTestCase`  | Base class for API tests | `tests/Controller/BaseApiTestCase.php` |
-| `Credentials`      | Test user credentials    | `tests/Controller/Credentials.php`     |
+| `BaseApiTestCase`  | Base class for API tests | `api/tests/Controller/BaseApiTestCase.php` |
+| `Credentials`      | Test user credentials    | `api/tests/Controller/Credentials.php`     |
 
 ## Test Structure
 
 ### Directory Layout
 
 ```
-tests/
+api/tests/
 └── Controller/
     ├── BaseApiTestCase.php     # Base test case with schema + DB reset
     ├── Credentials.php         # Helper for authenticating test users
-    ├── DummyTest.php           # Repository pattern example CRUD tests
-    ├── DummyHexTest.php        # Hex/UUID example
+    ├── ProjectTest.php         # Repository pattern example CRUD tests (int PK)
+    ├── TaskTest.php            # Repository pattern UUID example
+    ├── NoteTest.php            # ActiveRecord pattern example
     ├── LoginTest.php           # Authentication flow
     └── ... (add your own files here)
 ```
 
 :::info Want unit tests?
-Add additional directories (e.g., `tests/Service`) as needed—PHPUnit's configuration already looks at the whole `tests/` tree.
+Add additional directories (e.g., `api/tests/Service`) as needed—PHPUnit's configuration already looks at the whole `api/tests/` tree.
 :::
 
 ### Running Tests
@@ -51,21 +52,21 @@ Add additional directories (e.g., `tests/Service`) as needed—PHPUnit's configu
 # Create or reset the testing database
 APP_ENV=test composer migrate -- reset --yes
 
-# Run all tests using the composer script
+# Run all tests using the composer script (proxies to api/)
 APP_ENV=test composer run test
 
-# Run a specific test file
-APP_ENV=test ./vendor/bin/phpunit tests/Controller/DummyTest.php
+# Run a specific test file (from the api/ directory)
+cd api && APP_ENV=test vendor/bin/phpunit tests/Controller/ProjectTest.php
 
 # Run a single test method
-APP_ENV=test ./vendor/bin/phpunit --filter testFullCrud tests/Controller/DummyTest.php
+cd api && APP_ENV=test vendor/bin/phpunit --filter testFullCrud tests/Controller/ProjectTest.php
 
 # Generate coverage (optional)
-APP_ENV=test ./vendor/bin/phpunit --coverage-html coverage/
+cd api && APP_ENV=test vendor/bin/phpunit --coverage-html coverage/
 ```
 
 :::info Database resets automatically
-`tests/Controller/BaseApiTestCase.php` already calls `Migration::reset()` the first time a test runs, but pre-resetting with the command above avoids surprises if you run the suite outside PHPUnit (e.g., invoking migrations manually).
+`api/tests/Controller/BaseApiTestCase.php` already calls `Migration::reset()` the first time a test runs, but pre-resetting with the command above avoids surprises if you run the suite outside PHPUnit (e.g., invoking migrations manually).
 :::
 
 ## FakeApiRequester
@@ -74,7 +75,7 @@ The `FakeApiRequester` class enables in-process API testing without a web server
 
 **Location**: `ByJG\Gluo\Util\FakeApiRequester` (byjg/gluo-core)
 
-`BaseApiTestCase` extends `PHPUnit\Framework\TestCase` and mixes in the `OpenApiValidation` trait, so every call to `sendRequest()` validates the result against `public/docs/openapi.json`. All routing happens in-memory via `FakeApiRequester`, so you don't need a running web server—only a configured database.
+`BaseApiTestCase` extends `PHPUnit\Framework\TestCase` and mixes in the `OpenApiValidation` trait, so every call to `sendRequest()` validates the result against `api/public/docs/openapi.json`. All routing happens in-memory via `FakeApiRequester`, so you don't need a running web server—only a configured database.
 
 ### How It Works
 
@@ -92,7 +93,7 @@ use ByJG\Gluo\Util\FakeApiRequester;
 $request = (new FakeApiRequester())
     ->withPsr7Request($this->getPsr7Request())
     ->withMethod('GET')
-    ->withPath('/dummy/1')
+    ->withPath('/project/1')
     ->withRequestHeader(['Authorization' => 'Bearer ' . $token])
     ->expectStatus(200);
 
@@ -193,9 +194,9 @@ lifting (schema loading, OpenAPI validation, database reset, PSR-7 request
 factory) lives in `ByJG\Gluo\Testing\BaseApiTestCase` (byjg/gluo-core);
 your local class only points it at your project:
 
-**Location**: `tests/Controller/BaseApiTestCase.php`
+**Location**: `api/tests/Controller/BaseApiTestCase.php`
 
-```php title="tests/Controller/BaseApiTestCase.php"
+```php title="api/tests/Controller/BaseApiTestCase.php"
 namespace Test\Controller;
 
 use ByJG\Gluo\Testing\BaseApiTestCase as GluoBaseApiTestCase;
@@ -258,7 +259,7 @@ class SampleTest extends BaseApiTestCase
 
 ### Test User Credentials
 
-**Location**: `tests/Controller/Credentials.php`
+**Location**: `api/tests/Controller/Credentials.php`
 
 ```php
 use Test\Controller\Credentials;
@@ -299,7 +300,7 @@ public function testGetUnauthorized()
     $request
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
-        ->withPath('/dummy/1')
+        ->withPath('/project/1')
         ->expectStatus(401);
 
     $this->sendRequest($request);
@@ -378,12 +379,15 @@ public function testInsufficientPrivileges()
 
 ### Complete CRUD Test
 
-**Location**: `tests/Controller/DummyTest.php:142`
+**Location**: `api/tests/Controller/ProjectTest.php`
+
+Reads (`GET`) require `#[RequireAuthenticated]`, while writes (`POST`/`PUT`) require
+`#[RequireRole(User::ROLE_ADMIN)]`, so the create/update steps below log in as the admin user.
 
 ```php
 public function testFullCrud()
 {
-    // Login
+    // Login as admin (writes require the admin role)
     $loginResponse = $this->sendRequest(
         Credentials::requestLogin(Credentials::getAdminUser())
     );
@@ -395,8 +399,8 @@ public function testFullCrud()
     $createRequest
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('POST')
-        ->withPath('/dummy')
-        ->withRequestBody(json_encode(['field' => 'test value']))
+        ->withPath('/project')
+        ->withRequestBody(json_encode(['name' => 'name', 'description' => 'description']))
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->expectStatus(200);
 
@@ -409,7 +413,7 @@ public function testFullCrud()
     $getRequest
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
-        ->withPath("/dummy/{$id}")
+        ->withPath("/project/{$id}")
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->expectStatus(200);
 
@@ -417,16 +421,16 @@ public function testFullCrud()
     $retrieved = json_decode($getResponse->getBody()->getContents(), true);
 
     $this->assertEquals($id, $retrieved['id']);
-    $this->assertEquals('test value', $retrieved['field']);
+    $this->assertEquals('name', $retrieved['name']);
 
     // UPDATE
-    $retrieved['field'] = 'updated value';
+    $retrieved['description'] = 'updated value';
 
     $updateRequest = new FakeApiRequester();
     $updateRequest
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('PUT')
-        ->withPath('/dummy')
+        ->withPath('/project')
         ->withRequestBody(json_encode($retrieved))
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->expectStatus(200);
@@ -438,14 +442,14 @@ public function testFullCrud()
     $verifyRequest
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
-        ->withPath("/dummy/{$id}")
+        ->withPath("/project/{$id}")
         ->withRequestHeader(['Authorization' => "Bearer {$token}"])
         ->expectStatus(200);
 
     $verifyResponse = $this->sendRequest($verifyRequest);
     $verified = json_decode($verifyResponse->getBody()->getContents(), true);
 
-    $this->assertEquals('updated value', $verified['field']);
+    $this->assertEquals('updated value', $verified['description']);
 }
 ```
 
@@ -463,7 +467,7 @@ public function testList()
     $request
         ->withPsr7Request($this->getPsr7Request())
         ->withMethod('GET')
-        ->withPath('/dummy?page=0&size=20')
+        ->withPath('/project?page=0&size=20')
         ->withRequestHeader(['Authorization' => "Bearer {$data['token']}"])
         ->expectStatus(200);
 

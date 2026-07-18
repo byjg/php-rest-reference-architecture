@@ -7,6 +7,10 @@ title: Architecture Decisions
 
 Guide to choosing between architectural patterns and understanding when to use each approach.
 
+:::note Monorepo layout
+A Gluo project is a monorepo: all PHP (models, repositories, services, controllers, config, migrations, tests) lives under `api/`, while an optional Vite SPA lives under `html/`. The patterns below all concern the `api/` backend. For the frontend that consumes it, see the [Frontend guide](../guides/frontend.md).
+:::
+
 ## Table of Contents
 
 - [Repository vs ActiveRecord](#repository-vs-activerecord)

@@ -224,7 +224,7 @@ public function putExampleCrudStatus(HttpResponse $response, HttpRequest $reques
 
 Create a functional test to ensure your endpoint works correctly and continues to function as expected.
 
-Create or update the test file `tests/Controller/ExampleCrudTest.php`:
+Create or update the test file `api/tests/Controller/ExampleCrudTest.php`:
 
 ```php
 <?php

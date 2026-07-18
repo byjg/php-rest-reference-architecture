@@ -41,7 +41,7 @@ CREATE TABLE `users_property` (
 
 ## Model Mapping
 
-Models live in `src/Model` and already extend the AuthUser abstractions:
+Models live in `api/src/Model` and already extend the AuthUser abstractions:
 
 - `RestReferenceArchitecture\Model\User` extends `ByJG\Authenticate\Model\UserModel`. It uses `FieldUuidAttribute` and OpenAPI attributes to sync the schema.
 - `RestReferenceArchitecture\Model\UserProperties` extends `ByJG\Authenticate\Model\UserPropertiesModel`.
@@ -50,9 +50,9 @@ To customize fields, either modify these models or create your own classes and u
 
 ## AuthUser Service Configuration
 
-`config/dev/02-security.php` wires the repositories and service:
+`api/config/dev/02-security.php` wires the repositories and service:
 
-```php title="config/dev/02-security.php"
+```php title="api/config/dev/02-security.php"
 use ByJG\Authenticate\Enum\LoginField;
 use ByJG\Authenticate\Repository\UserPropertiesRepository;
 use ByJG\Authenticate\Repository\UsersRepository;
@@ -86,9 +86,9 @@ return [
 
 ## Password Policy Configuration
 
-The password policy also lives in `config/dev/02-security.php`:
+The password policy also lives in `api/config/dev/02-security.php`:
 
-```php title="config/dev/02-security.php"
+```php title="api/config/dev/02-security.php"
 use ByJG\Authenticate\Definition\PasswordDefinition;
 
 return [
@@ -115,7 +115,7 @@ AuthUser uses the mapper configured on `User::$password` to hash passwords (`Pas
 
 `JwtWrapper` bindings read the secret from each environment’s `credentials.env` file.
 
-```ini title="config/dev/credentials.env"
+```ini title="api/config/dev/credentials.env"
 JWT_SECRET=ZGV2LS1qd3Qtc2VjcmV0LWtleS1mb3ItbG9jYWwtZGV2ZWxvcG1lbnQtb25seS1wYWQtQUJDREVGR0hJSktMTU5P
 ```
 
@@ -135,10 +135,10 @@ Copy the output and replace `JWT_SECRET` in the appropriate `credentials.env`.
 :::
 
 :::caution Never commit secrets
-Each environment gets its own `config/<env>/credentials.env` — keep this file out of version control (it is already listed in `.gitignore`).
+Each environment gets its own `api/config/<env>/credentials.env` — keep this file out of version control (it is already listed in `.gitignore`).
 :::
 
-```php title="config/dev/02-security.php"
+```php title="api/config/dev/02-security.php"
 use ByJG\Config\Param;
 use ByJG\JwtWrapper\JwtHashHmacSecret;
 use ByJG\JwtWrapper\JwtKeyInterface;
@@ -169,14 +169,14 @@ See the caution above — never commit `credentials.env`.
 | `POST /login/confirmcode`     | Confirm the email + code pair               |
 | `POST /login/resetpassword`   | Set a new password after confirmation       |
 | `GET /profile`                | Profile of the authenticated user (from the JWT) |
-| `PUT /profile`                | Update the authenticated user's name/email  |
+| `PUT /profile`                | Update the authenticated user's name, email, and language (en/fr/pt) |
 | `GET /sampleprotected/ping`   | Sample endpoint requiring authentication    |
 
-The frontend consumes these directly — its `src/lib/api.js` stores the JWT and
+The frontend consumes these directly — its `html/src/lib/api.js` stores the JWT and
 transparently calls `POST /refreshtoken` when the token is close to expiring. See the
 [Frontend guide](frontend.md).
 
-The password reset flow sends emails through `ByJG\Mail\Wrapper\MailWrapperInterface`. Customize the sender/template in `config/dev/06-external.php`, which defines the `MAIL_ENVELOPE` factory.
+The password reset flow sends emails through `ByJG\Mail\Wrapper\MailWrapperInterface`. Customize the sender/template in `api/config/dev/06-external.php`, which defines the `MAIL_ENVELOPE` factory.
 
 ## Testing Authentication
 
@@ -231,6 +231,6 @@ Need the full payload? Access `HttpRequest::attribute('jwt.data')` directly, but
 
 ## Additional Resources
 
-- `src/Controller/LoginController.php` – Reference implementation for all endpoints.
+- `api/src/Controller/LoginController.php` – Reference implementation for all endpoints.
 - `ByJG\Gluo\Util\JwtContext` (byjg/gluo-core) – Helper used by controllers and tests.
-- `config/dev/02-security.php` – Central location for auth wiring.
+- `api/config/dev/02-security.php` – Central location for auth wiring.

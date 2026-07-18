@@ -19,20 +19,23 @@ namespace RestReferenceArchitecture\Model;
 use ByJG\MicroOrm\Attributes\FieldAttribute;
 use ByJG\MicroOrm\Attributes\TableAttribute;
 
-#[TableAttribute("dummy")]
-class Dummy
+#[TableAttribute("project")]
+class Project
 {
     #[FieldAttribute(primaryKey: true, fieldName: "id")]
     protected ?int $id = null;
 
-    #[FieldAttribute(fieldName: "field")]
-    protected ?string $field = null;
+    #[FieldAttribute(fieldName: "name")]
+    protected ?string $name = null;
+
+    #[FieldAttribute(fieldName: "description")]
+    protected ?string $description = null;
 
     // getters/setters omitted for brevity
 }
 ```
 
-Need UUID support? Use `#[TableMySqlUuidPKAttribute]` + `#[FieldUuidAttribute]` as shown in `src/Model/DummyHex.php` and `src/Model/User.php`. They automatically read/write binary UUIDs via `HexUuidLiteral`.
+Need UUID support? Use `#[TableMySqlUuidPKAttribute]` + `#[FieldUuidAttribute]` as shown in `api/src/Model/Task.php` and `api/src/Model/User.php`. They automatically read/write binary UUIDs via `HexUuidLiteral`.
 
 ## 2. Repository Definition
 
@@ -45,13 +48,13 @@ namespace RestReferenceArchitecture\Repository;
 
 use ByJG\AnyDataset\Db\DatabaseExecutor;
 use ByJG\MicroOrm\Repository;
-use RestReferenceArchitecture\Model\Dummy;
+use RestReferenceArchitecture\Model\Project;
 
-class DummyRepository extends BaseRepository
+class ProjectRepository extends BaseRepository
 {
     public function __construct(DatabaseExecutor $executor)
     {
-        $this->repository = new Repository($executor, Dummy::class);
+        $this->repository = new Repository($executor, Project::class);
     }
 }
 ```
@@ -59,7 +62,7 @@ class DummyRepository extends BaseRepository
 `BaseRepository` already exposes useful helpers:
 
 ```php
-$dummy = $repository->get($id);
+$project = $repository->get($id);
 $list  = $repository->list(page: 0, size: 20);
 $model = $repository->model();          // New instance of mapped entity
 $repo  = $repository->getRepository();  // Direct access to ByJG\Repository
@@ -70,7 +73,7 @@ Saving and deleting records delegates to Micro ORM while keeping literals in syn
 
 ```php
 $model = $repository->model()
-    ->setField('hello world');
+    ->setName('hello world');
 
 $saved = $repository->save($model);
 $repository->delete($saved->getId());
@@ -83,13 +86,13 @@ Use `ByJG\MicroOrm\Query` (or any `QueryBuilderInterface`) for filtered results:
 ```php
 use ByJG\MicroOrm\Query;
 
-class DummyRepository extends BaseRepository
+class ProjectRepository extends BaseRepository
 {
-    public function findByField(string $value): array
+    public function findByName(string $value): array
     {
         $query = Query::getInstance()
             ->table($this->getMapper()->getTable())
-            ->where('field = :value', ['value' => $value])
+            ->where('name = :value', ['value' => $value])
             ->orderBy(['id DESC']);
 
         return $this->getRepository()->getByQuery($query);
@@ -103,7 +106,7 @@ class DummyRepository extends BaseRepository
 
 Binary UUID columns are transparent when you rely on the attribute helpers:
 
-- `#[TableMySqlUuidPKAttribute("dummy_hex")]` wires the table and default UUID generator.
+- `#[TableMySqlUuidPKAttribute("task")]` wires the table and default UUID generator.
 - `#[FieldUuidAttribute(primaryKey: true)]` handles binary ⇄ string conversion automatically.
 - `HexUuidLiteral::create($uuid)` lets you query by UUID strings without manual hex handling.
 
@@ -111,22 +114,22 @@ Binary UUID columns are transparent when you rely on the attribute helpers:
 
 ## 5. Services and REST Controllers
 
-Repositories are registered in `config/<env>/04-repositories.php` and injected into services (see `src/Service/DummyService.php`). Services orchestrate repositories, and REST controllers resolve services via the PSR-11 container. For deeper patterns (DTOs, filters, transactions), read [Repository Patterns](repository-advanced.md) and [Service Layer](services.md).
+Repositories are registered in `api/config/<env>/04-repositories.php` and injected into services (see `api/src/Service/ProjectService.php`). Services orchestrate repositories, and REST controllers resolve services via the PSR-11 container. For deeper patterns (DTOs, filters, transactions), read [Repository Patterns](repository-advanced.md) and [Service Layer](services.md).
 
 ## 6. ActiveRecord REST Endpoints
 
-When using the ActiveRecord pattern, the controller calls model methods directly — no separate service class is required. The reference implementation is `src/Controller/DummyActiveRecordController.php`.
+When using the ActiveRecord pattern, the controller calls model methods directly — no separate service class is required. The reference implementation is `api/src/Controller/NoteController.php`.
 
 ### GET — Fetch by ID
 
-```php title="src/Controller/DummyActiveRecordController.php (GET by id)"
+```php title="api/src/Controller/NoteController.php (GET by id)"
 #[RequireAuthenticated]
-public function getDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+public function getNote(HttpResponse $response, HttpRequest $request): void
 {
-    $model = DummyActiveRecord::get($request->attribute('id'));
+    $model = Note::get($request->attribute('id'));
 
     if (is_null($model)) {
-        throw new Error404Exception("DummyActiveRecord not found");
+        throw new Error404Exception("Note not found");
     }
 
     $response->write($model);
@@ -135,27 +138,27 @@ public function getDummyActiveRecord(HttpResponse $response, HttpRequest $reques
 
 ### GET — List with Pagination
 
-```php title="src/Controller/DummyActiveRecordController.php (list)"
+```php title="api/src/Controller/NoteController.php (list)"
 #[RequireAuthenticated]
-public function listDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+public function listNote(HttpResponse $response, HttpRequest $request): void
 {
-    $models = DummyActiveRecord::all($request->queryString('page', 0), $request->queryString('size', 50));
+    $models = Note::all((int)($request->queryString('page') ?? 0), (int)($request->queryString('size') ?? 50));
     $response->write($models);
 }
 ```
 
 ### POST — Create
 
-Use `DummyActiveRecord::new($payload)` to hydrate a new instance from an array, then call `save()`:
+Use `Note::new($payload)` to hydrate a new instance from an array, then call `save()`:
 
-```php title="src/Controller/DummyActiveRecordController.php (create)"
+```php title="api/src/Controller/NoteController.php (create)"
 #[RequireRole(User::ROLE_ADMIN)]
 #[ValidateRequest]
-public function postDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+public function postNote(HttpResponse $response, HttpRequest $request): void
 {
     $payload = ValidateRequest::getPayload();
 
-    $model = DummyActiveRecord::new($payload);
+    $model = Note::new($payload);
     $model->save();
 
     $response->write(["id" => $model->getId()]);
@@ -166,17 +169,17 @@ public function postDummyActiveRecord(HttpResponse $response, HttpRequest $reque
 
 Use `->fill($payload)` to apply changes to an existing instance, then call `save()`:
 
-```php title="src/Controller/DummyActiveRecordController.php (update)"
+```php title="api/src/Controller/NoteController.php (update)"
 #[RequireRole(User::ROLE_ADMIN)]
 #[ValidateRequest]
-public function putDummyActiveRecord(HttpResponse $response, HttpRequest $request): void
+public function putNote(HttpResponse $response, HttpRequest $request): void
 {
     $payload = ValidateRequest::getPayload();
 
-    $model = DummyActiveRecord::get($payload['id'] ?? null);
+    $model = Note::get($payload['id'] ?? null);
 
     if (is_null($model)) {
-        throw new Error404Exception("DummyActiveRecord not found");
+        throw new Error404Exception("Note not found");
     }
 
     $model->fill($payload);
@@ -188,6 +191,6 @@ public function putDummyActiveRecord(HttpResponse $response, HttpRequest $reques
 
 | Service pattern | ActiveRecord pattern |
 |---|---|
-| `Config::get(DummyService::class)->create($payload)` | `DummyActiveRecord::new($payload)->save()` |
-| `Config::get(DummyService::class)->getOrFail($id)` | `DummyActiveRecord::get($id)` |
+| `Config::get(ProjectService::class)->create($payload)` | `Note::new($payload)->save()` |
+| `Config::get(ProjectService::class)->getOrFail($id)` | `Note::get($id)` |
 | `$service->update($payload)` | `$model->fill($payload); $model->save()` |

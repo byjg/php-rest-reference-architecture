@@ -207,7 +207,7 @@ APP_ENV=test composer run test
 # OR: docker exec -it $CONTAINER_NAME composer run test
 ```
 
-**Note**: If you chose not to install examples, the project will only include authentication tests. Example tests (Dummy, Sample) will not be present.
+**Note**: If you chose not to install examples, the project will only include authentication tests. Example tests (Project/Task/Note, Sample) will not be present.
 
 ## Documentation
 

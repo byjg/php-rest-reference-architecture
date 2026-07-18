@@ -359,7 +359,7 @@ CREATE TABLE products (
 The code generator automatically adds timestamp fields:
 
 ```bash
-composer run gen create products name:string price:decimal
+composer codegen -- --env=dev --table=products model --save
 ```
 
 Generates:
@@ -622,7 +622,7 @@ class Product
 
 **Problem**: Timestamps in wrong timezone
 
-**Solution**: Set timezone in `config/<env>/02-security.php`:
+**Solution**: Set timezone in `api/config/<env>/02-security.php`:
 
 ```php
 return [
