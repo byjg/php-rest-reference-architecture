@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHP REST Reference Architecture ByJG</title>
-    <meta name="description" content="Production-ready PHP boilerplate to build professional REST APIs — with code generation, JWT auth, migrations and OpenAPI.">
+    <title>Gluo · PHP REST API</title>
+    <meta name="description" content="Gluo — production-ready PHP REST API starter with code generation, JWT auth, migrations and OpenAPI.">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -475,7 +475,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/></svg>
             Open Source ByJG
         </div>
-        <h1>PHP REST Reference Architecture</h1>
+        <h1>Gluo</h1>
         <p>A production-ready boilerplate to build professional REST APIs in PHP — with JWT auth, code generation, migrations, and OpenAPI baked in.</p>
         <div class="hero-actions">
             <a href="#quickstart" class="btn btn-primary">
@@ -556,8 +556,8 @@
                 </button>
                 <div class="accordion-content">
                     <div class="accordion-inner">
-                        <div class="step"><strong>Step 1:</strong> Create an "up" migration file in <span class="inline-code">db/migrations/up/</span> using format <span class="inline-code">0000X-description.sql</span></div>
-                        <div class="step"><strong>Step 2:</strong> Create a "down" migration file in <span class="inline-code">db/migrations/down/</span> for rollbacks (number should be X-1)</div>
+                        <div class="step"><strong>Step 1:</strong> Create an "up" migration file in <span class="inline-code">api/db/migrations/up/</span> using format <span class="inline-code">0000X-description.sql</span></div>
+                        <div class="step"><strong>Step 2:</strong> Create a "down" migration file in <span class="inline-code">api/db/migrations/down/</span> for rollbacks (number should be X-1)</div>
                         <div class="step"><strong>Step 3:</strong> Apply the migration</div>
                         <div class="code-wrapper">
                             <div class="code-block">APP_ENV=dev composer run migrate -- update</div>
@@ -609,7 +609,7 @@
                     <div class="accordion-inner">
                         <div class="step"><strong>Access Swagger UI:</strong> View interactive API documentation</div>
                         <div class="code-wrapper">
-                            <div class="code-block">http://localhost:8080/docs</div>
+                            <div class="code-block">http://localhost:8080/docs/</div>
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                         </div>
                         <div class="step"><strong>Update after code changes:</strong> Regenerate OpenAPI spec</div>
@@ -617,7 +617,7 @@
                             <div class="code-block">APP_ENV=dev composer run openapi</div>
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                         </div>
-                        <div class="step"><strong>OpenAPI file:</strong> <span class="inline-code">public/docs/openapi.json</span></div>
+                        <div class="step"><strong>OpenAPI file:</strong> <span class="inline-code">api/public/docs/openapi.json</span></div>
                     </div>
                 </div>
             </div>
@@ -629,7 +629,7 @@
                 </button>
                 <div class="accordion-content">
                     <div class="accordion-inner">
-                        <div class="step"><strong>Step 1:</strong> Register in DI container (e.g., <span class="inline-code">config/dev/05-services.php</span>)</div>
+                        <div class="step"><strong>Step 1:</strong> Register in DI container (e.g., <span class="inline-code">api/config/dev/05-services.php</span>)</div>
                         <div class="code-wrapper">
                             <div class="code-block">use ByJG\Config\DependencyInjection as DI;
 
@@ -673,7 +673,7 @@ use ByJG\Config\Config;
 #[RequireAuthenticated]
 public function getProduct(HttpResponse $response, HttpRequest $request): void {
     $service = Config::get(ProductsService::class);
-    $result = $service->getOrFail($request->param('id'));
+    $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }</div>
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -984,7 +984,7 @@ public function getProduct(HttpResponse $response, HttpRequest $request): void {
 <footer>
     <div class="footer-inner">
         <div class="footer-brand">
-            <strong>PHP REST Reference ByJG</strong>
+            <strong>Gluo · ByJG</strong>
             <p>Licensed under MIT · Built for the PHP community.</p>
         </div>
         <div class="footer-links">
@@ -992,7 +992,7 @@ public function getProduct(HttpResponse $response, HttpRequest $request): void {
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
                 GitHub
             </a>
-            <a href="/docs" class="btn btn-ghost">
+            <a href="/docs/" class="btn btn-ghost">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
                 Docs
             </a>
