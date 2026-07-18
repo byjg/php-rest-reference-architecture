@@ -23,7 +23,9 @@ create table task (
     constraint fk_task_project foreign key (project_id) references project(id)
 ) ENGINE=InnoDB;
 
-insert into task (project_id, title, status) values (1, 'Set up repository', 'done');
+-- Give the first task a fixed UUID so the seed note below can attach to it.
+insert into task (id, project_id, title, status)
+    values (uuid_to_bin('11111111-2222-3333-4444-555555555555'), 1, 'Set up repository', 'done');
 insert into task (project_id, title, status) values (1, 'Write first endpoint', 'open');
 
 -- ActiveRecord pattern, attached to a task by its uuid (soft reference)
@@ -38,4 +40,6 @@ create table note (
 
 create index ix_note_task on note(task_uuid);
 
-insert into note (task_uuid, body) values (null, 'First note — welcome to Gluo');
+-- Seed note attached to the fixed-UUID task above (matches task.uuid formatting).
+insert into note (task_uuid, body)
+    values ('11111111-2222-3333-4444-555555555555', 'Kickoff note for the first task');

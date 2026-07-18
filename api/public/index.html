@@ -1138,7 +1138,10 @@ public function getProduct(HttpResponse $response, HttpRequest $request): void {
         if (!lastCreatedUuid) { alert('Please create a Task first to get a UUID'); return; }
         apiCall('PUT', '/task', { id: lastCreatedUuid, projectId: 1, title: 'Updated Task ' + Date.now(), status: 'done' });
     }
-    function createNote()    { apiCall('POST', '/note', { body: 'Note ' + Date.now() }); }
+    function createNote() {
+        if (!lastCreatedUuid) { alert('Please create a Task first — notes attach to a task'); return; }
+        apiCall('POST', '/note', { taskUuid: lastCreatedUuid, body: 'Note ' + Date.now() });
+    }
     // End Example
 
     function displayResponse(endpoint, status, data) {
