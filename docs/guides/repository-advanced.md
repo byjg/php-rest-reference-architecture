@@ -458,16 +458,16 @@ class Note
     use ActiveRecord;
 
     /**
-     * Find records by task UUID
+     * Find records by task id (the binary(16) foreign key to task)
      *
-     * @param mixed $taskUuid
+     * @param mixed $taskId
      * @return null|Note[]
      */
-    public static function getByTaskUuid($taskUuid): ?array
+    public static function getByTaskId($taskId): ?array
     {
         $query = Query::getInstance()
             ->table(self::$repository->getMapper()->getTable(), 'alias')
-            ->where('alias.task_uuid = :value', ['value' => $taskUuid]);
+            ->where('alias.task_id = :value', ['value' => $taskId]);
 
         return self::query($query);
     }
@@ -508,7 +508,7 @@ class Note
 
 ```php
 // Call static methods directly on the model
-$notes = Note::getByTaskUuid('550e8400-e29b-41d4-a716-446655440000');
+$notes = Note::getByTaskId('550e8400-e29b-41d4-a716-446655440000');
 $recent = Note::findRecent();
 $note = Note::getByBody('Remember to follow up');
 ```
@@ -716,7 +716,7 @@ $note->save();
 $note->delete();
 
 // Query
-$results = Note::getByTaskUuid('550e8400-e29b-41d4-a716-446655440000');
+$results = Note::getByTaskId('550e8400-e29b-41d4-a716-446655440000');
 ```
 
 ### Adding Custom Methods

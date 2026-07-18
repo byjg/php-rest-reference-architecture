@@ -194,3 +194,69 @@ public function putNote(HttpResponse $response, HttpRequest $request): void
 | `Config::get(ProjectService::class)->create($payload)` | `Note::new($payload)->save()` |
 | `Config::get(ProjectService::class)->getOrFail($id)` | `Note::get($id)` |
 | `$service->update($payload)` | `$model->fill($payload); $model->save()` |
+
+## 7. Read-only and computed fields (the Note example)
+
+`api/src/Model/Note.php` demonstrates three field patterns beyond a plain column. All
+three rely on `syncWithDb: false`, which keeps a property in the mapper (so it is selected
+and hydrated) but excludes it from writes.
+
+### Binary foreign key
+
+`task_id` is a real `binary(16)` foreign key to `task(id)`, mapped with the same helper as
+a UUID primary key:
+
+```php title="api/src/Model/Note.php"
+#[OA\Property(type: "string", format: "string")]
+#[FieldUuidAttribute(fieldName: "task_id")]
+protected string|LiteralInterface|null $taskId = null;
+```
+
+`FieldUuidAttribute` converts binary ⇄ formatted UUID string on select/update, so callers
+pass and receive human-readable UUIDs (`Note::getByTaskId('…')`).
+
+### Database virtual column (`body_length`)
+
+The database computes this on every read; the app never writes it. The migration declares a
+MySQL **generated** column, and the model maps it read-only:
+
+```sql title="api/db/migrations/up/00001-create-table-examples.sql"
+body_length int generated always as (char_length(body)) virtual
+```
+
+```php title="api/src/Model/Note.php"
+#[OA\Property(type: "integer", format: "int32", nullable: true)]
+#[FieldAttribute(fieldName: "body_length", syncWithDb: false)]
+protected int|null $bodyLength = null;
+```
+
+It needs a **setter** (`setBodyLength`) even though it is read-only: hydration copies DB
+rows onto the model through setters, so a getter alone would leave the property `null`.
+
+### Computed field in PHP (`days`)
+
+A value the database *cannot* generate — "days since creation" depends on `NOW()`, which
+MySQL rejects in a generated-column expression. So it is derived in PHP from `created_at`.
+The `FieldAttribute(syncWithDb: false)` only keeps it out of writes; the value comes from
+the getter, not from a column:
+
+```php title="api/src/Model/Note.php"
+#[OA\Property(type: "integer", format: "int32", nullable: true)]
+#[FieldAttribute(fieldName: "created_at", syncWithDb: false)]
+protected int|null $days = null;
+
+public function getDays(): int|null
+{
+    if (empty($this->createdAt)) {
+        return null;
+    }
+    $timestamp = strtotime($this->createdAt);
+    return $timestamp === false ? null : (int)floor((time() - $timestamp) / 86400);
+}
+```
+
+### Soft delete
+
+Note also uses `OaDeletedAt`, so `DELETE /note/{id}` calls `$model->delete()`, which sets
+`deleted_at` instead of removing the row; `Note::get()`/`Note::all()` then skip it. See
+[Traits](../reference/traits.md#oadeletedat-trait) for the trait details.
