@@ -2,11 +2,29 @@ export const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8
 
 function decodeJwtPayload(t) {
   try {
-    const base64 = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = t.split('.')[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
     return JSON.parse(atob(base64));
   } catch {
     return null;
   }
+}
+
+async function parseResponseBody(res) {
+  const text = await res.text();
+  if (!text || res.status === 204) return null;
+
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return JSON.parse(text);
+  }
+  return text;
+}
+
+function getResponseMessage(data, fallback) {
+  if (typeof data === 'string') return data;
+  return data?.error?.message || data?.message || fallback;
 }
 
 export const token = {
@@ -37,7 +55,8 @@ export function setAuthErrorHandler(fn) {
 }
 
 async function apiFetch(path, options = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const { skipAuthError, ...fetchOptions } = options;
+  const headers = { ...(fetchOptions.headers || {}) };
   let authenticated = false;
 
   const currentToken = token.get();
@@ -61,12 +80,12 @@ async function apiFetch(path, options = {}) {
     authenticated = true;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${BASE_URL}${path}`, { ...fetchOptions, headers });
 
   // Centralised auth-error capture. 403 always means "insufficient role";
   // 401 on an authenticated request means the session expired (a 401 on the
   // login/refresh calls themselves has no token attached and is left to the caller).
-  if (onAuthError && !options.skipAuthError) {
+  if (onAuthError && !skipAuthError) {
     if (res.status === 403) onAuthError(403, res);
     else if (res.status === 401 && authenticated) onAuthError(401, res);
   }
@@ -74,9 +93,30 @@ async function apiFetch(path, options = {}) {
   return res;
 }
 
+async function request(path, options = {}) {
+  const res = await apiFetch(path, options);
+  const data = await parseResponseBody(res);
+  if (!res.ok) {
+    throw new Error(getResponseMessage(data, `Request failed with status ${res.status}`));
+  }
+  return data;
+}
+
+function jsonOptions(method, body, opts = {}) {
+  return {
+    ...opts,
+    method,
+    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+    body: JSON.stringify(body),
+  };
+}
+
 export const api = {
-  post: (path, body, opts) => apiFetch(path, { method: 'POST', body: JSON.stringify(body), ...opts }),
+  request,
+  postJson: (path, body, opts) => request(path, jsonOptions('POST', body, opts)),
+  putJson: (path, body, opts) => request(path, jsonOptions('PUT', body, opts)),
+  post: (path, body, opts) => apiFetch(path, jsonOptions('POST', body, opts)),
   get: (path, opts) => apiFetch(path, { method: 'GET', ...opts }),
-  put: (path, body, opts) => apiFetch(path, { method: 'PUT', body: JSON.stringify(body), ...opts }),
+  put: (path, body, opts) => apiFetch(path, jsonOptions('PUT', body, opts)),
   del: (path, opts) => apiFetch(path, { method: 'DELETE', ...opts }),
 };

@@ -35,10 +35,8 @@ export default function ForgotPassword() {
   const requestReset = (e) => {
     e.preventDefault();
     call(async () => {
-      const res = await api.post('/login/resetrequest', { email });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'Request failed');
-      setResetToken(data.token || '');
+      const data = await api.postJson('/login/resetrequest', { email }, { skipAuthError: true });
+      setResetToken(data?.token || '');
       setInfo('If the email exists, a confirmation code was sent to it.');
       setStep(2);
     });
@@ -47,10 +45,8 @@ export default function ForgotPassword() {
   const confirmCode = (e) => {
     e.preventDefault();
     call(async () => {
-      const res = await api.post('/login/confirmcode', { email, token: resetToken, code });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'Invalid code');
-      setResetToken(data.token || resetToken);
+      const data = await api.postJson('/login/confirmcode', { email, token: resetToken, code }, { skipAuthError: true });
+      setResetToken(data?.token || resetToken);
       setInfo('');
       setStep(3);
     });
@@ -59,9 +55,7 @@ export default function ForgotPassword() {
   const resetPassword = (e) => {
     e.preventDefault();
     call(async () => {
-      const res = await api.post('/login/resetpassword', { email, token: resetToken, password });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'Reset failed');
+      await api.postJson('/login/resetpassword', { email, token: resetToken, password }, { skipAuthError: true });
       navigate('/login');
     });
   };

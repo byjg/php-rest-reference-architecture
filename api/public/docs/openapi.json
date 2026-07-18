@@ -568,6 +568,15 @@
                                         },
                                         "username": {
                                             "type": "string"
+                                        },
+                                        "language": {
+                                            "type": "string",
+                                            "nullable": true,
+                                            "enum": [
+                                                "en",
+                                                "fr",
+                                                "pt"
+                                            ]
                                         }
                                     },
                                     "type": "object"
@@ -614,6 +623,15 @@
                                     },
                                     "email": {
                                         "type": "string"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "enum": [
+                                            "en",
+                                            "fr",
+                                            "pt"
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -641,6 +659,15 @@
                                         },
                                         "email": {
                                             "type": "string"
+                                        },
+                                        "language": {
+                                            "type": "string",
+                                            "nullable": true,
+                                            "enum": [
+                                                "en",
+                                                "fr",
+                                                "pt"
+                                            ]
                                         }
                                     },
                                     "type": "object"

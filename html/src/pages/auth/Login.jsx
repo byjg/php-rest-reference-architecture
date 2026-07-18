@@ -17,14 +17,10 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/login', { username, password });
-      const data = await res.json();
-      if (res.ok && data.token) {
-        login(data.token, data.data);
-        navigate('/dashboard');
-      } else {
-        setError(data.error?.message || 'Login failed');
-      }
+      const data = await api.postJson('/login', { username, password }, { skipAuthError: true });
+      if (!data?.token) throw new Error('Login failed');
+      login(data.token, data.data);
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message);
     } finally {

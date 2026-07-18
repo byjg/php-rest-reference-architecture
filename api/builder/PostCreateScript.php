@@ -402,7 +402,7 @@ ENV;
         return [
             'html/src/pages/examples/ProjectsList.jsx',
             'html/src/pages/examples/ProjectDetail.jsx',
-            'html/src/pages/examples/NotesWidget.jsx',
+            'html/src/pages/examples/TaskNotes.jsx',
             'html/src/lib/examplesApi.js',
         ];
     }

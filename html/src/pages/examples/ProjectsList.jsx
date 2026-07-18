@@ -20,9 +20,7 @@ export default function ProjectsList() {
   const load = async () => {
     setError('');
     try {
-      const res = await api.get('/project');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'Failed to load projects');
+      const data = await api.request('/project', { method: 'GET' });
       setProjects(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);
@@ -83,11 +81,11 @@ export default function ProjectsList() {
         name: form.name.trim(),
         description: form.description.trim(),
       };
-      const res = editingProject
-        ? await api.put('/project', { id: editingProject.id, ...payload })
-        : await api.post('/project', payload);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error?.message || (editingProject ? 'Update failed' : 'Create failed'));
+      if (editingProject) {
+        await api.putJson('/project', { id: editingProject.id, ...payload });
+      } else {
+        await api.postJson('/project', payload);
+      }
 
       setModalOpen(false);
       setForm(blankForm);

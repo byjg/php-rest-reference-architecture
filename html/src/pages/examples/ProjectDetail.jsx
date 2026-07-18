@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Edit3, ListPlus, Search } from 'lucide-react';
+import { ArrowLeft, Edit3, ListPlus, Search, StickyNote } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Alert, Button, Card, EmptyState, Field, Input, Modal, PageHeader } from '@/components/ui';
-import NotesWidget from '@/pages/examples/NotesWidget';
+import TaskNotes from '@/pages/examples/TaskNotes';
 
 const STATUSES = ['open', 'in-progress', 'done'];
 const blankTaskForm = { title: '', status: 'open' };
@@ -31,8 +31,10 @@ export default function ProjectDetail() {
   const { id } = useParams();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [notes, setNotes] = useState([]);
   const [taskForm, setTaskForm] = useState(blankTaskForm);
   const [editingTask, setEditingTask] = useState(null);
+  const [notesTask, setNotesTask] = useState(null);
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
   const [taskError, setTaskError] = useState('');
@@ -40,36 +42,50 @@ export default function ProjectDetail() {
   const [saving, setSaving] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
 
-  const loadProject = async () => {
-    const res = await api.get(`/project/${id}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Failed to load project');
+  const loadProject = useCallback(async () => {
+    const data = await api.request(`/project/${id}`, { method: 'GET' });
     setProject(data);
-  };
+  }, [id]);
 
-  const loadTasks = async () => {
-    const res = await api.get('/task');
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Failed to load tasks');
+  const loadTasks = useCallback(async () => {
+    const data = await api.request('/task', { method: 'GET' });
     setTasks(Array.isArray(data) ? data.filter((t) => String(t.projectId) === String(id)) : []);
-  };
+  }, [id]);
 
-  const load = async () => {
+  const loadNotes = useCallback(async () => {
+    try {
+      const data = await api.request('/note', { method: 'GET' });
+      setNotes(Array.isArray(data) ? data : []);
+    } catch {
+      setNotes([]);
+    }
+  }, []);
+
+  const load = useCallback(async () => {
     setError('');
     setLoading(true);
     try {
-      await Promise.all([loadProject(), loadTasks()]);
+      await Promise.all([loadProject(), loadTasks(), loadNotes()]);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadNotes, loadProject, loadTasks]);
+
+  // task uuid -> that task's notes
+  const notesByTask = useMemo(() => {
+    const map = {};
+    notes.forEach((note) => {
+      if (!note.taskUuid) return;
+      (map[note.taskUuid] ||= []).push(note);
+    });
+    return map;
+  }, [notes]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [load]);
 
   const filteredTasks = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -121,11 +137,11 @@ export default function ProjectDetail() {
         title: taskForm.title.trim(),
         status: taskForm.status,
       };
-      const res = editingTask
-        ? await api.put('/task', { id: editingTask.id, ...payload })
-        : await api.post('/task', payload);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error?.message || (editingTask ? 'Update failed' : 'Create failed'));
+      if (editingTask) {
+        await api.putJson('/task', { id: editingTask.id, ...payload });
+      } else {
+        await api.postJson('/task', payload);
+      }
 
       setTaskModalOpen(false);
       setTaskForm(blankTaskForm);
@@ -245,10 +261,21 @@ export default function ProjectDetail() {
                         {task.uuid || task.id}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-right">
-                        <Button type="button" variant="outline" className="px-3 py-1.5" onClick={() => openEditTask(task)}>
-                          <Edit3 size={14} />
-                          Edit
-                        </Button>
+                        <div className="inline-flex gap-2">
+                          <Button type="button" variant="outline" className="px-3 py-1.5" onClick={() => setNotesTask(task)}>
+                            <StickyNote size={14} />
+                            Notes
+                            {(notesByTask[task.uuid]?.length ?? 0) > 0 && (
+                              <span className="ml-1 rounded-full bg-brand/10 px-1.5 text-xs font-semibold text-brand">
+                                {notesByTask[task.uuid].length}
+                              </span>
+                            )}
+                          </Button>
+                          <Button type="button" variant="outline" className="px-3 py-1.5" onClick={() => openEditTask(task)}>
+                            <Edit3 size={14} />
+                            Edit
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -259,7 +286,21 @@ export default function ProjectDetail() {
         </div>
       </Card>
 
-      <NotesWidget tasks={tasks} />
+      <Modal
+        open={Boolean(notesTask)}
+        onClose={() => setNotesTask(null)}
+        title={notesTask ? `Notes · ${notesTask.title || 'Task'}` : 'Notes'}
+        description="Notes attached to this task (ActiveRecord pattern)."
+        footer={
+          <Button type="button" variant="outline" onClick={() => setNotesTask(null)}>
+            Close
+          </Button>
+        }
+      >
+        {notesTask && (
+          <TaskNotes task={notesTask} notes={notesByTask[notesTask.uuid] || []} onChanged={loadNotes} />
+        )}
+      </Modal>
 
       <Modal
         open={taskModalOpen}

@@ -13,6 +13,7 @@ use ByJG\Gluo\Attribute\ValidateRequest;
 use ByJG\Gluo\Util\JwtContext;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use OpenApi\Attributes as OA;
@@ -22,6 +23,9 @@ use OpenApi\Attributes as OA;
  */
 class ProfileController
 {
+    /** Languages allowed for the `language` user property. */
+    private const LANGUAGES = ['en', 'fr', 'pt'];
+
     /**
      * Return the profile of the logged-in user (from the JWT).
      *
@@ -47,6 +51,7 @@ class ProfileController
                 new OA\Property(property: "name", type: "string"),
                 new OA\Property(property: "email", type: "string"),
                 new OA\Property(property: "username", type: "string"),
+                new OA\Property(property: "language", type: "string", enum: ["en", "fr", "pt"], nullable: true),
             ]
         )
     )]
@@ -59,11 +64,14 @@ class ProfileController
     public function getProfile(HttpResponse $response, HttpRequest $request): void
     {
         $user = JwtContext::getUser();
+        // `language` is stored in the users_property table, loaded with the user.
+        $language = $user->get('language');
         $response->write([
             "userid" => (string)$user->getUserid(),
             "name" => $user->getName(),
             "email" => $user->getEmail(),
             "username" => $user->getUsername(),
+            "language" => is_string($language) ? $language : null,
         ]);
     }
 
@@ -90,6 +98,7 @@ class ProfileController
             properties: [
                 new OA\Property(property: "name", type: "string"),
                 new OA\Property(property: "email", type: "string"),
+                new OA\Property(property: "language", type: "string", enum: ["en", "fr", "pt"], nullable: true),
             ]
         )
     )]
@@ -102,6 +111,7 @@ class ProfileController
                 new OA\Property(property: "userid", type: "string"),
                 new OA\Property(property: "name", type: "string"),
                 new OA\Property(property: "email", type: "string"),
+                new OA\Property(property: "language", type: "string", enum: ["en", "fr", "pt"], nullable: true),
             ]
         )
     )]
@@ -119,13 +129,23 @@ class ProfileController
         $user->setName($payload['name']);
         $user->setEmail($payload['email']);
 
+        if (array_key_exists('language', $payload) && $payload['language'] !== null) {
+            if (!in_array($payload['language'], self::LANGUAGES, true)) {
+                throw new Error422Exception('language must be one of: ' . implode(', ', self::LANGUAGES));
+            }
+            // Stored in the users_property table.
+            $user->set('language', $payload['language']);
+        }
+
         $usersService = Config::get(UsersService::class);
         $usersService->save($user);
 
+        $language = $user->get('language');
         $response->write([
             "userid" => (string)$user->getUserid(),
             "name" => $user->getName(),
             "email" => $user->getEmail(),
+            "language" => is_string($language) ? $language : null,
         ]);
     }
 }

@@ -2,10 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Button, Card, Input, Field } from '@/components/ui';
 
+// Stored as a user property (users_property table), constrained to these values.
+const LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'French' },
+  { value: 'pt', label: 'Portuguese' },
+];
+
 export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [language, setLanguage] = useState('en');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -13,12 +21,11 @@ export default function Profile() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get('/profile');
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error?.message || 'Failed to load profile');
+        const data = await api.request('/profile', { method: 'GET' });
         setProfile(data);
         setName(data.name || '');
         setEmail(data.email || '');
+        setLanguage(data.language || 'en');
       } catch (err) {
         setError(err.message);
       } finally {
@@ -32,9 +39,7 @@ export default function Profile() {
     setStatus('');
     setError('');
     try {
-      const res = await api.put('/profile', { name, email });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'Update failed');
+      await api.putJson('/profile', { name, email, language });
       setStatus('Saved.');
     } catch (err) {
       setError(err.message);
@@ -56,6 +61,19 @@ export default function Profile() {
         </Field>
         <Field label="Email">
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </Field>
+        <Field label="Language" hint="Stored as a user property.">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+          >
+            {LANGUAGES.map((lang) => (
+              <option key={lang.value} value={lang.value}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
         </Field>
         <div className="flex items-center gap-3">
           <Button type="submit">Save changes</Button>
