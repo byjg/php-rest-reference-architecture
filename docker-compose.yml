@@ -11,13 +11,25 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - .:/srv/
+      - ./api:/srv/
     environment:
       - APP_ENV=dev
       - PHP_FPM_SERVER=0.0.0.0:9000
       - VERBOSE=true
     networks:
       - net
+
+  # >>> frontend-service
+  html:
+    image: gluo-html:dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-html
+    ports:
+      - "7080:8080"
+    networks:
+      - net
+  # <<< frontend-service
 
   mysql-container:
     image: mysql:8.0
