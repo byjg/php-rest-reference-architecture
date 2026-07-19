@@ -45,7 +45,7 @@ class Note
      * @var string|LiteralInterface|null
      */
     #[OA\Property(type: "string", format: "string")]
-    #[FieldUuidAttribute(fieldName: "task_id")]
+    #[FieldUuidAttribute(fieldName: "task_id", parentTable: "task")]
     protected string|LiteralInterface|null $taskId = null;
 
     /**
@@ -189,6 +189,24 @@ class Note
         $query = Query::getInstance()
             ->table(self::$repository->getMapper()->getTable(), 'alias')
             ->where('alias.task_id = :value', ['value' => $taskId]);
+        return self::query($query);
+    }
+
+    /**
+     * All notes belonging to a project, across the note -> task -> project relationship.
+     * A note only carries a task_id, so this cannot be a plain WHERE. joinWith('project')
+     * auto-discovers the intermediate `task` table (from the parentTable relationships
+     * declared on Note::taskId and Task::projectId) and joins it for us; `note.*` keeps
+     * the rows hydrating cleanly into Note.
+     *
+     * @param mixed $projectId
+     * @return Note[]
+     */
+    public static function getByProjectId($projectId): array
+    {
+        $query = self::joinWith('project')
+            ->field('note.*')
+            ->where('project.id = :id', ['id' => $projectId]);
         return self::query($query);
     }
 

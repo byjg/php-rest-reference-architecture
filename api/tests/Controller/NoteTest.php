@@ -205,6 +205,24 @@ class NoteTest extends BaseApiTestCase
         $this->sendRequest($request);
     }
 
+    public function testListNotesByProject()
+    {
+        $token = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getRegularUser()))->getBody()->getContents(), true)['token'];
+
+        // The seed note is attached to a task of project 1 (note -> task -> project).
+        $body = $this->sendRequest(
+            (new FakeApiRequester())
+                ->withPsr7Request($this->getPsr7Request())
+                ->withMethod('GET')
+                ->withPath('/project/1/note')
+                ->withRequestHeader(['Authorization' => "Bearer $token"])
+                ->expectStatus(200)
+        );
+        $notes = json_decode($body->getBody()->getContents(), true);
+        $this->assertNotEmpty($notes);
+        $this->assertSame(self::SEED_TASK_UUID, strtolower($notes[0]['taskId']));
+    }
+
     public function testGetReturnsComputedDaysField()
     {
         $token = json_decode($this->sendRequest(Credentials::requestLogin(Credentials::getAdminUser()))->getBody()->getContents(), true)['token'];

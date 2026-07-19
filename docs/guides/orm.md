@@ -260,3 +260,37 @@ public function getDays(): int|null
 Note also uses `OaDeletedAt`, so `DELETE /note/{id}` calls `$model->delete()`, which sets
 `deleted_at` instead of removing the row; `Note::get()`/`Note::all()` then skip it. See
 [Traits](../reference/traits.md#oadeletedat-trait) for the trait details.
+
+## 8. Joining across relationships (parentTable)
+
+Each foreign key declares its parent table, so the ORM knows the relationship graph:
+
+```php title="api/src/Model/Task.php"
+#[FieldAttribute(fieldName: "project_id", parentTable: "project")]
+protected int|null $projectId = null;
+```
+```php title="api/src/Model/Note.php"
+#[FieldUuidAttribute(fieldName: "task_id", parentTable: "task")]
+protected string|LiteralInterface|null $taskId = null;
+```
+
+With those declared, `Query::joinRelated()` (and `Model::joinWith()` for ActiveRecord)
+builds the JOIN condition for you — and auto-discovers intermediate tables. `Note` has no
+`project_id`, yet "all notes in a project" is a single query because `joinWith('project')`
+walks `note → task → project` and joins `task` in between:
+
+```php title="api/src/Model/Note.php"
+public static function getByProjectId($projectId): array
+{
+    $query = self::joinWith('project')      // FROM note JOIN task JOIN project
+        ->field('note.*')                   // keep only note columns to hydrate Note
+        ->where('project.id = :id', ['id' => $projectId]);
+    return self::query($query);
+}
+```
+
+Exposed as `GET /project/{projectId}/note` (see `NoteController::listNotesByProject`).
+
+> For the relationship graph to resolve on any request, the example repositories are
+> registered as **eager** singletons in `config/dev/04-repositories.php`, so every mapper
+> (and its `parentTable` edges) is registered at bootstrap.

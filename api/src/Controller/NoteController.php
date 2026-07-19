@@ -134,6 +134,44 @@ class NoteController
         $response->write($models);
     }
 
+    /**
+     * List every note across a whole project (note -> task -> project). A note only
+     * carries a task_id, so this spans two relationships; Note::getByProjectId() uses
+     * joinWith('project'), which auto-discovers the intermediate task table.
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @return void
+     */
+    #[OA\Get(
+        path: "/project/{projectId}/note",
+        security: [
+            ["jwt-token" => []]
+        ],
+        tags: ["Note"]
+    )]
+    #[OA\Parameter(
+        name: "projectId",
+        in: "path",
+        required: true,
+        schema: new OA\Schema(type: "integer", format: "int32")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "The notes belonging to the project",
+        content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/Note"))
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Not Authorized",
+        content: new OA\JsonContent(ref: "#/components/schemas/error")
+    )]
+    #[RequireAuthenticated]
+    public function listNotesByProject(HttpResponse $response, HttpRequest $request): void
+    {
+        $response->write(Note::getByProjectId($request->attribute('projectId')));
+    }
+
 
     /**
      * Create a new Note

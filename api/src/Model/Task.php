@@ -31,7 +31,7 @@ class Task
      * @var int|null
      */
     #[OA\Property(type: "integer", format: "int32")]
-    #[FieldAttribute(fieldName: "project_id")]
+    #[FieldAttribute(fieldName: "project_id", parentTable: "project")]
     protected int|null $projectId = null;
 
     /**
