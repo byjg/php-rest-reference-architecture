@@ -52,14 +52,17 @@ export default function ProjectDetail() {
     setTasks(Array.isArray(data) ? data.filter((t) => String(t.projectId) === String(id)) : []);
   }, [id]);
 
+  // Fetch every note in this project in one request. A note only carries a task_id,
+  // so the API resolves note -> task -> project server-side (Note::getByProjectId via
+  // joinWith(Task::class, Project::class)); we no longer pull all notes and filter here.
   const loadNotes = useCallback(async () => {
     try {
-      const data = await api.request('/note', { method: 'GET' });
+      const data = await api.request(`/project/${id}/note`, { method: 'GET' });
       setNotes(Array.isArray(data) ? data : []);
     } catch {
       setNotes([]);
     }
-  }, []);
+  }, [id]);
 
   const load = useCallback(async () => {
     setError('');
