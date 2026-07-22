@@ -137,7 +137,8 @@ class NoteController
     /**
      * List every note across a whole project (note -> task -> project). A note only
      * carries a task_id, so this spans two relationships; Note::getByProjectId() uses
-     * joinWith('project'), which auto-discovers the intermediate task table.
+     * joinWith(Task::class, Project::class), naming the through-entity so its mapper
+     * registers on demand and both JOINs resolve.
      *
      * @param HttpResponse $response
      * @param HttpRequest $request

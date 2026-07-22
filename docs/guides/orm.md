@@ -274,16 +274,21 @@ protected int|null $projectId = null;
 protected string|LiteralInterface|null $taskId = null;
 ```
 
-With those declared, `Query::joinRelated()` (and `Model::joinWith()` for ActiveRecord)
-builds the JOIN condition for you — and auto-discovers intermediate tables. `Note` has no
-`project_id`, yet "all notes in a project" is a single query because `joinWith('project')`
-walks `note → task → project` and joins `task` in between:
+With those declared, `Model::joinWith()` (and `Query::joinRelated()` for the Repository
+pattern) builds the JOIN condition for you. `Note` has no `project_id`, yet "all notes in
+a project" is a single query across `note → task → project`.
+
+You pass the **model classes** in the path, not table-name strings. Passing a class
+registers that entity's mapper on demand — reflection only, no database connection — so
+its `parentTable` relationships are known even on a request that only touched `Note`.
+`Task` is named as the through-entity (the same way Eloquent's `hasManyThrough` names its
+through-model), so its `task → project` edge is registered and the middle join resolves:
 
 ```php title="api/src/Model/Note.php"
 public static function getByProjectId($projectId): array
 {
-    $query = self::joinWith('project')      // FROM note JOIN task JOIN project
-        ->field('note.*')                   // keep only note columns to hydrate Note
+    $query = self::joinWith(Task::class, Project::class)  // FROM note JOIN task JOIN project
+        ->field('note.*')                                 // keep only note columns to hydrate Note
         ->where('project.id = :id', ['id' => $projectId]);
     return self::query($query);
 }
@@ -291,6 +296,5 @@ public static function getByProjectId($projectId): array
 
 Exposed as `GET /project/{projectId}/note` (see `NoteController::listNotesByProject`).
 
-> For the relationship graph to resolve on any request, the example repositories are
-> registered as **eager** singletons in `config/dev/04-repositories.php`, so every mapper
-> (and its `parentTable` edges) is registered at bootstrap.
+> Because the mappers register on demand from the classes you name, the repositories stay
+> ordinary lazy singletons — no bootstrap-time database connection is forced.

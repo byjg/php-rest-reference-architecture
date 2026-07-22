@@ -194,17 +194,19 @@ class Note
 
     /**
      * All notes belonging to a project, across the note -> task -> project relationship.
-     * A note only carries a task_id, so this cannot be a plain WHERE. joinWith('project')
-     * auto-discovers the intermediate `task` table (from the parentTable relationships
-     * declared on Note::taskId and Task::projectId) and joins it for us; `note.*` keeps
-     * the rows hydrating cleanly into Note.
+     * A note only carries a task_id, so this cannot be a plain WHERE. We name each entity
+     * in the path (Task is the through-entity, like Eloquent's hasManyThrough): passing
+     * the classes registers Task's and Project's mappers on demand — reflection only, no
+     * DB connection — so the parentTable relationships (Note::taskId -> task,
+     * Task::projectId -> project) resolve on a request that only touched Note. joinWith()
+     * then derives both ON conditions; `note.*` keeps the rows hydrating cleanly into Note.
      *
      * @param mixed $projectId
      * @return Note[]
      */
     public static function getByProjectId($projectId): array
     {
-        $query = self::joinWith('project')
+        $query = self::joinWith(Task::class, Project::class)
             ->field('note.*')
             ->where('project.id = :id', ['id' => $projectId]);
         return self::query($query);
