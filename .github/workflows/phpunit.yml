@@ -38,10 +38,12 @@ jobs:
           - "8.4"
           - "8.3"
 
+    defaults:
+      run:
+        working-directory: api
+
     steps:
       - uses: actions/checkout@v5
-#      - name: Prepare environment
-#        run: echo "mysql://root:mysqlp455w0rd@127.0.0.1/localtest" > config/.env
       - run: composer install
       - run: composer test
 
@@ -54,6 +56,10 @@ jobs:
     container:
       image: byjg/php:8.4-cli
       options: --user root --privileged
+
+    defaults:
+      run:
+        working-directory: api
 
     steps:
       - name: Git checkout
@@ -73,7 +79,21 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         if: github.ref == 'refs/heads/master'
         with:
-          sarif_file: psalm-results.sarif
+          sarif_file: api/psalm-results.sarif
+
+  Frontend:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: html
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install
+      - run: npm run build
 
   Documentation:
     if: github.ref == 'refs/heads/master'

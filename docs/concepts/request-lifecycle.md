@@ -9,7 +9,7 @@ This page traces the path of a single HTTP request from the moment it arrives at
 
 ## Overview
 
-Every request is handled in-process without a separate HTTP dispatcher process. The entry point is `public/app.php`, and the entire stack runs inside PHP.
+Every request is handled in-process without a separate HTTP dispatcher process. The entry point is `api/public/app.php`, and the entire stack runs inside PHP. This lifecycle covers the API half of the monorepo (`api/`); the optional Vite SPA in `html/` (served by byjg/static-httpserver on port 7080) is just another client that calls these same endpoints over JWT — see the [Frontend guide](../guides/frontend.md).
 
 ```mermaid
 sequenceDiagram
@@ -25,7 +25,7 @@ sequenceDiagram
     Client->>app.php: HTTP Request
     app.php->>Config: Bootstrap (APP_ENV)
     Config-->>app.php: DI container ready
-    app.php->>OpenApiRouteList: Load public/docs/openapi.json
+    app.php->>OpenApiRouteList: Load api/public/docs/openapi.json
     OpenApiRouteList-->>app.php: Route table
     app.php->>Middleware: CorsMiddleware
     Middleware->>Middleware: JwtMiddleware (parse token)
@@ -42,20 +42,20 @@ sequenceDiagram
 
 ## Step-by-Step Breakdown
 
-### 1. Entry Point — `public/app.php`
+### 1. Entry Point — `api/public/app.php`
 
-The web server (nginx/Apache/built-in) directs all requests to `public/app.php`. This file:
+The web server (nginx/Apache/built-in) directs all requests to `api/public/app.php`. This file:
 
 1. Loads the Composer autoloader.
 2. Calls `Config::init()` (or lets it auto-initialize on first use) using the `APP_ENV` environment variable.
 
 ### 2. Config Bootstrap
 
-`config/ConfigBootstrap.php` defines the environment hierarchy (`dev → test`, `dev → staging → prod`). The DI container is built lazily from the numbered config files (`01-infrastructure.php` … `06-external.php`) inside the active environment's folder.
+`api/config/ConfigBootstrap.php` defines the environment hierarchy (`dev → test`, `dev → staging → prod`). The DI container is built lazily from the numbered config files (`01-infrastructure.php` … `06-external.php`) inside the active environment's folder.
 
 ### 3. Route Loading — `OpenApiRouteList`
 
-`OpenApiRouteList` reads `public/docs/openapi.json` and builds an in-memory routing table. Each `operationId` value in the spec encodes the target class and method name, so no separate routing configuration is needed.
+`OpenApiRouteList` reads `api/public/docs/openapi.json` and builds an in-memory routing table. Each `operationId` value in the spec encodes the target class and method name, so no separate routing configuration is needed.
 
 ### 4. Middleware Stack
 
@@ -92,3 +92,4 @@ The HTTP status code defaults to `200`. Unhandled exceptions are caught by the f
 - [REST Controllers](../guides/rest-controllers.md) - Defining routes and attributes
 - [Dependency Injection](dependency-injection.md) - How the DI container is bootstrapped
 - [Authentication](../guides/authentication.md) - JWT flow details
+- [Frontend (Vite)](../guides/frontend.md) - The optional SPA that consumes these endpoints

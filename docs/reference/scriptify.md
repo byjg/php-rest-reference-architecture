@@ -75,7 +75,7 @@ APP_ENV=prod composer terminal
 The `composer terminal` command automatically:
 - Loads your project's autoloader
 - Sets up the environment from `APP_ENV` variable
-- Preloads helper functions from `templates/scriptify/scriptify.php`
+- Preloads helper functions from `api/templates/scriptify/scriptify.php`
 - Initializes a database executor instance (`$executor`)
 
 ### Features
@@ -89,7 +89,7 @@ The `composer terminal` command automatically:
 
 ### Preloaded Helpers
 
-The terminal comes with helper functions and variables automatically loaded from `templates/scriptify/scriptify.php`:
+The terminal comes with helper functions and variables automatically loaded from `api/templates/scriptify/scriptify.php`:
 
 #### Available Variables
 
@@ -105,7 +105,7 @@ The terminal comes with helper functions and variables automatically loaded from
 
 ```php title="Using Preloaded Helpers"
 # Execute a quick SQL query
-php> qq("SELECT * FROM dummy WHERE id = :id", ["id" => 1])
+php> qq("SELECT * FROM project WHERE id = :id", ["id" => 1])
 array(1) {
   [0]=>
   array(2) {
@@ -115,12 +115,12 @@ array(1) {
 }
 
 # Use the database executor directly
-php> $result = $executor->getScalar("SELECT COUNT(*) FROM dummy")
+php> $result = $executor->getScalar("SELECT COUNT(*) FROM project")
 php> dump($result)
 int(10)
 
 # Execute a raw query
-php> $iterator = $executor->getIterator("SELECT * FROM dummy LIMIT 5")
+php> $iterator = $executor->getIterator("SELECT * FROM project LIMIT 5")
 php> foreach ($iterator as $row) { dump($row); }
 ```
 
@@ -157,9 +157,9 @@ php> calculateDiscount(100, 15)
 
 ### Customizing the Preload File
 
-You can customize the preload file at `templates/scriptify/scriptify.php` to add your own helper functions and imports.
+You can customize the preload file at `api/templates/scriptify/scriptify.php` to add your own helper functions and imports.
 
-```php title="templates/scriptify/scriptify.php"
+```php title="api/templates/scriptify/scriptify.php"
 <?php
 
 use ByJG\AnyDataset\Db\DatabaseExecutor;
@@ -387,9 +387,9 @@ scriptify terminal myservice
 
 ### Composer Terminal Command
 
-The project is pre-configured with a `composer terminal` command in `composer.json`:
+The project is pre-configured with a `composer terminal` command in `api/composer.json` (the root `composer terminal` proxies into it, so you can run it from the repository root):
 
-```json title="composer.json"
+```json title="api/composer.json"
 {
   "scripts": {
     "terminal": "./vendor/bin/scriptify terminal --preload ./templates/scriptify/scriptify.php --env APP_ENV=$APP_ENV"
@@ -398,7 +398,7 @@ The project is pre-configured with a `composer terminal` command in `composer.js
 ```
 
 This configuration:
-- **`--preload`**: Loads helper functions from `templates/scriptify/scriptify.php`
+- **`--preload`**: Loads helper functions from `api/templates/scriptify/scriptify.php`
 - **`--env APP_ENV=$APP_ENV`**: Passes the current APP_ENV to the terminal
 
 You can customize this command to add additional options:
@@ -411,7 +411,7 @@ You can customize this command to add additional options:
 
 The preload file is located at:
 ```
-templates/scriptify/scriptify.php
+api/templates/scriptify/scriptify.php
 ```
 
 This file is executed before the terminal starts, allowing you to:

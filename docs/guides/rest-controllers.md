@@ -9,7 +9,7 @@ REST controllers in this architecture map HTTP routes to PHP methods using PHP 8
 
 ## Defining Routes with PHP Attributes
 
-Annotate controller classes with `zircote/swagger-php` attributes to describe each endpoint. The tooling generates `public/docs/openapi.json` from these annotations, and `OpenApiRouteList` uses that file to dispatch requests at runtime.
+Annotate controller classes with `zircote/swagger-php` attributes to describe each endpoint. The tooling generates `api/public/docs/openapi.json` from these annotations, and `OpenApiRouteList` uses that file to dispatch requests at runtime.
 
 ```php
 namespace RestReferenceArchitecture\Controller;
@@ -65,14 +65,14 @@ class LoginController
 Declare path parameters directly in the path string and use `#[OA\Parameter]` to describe them:
 
 ```php
-#[OA\Get(path: "/dummy/{id}", tags: ["Dummy"])]
+#[OA\Get(path: "/project/{id}", tags: ["Project"])]
 #[OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))]
 #[OA\Parameter(name: "page", in: "query", required: false, schema: new OA\Schema(type: "integer"))]
-#[OA\Response(response: 200, description: "The dummy object")]
-public function getDummy(HttpResponse $response, HttpRequest $request): void
+#[OA\Response(response: 200, description: "The project object")]
+public function getProject(HttpResponse $response, HttpRequest $request): void
 {
     $id = $request->attribute('id');
-    $page = $request->query('page');
+    $page = $request->queryString('page');
     // ...
 }
 ```
@@ -82,13 +82,13 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 Use `#[OA\RequestBody]` with `#[OA\JsonContent]` to define the expected payload shape:
 
 ```php
-#[OA\Post(path: "/dummy", tags: ["Dummy"])]
+#[OA\Post(path: "/project", tags: ["Project"])]
 #[OA\RequestBody(
     required: true,
-    content: new OA\JsonContent(ref: "#/components/schemas/DummyBody")
+    content: new OA\JsonContent(ref: "#/components/schemas/Project")
 )]
-#[OA\Response(response: 200, description: "Created dummy")]
-public function postDummy(HttpResponse $response, HttpRequest $request): void
+#[OA\Response(response: 200, description: "Created project")]
+public function postProject(HttpResponse $response, HttpRequest $request): void
 {
     // ...
 }
@@ -102,7 +102,7 @@ Document every response status code so the OpenAPI spec (and test validation) st
 #[OA\Response(
     response: 200,
     description: "Success",
-    content: new OA\JsonContent(ref: "#/components/schemas/Dummy")
+    content: new OA\JsonContent(ref: "#/components/schemas/Project")
 )]
 #[OA\Response(response: 404, description: "Not found")]
 #[OA\Response(response: 422, description: "Validation error")]
@@ -116,10 +116,10 @@ Add `#[ValidateRequest]` to a controller method to automatically validate the in
 use ByJG\Gluo\Attribute\ValidateRequest;
 
 #[ValidateRequest]
-public function postDummy(HttpResponse $response, HttpRequest $request): void
+public function postProject(HttpResponse $response, HttpRequest $request): void
 {
     $payload = ValidateRequest::getPayload();
-    $service = Config::get(DummyService::class);
+    $service = Config::get(ProjectService::class);
     $model = $service->create($payload);
     $response->write($model);
 }
@@ -133,9 +133,9 @@ Add `#[RequireAuthenticated]` to protect an endpoint. Requests without a valid J
 use ByJG\Gluo\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]
-public function getDummy(HttpResponse $response, HttpRequest $request): void
+public function getProject(HttpResponse $response, HttpRequest $request): void
 {
-    $service = Config::get(DummyService::class);
+    $service = Config::get(ProjectService::class);
     $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
@@ -147,11 +147,11 @@ Retrieve a DI-registered service inside a controller method:
 
 ```php
 use ByJG\Config\Config;
-use RestReferenceArchitecture\Service\DummyService;
+use RestReferenceArchitecture\Service\ProjectService;
 
-public function getDummy(HttpResponse $response, HttpRequest $request): void
+public function getProject(HttpResponse $response, HttpRequest $request): void
 {
-    $service = Config::get(DummyService::class);
+    $service = Config::get(ProjectService::class);
     $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
@@ -160,11 +160,11 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 ## Working with `HttpRequest` and `HttpResponse`
 
 ```php
-// Path parameter (from the URL pattern, e.g. /dummy/{id})
+// Path parameter (from the URL pattern, e.g. /project/{id})
 $id = $request->attribute('id');
 
 // Query string parameter (from ?page=2)
-$page = $request->query('page');
+$page = $request->queryString('page');
 
 // Request body as string
 $rawBody = $request->payload();
@@ -178,7 +178,7 @@ $response->write(['result' => 'ok']);
 
 ## Using an Existing OpenAPI Specification
 
-If you already have an OpenAPI JSON spec, place it at `public/docs/openapi.json`. Set the `operationId` for each path to route requests to the correct controller method:
+If you already have an OpenAPI JSON spec, place it at `api/public/docs/openapi.json`. Set the `operationId` for each path to route requests to the correct controller method:
 
 ```json
 {

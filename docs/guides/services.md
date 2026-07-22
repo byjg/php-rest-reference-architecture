@@ -29,7 +29,7 @@ graph TD
 
 ## BaseService
 
-Every service extends `ByJG\Gluo\Service\BaseService`, so you automatically inherit the same safeguards used by the sample `DummyService`/`DummyHexService` classes.
+Every service extends `ByJG\Gluo\Service\BaseService`, so you automatically inherit the same safeguards used by the sample `ProjectService`/`TaskService` classes.
 
 ```php title="ByJG\\Gluo\\Service\\BaseService (byjg/gluo-core, excerpt)"
 abstract class BaseService
@@ -136,7 +136,7 @@ class ProductService extends BaseService
 
 ### Step 2: Register in DI Container
 
-Add to `config/dev/05-services.php`:
+Add to `api/config/dev/05-services.php`:
 
 ```php
 <?php
@@ -164,14 +164,14 @@ Services dramatically simplify REST controllers:
 ```php
 <?php
 
-public function getDummy(HttpResponse $response, HttpRequest $request): void
+public function getProject(HttpResponse $response, HttpRequest $request): void
 {
     // Lots of business logic in the controller
-    $repository = Config::get(DummyRepository::class);
+    $repository = Config::get(ProjectRepository::class);
     $model = $repository->get($request->attribute('id'));
 
     if (is_null($model)) {
-        throw new Error404Exception("Dummy not found");
+        throw new Error404Exception("Project not found");
     }
 
     // Additional validation, processing...
@@ -188,9 +188,9 @@ public function getDummy(HttpResponse $response, HttpRequest $request): void
 use ByJG\Gluo\Attribute\RequireAuthenticated;
 
 #[RequireAuthenticated]
-public function getDummy(HttpResponse $response, HttpRequest $request): void
+public function getProject(HttpResponse $response, HttpRequest $request): void
 {
-    $service = Config::get(DummyService::class);
+    $service = Config::get(ProjectService::class);
     $result = $service->getOrFail($request->attribute('id'));
     $response->write($result);
 }
@@ -357,7 +357,7 @@ APP_ENV=dev composer run codegen -- --table products all --save
 The service will automatically:
 - Extend `BaseService`
 - Inject the corresponding repository
-- Be registered in `config/dev/05-services.php`
+- Be registered in `api/config/dev/05-services.php`
 
 ---
 
@@ -370,17 +370,17 @@ The service will automatically:
 ```php
 // ✓ CORRECT - Controller calls Service
 #[ValidateRequest]
-public function putDummyHex(HttpResponse $response, HttpRequest $request): void
+public function putTask(HttpResponse $response, HttpRequest $request): void
 {
-    $dummyHexService = Config::get(DummyHexService::class);
-    $model = $dummyHexService->update(ValidateRequest::getPayload());
+    $taskService = Config::get(TaskService::class);
+    $model = $taskService->update(ValidateRequest::getPayload());
     $response->write($model);
 }
 
 // ✗ WRONG - Controller calls Repository directly
-public function putDummyHex(HttpResponse $response, HttpRequest $request): void
+public function putTask(HttpResponse $response, HttpRequest $request): void
 {
-    $repository = Config::get(DummyHexRepository::class);
+    $repository = Config::get(TaskRepository::class);
     $model = $repository->get($id);  // Don't do this!
     // ...
 }
@@ -398,7 +398,7 @@ public function putDummyHex(HttpResponse $response, HttpRequest $request): void
 For complex queries or operations not covered by BaseService:
 
 ```php
-class DummyService extends BaseService
+class ProjectService extends BaseService
 {
     public function findActiveByCategory(string $category): array
     {
@@ -572,7 +572,7 @@ class OrderService extends BaseService
 }
 ```
 
-Register in `config/<env>/05-services.php`:
+Register in `api/config/<env>/05-services.php`:
 
 ```php
 use RestReferenceArchitecture\Service\OrderService;

@@ -1,9 +1,19 @@
 .idea/*
 !.idea/runConfigurations
 /Dockerfile
-composer.lock
-vendor
-/src/*.db
+
+# API (PHP) — everything lives under api/
+api/composer.lock
+api/vendor
+api/src/*.db
+api/.phpunit.result.cache
+api/config/.env
+
+# Frontend (Vite)
+html/node_modules
+html/dist
+html/.env
+
 node_modules
 .mysql
 .phpunit.result.cache
